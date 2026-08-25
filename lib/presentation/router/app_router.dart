@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../features/culture/exploration/data/datasources/mock_mali_regions.dart';
+import '../../features/culture/exploration/data/models/mali_region.dart';
+import '../../features/culture/exploration/presentation/screens/region_detail_screen.dart';
 import '../../features/discussions/holographic_salon_page.dart';
 import '../../features/profile/user_prefs_notifier.dart';
 import '../../shared/widgets.dart';
@@ -109,6 +112,20 @@ GoRouter appRouter(Ref ref) {
       ),
 
       // ── Modals & Standalone Routes ───────────────────────────────────────
+      GoRoute(
+        path: '/culture/region/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final regionId = state.pathParameters['id'] ?? '';
+          final extraRegion = state.extra as MaliRegion?;
+          final region = extraRegion ??
+              MockMaliRegions.regions.firstWhere(
+                (r) => r.id == regionId,
+                orElse: () => MockMaliRegions.regions.first,
+              );
+          return RegionDetailScreen(region: region);
+        },
+      ),
       GoRoute(
         path: '/holo-salon',
         parentNavigatorKey: _rootNavigatorKey,
