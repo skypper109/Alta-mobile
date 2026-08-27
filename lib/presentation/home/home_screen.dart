@@ -45,10 +45,10 @@ class HomeScreen extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.surface : const Color(0xFFE2E8F0),
+                      color: isDark ? AppColors.surface : Colors.white,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isDark ? AppColors.border : const Color(0xFFCBD5E1),
+                        color: isDark ? AppColors.border : const Color(0xFFE2E8F0),
                       ),
                     ),
                     child: Icon(

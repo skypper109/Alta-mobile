@@ -73,5 +73,9 @@ flutter:
   # ── Assets AlterniA ─────────────────────────────────────────────────────────
   assets:
     - assets/images/
+    - assets/images/culture/
+    - assets/images/culture/personnages/
+    - assets/images/culture/monuments/
+    - assets/images/culture/villes/
     - assets/icons/
     - assets/animations/

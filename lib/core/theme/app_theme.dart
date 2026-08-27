@@ -108,10 +108,10 @@ abstract final class AppTheme {
 
   // ── LIGHT THEME ────────────────────────────────────────────────────────────
   static ThemeData get lightTheme {
-    const bgLight = Color(0xFFF1F5F9);
+    const bgLight = Color(0xFFFFFFFF);
     const surfLight = Color(0xFFFFFFFF);
-    const surfAltLight = Color(0xFFE2E8F0);
-    const borderLight = Color(0xFFCBD5E1);
+    const surfAltLight = Color(0xFFF8FAFC);
+    const borderLight = Color(0xFFE2E8F0);
     const textPriLight = Color(0xFF0F172A);
     const textSecLight = Color(0xFF475569);
 

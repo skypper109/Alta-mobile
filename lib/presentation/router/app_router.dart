@@ -7,7 +7,14 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/culture/exploration/data/datasources/mock_mali_regions.dart';
 import '../../features/culture/exploration/data/models/mali_region.dart';
+import '../../features/culture/exploration/presentation/screens/culture_exploration_screen.dart';
 import '../../features/culture/exploration/presentation/screens/region_detail_screen.dart';
+import '../../features/culture/presentation/screens/culture_monuments_screen.dart';
+import '../../features/culture/presentation/screens/culture_personnages_screen.dart';
+import '../../features/culture/presentation/screens/culture_villes_screen.dart';
+import '../../features/culture/presentation/screens/historical_figure_detail_screen.dart';
+import '../../features/culture/presentation/screens/monument_detail_screen.dart';
+import '../../features/culture/presentation/screens/place_detail_screen.dart';
 import '../../features/discussions/holographic_salon_page.dart';
 import '../../features/profile/user_prefs_notifier.dart';
 import '../../shared/widgets.dart';
@@ -112,6 +119,54 @@ GoRouter appRouter(Ref ref) {
       ),
 
       // ── Modals & Standalone Routes ───────────────────────────────────────
+      GoRoute(
+        path: '/culture/map',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CultureExplorationScreen(),
+      ),
+
+      // ── Culture Étape 2 : Écrans Découverte ──────────────────────────────
+      GoRoute(
+        path: '/culture/personnages',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CulturePersonnagesScreen(),
+      ),
+      GoRoute(
+        path: '/culture/villes',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CultureVillesScreen(),
+      ),
+      GoRoute(
+        path: '/culture/monuments',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CultureMonumentsScreen(),
+      ),
+
+      // ── Culture Étape 3 : Fiches Immersives de Consultation ──────────────
+      GoRoute(
+        path: '/culture/personnage/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return HistoricalFigureDetailScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/monument/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return MonumentDetailScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/ville/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return PlaceDetailScreen(id: id);
+        },
+      ),
       GoRoute(
         path: '/culture/region/:id',
         parentNavigatorKey: _rootNavigatorKey,

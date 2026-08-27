@@ -34,7 +34,7 @@ class DetShellScaffold extends StatelessWidget {
     final isCultureTab = navigationShell.currentIndex == 3;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final navBg = isDark ? const Color(0xFF121B2D) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF23314D) : const Color(0xFFCBD5E1);
+    final borderColor = isDark ? const Color(0xFF23314D) : const Color(0xFFE2E8F0);
 
     final items = const [
       _NavItemData(icon: Icons.home_outlined, selectedIcon: Icons.home_rounded, label: 'Accueil'),
