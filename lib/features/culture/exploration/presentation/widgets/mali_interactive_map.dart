@@ -27,6 +27,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
   late final AnimationController _pulseController;
   final TransformationController _transformController =
       TransformationController();
+  // Cache local pour les hit-tests (recalculé si la taille change)
   final Map<String, Path> _cachedPaths = {};
   Size _lastSize = Size.zero;
 
@@ -35,7 +36,8 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     super.initState();
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      // Ralenti à 2400ms pour réduire la charge CPU (moins de repaints/sec)
+      duration: const Duration(milliseconds: 2400),
     )..repeat();
   }
 
@@ -46,16 +48,23 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     super.dispose();
   }
 
+  void _invalidatePathCache() {
+    _cachedPaths.clear();
+  }
+
   void _handleTapUp(TapUpDetails details) {
     final localPosition = details.localPosition;
     if (_lastSize.isEmpty) return;
 
-    // Détection de la région touchée (parcours inversé pour donner priorité à Bamako en premier)
+    // Calcul des paths à la volée (déjà optimisé avec cache dans le painter)
     final reversedList = MaliGeoRegistry.all.reversed.toList();
     String? hitRegionId;
 
     for (final geoPath in reversedList) {
-      final path = _cachedPaths[geoPath.regionId] ?? geoPath.toPath(_lastSize);
+      final path = _cachedPaths.putIfAbsent(
+        geoPath.regionId,
+        () => geoPath.toPath(_lastSize),
+      );
       if (path.contains(localPosition)) {
         hitRegionId = geoPath.regionId;
         break;
@@ -91,7 +100,12 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
             ? constraints.maxHeight
             : mapWidth * 0.95;
 
-        _lastSize = Size(mapWidth, mapHeight);
+        final newSize = Size(mapWidth, mapHeight);
+        // Invalider le cache des paths si la taille a changé
+        if (_lastSize != newSize) {
+          _invalidatePathCache();
+          _lastSize = newSize;
+        }
 
         return Stack(
           children: [
@@ -123,22 +137,21 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
                   child: GestureDetector(
                     onTapUp: _handleTapUp,
                     behavior: HitTestBehavior.opaque,
-                    child: AnimatedBuilder(
-                      animation: _pulseController,
-                      builder: (context, child) {
-                        return CustomPaint(
-                          size: Size(mapWidth, mapHeight),
-                          painter: MaliMapPainter(
-                            regions: widget.regions,
-                            selectedRegionId: widget.selectedRegionId,
-                            pulseValue: _pulseController.value,
-                            isDark: isDark,
-                            onPathsCalculated: (paths) {
-                              _cachedPaths.addAll(paths);
-                            },
-                          ),
-                        );
-                      },
+                    child: RepaintBoundary(
+                      child: AnimatedBuilder(
+                        animation: _pulseController,
+                        builder: (context, child) {
+                          return CustomPaint(
+                            size: Size(mapWidth, mapHeight),
+                            painter: MaliMapPainter(
+                              regions: widget.regions,
+                              selectedRegionId: widget.selectedRegionId,
+                              pulseValue: _pulseController.value,
+                              isDark: isDark,
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),

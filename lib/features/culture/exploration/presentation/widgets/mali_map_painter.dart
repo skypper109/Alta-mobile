@@ -10,21 +10,29 @@ class MaliMapPainter extends CustomPainter {
   final String? selectedRegionId;
   final double pulseValue; // 0.0 -> 1.0 (AnimationController)
   final bool isDark;
-  final void Function(Map<String, Path> paths)? onPathsCalculated;
+
+  // Cache interne des paths pour éviter le recalcul à chaque frame
+  final Map<String, Path> _pathCache = {};
+  Size _cachedSize = Size.zero;
 
   MaliMapPainter({
     required this.regions,
     required this.selectedRegionId,
     required this.pulseValue,
     required this.isDark,
-    this.onPathsCalculated,
   });
+
+  Path _getPath(RegionGeoPath geoPath, Size size) {
+    if (_cachedSize != size) {
+      _pathCache.clear();
+      _cachedSize = size;
+    }
+    return _pathCache.putIfAbsent(geoPath.regionId, () => geoPath.toPath(size));
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
     if (size.width <= 0 || size.height <= 0) return;
-
-    final calculatedPaths = <String, Path>{};
 
     // ── 1. Fond cartographique avec texture subtile ───────────────────────────
     final bgPaint = Paint()
@@ -49,8 +57,8 @@ class MaliMapPainter extends CustomPainter {
 
     // ── 2. Dessin des polygones régionaux ────────────────────────────────────
     for (final geoPath in MaliGeoRegistry.all) {
-      final path = geoPath.toPath(size);
-      calculatedPaths[geoPath.regionId] = path;
+      final path = _getPath(geoPath, size);
+
 
       final isSelected = geoPath.regionId == selectedRegionId;
       final regionData = regions.where((r) => r.id == geoPath.regionId).firstOrNull;
@@ -185,8 +193,6 @@ class MaliMapPainter extends CustomPainter {
         );
       }
     }
-
-    onPathsCalculated?.call(calculatedPaths);
   }
 
   void _drawPillLabel({
@@ -282,4 +288,7 @@ class MaliMapPainter extends CustomPainter {
         oldDelegate.isDark != isDark ||
         oldDelegate.regions != regions;
   }
+
+  @override
+  bool shouldRebuildSemantics(covariant MaliMapPainter oldDelegate) => false;
 }
