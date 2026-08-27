@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_stage1_data.dart';
+import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
 import '../widgets/culture_region_bottom_sheet.dart';
@@ -42,99 +43,7 @@ class CultureHomeView extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── 1. INTRODUCTION CULTURE (HERO) ──────────────────────────────────
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFEFF6FF),
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: isDark
-                    ? CultureTheme.primaryBlue.withValues(alpha: 0.3)
-                    : CultureTheme.primaryBlue.withValues(alpha: 0.2),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: CultureTheme.primaryBlue,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'EXPLORATION VIVANTE',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (activeRegion != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: CultureTheme.accentOrange.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: CultureTheme.accentOrange.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.location_on_rounded,
-                              size: 11,
-                              color: CultureTheme.accentOrange,
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              activeRegion.nom,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: CultureTheme.accentOrange,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Découvrez le Mali autrement',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: isDark ? Colors.white : CultureTheme.primaryBlue,
-                    letterSpacing: -0.4,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Histoires, personnages illustres, cités millénaires, contes initiatiques et traditions de nos régions.',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    color: subtitleColor,
-                    height: 1.45,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          // ── 2. SECTION « À LA UNE » ─────────────────────────────────────────
+          // ── 1. SECTION « À LA UNE » ─────────────────────────────────────────
           Row(
             children: [
               Container(
@@ -452,6 +361,129 @@ class CultureHomeView extends ConsumerWidget {
                 onTap: () => onNavigateToTab(3),
               ),
             ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── BANNIÈRE COMPAGNON CULTUREL IA (ACCÈS STRATÉGIQUE) ───────────
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              final guideContext = activeRegion != null
+                  ? CulturalGuideContext(
+                      contentType: CulturalContentType.region,
+                      contentId: activeRegion.id,
+                      contentTitle: activeRegion.nom,
+                      subtitle: activeRegion.surnom,
+                      regionId: activeRegion.id,
+                      regionName: activeRegion.nom,
+                    )
+                  : CulturalGuideContext.general;
+              context.push('/culture/guide', extra: guideContext);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFFFF7ED),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: CultureTheme.accentOrange.withValues(alpha: 0.35),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.15 : 0.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.18),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.auto_awesome_rounded,
+                      color: CultureTheme.accentOrange,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'GUIDE CULTUREL IA',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: CultureTheme.accentOrange,
+                                letterSpacing: 0.6,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'En direct',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Posez une question sur le patrimoine malien',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: titleColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: CultureTheme.accentOrange,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Discuter',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 3),
+                        const Icon(Icons.arrow_forward_rounded, size: 12, color: Colors.white),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
 
           const SizedBox(height: 24),

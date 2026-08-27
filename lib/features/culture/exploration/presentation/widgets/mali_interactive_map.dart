@@ -22,9 +22,7 @@ class MaliInteractiveMap extends StatefulWidget {
   State<MaliInteractiveMap> createState() => _MaliInteractiveMapState();
 }
 
-class _MaliInteractiveMapState extends State<MaliInteractiveMap>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulseController;
+class _MaliInteractiveMapState extends State<MaliInteractiveMap> {
   final TransformationController _transformController =
       TransformationController();
   // Cache local pour les hit-tests (recalculé si la taille change)
@@ -32,18 +30,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
   Size _lastSize = Size.zero;
 
   @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      // Ralenti à 2400ms pour réduire la charge CPU (moins de repaints/sec)
-      duration: const Duration(milliseconds: 2400),
-    )..repeat();
-  }
-
-  @override
   void dispose() {
-    _pulseController.dispose();
     _transformController.dispose();
     super.dispose();
   }
@@ -138,19 +125,13 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
                     onTapUp: _handleTapUp,
                     behavior: HitTestBehavior.opaque,
                     child: RepaintBoundary(
-                      child: AnimatedBuilder(
-                        animation: _pulseController,
-                        builder: (context, child) {
-                          return CustomPaint(
-                            size: Size(mapWidth, mapHeight),
-                            painter: MaliMapPainter(
-                              regions: widget.regions,
-                              selectedRegionId: widget.selectedRegionId,
-                              pulseValue: _pulseController.value,
-                              isDark: isDark,
-                            ),
-                          );
-                        },
+                      child: CustomPaint(
+                        size: Size(mapWidth, mapHeight),
+                        painter: MaliMapPainter(
+                          regions: widget.regions,
+                          selectedRegionId: widget.selectedRegionId,
+                          isDark: isDark,
+                        ),
                       ),
                     ),
                   ),

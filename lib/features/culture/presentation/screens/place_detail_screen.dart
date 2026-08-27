@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_details_data.dart';
+import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_detail_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/authentic_photo_hero.dart';
 import '../widgets/connected_contents_section.dart';
 
@@ -112,6 +114,21 @@ class PlaceDetailScreen extends ConsumerWidget {
                       height: 1.55,
                       fontWeight: FontWeight.w500,
                     ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Guide Culturel IA Contextuel
+                AskCulturalGuideButton(
+                  contextData: CulturalGuideContext(
+                    contentType: CulturalContentType.ville,
+                    contentId: item.id,
+                    contentTitle: item.name,
+                    subtitle: item.subtitle,
+                    regionId: item.regionId,
+                    regionName: item.regionName,
+                    photoUrl: item.photoUrl,
                   ),
                 ),
 

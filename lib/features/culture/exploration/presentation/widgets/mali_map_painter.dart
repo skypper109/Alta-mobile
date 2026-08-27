@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../core/theme/culture_theme.dart';
 import '../../data/models/mali_region.dart';
@@ -8,7 +7,6 @@ import '../../data/models/region_geo_path.dart';
 class MaliMapPainter extends CustomPainter {
   final List<MaliRegion> regions;
   final String? selectedRegionId;
-  final double pulseValue; // 0.0 -> 1.0 (AnimationController)
   final bool isDark;
 
   // Cache interne des paths pour éviter le recalcul à chaque frame
@@ -18,7 +16,6 @@ class MaliMapPainter extends CustomPainter {
   MaliMapPainter({
     required this.regions,
     required this.selectedRegionId,
-    required this.pulseValue,
     required this.isDark,
   });
 
@@ -59,39 +56,21 @@ class MaliMapPainter extends CustomPainter {
     for (final geoPath in MaliGeoRegistry.all) {
       final path = _getPath(geoPath, size);
 
-
       final isSelected = geoPath.regionId == selectedRegionId;
       final regionData = regions.where((r) => r.id == geoPath.regionId).firstOrNull;
       final accentColor = regionData?.couleurAccent ?? CultureTheme.ocreTerre;
 
       if (isSelected) {
-        // Ombre portée / Lueur externe (Glow) sur la région sélectionnée
-        final glowPaint = Paint()
-          ..color = accentColor.withValues(alpha: 0.35 + 0.15 * math.sin(pulseValue * math.pi * 2))
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 10;
-        canvas.drawPath(path, glowPaint);
-
-        // Remplissage éclatant de la région sélectionnée
-        final fillGradient = LinearGradient(
-          colors: [
-            accentColor.withValues(alpha: isDark ? 0.85 : 0.80),
-            accentColor.withValues(alpha: isDark ? 0.60 : 0.50),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        );
-
+        // Remplissage éclatant et net de la région sélectionnée
         final fillPaint = Paint()
-          ..shader = fillGradient.createShader(path.getBounds())
+          ..color = accentColor.withValues(alpha: isDark ? 0.90 : 0.80)
           ..style = PaintingStyle.fill;
         canvas.drawPath(path, fillPaint);
 
-        // Bordure dorée / luminescente
+        // Bordure contrastée
         final borderPaint = Paint()
           ..color = isDark ? Colors.white : CultureTheme.primaryBlue
-          ..strokeWidth = 2.8
+          ..strokeWidth = 3.0
           ..style = PaintingStyle.stroke;
         canvas.drawPath(path, borderPaint);
       } else {
@@ -151,13 +130,12 @@ class MaliMapPainter extends CustomPainter {
       final accentColor = regionData?.couleurAccent ?? CultureTheme.ocreTerre;
 
       if (isSelected) {
-        // Anneau animé de pulsation sur le centre
-        final ringRadius = 14.0 + 6.0 * pulseValue;
+        // Anneau statique sur le centre
         final ringPaint = Paint()
-          ..color = accentColor.withValues(alpha: 1.0 - pulseValue)
+          ..color = accentColor.withValues(alpha: 0.5)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.5;
-        canvas.drawCircle(center, ringRadius, ringPaint);
+        canvas.drawCircle(center, 14.0, ringPaint);
 
         // Pastille centrale solide
         final dotPaint = Paint()
@@ -284,7 +262,6 @@ class MaliMapPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant MaliMapPainter oldDelegate) {
     return oldDelegate.selectedRegionId != selectedRegionId ||
-        oldDelegate.pulseValue != pulseValue ||
         oldDelegate.isDark != isDark ||
         oldDelegate.regions != regions;
   }

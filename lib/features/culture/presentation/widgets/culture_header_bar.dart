@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_filter_controller.dart';
+import '../../core/models/cultural_guide_models.dart';
 import '../../core/theme/culture_theme.dart';
 import 'culture_region_bottom_sheet.dart';
 
-/// Barre supérieure minimaliste de Culture avec marque et filtre régional transversal
+/// Barre supérieure minimaliste de Culture avec marque, filtre régional et Guide IA
 /// STRICTEMENT SANS DÉGRADÉS selon les règles d'architecture UX/UI
 class CultureHeaderBar extends ConsumerWidget {
   const CultureHeaderBar({super.key});
@@ -22,7 +24,7 @@ class CultureHeaderBar extends ConsumerWidget {
     final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
+      padding: const EdgeInsets.fromLTRB(20, 12, 16, 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -35,58 +37,104 @@ class CultureHeaderBar extends ConsumerWidget {
                 Row(
                   children: [
                     Container(
-                      width: 8,
-                      height: 8,
+                      width: 7,
+                      height: 7,
                       decoration: const BoxDecoration(
                         color: CultureTheme.accentOrange,
                         shape: BoxShape.circle,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Text(
                       'CULTURE',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        letterSpacing: 1.4,
+                        letterSpacing: 1.3,
                         color: CultureTheme.accentOrange,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 2),
                 Text(
                   'Découvrez le Mali',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 22,
+                    fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: titleColor,
-                    letterSpacing: -0.4,
+                    letterSpacing: -0.3,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
 
-          // Filtre Régional Transversal (Pilule cliquable)
+          const SizedBox(width: 8),
+
+          // 1. Bouton Guide Culturel IA (Icône élégante avec effet lumineux)
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                final activeReg = filterState.activeRegion;
+                final guideContext = activeReg != null
+                    ? CulturalGuideContext(
+                        contentType: CulturalContentType.region,
+                        contentId: activeReg.id,
+                        contentTitle: activeReg.nom,
+                        subtitle: activeReg.surnom,
+                        regionId: activeReg.id,
+                        regionName: activeReg.nom,
+                      )
+                    : CulturalGuideContext.general;
+                context.push('/culture/guide', extra: guideContext);
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.20 : 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.4),
+                    width: 1.2,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.auto_awesome_rounded,
+                  size: 18,
+                  color: CultureTheme.accentOrange,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // 2. Filtre Régional Transversal (Pilule cliquable compacte)
           Material(
             color: Colors.transparent,
             child: InkWell(
               onTap: () => CultureRegionBottomSheet.show(context),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(14),
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
+                  horizontal: 10,
                   vertical: 7,
                 ),
                 decoration: BoxDecoration(
                   color: filterState.hasActiveFilter
-                      ? CultureTheme.accentOrange.withValues(alpha: 0.15)
+                      ? CultureTheme.primaryBlue.withValues(alpha: 0.15)
                       : (isDark ? CultureTheme.darkSurfaceAlt : CultureTheme.lightSurfaceAlt),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: filterState.hasActiveFilter
-                        ? CultureTheme.accentOrange
+                        ? CultureTheme.primaryBlue
                         : borderCol,
                     width: 1.2,
                   ),
@@ -96,47 +144,52 @@ class CultureHeaderBar extends ConsumerWidget {
                   children: [
                     Icon(
                       Icons.location_on_rounded,
-                      size: 14,
+                      size: 13,
                       color: filterState.hasActiveFilter
-                          ? CultureTheme.accentOrange
-                          : CultureTheme.primaryBlue,
+                          ? CultureTheme.primaryBlue
+                          : subtitleColor,
                     ),
-                    const SizedBox(width: 5),
-                    Text(
-                      filterState.displayName,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: filterState.hasActiveFilter
-                            ? CultureTheme.accentOrange
-                            : titleColor,
+                    const SizedBox(width: 4),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 80),
+                      child: Text(
+                        filterState.displayName,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: filterState.hasActiveFilter
+                              ? CultureTheme.primaryBlue
+                              : titleColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     if (filterState.hasActiveFilter) ...[
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 4),
                       GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();
                           notifier.clearFilter();
                         },
                         child: Container(
-                          padding: const EdgeInsets.all(2),
+                          padding: const EdgeInsets.all(1.5),
                           decoration: BoxDecoration(
-                            color: CultureTheme.accentOrange.withValues(alpha: 0.25),
+                            color: CultureTheme.primaryBlue.withValues(alpha: 0.25),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
                             Icons.close_rounded,
-                            size: 11,
-                            color: CultureTheme.accentOrange,
+                            size: 10,
+                            color: CultureTheme.primaryBlue,
                           ),
                         ),
                       ),
                     ] else ...[
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 2),
                       Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        size: 16,
+                        size: 15,
                         color: subtitleColor,
                       ),
                     ],

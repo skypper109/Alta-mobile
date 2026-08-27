@@ -7,14 +7,23 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/culture/exploration/data/datasources/mock_mali_regions.dart';
 import '../../features/culture/exploration/data/models/mali_region.dart';
-import '../../features/culture/exploration/presentation/screens/culture_exploration_screen.dart';
+import '../../features/culture/exploration/presentation/screens/explore_mali_screen.dart';
 import '../../features/culture/exploration/presentation/screens/region_detail_screen.dart';
+import '../../features/culture/presentation/screens/challenges_home_screen.dart';
+import '../../features/culture/presentation/screens/contes_screen.dart';
+import '../../features/culture/core/models/cultural_guide_models.dart';
+import '../../features/culture/presentation/screens/cultural_guide_screen.dart';
 import '../../features/culture/presentation/screens/culture_monuments_screen.dart';
 import '../../features/culture/presentation/screens/culture_personnages_screen.dart';
 import '../../features/culture/presentation/screens/culture_villes_screen.dart';
 import '../../features/culture/presentation/screens/historical_figure_detail_screen.dart';
+import '../../features/culture/presentation/screens/interactive_story_player_screen.dart';
 import '../../features/culture/presentation/screens/monument_detail_screen.dart';
 import '../../features/culture/presentation/screens/place_detail_screen.dart';
+import '../../features/culture/presentation/screens/quiz_culture_screen.dart';
+import '../../features/culture/presentation/screens/riddle_screen.dart';
+import '../../features/culture/presentation/screens/story_detail_screen.dart';
+import '../../features/culture/presentation/screens/story_reader_screen.dart';
 import '../../features/discussions/holographic_salon_page.dart';
 import '../../features/profile/user_prefs_notifier.dart';
 import '../../shared/widgets.dart';
@@ -122,7 +131,7 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/culture/map',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const CultureExplorationScreen(),
+        builder: (context, state) => const ExploreMaliScreen(),
       ),
 
       // ── Culture Étape 2 : Écrans Découverte ──────────────────────────────
@@ -179,6 +188,67 @@ GoRouter appRouter(Ref ref) {
                 orElse: () => MockMaliRegions.regions.first,
               );
           return RegionDetailScreen(region: region);
+        },
+      ),
+
+      // ── Culture Étape 4 : Contes & Récits Interactifs ────────────────────
+      GoRoute(
+        path: '/culture/contes',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ContesScreen(),
+      ),
+      GoRoute(
+        path: '/culture/conte/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return StoryDetailScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/conte/:id/play',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return InteractiveStoryPlayerScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/conte/:id/read',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return StoryReaderScreen(id: id);
+        },
+      ),
+
+      // ── Culture Étape 5 : Défis & Jeux Culturels ─────────────────────────
+      GoRoute(
+        path: '/culture/defis',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ChallengesHomeScreen(),
+      ),
+      GoRoute(
+        path: '/culture/defis/devinettes',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/defis/quiz',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const QuizCultureScreen(),
+      ),
+      GoRoute(
+        path: '/culture/guide',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final contextData = state.extra is CulturalGuideContext
+              ? state.extra as CulturalGuideContext
+              : CulturalGuideContext.general;
+          return CulturalGuideScreen(contextData: contextData);
         },
       ),
       GoRoute(
