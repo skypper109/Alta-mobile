@@ -4,11 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_filter_controller.dart';
+import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/theme/culture_theme.dart';
 import 'culture_region_bottom_sheet.dart';
 
-/// Barre supérieure minimaliste de Culture avec marque, filtre régional et Guide IA
+/// Barre supérieure minimaliste de Culture avec marque, filtre régional, Passeport et Guide IA
 /// STRICTEMENT SANS DÉGRADÉS selon les règles d'architecture UX/UI
 class CultureHeaderBar extends ConsumerWidget {
   const CultureHeaderBar({super.key});
@@ -16,6 +17,7 @@ class CultureHeaderBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final filterState = ref.watch(activeCultureRegionProvider);
+    final passportState = ref.watch(culturePassportProvider);
     final notifier = ref.read(activeCultureRegionProvider.notifier);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -72,9 +74,68 @@ class CultureHeaderBar extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
 
-          // 1. Bouton Guide Culturel IA (Icône élégante avec effet lumineux)
+          // 1. Bouton Passeport Culturel (Carnet de Voyage)
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                context.push('/culture/passport');
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: CultureTheme.primaryBlue.withValues(alpha: isDark ? 0.20 : 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: CultureTheme.primaryBlue.withValues(alpha: 0.4),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.auto_stories_rounded,
+                      size: 18,
+                      color: CultureTheme.primaryBlue,
+                    ),
+                  ),
+                  if (passportState.totalDiscoveries > 0)
+                    Positioned(
+                      top: -3,
+                      right: -3,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                        decoration: const BoxDecoration(
+                          color: CultureTheme.accentOrange,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                        child: Center(
+                          child: Text(
+                            passportState.totalDiscoveries.toString(),
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 6),
+
+          // 2. Bouton Guide Culturel IA (Icône élégante avec effet lumineux)
           Material(
             color: Colors.transparent,
             child: InkWell(
@@ -114,7 +175,7 @@ class CultureHeaderBar extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
 
           // 2. Filtre Régional Transversal (Pilule cliquable compacte)
           Material(

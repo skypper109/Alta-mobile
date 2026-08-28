@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/datasources/mock_culture_challenges_data.dart';
 import '../../core/models/culture_challenge_models.dart';
+import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../widgets/passport_stamp_toast.dart';
 
 /// Écran d'Expérience de Devinettes Traditionnelles (« N'Da ! »)
-class RiddleScreen extends StatefulWidget {
+class RiddleScreen extends ConsumerStatefulWidget {
   final String? riddleId;
 
   const RiddleScreen({super.key, this.riddleId});
 
   @override
-  State<RiddleScreen> createState() => _RiddleScreenState();
+  ConsumerState<RiddleScreen> createState() => _RiddleScreenState();
 }
 
-class _RiddleScreenState extends State<RiddleScreen> {
+class _RiddleScreenState extends ConsumerState<RiddleScreen> {
   late List<TraditionalRiddle> _riddles;
   int _currentIndex = 0;
   int _revealedHintsCount = 0;
@@ -92,6 +96,28 @@ class _RiddleScreenState extends State<RiddleScreen> {
       _isCorrect = correct;
       _isSpeaking = false;
     });
+
+    if (correct) {
+      final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
+            id: _currentRiddle.id,
+            type: PassportItemType.defi,
+            title: 'Devinette : ${_currentRiddle.correctAnswer}',
+            subtitle: _currentRiddle.category,
+            regionId: _currentRiddle.regionId,
+            regionName: _currentRiddle.regionName,
+            photoUrl: _currentRiddle.photoUrl ?? 'assets/images/culture/villes/bandiagara_falaise.jpg',
+            tag: 'Devinette N\'Da',
+            culturalQuote: _currentRiddle.proverb,
+            targetRoute: '/culture/defis/devinettes?id=${_currentRiddle.id}',
+          );
+      if (added && mounted) {
+        PassportStampToast.show(
+          context,
+          title: 'Devinette : ${_currentRiddle.correctAnswer}',
+          type: PassportItemType.defi,
+        );
+      }
+    }
   }
 
   void _giveUpAndReveal() {

@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/datasources/mock_culture_stories_data.dart';
+import '../../core/models/culture_passport_models.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../widgets/connected_contents_section.dart';
+import '../widgets/passport_stamp_toast.dart';
 
 /// Moteur immersif de Narration Interactive Scène par Scène
-class InteractiveStoryPlayerScreen extends StatefulWidget {
+class InteractiveStoryPlayerScreen extends ConsumerStatefulWidget {
   final String id;
   final InteractiveStory? story;
 
@@ -20,12 +24,12 @@ class InteractiveStoryPlayerScreen extends StatefulWidget {
   });
 
   @override
-  State<InteractiveStoryPlayerScreen> createState() =>
+  ConsumerState<InteractiveStoryPlayerScreen> createState() =>
       _InteractiveStoryPlayerScreenState();
 }
 
 class _InteractiveStoryPlayerScreenState
-    extends State<InteractiveStoryPlayerScreen> {
+    extends ConsumerState<InteractiveStoryPlayerScreen> {
   late InteractiveStory _story;
   late StoryScene _currentScene;
   final List<String> _visitedSceneIds = [];
@@ -85,6 +89,29 @@ class _InteractiveStoryPlayerScreenState
             _visitedSceneIds.add(nextScene.id);
           }
         });
+
+        // Enregistrement au Passeport si épilogue atteint
+        if (nextScene.isEpilogue) {
+          final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
+                id: _story.id,
+                type: PassportItemType.conte,
+                title: _story.title,
+                subtitle: _story.subtitle,
+                regionId: _story.regionId,
+                regionName: _story.regionName,
+                photoUrl: _story.photoUrl,
+                tag: _story.tag,
+                culturalQuote: _story.moral,
+                targetRoute: '/culture/conte/${_story.id}',
+              );
+          if (added && mounted) {
+            PassportStampToast.show(
+              context,
+              title: _story.title,
+              type: PassportItemType.conte,
+            );
+          }
+        }
       }
     });
   }

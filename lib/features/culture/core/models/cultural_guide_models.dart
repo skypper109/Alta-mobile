@@ -8,6 +8,7 @@ enum CulturalContentType {
   conte,
   defi,
   region,
+  passeport,
   general,
 }
 

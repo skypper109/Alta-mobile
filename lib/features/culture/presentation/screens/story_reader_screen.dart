@@ -1,25 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/datasources/mock_culture_stories_data.dart';
+import '../../core/models/culture_passport_models.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../widgets/connected_contents_section.dart';
+import '../widgets/passport_stamp_toast.dart';
 
 /// Écran de lecture continue du conte (Grand confort éditorial)
-class StoryReaderScreen extends StatefulWidget {
+class StoryReaderScreen extends ConsumerStatefulWidget {
   final String id;
   final InteractiveStory? story;
 
   const StoryReaderScreen({super.key, required this.id, this.story});
 
   @override
-  State<StoryReaderScreen> createState() => _StoryReaderScreenState();
+  ConsumerState<StoryReaderScreen> createState() => _StoryReaderScreenState();
 }
 
-class _StoryReaderScreenState extends State<StoryReaderScreen> {
+class _StoryReaderScreenState extends ConsumerState<StoryReaderScreen> {
   double _fontSize = 15.0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final story = widget.story ?? MockCultureStoriesData.getStoryById(widget.id);
+      final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
+            id: story.id,
+            type: PassportItemType.conte,
+            title: story.title,
+            subtitle: story.subtitle,
+            regionId: story.regionId,
+            regionName: story.regionName,
+            photoUrl: story.photoUrl,
+            tag: story.tag,
+            culturalQuote: story.moral,
+            targetRoute: '/culture/conte/${story.id}',
+          );
+      if (added && mounted) {
+        PassportStampToast.show(
+          context,
+          title: story.title,
+          type: PassportItemType.conte,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

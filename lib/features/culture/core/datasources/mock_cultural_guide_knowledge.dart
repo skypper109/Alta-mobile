@@ -135,6 +135,30 @@ abstract final class MockCulturalGuideKnowledge {
           ),
         ];
 
+      case CulturalContentType.passeport:
+        return [
+          GuideSuggestion(
+            id: 'pass_next_step',
+            questionText: 'Que me conseillez-vous d\'explorer pour enrichir mon Passeport ?',
+            icon: Icons.explore_rounded,
+          ),
+          GuideSuggestion(
+            id: 'pass_tombouctou_gao',
+            questionText: 'J\'ai exploré Tombouctou. Que visiter ensuite à Gao ?',
+            icon: Icons.account_balance_rounded,
+          ),
+          GuideSuggestion(
+            id: 'pass_missing_contes',
+            questionText: 'Quels contes et veillées me conseillez-vous d\'écouter ?',
+            icon: Icons.auto_stories_rounded,
+          ),
+          GuideSuggestion(
+            id: 'pass_seals',
+            questionText: 'Comment débloquer les prochains Sceaux d\'Ambassadeur ?',
+            icon: Icons.workspace_premium_rounded,
+          ),
+        ];
+
       case CulturalContentType.general:
         return [
           GuideSuggestion(
@@ -165,6 +189,13 @@ abstract final class MockCulturalGuideKnowledge {
   static GuideMessage getWelcomeMessage(CulturalGuideContext context) {
     String welcomeText;
     switch (context.contentType) {
+      case CulturalContentType.passeport:
+        welcomeText =
+            'I ni ce ! J\'ai sous les yeux votre Passeport Culturel. '
+            'Vous avez déjà gravé de magnifiques découvertes entre Koulikoro, Tombouctou, Mopti et Sikasso. '
+            'Je peux analyser vos étapes et vous orienter vers vos prochaines aventures au Mali !';
+        break;
+
       case CulturalContentType.monument:
         welcomeText =
             'I ni ce ! Je suis votre guide pour le monument « ${context.contentTitle} » (${context.regionName}). '
@@ -222,6 +253,64 @@ abstract final class MockCulturalGuideKnowledge {
     required CulturalGuideContext context,
   }) {
     final q = question.toLowerCase();
+
+    // ── PASSEPORT CULTUREL ──────────────────────────────────────────────────
+    if (context.contentType == CulturalContentType.passeport) {
+      if (q.contains('gao') || q.contains('tombouctou')) {
+        return GuideMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text:
+              'Ayant exploré la prestigieuse Mosquée Djingareyber de Tombouctou et la figure de Mansa Moussa, '
+              'votre odyssée logique vous conduit tout droit vers la Cité de Gao ! '
+              'Là-bas, le Tombeau pyramidal des Askia (édifié en 1495) et la Dune Rose de Koïma complèteront à merveille votre connaissance de l\'Empire Songhoï.',
+          isUser: false,
+          timestamp: DateTime.now(),
+          action: const GuideConnectedAction(
+            label: 'Explorer le Tombeau des Askia',
+            targetRoute: '/culture/monument/monument_tombeau_askia',
+          ),
+        );
+      } else if (q.contains('sceau') || q.contains('distinction') || q.contains('ambassadeur')) {
+        return GuideMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text:
+              'Vos distinctions témoignent de la profondeur de votre exploration. '
+              'Pour obtenir le prestigieux sceau « Grand Voyageur du Sahel », il vous suffit de fouler encore quelques terroirs comme Gao, Ségou ou Mopti !',
+          isUser: false,
+          timestamp: DateTime.now(),
+          action: const GuideConnectedAction(
+            label: 'Voir la Carte des Régions',
+            targetRoute: '/culture/map',
+          ),
+        );
+      } else if (q.contains('conte') || q.contains('veillée') || q.contains('manqu')) {
+        return GuideMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text:
+              'Pour enrichir votre carnet de récits oraux, je vous conseille de vous immerger dans le conte mythique « L\'Astronomie Dogon & le Mystère de Sirius B » ou le récit des pêcheurs Bozo.',
+          isUser: false,
+          timestamp: DateTime.now(),
+          action: const GuideConnectedAction(
+            label: 'Écouter les Contes',
+            targetRoute: '/culture/contes',
+          ),
+        );
+      } else {
+        return GuideMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text:
+              'Votre Passeport Culturel est richement initié ! '
+              'Pour aller plus loin, je vous suggère d\'explorer les Monts Mandingues de Koulikoro, '
+              'ou de relever les devinettes traditionnelles « N\'Da ! » pour affûter votre esprit.',
+          isUser: false,
+          timestamp: DateTime.now(),
+          action: const GuideConnectedAction(
+            label: 'Relever un Défi N\'Da',
+            targetRoute: '/culture/defis/devinettes',
+          ),
+        );
+      }
+    }
 
     // ── MONUMENTS ───────────────────────────────────────────────────────────
     if (context.contentType == CulturalContentType.monument) {

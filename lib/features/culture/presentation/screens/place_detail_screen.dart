@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_filter_controller.dart';
+import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/datasources/mock_culture_details_data.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_detail_models.dart';
+import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/authentic_photo_hero.dart';
 import '../widgets/connected_contents_section.dart';
+import '../widgets/passport_stamp_toast.dart';
 
 /// Fiche de consultation immersive d'une Ville ou Village du Mali
 class PlaceDetailScreen extends ConsumerWidget {
@@ -26,6 +29,29 @@ class PlaceDetailScreen extends ConsumerWidget {
     final item = place ?? MockCultureDetailsData.getPlaceById(id);
     final activeRegion = ref.watch(activeCultureRegionProvider).activeRegion;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Enregistrement automatique au Passeport Culturel
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
+            id: item.id,
+            type: PassportItemType.ville,
+            title: item.name,
+            subtitle: item.subtitle,
+            regionId: item.regionId,
+            regionName: item.regionName,
+            photoUrl: item.photoUrl,
+            tag: item.tag,
+            culturalQuote: '« Cité vivante aux racines ancestrales du fleuve. »',
+            targetRoute: '/culture/ville/${item.id}',
+          );
+      if (added && context.mounted) {
+        PassportStampToast.show(
+          context,
+          title: item.name,
+          type: PassportItemType.ville,
+        );
+      }
+    });
 
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569);

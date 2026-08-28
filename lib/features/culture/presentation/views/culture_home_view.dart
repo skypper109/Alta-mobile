@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_filter_controller.dart';
+import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_item.dart';
@@ -362,6 +363,11 @@ class CultureHomeView extends ConsumerWidget {
               ),
             ],
           ),
+
+          const SizedBox(height: 16),
+
+          // ── BANNIÈRE PASSEPORT CULTUREL & MÉMOIRE DE VOYAGE ──────────────
+          _buildPassportBanner(context, ref, isDark, cardBg, borderCol, titleColor, subtitleColor),
 
           const SizedBox(height: 16),
 
@@ -756,6 +762,140 @@ class CultureHomeView extends ConsumerWidget {
         ],
       ),
     ),
+    );
+  }
+
+  Widget _buildPassportBanner(
+    BuildContext context,
+    WidgetRef ref,
+    bool isDark,
+    Color cardBg,
+    Color borderCol,
+    Color titleColor,
+    Color subtitleColor,
+  ) {
+    final passportState = ref.watch(culturePassportProvider);
+
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        context.push('/culture/passport');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF131D31) : const Color(0xFFEFF6FF),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: CultureTheme.primaryBlue.withValues(alpha: 0.35),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: CultureTheme.primaryBlue.withValues(alpha: isDark ? 0.2 : 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: CultureTheme.primaryBlue,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.auto_stories_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'PASSEPORT CULTUREL',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: CultureTheme.primaryBlue,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: CultureTheme.accentOrange.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '${passportState.totalDiscoveries} Inscrits',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: CultureTheme.accentOrange,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Votre carnet de voyage au Mali',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      color: titleColor,
+                    ),
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    'Retrouvez vos découvertes et vos sceaux',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: subtitleColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: CultureTheme.primaryBlue,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Ouvrir',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 3),
+                  const Icon(Icons.arrow_forward_rounded, size: 12, color: Colors.white),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -4,15 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/controllers/culture_filter_controller.dart';
+import '../../../core/controllers/culture_passport_controller.dart';
 import '../../../core/datasources/mock_culture_challenges_data.dart';
 import '../../../core/datasources/mock_culture_stage1_data.dart';
 import '../../../core/datasources/mock_culture_stories_data.dart';
 import '../../../core/models/cultural_guide_models.dart';
 import '../../../core/models/culture_item.dart';
+import '../../../core/models/culture_passport_models.dart';
 import '../../../core/models/culture_story_models.dart';
 import '../../../core/theme/culture_theme.dart';
 import '../../../presentation/widgets/ask_cultural_guide_button.dart';
 import '../../../presentation/widgets/authentic_photo_hero.dart';
+import '../../../presentation/widgets/passport_stamp_toast.dart';
 import '../../data/models/mali_region.dart';
 
 /// Fiche Détaillée d'une Région du Mali (Design System Unifié Alternia Culture)
@@ -93,6 +96,29 @@ class RegionDetailScreen extends ConsumerWidget {
     final isFilterActive = activeGlobalRegion?.id == region.id;
 
     final photoUrl = _resolveRegionPhoto(region.id);
+
+    // Enregistrement automatique de la Région foulée dans le Passeport Culturel
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
+            id: region.id,
+            type: PassportItemType.region,
+            title: region.nom,
+            subtitle: region.surnom,
+            regionId: region.id,
+            regionName: region.nom,
+            photoUrl: photoUrl,
+            tag: 'Terre & Région',
+            culturalQuote: '« ${region.descriptionCourte} »',
+            targetRoute: '/culture/region/${region.id}',
+          );
+      if (added && context.mounted) {
+        PassportStampToast.show(
+          context,
+          title: region.nom,
+          type: PassportItemType.region,
+        );
+      }
+    });
 
     // Trésors culturels associés
     final monuments = MockCultureStage1Data.monuments

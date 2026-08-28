@@ -22,6 +22,7 @@ import '../../features/culture/presentation/screens/monument_detail_screen.dart'
 import '../../features/culture/presentation/screens/place_detail_screen.dart';
 import '../../features/culture/presentation/screens/quiz_culture_screen.dart';
 import '../../features/culture/presentation/screens/riddle_screen.dart';
+import '../../features/culture/presentation/screens/passport_screen.dart';
 import '../../features/culture/presentation/screens/story_detail_screen.dart';
 import '../../features/culture/presentation/screens/story_reader_screen.dart';
 import '../../features/discussions/holographic_salon_page.dart';
@@ -250,6 +251,11 @@ GoRouter appRouter(Ref ref) {
               : CulturalGuideContext.general;
           return CulturalGuideScreen(contextData: contextData);
         },
+      ),
+      GoRoute(
+        path: '/culture/passport',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PassportScreen(),
       ),
       GoRoute(
         path: '/holo-salon',

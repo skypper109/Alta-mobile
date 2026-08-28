@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/datasources/mock_culture_challenges_data.dart';
 import '../../core/models/culture_challenge_models.dart';
+import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../widgets/passport_stamp_toast.dart';
 
 /// Écran de Quiz Culturel dynamique à choix multiples
-class QuizCultureScreen extends StatefulWidget {
+class QuizCultureScreen extends ConsumerStatefulWidget {
   const QuizCultureScreen({super.key});
 
   @override
-  State<QuizCultureScreen> createState() => _QuizCultureScreenState();
+  ConsumerState<QuizCultureScreen> createState() => _QuizCultureScreenState();
 }
 
-class _QuizCultureScreenState extends State<QuizCultureScreen> {
+class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
   late List<CultureQuizQuestion> _questions;
   int _currentIndex = 0;
   int? _selectedAnswerIndex;
@@ -58,6 +62,26 @@ class _QuizCultureScreenState extends State<QuizCultureScreen> {
       setState(() {
         _isCompleted = true;
       });
+
+      final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
+            id: 'quiz_culture_general',
+            type: PassportItemType.defi,
+            title: 'Grand Quiz du Patrimoine Malien',
+            subtitle: 'Score de réussite : $_score/${_questions.length}',
+            regionId: null,
+            regionName: 'Tout le Mali',
+            photoUrl: 'assets/images/culture/villes/djenne_ville.jpg',
+            tag: 'Quiz Culturel',
+            culturalQuote: '« La connaissance du passé est la boussole de l\'avenir. »',
+            targetRoute: '/culture/defis/quiz',
+          );
+      if (added && mounted) {
+        PassportStampToast.show(
+          context,
+          title: 'Grand Quiz du Patrimoine Malien',
+          type: PassportItemType.defi,
+        );
+      }
     }
   }
 
