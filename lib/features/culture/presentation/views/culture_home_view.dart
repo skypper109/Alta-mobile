@@ -822,13 +822,17 @@ class CultureHomeView extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        'PASSEPORT CULTUREL',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: CultureTheme.primaryBlue,
-                          letterSpacing: 0.8,
+                      Flexible(
+                        child: Text(
+                          'PASSEPORT CULTUREL',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: CultureTheme.primaryBlue,
+                            letterSpacing: 0.8,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -857,6 +861,8 @@ class CultureHomeView extends ConsumerWidget {
                       fontWeight: FontWeight.w800,
                       color: titleColor,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 1),
                   Text(
@@ -866,6 +872,8 @@ class CultureHomeView extends ConsumerWidget {
                       fontWeight: FontWeight.w500,
                       color: subtitleColor,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

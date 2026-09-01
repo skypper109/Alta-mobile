@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
@@ -359,10 +358,16 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
 
   void _showHistoryModal() {
     HapticFeedback.mediumImpact();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final modalBg = isDark ? DetColors.surface : Colors.white;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSec = isDark ? DetColors.textSecondary : const Color(0xFF475569);
+    final borderCol = isDark ? DetColors.border : const Color(0xFFE2E8F0);
+
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: DetColors.background,
+      backgroundColor: modalBg,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -376,7 +381,7 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: DetColors.border,
+                  color: borderCol,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -387,7 +392,11 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
                     Expanded(
                       child: Text(
                         'Historique des Discussions',
-                        style: DetTextStyles.headingLg,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: textPri,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -406,7 +415,7 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
                   ],
                 ),
               ),
-              const Divider(),
+              Divider(color: borderCol, height: 1),
               Expanded(
                 child: ListView.separated(
                   padding: const EdgeInsets.all(DetSizes.lg),
@@ -422,10 +431,11 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
 
                     return DetCard(
                       onTap: () => _loadSession(sess),
-                      backgroundColor:
-                          isSelected ? DetColors.surfaceAlt : DetColors.surface,
+                      backgroundColor: isSelected
+                          ? (isDark ? DetColors.surfaceAlt : const Color(0xFFF1F5F9))
+                          : (isDark ? DetColors.surface : Colors.white),
                       borderColor:
-                          isSelected ? DetColors.primary : DetColors.border,
+                          isSelected ? DetColors.primary : borderCol,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -434,9 +444,11 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
                             children: [
                               Text(
                                 '${sess.messages.length} message(s)',
-                                style: DetTextStyles.caption.copyWith(
-                                    color: DetColors.primary,
-                                    fontWeight: FontWeight.w700),
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: DetColors.primary,
+                                ),
                               ),
                               if (isSelected)
                                 Container(
@@ -448,24 +460,33 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
                                   ),
                                   child: Text(
                                     'EN COURS',
-                                    style: DetTextStyles.caption.copyWith(
-                                        color: Colors.white,
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.bold),
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Text(sess.title,
-                              style: DetTextStyles.headingSm,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis),
+                          Text(
+                            sess.title,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: textPri,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           const SizedBox(height: 4),
                           Text(
                             lastMsg,
-                            style: DetTextStyles.bodySm
-                                .copyWith(color: DetColors.textSecondary),
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              color: textSec,
+                            ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -506,32 +527,7 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
                   const AlterniaLogo(size: 28, showText: true),
                   const Spacer(),
                   // BOUTON SALON LIVE HOLOGRAPHIQUE
-                  GestureDetector(
-                    onTap: () => context.push('/holo-salon'),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: AltaColors.secondary.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AltaColors.secondary, width: 1),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.psychology_rounded, color: AltaColors.secondary, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            'SALON LIVE',
-                            style: DetTextStyles.caption.copyWith(
-                              color: AltaColors.secondary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  const AlterniaAvatarTopBarButton(),
                   const SizedBox(width: 8),
                   // BOUTON HISTORIQUE
                   GestureDetector(
@@ -539,11 +535,25 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: DetColors.surfaceAlt,
+                        color: isDark ? DetColors.surfaceAlt : Colors.white,
                         shape: BoxShape.circle,
-                        border: Border.all(color: DetColors.border, width: 1),
+                        border: Border.all(
+                          color: isDark ? DetColors.border : const Color(0xFFE2E8F0),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      child: const Icon(Icons.history_rounded, color: AltaColors.secondary, size: 18),
+                      child: Icon(
+                        Icons.history_rounded,
+                        color: isDark ? AltaColors.secondary : const Color(0xFF0E7490),
+                        size: 18,
+                      ),
                     ),
                   ),
                 ],
@@ -1013,6 +1023,7 @@ class _ChatMessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isUser = message.isUser;
     final time =
         '${message.timestamp.hour.toString().padLeft(2, '0')}:${message.timestamp.minute.toString().padLeft(2, '0')}';
@@ -1064,9 +1075,9 @@ class _ChatMessageWidget extends StatelessWidget {
             padding: const EdgeInsets.symmetric(
                 horizontal: DetSizes.md, vertical: DetSizes.md),
             decoration: BoxDecoration(
-                color: isUser
-                    ? AltaColors.primary.withValues(alpha: 0.18)
-                    : DetColors.surfaceAlt,
+              color: isUser
+                  ? AltaColors.primary.withValues(alpha: isDark ? 0.18 : 0.12)
+                  : (isDark ? DetColors.surfaceAlt : Colors.white),
               borderRadius: BorderRadius.only(
                 topLeft: const Radius.circular(16),
                 topRight: const Radius.circular(16),
@@ -1079,10 +1090,19 @@ class _ChatMessageWidget extends StatelessWidget {
               ),
               border: Border.all(
                 color: isUser
-                    ? AltaColors.primary.withValues(alpha: 0.4)
-                    : DetColors.border,
+                    ? AltaColors.primary.withValues(alpha: isDark ? 0.4 : 0.25)
+                    : (isDark ? DetColors.border : const Color(0xFFE2E8F0)),
                 width: 1,
               ),
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
             ),
             child: _FormattedResponseView(
               text: message.text,
@@ -1204,6 +1224,8 @@ class _QuickQuestionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
@@ -1212,13 +1234,20 @@ class _QuickQuestionChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: DetColors.surfaceAlt,
+          color: isDark ? DetColors.surfaceAlt : const Color(0xFFF1F5F9),
           borderRadius: DetSizes.borderRadiusSm,
-          border: Border.all(color: DetColors.border, width: 1),
+          border: Border.all(
+            color: isDark ? DetColors.border : const Color(0xFFCBD5E1),
+            width: 1,
+          ),
         ),
         child: Text(
           label,
-          style: DetTextStyles.labelSm.copyWith(color: DetColors.textSecondary),
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: isDark ? DetColors.textSecondary : const Color(0xFF475569),
+          ),
         ),
       ),
     );
@@ -1240,14 +1269,18 @@ class _FormattedResponseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+
     if (isUser) {
       final cleanText = _cleanMarkdownFormatting(text);
       return Text(
         cleanText,
-        style: DetTextStyles.bodyLg.copyWith(
+        style: GoogleFonts.plusJakartaSans(
           fontSize: 14.5,
           height: 1.65,
-          color: DetColors.textPrimary,
+          fontWeight: FontWeight.w500,
+          color: textPri,
         ),
       );
     }
@@ -1274,7 +1307,7 @@ class _FormattedResponseView extends StatelessWidget {
             margin: const EdgeInsets.symmetric(vertical: 6),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: DetColors.accentAmber.withValues(alpha: 0.15),
+              color: DetColors.accentAmber.withValues(alpha: isDark ? 0.15 : 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: DetColors.accentAmber, width: 1.2),
             ),
@@ -1287,8 +1320,8 @@ class _FormattedResponseView extends StatelessWidget {
                 Expanded(
                   child: Text(
                     cleanLine,
-                    style: DetTextStyles.bodyLg.copyWith(
-                      color: DetColors.accentAmber,
+                    style: GoogleFonts.plusJakartaSans(
+                      color: isDark ? DetColors.accentAmber : const Color(0xFFB45309),
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                       height: 1.5,
@@ -1310,10 +1343,10 @@ class _FormattedResponseView extends StatelessWidget {
             margin: const EdgeInsets.symmetric(vertical: 6),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: DetColors.primary.withValues(alpha: 0.12),
+              color: DetColors.primary.withValues(alpha: isDark ? 0.12 : 0.08),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: DetColors.primary.withValues(alpha: 0.8), width: 1.2),
+                  color: DetColors.primary.withValues(alpha: isDark ? 0.8 : 0.4), width: 1.2),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1324,8 +1357,8 @@ class _FormattedResponseView extends StatelessWidget {
                 Expanded(
                   child: Text(
                     cleanLine,
-                    style: DetTextStyles.bodyLg.copyWith(
-                      color: DetColors.textPrimary,
+                    style: GoogleFonts.plusJakartaSans(
+                      color: textPri,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                       height: 1.5,
@@ -1348,7 +1381,7 @@ class _FormattedResponseView extends StatelessWidget {
             margin: const EdgeInsets.symmetric(vertical: 6),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: DetColors.error.withValues(alpha: 0.12),
+              color: DetColors.error.withValues(alpha: isDark ? 0.12 : 0.08),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: DetColors.error, width: 1.2),
             ),
@@ -1361,8 +1394,8 @@ class _FormattedResponseView extends StatelessWidget {
                 Expanded(
                   child: Text(
                     cleanLine,
-                    style: DetTextStyles.bodyLg.copyWith(
-                      color: DetColors.error,
+                    style: GoogleFonts.plusJakartaSans(
+                      color: isDark ? DetColors.error : const Color(0xFFDC2626),
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                       height: 1.5,
@@ -1379,7 +1412,7 @@ class _FormattedResponseView extends StatelessWidget {
         children.add(
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
-            child: _buildRichTextSpan(line),
+            child: _buildRichTextSpan(line, textPri, isDark),
           ),
         );
       }
@@ -1391,20 +1424,21 @@ class _FormattedResponseView extends StatelessWidget {
     );
   }
 
-  Widget _buildRichTextSpan(String rawLine) {
+  Widget _buildRichTextSpan(String rawLine, Color textPri, bool isDark) {
     // Nettoyer les dièses de titre s'il y en a
     String cleanStr = rawLine.replaceAll(RegExp(r'^#+\s*'), '');
 
     final regex = RegExp(r'\*\*(.*?)\*\*');
     final matches = regex.allMatches(cleanStr);
+    final accentColor = isDark ? DetColors.accentAmber : const Color(0xFFD97706);
 
     if (matches.isEmpty) {
       return Text(
         cleanStr,
-        style: DetTextStyles.bodyLg.copyWith(
+        style: GoogleFonts.plusJakartaSans(
           fontSize: 14.5,
           height: 1.65,
-          color: DetColors.textPrimary,
+          color: textPri,
         ),
       );
     }
@@ -1416,10 +1450,10 @@ class _FormattedResponseView extends StatelessWidget {
       if (m.start > lastEnd) {
         spans.add(TextSpan(
           text: cleanStr.substring(lastEnd, m.start),
-          style: DetTextStyles.bodyLg.copyWith(
+          style: GoogleFonts.plusJakartaSans(
             fontSize: 14.5,
             height: 1.65,
-            color: DetColors.textPrimary,
+            color: textPri,
           ),
         ));
       }
@@ -1427,11 +1461,11 @@ class _FormattedResponseView extends StatelessWidget {
       final boldWord = m.group(1) ?? '';
       spans.add(TextSpan(
         text: boldWord,
-        style: DetTextStyles.bodyLg.copyWith(
+        style: GoogleFonts.plusJakartaSans(
           fontSize: 14.5,
           height: 1.65,
           fontWeight: FontWeight.w800,
-          color: DetColors.accentAmber, // AlterniA : partie à retenir = orange vif !
+          color: accentColor,
         ),
       ));
 
@@ -1441,10 +1475,10 @@ class _FormattedResponseView extends StatelessWidget {
     if (lastEnd < cleanStr.length) {
       spans.add(TextSpan(
         text: cleanStr.substring(lastEnd),
-        style: DetTextStyles.bodyLg.copyWith(
+        style: GoogleFonts.plusJakartaSans(
           fontSize: 14.5,
           height: 1.65,
-          color: DetColors.textPrimary,
+          color: textPri,
         ),
       ));
     }

@@ -2,11 +2,10 @@
 // Connecté directement au serveur local AlternIA (LLM Qwen 2.5 + RAG 1573 Chunks Maliens).
 library;
 
-import 'dart:io' show Platform;
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 
+import 'constants.dart';
 import 'malian_school_system.dart';
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -28,23 +27,13 @@ class GeminiService {
     if (custom != null && custom.isNotEmpty) {
       return [custom];
     }
-    if (kIsWeb) {
-      return ['http://127.0.0.1:8000', 'http://localhost:8000'];
-    }
-    try {
-      if (Platform.isAndroid) {
-        return [
-          'http://10.0.2.2:8000',      // Émulateur Android
-          'http://127.0.0.1:8000',
-          'http://192.168.4.1:8000',   // Hotspot Boîtier AlternIA
-          'http://192.168.1.100:8000',
-        ];
-      }
-    } catch (_) {}
     return [
-      'http://127.0.0.1:8000',        // iOS Simulator / macOS / Linux Desktop
+      AltaApiConfig.serverBaseUrl,
+      'http://127.0.0.1:8000',
+      'http://10.0.2.2:8000',
       'http://localhost:8000',
       'http://192.168.4.1:8000',
+      'http://192.168.1.100:8000',
     ];
   }
 

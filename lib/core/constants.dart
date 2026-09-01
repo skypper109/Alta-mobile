@@ -5,6 +5,13 @@ library;
 import 'package:flutter/material.dart';
 
 // ══════════════════════════════════════════════════════════════════════════════
+// CONFIGURATION SERVEUR ALTERNIA (BACKEND IA & RAG)
+// ══════════════════════════════════════════════════════════════════════════════
+abstract final class AltaApiConfig {
+  static const String serverBaseUrl = 'https://nation-institutional-freeware-representations.trycloudflare.com';
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // COULEURS (CHARTE OFFICIELLE ALTERNIA)
 // ══════════════════════════════════════════════════════════════════════════════
 abstract final class AltaColors {
@@ -168,7 +175,6 @@ abstract final class DetTextStyles {
     fontWeight: FontWeight.w700,
     letterSpacing: -0.6,
     height: 1.2,
-    color: AltaColors.textPrimaryDark,
   );
 
   static const TextStyle displayMd = TextStyle(
@@ -177,7 +183,6 @@ abstract final class DetTextStyles {
     fontWeight: FontWeight.w700,
     letterSpacing: -0.4,
     height: 1.25,
-    color: AltaColors.textPrimaryDark,
   );
 
   static const TextStyle headingLg = TextStyle(
@@ -186,7 +191,6 @@ abstract final class DetTextStyles {
     fontWeight: FontWeight.w600,
     letterSpacing: -0.3,
     height: 1.3,
-    color: AltaColors.textPrimaryDark,
   );
 
   static const TextStyle headingMd = TextStyle(
@@ -195,7 +199,6 @@ abstract final class DetTextStyles {
     fontWeight: FontWeight.w600,
     letterSpacing: -0.1,
     height: 1.35,
-    color: AltaColors.textPrimaryDark,
   );
 
   static const TextStyle headingSm = TextStyle(
@@ -204,7 +207,6 @@ abstract final class DetTextStyles {
     fontWeight: FontWeight.w600,
     letterSpacing: 0.0,
     height: 1.4,
-    color: AltaColors.textPrimaryDark,
   );
 
   static const TextStyle bodyLg = TextStyle(
@@ -212,7 +214,6 @@ abstract final class DetTextStyles {
     fontSize: 16.0,
     fontWeight: FontWeight.w400,
     height: 1.55,
-    color: AltaColors.textPrimaryDark,
   );
 
   static const TextStyle bodyMd = TextStyle(
@@ -220,7 +221,6 @@ abstract final class DetTextStyles {
     fontSize: 14.0,
     fontWeight: FontWeight.w400,
     height: 1.5,
-    color: AltaColors.textPrimaryDark,
   );
 
   static const TextStyle bodySm = TextStyle(
@@ -228,7 +228,6 @@ abstract final class DetTextStyles {
     fontSize: 12.0,
     fontWeight: FontWeight.w400,
     height: 1.45,
-    color: AltaColors.textSecondaryDark,
   );
 
   static const TextStyle labelLg = TextStyle(
@@ -237,7 +236,6 @@ abstract final class DetTextStyles {
     fontWeight: FontWeight.w600,
     letterSpacing: 0.2,
     height: 1.3,
-    color: AltaColors.textPrimaryDark,
   );
 
   static const TextStyle labelSm = TextStyle(
@@ -246,7 +244,6 @@ abstract final class DetTextStyles {
     fontWeight: FontWeight.w600,
     letterSpacing: 0.4,
     height: 1.3,
-    color: AltaColors.textMutedDark,
   );
 
   static const TextStyle caption = TextStyle(
@@ -255,7 +252,6 @@ abstract final class DetTextStyles {
     fontWeight: FontWeight.w500,
     letterSpacing: 0.5,
     height: 1.3,
-    color: AltaColors.textMutedDark,
   );
 
   static const TextStyle codeMd = TextStyle(
@@ -263,7 +259,6 @@ abstract final class DetTextStyles {
     fontSize: 13.0,
     fontWeight: FontWeight.w400,
     height: 1.5,
-    color: AltaColors.textPrimaryDark,
   );
 
   static const TextStyle codeSm = TextStyle(
@@ -271,7 +266,6 @@ abstract final class DetTextStyles {
     fontSize: 11.0,
     fontWeight: FontWeight.w400,
     height: 1.4,
-    color: AltaColors.textSecondaryDark,
   );
 }
 

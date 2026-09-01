@@ -497,15 +497,19 @@ class _ThemeEntryCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        title,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w800,
-                          color: titleColor,
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w800,
+                            color: titleColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 7, vertical: 3),

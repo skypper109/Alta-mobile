@@ -31,11 +31,15 @@ class HomeScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 100), // Bottom padding prevents clipping under floating nav
           children: [
-            // ── 1. TOP HEADER : AlterniA Logo + Theme Switch + Profile ──────
+            // ── 1. TOP HEADER : AlterniA Logo + Salon Live + Theme Switch + Profile ──
             Row(
               children: [
                 const AlterniaLogo(size: 34, showText: true),
                 const Spacer(),
+
+                // Avatar Salon Live Action Button
+                const AlterniaAvatarTopBarButton(),
+                const SizedBox(width: 8),
 
                 // Theme Mode Switcher (Sun ☀️ / Moon 🌙)
                 GestureDetector(
@@ -58,14 +62,14 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
 
                 // User Profile Avatar
                 GestureDetector(
                   onTap: () => context.go('/profile'),
                   child: Container(
-                    width: 40,
-                    height: 40,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
                       gradient: AppColors.primaryGradient,
                       shape: BoxShape.circle,
@@ -75,7 +79,7 @@ class HomeScreen extends ConsumerWidget {
                       child: Text(
                         firstName.isNotEmpty ? firstName[0].toUpperCase() : 'A',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -110,16 +114,18 @@ class HomeScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.18),
+                    color: AppColors.primary.withValues(alpha: isDark ? 0.18 : 0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
+                    border: Border.all(
+                      color: isDark ? AppColors.primary.withValues(alpha: 0.4) : AppColors.primary.withValues(alpha: 0.25),
+                    ),
                   ),
                   child: Text(
                     userState.classShortLabel,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.secondary,
+                      color: isDark ? AppColors.secondary : AppColors.primary,
                     ),
                   ),
                 ),
@@ -434,6 +440,7 @@ class _TeenStatBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? AppColors.textPrimary : const Color(0xFF0F172A);
+    final labelColor = isDark ? AppColors.textMuted : const Color(0xFF475569);
 
     return CustomCard(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -442,7 +449,7 @@ class _TeenStatBadge extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
+              color: color.withValues(alpha: isDark ? 0.15 : 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 18, color: color),
@@ -456,7 +463,8 @@ class _TeenStatBadge extends StatelessWidget {
                   label,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 10,
-                    color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
+                    fontWeight: FontWeight.w600,
+                    color: labelColor,
                   ),
                 ),
                 Text(
@@ -504,7 +512,7 @@ class _TeenSuggestionCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
+              color: color.withValues(alpha: isDark ? 0.15 : 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 20, color: color),
@@ -525,7 +533,8 @@ class _TeenSuggestionCard extends StatelessWidget {
             subtitle,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
-              color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
+              fontWeight: FontWeight.w500,
+              color: isDark ? AppColors.textMuted : const Color(0xFF475569),
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

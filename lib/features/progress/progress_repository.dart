@@ -2,9 +2,7 @@
 // Persistance locale & synchronisation temps réel avec le backend AlternIA.
 library;
 
-import 'dart:io' show Platform;
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
@@ -30,18 +28,10 @@ class ProgressRepository {
   final _logger = Logger();
 
   List<String> get _candidateBaseUrls {
-    if (kIsWeb) return ['http://127.0.0.1:8000', 'http://localhost:8000'];
-    try {
-      if (Platform.isAndroid) {
-        return [
-          'http://10.0.2.2:8000',
-          'http://127.0.0.1:8000',
-          'http://192.168.4.1:8000',
-        ];
-      }
-    } catch (_) {}
     return [
+      AltaApiConfig.serverBaseUrl,
       'http://127.0.0.1:8000',
+      'http://10.0.2.2:8000',
       'http://localhost:8000',
       'http://192.168.4.1:8000',
     ];

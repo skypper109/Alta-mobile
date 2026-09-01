@@ -2,12 +2,11 @@
 // Import et analyse socratique d'exercices connecté au moteur RAG AlternIA.
 library;
 
-import 'dart:io' show Platform;
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/constants.dart';
 import '../../shared/widgets.dart';
@@ -90,18 +89,10 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
   }
 
   List<String> get _candidateBaseUrls {
-    if (kIsWeb) return ['http://127.0.0.1:8000', 'http://localhost:8000'];
-    try {
-      if (Platform.isAndroid) {
-        return [
-          'http://10.0.2.2:8000',
-          'http://127.0.0.1:8000',
-          'http://192.168.4.1:8000',
-        ];
-      }
-    } catch (_) {}
     return [
+      AltaApiConfig.serverBaseUrl,
       'http://127.0.0.1:8000',
+      'http://10.0.2.2:8000',
       'http://localhost:8000',
       'http://192.168.4.1:8000',
     ];
@@ -183,29 +174,34 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
           children: [
             // ── En-tête ─────────────────────────────────────────────────────
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                AlterniaLogo(size: 28, showText: true),
+                Spacer(),
+                AlterniaAvatarTopBarButton(),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'MES DOCUMENTS',
-                      style: DetTextStyles.caption.copyWith(
-                        color: AltaColors.accent,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Scanner Socratique',
-                      style: DetTextStyles.displayMd.copyWith(
-                        color: textPri,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'MES DOCUMENTS',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: AltaColors.accent,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                  ),
                 ),
-                const AlterniaLogo(size: 28, showText: true),
+                const SizedBox(height: 2),
+                Text(
+                  'Scanner Socratique',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: textPri,
+                  ),
+                ),
               ],
             ),
 
@@ -526,7 +522,8 @@ class _DocHistoryCard extends StatelessWidget {
               children: [
                 Text(
                   doc.name,
-                  style: DetTextStyles.bodyMd.copyWith(
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13.5,
                     color: textPri,
                     fontWeight: FontWeight.w600,
                   ),
@@ -534,7 +531,10 @@ class _DocHistoryCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   '${doc.subject} • ${doc.date}',
-                  style: DetTextStyles.caption.copyWith(color: textSec),
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    color: textSec,
+                  ),
                 ),
               ],
             ),
@@ -547,8 +547,9 @@ class _DocHistoryCard extends StatelessWidget {
             ),
             child: Text(
               '${doc.steps} étapes',
-              style: DetTextStyles.caption.copyWith(
-                color: AltaColors.secondary,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 10.5,
+                color: isDark ? AltaColors.secondary : const Color(0xFF0E7490),
                 fontWeight: FontWeight.w700,
               ),
             ),
