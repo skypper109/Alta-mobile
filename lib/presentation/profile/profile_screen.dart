@@ -161,19 +161,21 @@ class ProfileScreen extends ConsumerWidget {
           children: [
             // ── TOP HEADER ──────────────────────────────────────────────────
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Mon Profil',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: textPri,
-                    letterSpacing: -0.4,
-                  ),
-                ),
-                const AlterniaLogo(size: 28, showText: true),
+              children: const [
+                AlterniaLogo(size: 28, showText: true),
+                Spacer(),
+                AlterniaAvatarTopBarButton(),
               ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Mon Profil',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: textPri,
+                letterSpacing: -0.4,
+              ),
             ),
 
             const SizedBox(height: 20),
@@ -339,7 +341,7 @@ class _ProfileStatTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
-    final textMuted = isDark ? AppColors.textMuted : const Color(0xFF64748B);
+    final textMuted = isDark ? AppColors.textMuted : const Color(0xFF475569);
 
     return CustomCard(
       child: Column(

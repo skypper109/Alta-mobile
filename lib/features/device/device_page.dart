@@ -21,6 +21,9 @@ import 'device_repository.dart';
 
 void showDeviceModalSheet(BuildContext context) {
   HapticFeedback.mediumImpact();
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final borderCol = isDark ? DetColors.border : const Color(0xFFE2E8F0);
+
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -38,7 +41,7 @@ void showDeviceModalSheet(BuildContext context) {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: DetColors.border,
+                color: borderCol,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -109,12 +112,15 @@ class _DeviceDiscoveryPageState extends ConsumerState<DeviceDiscoveryPage>
   }
 
   PreferredSizeWidget _buildAppBar(DeviceState state) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderCol = isDark ? DetColors.border : const Color(0xFFE2E8F0);
+
     return PreferredSize(
       preferredSize: const Size.fromHeight(DetSizes.appBarHeight),
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: DetColors.border, width: DetSizes.borderWidth),
+            bottom: BorderSide(color: borderCol, width: DetSizes.borderWidth),
           ),
         ),
         child: AppBar(

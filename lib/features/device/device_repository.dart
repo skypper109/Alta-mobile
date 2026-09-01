@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:logger/logger.dart';
 
+import '../../core/constants.dart';
 import '../../core/failures.dart';
 import '../../core/ws_manager.dart';
 import 'device_entity.dart';
@@ -43,12 +44,12 @@ class DeviceRepository implements IDeviceRepository {
   final _logger = Logger();
 
   static final geminiVirtualDevice = DeviceEntity(
-    id: 'alternia-local-server',
-    name: 'Boîtier AlternIA (Local AI & RAG Mali)',
-    ipAddress: '127.0.0.1',
-    port: 8000,
-    signalStrength: -30,
-    firmwareVersion: 'v2.0-LocalEdge',
+    id: 'alternia-server',
+    name: 'Serveur AlternIA (IA & RAG Mali)',
+    ipAddress: AltaApiConfig.serverBaseUrl,
+    port: 443,
+    signalStrength: -20,
+    firmwareVersion: 'v2.0-Cloudflare',
     lastSeen: DateTime.now(),
   );
 
@@ -89,8 +90,9 @@ class DeviceRepository implements IDeviceRepository {
   Future<DeviceEntity?> _probeDevice(String ip) async {
     for (final port in [8000, 8080]) {
       try {
+        final url = ip.startsWith('http') ? '$ip/api/info' : 'http://$ip:$port/api/info';
         final response = await _dio.get(
-          'http://$ip:$port/api/info',
+          url,
           options: Options(
             receiveTimeout: const Duration(seconds: 2),
             sendTimeout:    const Duration(seconds: 2),
