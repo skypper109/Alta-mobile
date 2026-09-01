@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/culture_theme.dart';
-import '../views/culture_contes_view.dart';
 import '../views/culture_decouvrir_view.dart';
-import '../views/culture_defis_view.dart';
 import '../views/culture_home_view.dart';
+import '../views/culture_jeux_contes_view.dart';
+import '../views/culture_passport_view.dart';
 import '../widgets/culture_header_bar.dart';
 import '../widgets/culture_navigation_tabs.dart';
 
-/// Écran maître Culture (Étape 1)
-/// Intègre la barre supérieure, le filtre régional transversal et les 4 univers :
-/// Accueil, Découvrir, Contes, Défis
+/// Écran maître Culture
+/// Intègre la barre supérieure, le filtre régional transversal et les 4 univers principaux :
+/// Accueil, Découverte, Jeux & Contes, Passeport
 /// STRICTEMENT SANS DÉGRADÉS selon les règles d'architecture UX/UI
 class CultureMainScreen extends ConsumerStatefulWidget {
   const CultureMainScreen({super.key});
@@ -49,8 +49,8 @@ class _CultureMainScreenState extends ConsumerState<CultureMainScreen> {
                 children: [
                   CultureHomeView(onNavigateToTab: _onTabSelected),
                   const CultureDecouvrirView(),
-                  const CultureContesView(),
-                  const CultureDefisView(),
+                  const CultureJeuxContesView(),
+                  const CulturePassportView(),
                 ],
               ),
             ),

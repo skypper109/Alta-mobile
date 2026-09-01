@@ -5,18 +5,39 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_stage1_data.dart';
+import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
+import '../widgets/culture_region_bottom_sheet.dart';
 import '../widgets/region_filter_pill.dart';
 
-/// Vue 2 : Découvrir — Portail éditorial Culture
-/// Joue le rôle de bibliothèque d'entrée vers Personnages, Villes & Monuments.
-/// STRICTEMENT SANS DÉGRADÉS selon les règles d'architecture UX/UI
-class CultureDecouvrirView extends ConsumerWidget {
+/// Vue 2 : Découverte — Hub Central d'Exploration Culturelle du Mali
+/// Grandes Figures, Monuments Historiques, Patrimoine, Villes & Villages, Explorer le Mali
+/// Accès direct en 1 clic aux fiches détaillées avec photographies réelles.
+/// STRICTEMENT SANS DÉGRADÉS selon la charte UX/UI
+class CultureDecouvrirView extends ConsumerStatefulWidget {
   const CultureDecouvrirView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CultureDecouvrirView> createState() =>
+      _CultureDecouvrirViewState();
+}
+
+class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
+  int _selectedFilterIndex = 0; // 0: Tout, 1: Figures, 2: Monuments, 3: Villes, 4: Patrimoine, 5: Explorer
+
+  static const List<String> _categories = [
+    'Tout',
+    'Grandes Figures',
+    'Monuments Historiques',
+    'Villes & Villages',
+    'Patrimoine',
+    'Explorer le Mali',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     final filterState = ref.watch(activeCultureRegionProvider);
+    final activeRegion = filterState.activeRegion;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
@@ -25,15 +46,23 @@ class CultureDecouvrirView extends ConsumerWidget {
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
     final borderCol =
         isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
-    final surfaceAlt =
-        isDark ? CultureTheme.darkSurfaceAlt : CultureTheme.lightSurfaceAlt;
 
-    // Élément featured pour "À découvrir aujourd'hui"
+    // Filtre par région
+    final regionId = activeRegion?.id;
+    final figures = MockCultureStage1Data.personnages
+        .where((i) => i.matchesRegion(regionId))
+        .toList();
+    final monuments = MockCultureStage1Data.monuments
+        .where((i) => i.matchesRegion(regionId))
+        .toList();
+    final villes = MockCultureStage1Data.villes
+        .where((i) => i.matchesRegion(regionId))
+        .toList();
     final featured = MockCultureStage1Data.featuredItem;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -43,282 +72,332 @@ class CultureDecouvrirView extends ConsumerWidget {
               const RegionFilterPill(),
               const Spacer(),
               if (filterState.hasActiveFilter)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: CultureTheme.accentOrange.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Contenu filtré',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: CultureTheme.accentOrange,
+                GestureDetector(
+                  onTap: () => ref
+                      .read(activeCultureRegionProvider.notifier)
+                      .clearFilter(),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${figures.length + monuments.length + villes.length} éléments',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w700,
+                            color: CultureTheme.accentOrange,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.close_rounded,
+                            size: 12, color: CultureTheme.accentOrange),
+                      ],
                     ),
                   ),
                 ),
             ],
           ),
 
-          const SizedBox(height: 22),
-
-          // ── 2. SECTION : À DÉCOUVRIR AUJOURD'HUI ────────────────────────────
-          Text(
-            'À découvrir aujourd\'hui',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-              color: titleColor,
-              letterSpacing: -0.3,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Carte featured éditoriale
-          _FeaturedEditorialCard(
-            item: featured,
-            isDark: isDark,
-            cardBg: cardBg,
-            borderCol: borderCol,
-            titleColor: titleColor,
-            subtitleColor: subtitleColor,
-            onTap: () {
-              HapticFeedback.mediumImpact();
-              context.push('/culture/personnage/perso_soundiata');
-            },
-          ),
-
-          const SizedBox(height: 28),
-
-          // ── 3. SECTION : EXPLORER PAR THÈME ─────────────────────────────────
-          Row(
-            children: [
-              Text(
-                'Explorer par thème',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: titleColor,
-                  letterSpacing: -0.3,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                decoration: BoxDecoration(
-                  color: CultureTheme.primaryBlue.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  'MALI',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                    color: CultureTheme.primaryBlue,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-              ),
-            ],
-          ),
           const SizedBox(height: 14),
 
-          // Carte Personnages
-          _ThemeEntryCard(
-            icon: Icons.person_rounded,
-            iconBg: CultureTheme.primaryBlue.withValues(alpha: 0.1),
-            iconColor: CultureTheme.primaryBlue,
-            accentColor: CultureTheme.primaryBlue,
-            title: 'Grands Personnages',
-            description:
-                'Découvrez les héros et bâtisseurs qui ont façonné l\'histoire du Mali à travers les siècles.',
-            count: MockCultureStage1Data.personnages.length,
-            countLabel: 'personnages',
-            isDark: isDark,
-            cardBg: cardBg,
-            borderCol: borderCol,
-            surfaceAlt: surfaceAlt,
-            titleColor: titleColor,
-            subtitleColor: subtitleColor,
-            onTap: () {
-              HapticFeedback.mediumImpact();
-              context.push('/culture/personnages');
-            },
-          ),
-
-          const SizedBox(height: 12),
-
-          // Carte Villes & Villages
-          _ThemeEntryCard(
-            icon: Icons.location_city_rounded,
-            iconBg: CultureTheme.cyanTurquoise.withValues(alpha: 0.1),
-            iconColor: CultureTheme.cyanTurquoise,
-            accentColor: CultureTheme.cyanTurquoise,
-            title: 'Villes & Villages',
-            description:
-                'Partez à la rencontre des cités millénaires, des terroirs et des récits des lieux du Mali.',
-            count: MockCultureStage1Data.villes.length,
-            countLabel: 'lieux',
-            isDark: isDark,
-            cardBg: cardBg,
-            borderCol: borderCol,
-            surfaceAlt: surfaceAlt,
-            titleColor: titleColor,
-            subtitleColor: subtitleColor,
-            onTap: () {
-              HapticFeedback.mediumImpact();
-              context.push('/culture/villes');
-            },
-          ),
-
-          const SizedBox(height: 12),
-
-          // Carte Monuments
-          _ThemeEntryCard(
-            icon: Icons.museum_rounded,
-            iconBg: CultureTheme.accentOrange.withValues(alpha: 0.1),
-            iconColor: CultureTheme.accentOrange,
-            accentColor: CultureTheme.accentOrange,
-            title: 'Monuments Historiques',
-            description:
-                'Explorez les grandes œuvres architecturales et les sites classés du patrimoine malien.',
-            count: MockCultureStage1Data.monuments.length,
-            countLabel: 'monuments',
-            isDark: isDark,
-            cardBg: cardBg,
-            borderCol: borderCol,
-            surfaceAlt: surfaceAlt,
-            titleColor: titleColor,
-            subtitleColor: subtitleColor,
-            onTap: () {
-              HapticFeedback.mediumImpact();
-              context.push('/culture/monuments');
-            },
-          ),
-
-          const SizedBox(height: 24),
-
-          // ── 4. NOTE DE BAS DE PAGE ───────────────────────────────────────────
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: surfaceAlt,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: borderCol),
-            ),
+          // ── 2. BARRE HORIZONTALE DE CATÉGORIES ──────────────────────────────
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
             child: Row(
-              children: [
-                Icon(
-                  Icons.info_outline_rounded,
-                  size: 16,
-                  color: subtitleColor,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Utilisez le filtre 📍 pour explorer par région du Mali.',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      color: subtitleColor,
-                      height: 1.4,
+              children: List.generate(_categories.length, (index) {
+                final isSelected = _selectedFilterIndex == index;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() {
+                        _selectedFilterIndex = index;
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? CultureTheme.primaryBlue
+                            : (isDark
+                                ? CultureTheme.darkSurface
+                                : Colors.white),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isSelected
+                              ? CultureTheme.primaryBlue
+                              : borderCol,
+                        ),
+                      ),
+                      child: Text(
+                        _categories[index],
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w600,
+                          color: isSelected
+                              ? Colors.white
+                              : (isDark
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B)),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                );
+              }),
             ),
           ),
+
+          const SizedBox(height: 20),
+
+          // ── 3. HERO ÉDITORIAL (À DÉCOUVRIR AUJOURD'HUI) ─────────────────────
+          if (_selectedFilterIndex == 0) ...[
+            _buildFeaturedCard(
+              featured: featured,
+              context: context,
+              isDark: isDark,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              titleColor: titleColor,
+              subtitleColor: subtitleColor,
+            ),
+            const SizedBox(height: 26),
+          ],
+
+          // ── 4. OUTIL : EXPLORER LE MALI (CARTE / SÉLECTEUR) ─────────────────
+          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 5) ...[
+            _buildExploreMaliCard(
+              context: context,
+              activeRegionName: activeRegion?.nom,
+              isDark: isDark,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              titleColor: titleColor,
+              subtitleColor: subtitleColor,
+            ),
+            const SizedBox(height: 26),
+          ],
+
+          // ── 5. SECTION GRANDES FIGURES ──────────────────────────────────────
+          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 1) ...[
+            _buildSectionHeader(
+              title: 'GRANDES FIGURES DU MALI',
+              icon: Icons.person_rounded,
+              color: CultureTheme.primaryBlue,
+              borderCol: borderCol,
+              onSeeAll: () => context.push('/culture/personnages'),
+            ),
+            const SizedBox(height: 14),
+            _buildItemsGrid(
+              items: figures,
+              categoryRoute: 'personnage',
+              isDark: isDark,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              titleColor: titleColor,
+              subtitleColor: subtitleColor,
+            ),
+            const SizedBox(height: 28),
+          ],
+
+          // ── 6. SECTION MONUMENTS HISTORIQUES ────────────────────────────────
+          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 2) ...[
+            _buildSectionHeader(
+              title: 'MONUMENTS HISTORIQUES',
+              icon: Icons.museum_rounded,
+              color: CultureTheme.accentOrange,
+              borderCol: borderCol,
+              onSeeAll: () => context.push('/culture/monuments'),
+            ),
+            const SizedBox(height: 14),
+            _buildItemsGrid(
+              items: monuments,
+              categoryRoute: 'monument',
+              isDark: isDark,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              titleColor: titleColor,
+              subtitleColor: subtitleColor,
+            ),
+            const SizedBox(height: 28),
+          ],
+
+          // ── 7. SECTION VILLES & VILLAGES ────────────────────────────────────
+          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 3) ...[
+            _buildSectionHeader(
+              title: 'VILLES & TERROIRS DU MALI',
+              icon: Icons.location_city_rounded,
+              color: CultureTheme.cyanTurquoise,
+              borderCol: borderCol,
+              onSeeAll: () => context.push('/culture/villes'),
+            ),
+            const SizedBox(height: 14),
+            _buildItemsGrid(
+              items: villes,
+              categoryRoute: 'ville',
+              isDark: isDark,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              titleColor: titleColor,
+              subtitleColor: subtitleColor,
+            ),
+            const SizedBox(height: 28),
+          ],
+
+          // ── 8. SECTION PATRIMOINE IMMATÉRIEL ────────────────────────────────
+          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 4) ...[
+            _buildSectionHeader(
+              title: 'PATRIMOINE & TRADITIONS VIVANTES',
+              icon: Icons.history_edu_rounded,
+              color: CultureTheme.vertNaturel,
+              borderCol: borderCol,
+            ),
+            const SizedBox(height: 14),
+            _buildHeritageSection(
+              context: context,
+              isDark: isDark,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              titleColor: titleColor,
+              subtitleColor: subtitleColor,
+            ),
+            const SizedBox(height: 20),
+          ],
         ],
       ),
     );
   }
-}
 
-// ── Carte Featured Éditoriale ──────────────────────────────────────────────
-class _FeaturedEditorialCard extends StatelessWidget {
-  const _FeaturedEditorialCard({
-    required this.item,
-    required this.isDark,
-    required this.cardBg,
-    required this.borderCol,
-    required this.titleColor,
-    required this.subtitleColor,
-    required this.onTap,
-  });
+  // ── EN-TÊTE DE SECTION AVEC BOUTON VOIR TOUT ────────────────────────────────
+  Widget _buildSectionHeader({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required Color borderCol,
+    VoidCallback? onSeeAll,
+  }) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 13, color: color),
+              const SizedBox(width: 5),
+              Text(
+                title,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(child: Container(height: 1, color: borderCol)),
+        if (onSeeAll != null) ...[
+          const SizedBox(width: 8),
+          InkWell(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              onSeeAll();
+            },
+            child: Text(
+              'Voir tout',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
 
-  final dynamic item;
-  final bool isDark;
-  final Color cardBg;
-  final Color borderCol;
-  final Color titleColor;
-  final Color subtitleColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
+  // ── CARTE FEATURED ÉDITORIALE ──────────────────────────────────────────────
+  Widget _buildFeaturedCard({
+    required CultureItem featured,
+    required BuildContext context,
+    required bool isDark,
+    required Color cardBg,
+    required Color borderCol,
+    required Color titleColor,
+    required Color subtitleColor,
+  }) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        context.push('/culture/personnage/perso_soundiata');
+      },
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: cardBg,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color:
-                CultureTheme.primaryBlue.withValues(alpha: isDark ? 0.3 : 0.15),
+            color: CultureTheme.primaryBlue
+                .withValues(alpha: isDark ? 0.35 : 0.2),
+            width: 1.2,
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
-              blurRadius: 12,
+              blurRadius: 14,
               offset: const Offset(0, 3),
             ),
           ],
         ),
         child: Row(
           children: [
-            // Vignette photographique authentique
             Container(
-              width: 64,
-              height: 64,
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: CultureTheme.primaryBlue.withValues(alpha: 0.3),
                   width: 1.5,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: CultureTheme.primaryBlue.withValues(alpha: 0.15),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(14),
-                child: item.imageUrl != null && (item.imageUrl as String).isNotEmpty
+                child: featured.imageUrl != null &&
+                        featured.imageUrl!.isNotEmpty
                     ? Image.asset(
-                        item.imageUrl as String,
+                        featured.imageUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: CultureTheme.primaryBlue.withValues(alpha: 0.1),
-                          child: const Icon(
-                            Icons.shield_rounded,
-                            size: 28,
-                            color: CultureTheme.primaryBlue,
-                          ),
+                        errorBuilder: (_, __, ___) => Container(
+                          color: CultureTheme.primaryBlue
+                              .withValues(alpha: 0.1),
+                          child: const Icon(Icons.shield_rounded,
+                              size: 28, color: CultureTheme.primaryBlue),
                         ),
                       )
                     : Container(
                         color: CultureTheme.primaryBlue.withValues(alpha: 0.1),
-                        child: const Icon(
-                          Icons.shield_rounded,
-                          size: 28,
-                          color: CultureTheme.primaryBlue,
-                        ),
+                        child: const Icon(Icons.shield_rounded,
+                            size: 28, color: CultureTheme.primaryBlue),
                       ),
               ),
             ),
@@ -338,7 +417,7 @@ class _FeaturedEditorialCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          item.tag.toUpperCase(),
+                          featured.tag.toUpperCase(),
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
@@ -348,41 +427,30 @@ class _FeaturedEditorialCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.location_on_rounded,
-                            size: 10,
-                            color: CultureTheme.accentOrange,
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            item.regionName,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: subtitleColor,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        featured.regionName,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                          color: subtitleColor,
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 5),
                   Text(
-                    item.title,
+                    featured.title,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
+                      fontSize: 14.5,
                       fontWeight: FontWeight.w800,
                       color: titleColor,
-                      height: 1.2,
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 2),
                   Text(
-                    item.subtitle,
+                    featured.subtitle,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w600,
@@ -391,163 +459,385 @@ class _FeaturedEditorialCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.arrow_forward_rounded,
-                        size: 13,
-                        color: CultureTheme.accentOrange,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Découvrir le personnage',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: CultureTheme.accentOrange,
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: CultureTheme.accentOrange,
             ),
           ],
         ),
       ),
     );
   }
-}
 
-// ── Carte Thématique d'entrée ─────────────────────────────────────────────
-class _ThemeEntryCard extends StatelessWidget {
-  const _ThemeEntryCard({
-    required this.icon,
-    required this.iconBg,
-    required this.iconColor,
-    required this.accentColor,
-    required this.title,
-    required this.description,
-    required this.count,
-    required this.countLabel,
-    required this.isDark,
-    required this.cardBg,
-    required this.borderCol,
-    required this.surfaceAlt,
-    required this.titleColor,
-    required this.subtitleColor,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final Color iconBg;
-  final Color iconColor;
-  final Color accentColor;
-  final String title;
-  final String description;
-  final int count;
-  final String countLabel;
-  final bool isDark;
-  final Color cardBg;
-  final Color borderCol;
-  final Color surfaceAlt;
-  final Color titleColor;
-  final Color subtitleColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: borderCol),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+  // ── CARTE OUTIL : EXPLORER LE MALI (NON BLOQUANT) ──────────────────────────
+  Widget _buildExploreMaliCard({
+    required BuildContext context,
+    required String? activeRegionName,
+    required bool isDark,
+    required Color cardBg,
+    required Color borderCol,
+    required Color titleColor,
+    required Color subtitleColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF131D31) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: CultureTheme.primaryBlue.withValues(alpha: 0.35),
+          width: 1.2,
         ),
-        child: Row(
-          children: [
-            // Icône thématique large
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: iconBg,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: iconColor.withValues(alpha: 0.2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: CultureTheme.primaryBlue.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.map_rounded,
+                  color: CultureTheme.primaryBlue,
+                  size: 24,
                 ),
               ),
-              child: Icon(icon, size: 26, color: iconColor),
-            ),
-            const SizedBox(width: 14),
-            // Texte
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        title,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w800,
-                          color: titleColor,
-                        ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'EXPLORER LE MALI PAR RÉGION',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: CultureTheme.primaryBlue,
+                        letterSpacing: 0.8,
                       ),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: accentColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      activeRegionName != null
+                          ? 'Région active : $activeRegionName'
+                          : 'Explorez les 10 terroirs et cités millénaires',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: titleColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    CultureRegionBottomSheet.show(context);
+                  },
+                  icon: const Icon(Icons.tune_rounded, size: 16),
+                  label: Text(
+                    'Changer de région',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: CultureTheme.primaryBlue,
+                    side: BorderSide(
+                      color: CultureTheme.primaryBlue.withValues(alpha: 0.4),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── GRILLE D'ITEMS CULTURELS (PERSONNAGES, MONUMENTS, VILLES) ──────────────
+  Widget _buildItemsGrid({
+    required List<CultureItem> items,
+    required String categoryRoute,
+    required bool isDark,
+    required Color cardBg,
+    required Color borderCol,
+    required Color titleColor,
+    required Color subtitleColor,
+  }) {
+    if (items.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        alignment: Alignment.center,
+        child: Text(
+          'Aucun élément trouvé pour cette région.',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 12,
+            color: subtitleColor,
+          ),
+        ),
+      );
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 0.78,
+      ),
+      itemCount: items.take(4).length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return GestureDetector(
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            context.push('/culture/$categoryRoute/${item.id}');
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: borderCol),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Photographie réelle
+                Expanded(
+                  flex: 5,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (item.imageUrl != null && item.imageUrl!.isNotEmpty)
+                        Image.asset(
+                          item.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: CultureTheme.primaryBlue
+                                .withValues(alpha: 0.1),
+                            child: Icon(item.icon,
+                                color: CultureTheme.primaryBlue, size: 30),
+                          ),
+                        )
+                      else
+                        Container(
+                          color: CultureTheme.primaryBlue.withValues(alpha: 0.1),
+                          child: Icon(item.icon,
+                              color: CultureTheme.primaryBlue, size: 30),
                         ),
-                        child: Text(
-                          '$count $countLabel',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: accentColor,
+
+                      // Badge région en haut à droite
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2.5),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            item.regionName,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      color: subtitleColor,
-                      height: 1.35,
+                ),
+
+                // Textes
+                Expanded(
+                  flex: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.title,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: titleColor,
+                                height: 1.2,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              item.subtitle,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w600,
+                                color: CultureTheme.accentOrange,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              item.info,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w500,
+                                color: subtitleColor,
+                              ),
+                            ),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 13,
+                              color: CultureTheme.primaryBlue,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ── SECTION PATRIMOINE IMMATÉRIEL ───────────────────────────────────────────
+  Widget _buildHeritageSection({
+    required BuildContext context,
+    required bool isDark,
+    required Color cardBg,
+    required Color borderCol,
+    required Color titleColor,
+    required Color subtitleColor,
+  }) {
+    final heritageItems = [
+      {
+        'title': 'La Charte du Manden (1236)',
+        'subtitle': 'L\'une des plus anciennes déclarations des droits de l\'Homme.',
+        'region': 'Koulikoro',
+        'icon': Icons.gavel_rounded,
+      },
+      {
+        'title': 'Le Crépissage de Djenné',
+        'subtitle': 'Tradition vivante et solidaire de restauration architecturale.',
+        'region': 'Mopti',
+        'icon': Icons.handyman_rounded,
+      },
+      {
+        'title': 'Les Manuscrits Anciens',
+        'subtitle': 'Trésors scientifiques, astronomiques et littéraires de Tombouctou.',
+        'region': 'Tombouctou',
+        'icon': Icons.menu_book_rounded,
+      },
+    ];
+
+    return Column(
+      children: heritageItems.map((item) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderCol),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: CultureTheme.vertNaturel.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Icon(
+                    item['icon'] as IconData,
+                    color: CultureTheme.vertNaturel,
+                    size: 22,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            // Chevron
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 22,
-              color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1),
-            ),
-          ],
-        ),
-      ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          item['title'] as String,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: titleColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      item['subtitle'] as String,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        color: subtitleColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }

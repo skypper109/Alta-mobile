@@ -90,21 +90,10 @@ class _AuthenticPhotoHeroState extends State<AuthenticPhotoHero> {
                   },
                 ),
 
-          // ── 2. VOILE NOIR ÉLÉGANT HAUT & BAS POUR LISIBILITÉ ──────────────
+          // ── 2. VOILE NOIR ÉLÉGANT POUR LISIBILITÉ (SANS DÉGRADÉ) ──────────────
           Positioned.fill(
             child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0x99000000), // Sombre en haut pour les boutons
-                    Colors.transparent,
-                    Color(0xB3000000), // Sombre en bas pour les badges
-                  ],
-                  stops: [0.0, 0.45, 1.0],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
+              color: Colors.black.withValues(alpha: 0.42),
             ),
           ),
 

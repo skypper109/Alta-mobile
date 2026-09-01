@@ -120,22 +120,9 @@ class CultureHomeView extends ConsumerWidget {
                       else
                         Container(color: CultureTheme.primaryDark),
 
-                      // Dégradé assombrissant
-                      Positioned.fill(
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Color(0x99000000),
-                                Colors.transparent,
-                                Color(0xB3000000),
-                              ],
-                              stops: [0.0, 0.45, 1.0],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                            ),
-                          ),
-                        ),
+                      // Overlay sombre uni pour contraste texte (strictement sans dégradé)
+                      Container(
+                        color: Colors.black.withValues(alpha: 0.45),
                       ),
 
                       Padding(
@@ -329,13 +316,13 @@ class CultureHomeView extends ConsumerWidget {
 
           const SizedBox(height: 12),
 
-          // Cartes d'accès rapide
+          // Cartes d'accès rapide vers les 3 autres onglets principaux
           Row(
             children: [
               _buildQuickNavCard(
                 context: context,
-                title: 'Découvrir',
-                subtitle: 'Figures, Villes, Monuments',
+                title: 'Découverte',
+                subtitle: 'Figures, Villes, Lieux',
                 icon: Icons.explore_rounded,
                 accentColor: CultureTheme.primaryBlue,
                 isDark: isDark,
@@ -344,9 +331,9 @@ class CultureHomeView extends ConsumerWidget {
               const SizedBox(width: 10),
               _buildQuickNavCard(
                 context: context,
-                title: 'Contes',
-                subtitle: 'Récits interactifs',
-                icon: Icons.record_voice_over_rounded,
+                title: 'Jeux & Contes',
+                subtitle: 'Récits & Quiz',
+                icon: Icons.auto_stories_rounded,
                 accentColor: CultureTheme.rougeKoulikoro,
                 isDark: isDark,
                 onTap: () => onNavigateToTab(2),
@@ -354,9 +341,9 @@ class CultureHomeView extends ConsumerWidget {
               const SizedBox(width: 10),
               _buildQuickNavCard(
                 context: context,
-                title: 'Défis',
-                subtitle: 'Devinettes N\'Da',
-                icon: Icons.quiz_rounded,
+                title: 'Passeport',
+                subtitle: 'Mon Parcours',
+                icon: Icons.badge_rounded,
                 accentColor: CultureTheme.cyanTurquoise,
                 isDark: isDark,
                 onTap: () => onNavigateToTab(3),
@@ -779,7 +766,7 @@ class CultureHomeView extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
-        context.push('/culture/passport');
+        onNavigateToTab(3);
       },
       child: Container(
         padding: const EdgeInsets.all(16),
