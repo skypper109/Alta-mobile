@@ -640,16 +640,6 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w800,
-                            color: titleColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                       if (item.imageUrl != null && item.imageUrl!.isNotEmpty)
                         Image.asset(
                           item.imageUrl!,
@@ -667,21 +657,6 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                           child: Icon(item.icon,
                               color: CultureTheme.primaryBlue, size: 30),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: accentColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '$count $countLabel',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: accentColor,
 
                       // Badge région en haut à droite
                       Positioned(

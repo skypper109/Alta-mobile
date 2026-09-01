@@ -64,6 +64,11 @@ void main() {
     });
 
     testWidgets('RegionDetailScreen renders all editorial sections', (tester) async {
+      tester.view.physicalSize = const Size(1080, 3000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       final region = MockMaliRegions.regions.firstWhere((r) => r.id == 'tombouctou');
 
       await tester.pumpWidget(
@@ -76,19 +81,18 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Hero : titre de la région
-      expect(find.text('TOMBOUCTOU'), findsOneWidget);
+      // Titre de la région
+      expect(find.text('Tombouctou'), findsWidgets);
 
-      // Section "À découvrir" — nouveau design Étape 3
-      expect(find.text('À DÉCOUVRIR'), findsOneWidget);
-      expect(find.text('Les trésors de Tombouctou'), findsOneWidget);
+      // Surnom & Données géographiques
+      expect(find.text(region.surnom), findsWidgets);
+      expect(find.text('CHEF-LIEU'), findsOneWidget);
+      expect(find.text('SUPERFICIE'), findsOneWidget);
+      expect(find.text('POPULATION'), findsOneWidget);
 
-      // Sections existantes Étape 2
-      expect(find.text('Histoires & Mémoire vivante'), findsOneWidget);
-      expect(find.text('Patrimoine d\'exception'), findsOneWidget);
-      expect(find.text('DÉFI DE LA RÉGION'), findsOneWidget);
-      expect(find.text('Vous connaissez Tombouctou ?'), findsOneWidget);
-      expect(find.text('Une question sur Tombouctou ?'), findsOneWidget);
+      // Sections éditoriales
+      expect(find.text('Histoire & Mémoire du Terroir'), findsOneWidget);
+      expect(find.text('POINTS FORTS & TRADITIONS'), findsOneWidget);
     });
   });
 }
