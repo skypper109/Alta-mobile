@@ -535,60 +535,57 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
 
           const SizedBox(height: 14),
 
-          // Ligne inférieure : Stats de contenu + Bouton Explorer
+          // Ligne 1 : 4 Statistiques de contenu réparties sur la largeur
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // 4 Statistiques précises
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildStatItem('📖', '128', 'Contes', const Color(0xFFDF6E21), isDark),
-                    _buildStatItem('🏛️', '48', 'Monuments', const Color(0xFF2E7D32), isDark),
-                    _buildStatItem('👥', '32', 'Héros', const Color(0xFF1976D2), isDark),
-                    _buildStatItem('🎮', '15', 'Défis', const Color(0xFFE65100), isDark),
-                  ],
+              _buildStatItem('📖', '128', 'Contes', const Color(0xFFDF6E21), isDark),
+              _buildStatItem('🏛️', '48', 'Monuments', const Color(0xFF2E7D32), isDark),
+              _buildStatItem('👥', '32', 'Héros', const Color(0xFF1976D2), isDark),
+              _buildStatItem('🎮', '15', 'Défis', const Color(0xFFE65100), isDark),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // Ligne 2 : Bouton Explorer la région pleine largeur
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _navigateToRegionDetail(region),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF283B7E),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 11,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
                 ),
               ),
-
-              const SizedBox(width: 14),
-
-              // Bouton Explorer la région
-              ElevatedButton(
-                onPressed: () => _navigateToRegionDetail(region),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF283B7E),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 11,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Explorer la région',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.chevron_right_rounded,
-                      size: 16,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Explorer la région',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
                       color: Colors.white,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -650,33 +647,41 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF283B7E).withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF283B7E).withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.touch_app_rounded,
+                    size: 16,
+                    color: Color(0xFF283B7E),
+                  ),
                 ),
-                child: const Icon(
-                  Icons.touch_app_rounded,
-                  size: 16,
-                  color: Color(0xFF283B7E),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Touchez une région pour découvrir ses trésors culturels',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : const Color(0xFF1E284A),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Touchez une région pour découvrir ses trésors culturels',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: isDark ? Colors.white : const Color(0xFF1E284A),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
+          const SizedBox(width: 8),
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(
                 Icons.people_outline_rounded,
