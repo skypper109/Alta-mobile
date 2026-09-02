@@ -6,11 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_challenges_data.dart';
 import '../../core/datasources/mock_culture_stories_data.dart';
-import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_challenge_models.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
-import '../widgets/region_filter_pill.dart';
 import '../widgets/story_audio_player_sheet.dart';
 
 /// Vue 3 : Jeux & Contes du Mali
@@ -68,47 +66,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── 1. BARRE DE FILTRE RÉGIONAL & STATUT DU JEU ────────────────────
-          Row(
-            children: [
-              const RegionFilterPill(),
-              const Spacer(),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: CultureTheme.cyanTurquoise.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: CultureTheme.cyanTurquoise.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.bolt_rounded,
-                      size: 14,
-                      color: CultureTheme.accentOrange,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '350 XP',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w800,
-                        color: CultureTheme.cyanTurquoise,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 14),
-
-          // ── 2. SÉLECTEUR DE SOUS-UNIVERS ────────────────────────────────────
+          // ── 1. SÉLECTEUR DE SOUS-UNIVERS PLEINE LARGEUR RESPONSIVE ───────────
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -130,14 +88,14 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                           horizontal: 14, vertical: 7),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? CultureTheme.accentOrange
+                            ? CultureTheme.rougeKoulikoro
                             : (isDark
                                 ? CultureTheme.darkSurface
                                 : Colors.white),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isSelected
-                              ? CultureTheme.accentOrange
+                              ? CultureTheme.rougeKoulikoro
                               : borderCol,
                         ),
                       ),
@@ -149,9 +107,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                               isSelected ? FontWeight.w700 : FontWeight.w600,
                           color: isSelected
                               ? Colors.white
-                              : (isDark
-                                  ? const Color(0xFF94A3B8)
-                                  : const Color(0xFF64748B)),
+                              : subtitleColor,
                         ),
                       ),
                     ),
@@ -163,7 +119,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
 
           const SizedBox(height: 20),
 
-          // ── 3. HERO VEDETTE INTERACTIF ─────────────────────────────────────
+          // ── 2. HERO VEDETTE INTERACTIF ─────────────────────────────────────
           if (_selectedFilterIndex == 0 || _selectedFilterIndex == 1) ...[
             _buildHeroStoryCard(
               story: featuredStory,
@@ -188,20 +144,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
             const SizedBox(height: 24),
           ],
 
-          // ── 4. BANNIÈRE COMPAGNON CULTUREL IA (GRIOT NUMÉRIQUE) ───────────
-          _buildAiCompanionBanner(
-            context: context,
-            activeRegionName: activeRegion?.nom,
-            isDark: isDark,
-            cardBg: cardBg,
-            borderCol: borderCol,
-            titleColor: titleColor,
-            subtitleColor: subtitleColor,
-          ),
-
-          const SizedBox(height: 28),
-
-          // ── 5. SECTION CONTES & RÉCITS DU MALI ──────────────────────────────
+          // ── 3. SECTION CONTES & RÉCITS DU MALI ──────────────────────────────
           if (_selectedFilterIndex == 0 || _selectedFilterIndex == 1) ...[
             _buildSectionHeader(
               title: 'CONTES & RÉCITS TRADITIONNELS',
@@ -679,101 +622,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     );
   }
 
-  // ── 3. BANNIÈRE COMPAGNON CULTUREL IA ───────────────────────────────────────
-  Widget _buildAiCompanionBanner({
-    required BuildContext context,
-    required String? activeRegionName,
-    required bool isDark,
-    required Color cardBg,
-    required Color borderCol,
-    required Color titleColor,
-    required Color subtitleColor,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        const guideContext = CulturalGuideContext(
-          contentType: CulturalContentType.conte,
-          contentTitle: 'Jeux & Contes du Mali',
-          subtitle: 'Maître du récit et des sagesses ancestrales',
-        );
-        context.push('/culture/guide', extra: guideContext);
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFFFF7ED),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: CultureTheme.accentOrange.withValues(alpha: 0.4),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: CultureTheme.accentOrange
-                  .withValues(alpha: isDark ? 0.15 : 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: CultureTheme.accentOrange.withValues(alpha: 0.18),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.auto_awesome_rounded,
-                color: CultureTheme.accentOrange,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'GUIDE CULTUREL IA • GRIOT NUMÉRIQUE',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w800,
-                          color: CultureTheme.accentOrange,
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Demandez une devinette, l\'explication d\'un proverbe ou un conte sur mesure.',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: titleColor,
-                      height: 1.3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 14,
-              color: CultureTheme.accentOrange,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── 4. ÉLÉMENT LISTE CONTE ──────────────────────────────────────────────────
+  // ── 3. ÉLÉMENT LISTE CONTE ──────────────────────────────────────────────────
   Widget _buildStoryRowItem({
     required InteractiveStory story,
     required BuildContext context,

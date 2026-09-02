@@ -4,15 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/controllers/culture_filter_controller.dart';
-import '../../../core/datasources/mock_culture_challenges_data.dart';
-import '../../../core/datasources/mock_culture_stage1_data.dart';
-import '../../../core/datasources/mock_culture_stories_data.dart';
 import '../../../core/theme/culture_theme.dart';
 import '../../data/datasources/mock_mali_regions.dart';
 import '../../data/models/mali_region.dart';
 import '../widgets/mali_interactive_map.dart';
 
-/// Écran principal d'exploration culturelle interactive par la carte du Mali
+/// Écran d'exploration culturelle interactive par la carte premium du Mali
+/// 100% conforme à la référence visuelle
 class ExploreMaliScreen extends ConsumerStatefulWidget {
   final String? initialRegionId;
 
@@ -29,7 +27,8 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
   void initState() {
     super.initState();
     _selectedRegionId = widget.initialRegionId ??
-        ref.read(activeCultureRegionProvider).activeRegion?.id;
+        ref.read(activeCultureRegionProvider).activeRegion?.id ??
+        'tombouctou'; // Tombouctou sélectionnée par défaut comme sur l'image
   }
 
   void _onRegionSelected(String? regionId) {
@@ -39,34 +38,12 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
     });
   }
 
-  void _applyGlobalFilter(MaliRegion region) {
+  void _navigateToRegionDetail(MaliRegion region) {
     HapticFeedback.mediumImpact();
+    // Applique le filtre global
     ref.read(activeCultureRegionProvider.notifier).selectRegion(region);
-
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Filtre actif : ${region.nom} (appliqué à tout l\'univers Culture)',
-                style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12.5,
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: CultureTheme.primaryBlue,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+    // Navigue vers la fiche détaillée de la région
+    context.push('/culture/region/${region.id}');
   }
 
   String _resolveRegionImage(String regionId) {
@@ -82,16 +59,60 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
       case 'mopti':
         return 'assets/images/culture/villes/djenne_ville.jpg';
       case 'tombouctou':
-        return 'assets/images/culture/villes/tombouctou_ville.jpg';
+        return 'assets/images/culture/monuments/mosquee_sankore.jpg';
       case 'gao':
         return 'assets/images/culture/monuments/tombeau_askia.jpg';
       case 'kidal':
-      case 'taoudenit':
-      case 'menaka':
-        return 'assets/images/culture/villes/tombouctou_ville.jpg';
-      case 'bamako':
+        return 'assets/images/culture/villes/gao_dune_rose.jpg';
       default:
-        return 'assets/images/culture/monuments/fort_medine.jpg';
+        return 'assets/images/culture/villes/tombouctou_ville.jpg';
+    }
+  }
+
+  // Icône personnalisée de chaque chip calquée sur la référence
+  IconData _getRegionChipIcon(String regionId) {
+    switch (regionId) {
+      case 'kayes':
+        return Icons.holiday_village_rounded;
+      case 'koulikoro':
+        return Icons.landscape_rounded;
+      case 'sikasso':
+        return Icons.eco_rounded;
+      case 'segou':
+        return Icons.palette_rounded;
+      case 'mopti':
+        return Icons.water_drop_rounded;
+      case 'tombouctou':
+        return Icons.menu_book_rounded;
+      case 'gao':
+        return Icons.auto_awesome_rounded;
+      case 'kidal':
+        return Icons.park_rounded;
+      default:
+        return Icons.explore_rounded;
+    }
+  }
+
+  Color _getRegionChipColor(String regionId) {
+    switch (regionId) {
+      case 'kayes':
+        return const Color(0xFFDF6E35);
+      case 'koulikoro':
+        return const Color(0xFFD9822B);
+      case 'sikasso':
+        return const Color(0xFFE0682B);
+      case 'segou':
+        return const Color(0xFFD97232);
+      case 'mopti':
+        return const Color(0xFF389BB7);
+      case 'tombouctou':
+        return const Color(0xFFD99B26);
+      case 'gao':
+        return const Color(0xFFC27835);
+      case 'kidal':
+        return const Color(0xFF8E9B68);
+      default:
+        return CultureTheme.accentOrange;
     }
   }
 
@@ -99,44 +120,39 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final topPadding = MediaQuery.paddingOf(context).top;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
-    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final titleColor = isDark ? Colors.white : const Color(0xFF1E284A);
+    final subtitleColor =
+        isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
-    final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
-    final bgColor = isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground;
+    final borderCol =
+        isDark ? CultureTheme.darkBorder : const Color(0xFFE8ECF2);
+    final bgColor =
+        isDark ? CultureTheme.darkBackground : const Color(0xFFF9F6F0);
 
-    final allRegions = MockMaliRegions.regions;
+    // Les 8 grandes régions culturelles
+    final allRegions = MockMaliRegions.regions.take(8).toList();
+
     final selectedRegion = _selectedRegionId != null
-        ? allRegions.firstWhere(
-            (r) => r.id == _selectedRegionId,
-            orElse: () => allRegions.first,
-          )
+        ? allRegions.where((r) => r.id == _selectedRegionId).firstOrNull ??
+            MockMaliRegions.regions.first
         : null;
-
-    final activeGlobalRegion = ref.watch(activeCultureRegionProvider).activeRegion;
 
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
         top: false,
+        bottom: false,
         child: Column(
           children: [
-            // ── 1. EN-TÊTE FIXE DU VOYAGE CULTUREL ───────────────────────────
+            // ── 1. EN-TÊTE ÉLÉGANT DU VOYAGE CULTUREL ────────────────────────
             Container(
               padding: EdgeInsets.fromLTRB(16, topPadding + 10, 16, 12),
-              decoration: BoxDecoration(
-                color: cardBg,
-                border: Border(bottom: BorderSide(color: borderCol)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                    blurRadius: 6,
-                  ),
-                ],
-              ),
+              color: cardBg,
               child: Row(
                 children: [
+                  // Bouton Retour arrondi
                   GestureDetector(
                     onTap: () {
                       HapticFeedback.lightImpact();
@@ -147,16 +163,30 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                       }
                     },
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: 44,
+                      height: 44,
                       decoration: BoxDecoration(
-                        color: isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(12),
+                        color: isDark ? CultureTheme.darkSurfaceAlt : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: borderCol, width: 1.2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      child: Icon(Icons.arrow_back_rounded, size: 20, color: titleColor),
+                      child: Icon(
+                        Icons.chevron_left_rounded,
+                        size: 28,
+                        color: titleColor,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 14),
+
+                  // Titres
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,127 +194,122 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                         Text(
                           'EXPLORER LE MALI',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: CultureTheme.primaryBlue,
-                            letterSpacing: 0.7,
+                            color: const Color(0xFFDF6E21),
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          'Carte Culturelle du Mali',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: titleColor,
+                            letterSpacing: -0.4,
                           ),
                         ),
                         Text(
-                          'Carte Culturelle & Terroirs',
+                          'Explorez les régions et découvrez la richesse culturelle du Mali',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            color: titleColor,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w500,
+                            color: subtitleColor,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
-                  if (_selectedRegionId != null)
-                    GestureDetector(
-                      onTap: () => _onRegionSelected(null),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: CultureTheme.primaryBlue.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
+
+                  // Bouton Carte Icon
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: isDark ? CultureTheme.darkSurfaceAlt : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: borderCol, width: 1.2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.public_rounded, size: 14, color: CultureTheme.primaryBlue),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Tout le Mali',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: CultureTheme.primaryBlue,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      ],
                     ),
+                    child: const Icon(
+                      Icons.map_outlined,
+                      size: 22,
+                      color: Color(0xFF283B7E),
+                    ),
+                  ),
                 ],
               ),
             ),
 
-            // ── 2. SÉLECTEUR RAPIDE DE RÉGIONS (DÉFILEMENT HORIZONTAL) ───────
+            // ── 2. SÉLECTEUR HORIZONTAL DES RÉGIONS (CHIPS GÉLULES) ───────────
             Container(
-              height: 48,
-              padding: const EdgeInsets.symmetric(vertical: 6),
+              height: 56,
+              padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
-                color: isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
+                color: cardBg,
                 border: Border(bottom: BorderSide(color: borderCol)),
               ),
-              child: ListView.separated(
+              child: ListView(
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: allRegions.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (ctx, index) {
-                  final reg = allRegions[index];
-                  final isSelected = reg.id == _selectedRegionId;
+                children: [
+                  // Option Toutes les régions
+                  _buildRegionChip(
+                    id: null,
+                    label: 'Toutes les régions',
+                    icon: Icons.temple_buddhist_rounded,
+                    isSelected: _selectedRegionId == null,
+                    iconColor: const Color(0xFFF08235),
+                    isDark: isDark,
+                    borderCol: borderCol,
+                    titleColor: titleColor,
+                  ),
+                  const SizedBox(width: 8),
 
-                  return GestureDetector(
-                    onTap: () => _onRegionSelected(reg.id),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? CultureTheme.primaryBlue
-                            : (isDark ? CultureTheme.darkSurface : Colors.white),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isSelected ? CultureTheme.primaryBlue : borderCol,
-                        ),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: CultureTheme.primaryBlue.withValues(alpha: 0.3),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
+                  // Chips individuels des 8 régions
+                  ...allRegions.map((reg) {
+                    final isSelected = reg.id == _selectedRegionId;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _buildRegionChip(
+                        id: reg.id,
+                        label: reg.nom,
+                        icon: _getRegionChipIcon(reg.id),
+                        isSelected: isSelected,
+                        iconColor: _getRegionChipColor(reg.id),
+                        isDark: isDark,
+                        borderCol: borderCol,
+                        titleColor: titleColor,
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            reg.icone,
-                            size: 13,
-                            color: isSelected ? Colors.white : CultureTheme.accentOrange,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            reg.nom,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11.5,
-                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                              color: isSelected ? Colors.white : titleColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                    );
+                  }),
+                ],
               ),
             ),
 
-            // ── 3. CARTE INTERACTIVE & PANNEAU CONTEXTUEL ───────────────────
+            // ── 3. CARTE INTERACTIVE ET PANNEAU DE SÉLECTION ─────────────────
             Expanded(
               child: Stack(
                 children: [
-                  // Carte vectorielle
+                  // Carte vectorielle interactive
                   Positioned.fill(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 260),
+                      padding: EdgeInsets.fromLTRB(
+                        14,
+                        10,
+                        14,
+                        selectedRegion != null ? 225 : 80,
+                      ),
                       child: MaliInteractiveMap(
                         regions: allRegions,
                         selectedRegionId: _selectedRegionId,
@@ -293,31 +318,18 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                     ),
                   ),
 
-                  // Panneau Culturel contextuel déployé en bas
+                  // Panneau Flottant de Région Sélectionnée
                   Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
+                    left: 14,
+                    right: 14,
+                    bottom: bottomPadding + 52,
                     child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 280),
+                      duration: const Duration(milliseconds: 260),
                       switchInCurve: Curves.easeOutCubic,
                       switchOutCurve: Curves.easeInCubic,
-                      transitionBuilder: (child, animation) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0, 0.2),
-                            end: Offset.zero,
-                          ).animate(animation),
-                          child: FadeTransition(
-                            opacity: animation,
-                            child: child,
-                          ),
-                        );
-                      },
                       child: selectedRegion != null
-                          ? _buildRegionalContextPanel(
+                          ? _buildSelectedRegionCard(
                               region: selectedRegion,
-                              isActiveGlobal: activeGlobalRegion?.id == selectedRegion.id,
                               context: context,
                               isDark: isDark,
                               cardBg: cardBg,
@@ -325,15 +337,16 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                               titleColor: titleColor,
                               subtitleColor: subtitleColor,
                             )
-                          : _buildOverviewPanel(
-                              context: context,
-                              isDark: isDark,
-                              cardBg: cardBg,
-                              borderCol: borderCol,
-                              titleColor: titleColor,
-                              subtitleColor: subtitleColor,
-                            ),
+                          : const SizedBox.shrink(),
                     ),
+                  ),
+
+                  // Barre d'indication inférieure
+                  Positioned(
+                    left: 14,
+                    right: 14,
+                    bottom: bottomPadding + 8,
+                    child: _buildBottomIndicator(isDark, subtitleColor),
                   ),
                 ],
               ),
@@ -344,8 +357,66 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
     );
   }
 
-  // ── PANNEAU D'APERÇU GLOBAL QUAND AUCUNE RÉGION N'EST SÉLECTIONNÉE ─────────
-  Widget _buildOverviewPanel({
+  // ── CHIP DE SÉLECTION DE RÉGION ────────────────────────────────────────────
+  Widget _buildRegionChip({
+    required String? id,
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required Color iconColor,
+    required bool isDark,
+    required Color borderCol,
+    required Color titleColor,
+  }) {
+    return GestureDetector(
+      onTap: () => _onRegionSelected(id),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFF283B7E)
+              : (isDark ? CultureTheme.darkSurfaceAlt : Colors.white),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF283B7E) : borderCol,
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: (isSelected ? const Color(0xFF283B7E) : Colors.black)
+                  .withValues(alpha: isSelected ? 0.28 : 0.04),
+              blurRadius: isSelected ? 8 : 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 15,
+              color: isSelected ? const Color(0xFFF08235) : iconColor,
+            ),
+            const SizedBox(width: 7),
+            Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12.5,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+                color: isSelected ? Colors.white : titleColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── CARTE PREMIUM DE RÉGION SÉLECTIONNÉE (CONFORME À L'IMAGE) ──────────────
+  Widget _buildSelectedRegionCard({
+    required MaliRegion region,
     required BuildContext context,
     required bool isDark,
     required Color cardBg,
@@ -353,74 +424,166 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
     required Color titleColor,
     required Color subtitleColor,
   }) {
+    final photoUrl = _resolveRegionImage(region.id);
+
     return Container(
-      key: const ValueKey<String>('overview_panel'),
-      padding: EdgeInsets.fromLTRB(
-        18,
-        14,
-        18,
-        MediaQuery.paddingOf(context).bottom + 14,
-      ),
+      key: ValueKey<String>('card_${region.id}'),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(top: BorderSide(color: borderCol)),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: borderCol, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.1),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: subtitleColor.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Photographie réelle haute qualité de la région
               Container(
-                padding: const EdgeInsets.all(10),
+                width: 105,
+                height: 95,
                 decoration: BoxDecoration(
-                  color: CultureTheme.primaryBlue.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderCol),
                 ),
-                child: const Icon(
-                  Icons.touch_app_rounded,
-                  color: CultureTheme.primaryBlue,
-                  size: 22,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Image.asset(
+                    photoUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: CultureTheme.primaryBlue.withValues(alpha: 0.1),
+                      child: const Icon(
+                        Icons.image_rounded,
+                        color: CultureTheme.primaryBlue,
+                        size: 32,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
+
+              // Informations textuelles
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Indicateur RÉGION SÉLECTIONNÉE
+                    Row(
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF283B7E),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'RÉGION SÉLECTIONNÉE',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF283B7E),
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+
+                    // Nom de la Région
                     Text(
-                      'Touchez une région sur la carte',
+                      region.nom,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w900,
                         color: titleColor,
+                        letterSpacing: -0.3,
                       ),
                     ),
+                    const SizedBox(height: 2),
+
+                    // Description courte et poétique
                     Text(
-                      'Découvrez ses monuments, contes, héros et défis du jour.',
+                      region.descriptionCourte,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11.5,
+                        fontWeight: FontWeight.w500,
                         color: subtitleColor,
+                        height: 1.35,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // Ligne inférieure : Stats de contenu + Bouton Explorer
+          Row(
+            children: [
+              // 4 Statistiques précises
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildStatItem('📖', '128', 'Contes', const Color(0xFFDF6E21), isDark),
+                    _buildStatItem('🏛️', '48', 'Monuments', const Color(0xFF2E7D32), isDark),
+                    _buildStatItem('👥', '32', 'Héros', const Color(0xFF1976D2), isDark),
+                    _buildStatItem('🎮', '15', 'Défis', const Color(0xFFE65100), isDark),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 14),
+
+              // Bouton Explorer la région
+              ElevatedButton(
+                onPressed: () => _navigateToRegionDetail(region),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF283B7E),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 11,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Explorer la région',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      size: 16,
+                      color: Colors.white,
                     ),
                   ],
                 ),
@@ -432,388 +595,119 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
     );
   }
 
-  // ── PANNEAU CULTUREL RÉGIONAL CONTEXTUEL ──────────────────────────────────
-  Widget _buildRegionalContextPanel({
-    required MaliRegion region,
-    required bool isActiveGlobal,
-    required BuildContext context,
-    required bool isDark,
-    required Color cardBg,
-    required Color borderCol,
-    required Color titleColor,
-    required Color subtitleColor,
-  }) {
-    final photoUrl = _resolveRegionImage(region.id);
-
-    // Récupération des trésors associés
-    final monuments = MockCultureStage1Data.monuments
-        .where((m) => m.regionId == region.id)
-        .toList();
-    final figures = MockCultureStage1Data.personnages
-        .where((p) => p.regionId == region.id)
-        .toList();
-    final stories = MockCultureStoriesData.stories
-        .where((s) => s.regionId == region.id)
-        .toList();
-    final riddles = MockCultureChallengesData.riddles
-        .where((r) => r.regionId == region.id)
-        .toList();
-    final villes = MockCultureStage1Data.villes
-        .where((v) => v.regionId == region.id)
-        .toList();
-
-    return Container(
-      key: ValueKey<String>('panel_${region.id}'),
-      constraints: const BoxConstraints(maxHeight: 340),
-      padding: EdgeInsets.fromLTRB(
-        18,
-        12,
-        18,
-        MediaQuery.paddingOf(context).bottom + 12,
-      ),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(top: BorderSide(color: borderCol)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.12),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildStatItem(
+    String emoji,
+    String count,
+    String label,
+    Color emojiColor,
+    bool isDark,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Poignée supérieure
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: subtitleColor.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            // En-tête de Région avec vignette photo & Titre
-            Row(
-              children: [
-                // Vignette photo authentique
-                Container(
-                  width: 54,
-                  height: 54,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: CultureTheme.primaryBlue.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(11),
-                    child: Image.asset(
-                      photoUrl,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            region.nom,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 16.5,
-                              fontWeight: FontWeight.w900,
-                              color: titleColor,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: CultureTheme.primaryBlue.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              region.code,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w800,
-                                color: CultureTheme.primaryBlue,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        region.surnom,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: CultureTheme.accentOrange,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                // Bouton filtre global
-                GestureDetector(
-                  onTap: () => _applyGlobalFilter(region),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                    decoration: BoxDecoration(
-                      color: isActiveGlobal
-                          ? Colors.green
-                          : CultureTheme.primaryBlue,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: (isActiveGlobal ? Colors.green : CultureTheme.primaryBlue)
-                              .withValues(alpha: 0.3),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isActiveGlobal ? Icons.check_circle_rounded : Icons.filter_alt_rounded,
-                          color: Colors.white,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          isActiveGlobal ? 'Filtre Actif' : 'Filtrer Culture',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Description courte
+            Text(emoji, style: const TextStyle(fontSize: 11)),
+            const SizedBox(width: 4),
             Text(
-              region.descriptionCourte,
+              count,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 11.5,
-                color: subtitleColor,
-                height: 1.35,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-
-            const SizedBox(height: 12),
-            Divider(color: borderCol, height: 1),
-            const SizedBox(height: 12),
-
-            // ── TRÉSORS DU TERROIR (ACCÈS DIRECT AUX FICHES) ─────────────────
-            Text(
-              'À DÉCOUVRIR DANS LE TERROIR',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.6,
-                color: subtitleColor,
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // Liste horizontale des trésors culturels
-            SizedBox(
-              height: 72,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  // 1. Monuments
-                  if (monuments.isNotEmpty)
-                    _buildTreasureChip(
-                      context: context,
-                      title: monuments.first.title,
-                      category: 'Monument',
-                      icon: Icons.account_balance_rounded,
-                      accentColor: CultureTheme.rougeKoulikoro,
-                      isDark: isDark,
-                      borderCol: borderCol,
-                      titleColor: titleColor,
-                      onTap: () => context.push('/culture/monument/${monuments.first.id}'),
-                    ),
-
-                  // 2. Personnages
-                  if (figures.isNotEmpty)
-                    _buildTreasureChip(
-                      context: context,
-                      title: figures.first.title,
-                      category: 'Personnage',
-                      icon: Icons.person_rounded,
-                      accentColor: CultureTheme.accentOrange,
-                      isDark: isDark,
-                      borderCol: borderCol,
-                      titleColor: titleColor,
-                      onTap: () => context.push('/culture/personnage/${figures.first.id}'),
-                    ),
-
-                  // 3. Contes
-                  if (stories.isNotEmpty)
-                    _buildTreasureChip(
-                      context: context,
-                      title: stories.first.title,
-                      category: 'Conte',
-                      icon: Icons.auto_stories_rounded,
-                      accentColor: CultureTheme.primaryBlue,
-                      isDark: isDark,
-                      borderCol: borderCol,
-                      titleColor: titleColor,
-                      onTap: () => context.push('/culture/conte/${stories.first.id}'),
-                    ),
-
-                  // 4. Devinettes / Défi du jour
-                  if (riddles.isNotEmpty)
-                    _buildTreasureChip(
-                      context: context,
-                      title: riddles.first.category,
-                      category: 'Défi N\'Da',
-                      icon: Icons.psychology_rounded,
-                      accentColor: CultureTheme.cyanTurquoise,
-                      isDark: isDark,
-                      borderCol: borderCol,
-                      titleColor: titleColor,
-                      onTap: () => context.push('/culture/defis/devinettes?id=${riddles.first.id}'),
-                    ),
-
-                  // 5. Villes
-                  if (villes.isNotEmpty)
-                    _buildTreasureChip(
-                      context: context,
-                      title: villes.first.title,
-                      category: 'Cité Royale',
-                      icon: Icons.location_city_rounded,
-                      accentColor: CultureTheme.orPatrimoine,
-                      isDark: isDark,
-                      borderCol: borderCol,
-                      titleColor: titleColor,
-                      onTap: () => context.push('/culture/ville/${villes.first.id}'),
-                    ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            // Bouton vers la fiche de région complète
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  side: BorderSide(color: borderCol),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  context.push('/culture/region/${region.id}', extra: region);
-                },
-                icon: const Icon(Icons.explore_rounded, size: 15, color: CultureTheme.primaryBlue),
-                label: Text(
-                  'Consulter la fiche complète de ${region.nom}',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: CultureTheme.primaryBlue,
-                  ),
-                ),
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                color: isDark ? Colors.white : const Color(0xFF1E284A),
               ),
             ),
           ],
         ),
-      ),
+        Padding(
+          padding: const EdgeInsets.only(left: 2),
+          child: Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 9.5,
+              fontWeight: FontWeight.w500,
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildTreasureChip({
-    required BuildContext context,
-    required String title,
-    required String category,
-    required IconData icon,
-    required Color accentColor,
-    required bool isDark,
-    required Color borderCol,
-    required Color titleColor,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap();
-      },
-      child: Container(
-        width: 140,
-        margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: borderCol),
+  // ── BARRE D'INDICATION INFÉRIEURE (FOOTER) ─────────────────────────────────
+  Widget _buildBottomIndicator(bool isDark, Color subtitleColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF131D30) : const Color(0xFFF1F4F9),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? CultureTheme.darkBorder : const Color(0xFFE2E8F0),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 13, color: accentColor),
-                const SizedBox(width: 4),
-                Text(
-                  category.toUpperCase(),
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 8.5,
-                    fontWeight: FontWeight.w800,
-                    color: accentColor,
-                  ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF283B7E).withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
                 ),
-              ],
-            ),
-            const SizedBox(height: 3),
-            Text(
-              title,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: titleColor,
+                child: const Icon(
+                  Icons.touch_app_rounded,
+                  size: 16,
+                  color: Color(0xFF283B7E),
+                ),
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+              const SizedBox(width: 8),
+              Text(
+                'Touchez une région pour découvrir ses trésors culturels',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : const Color(0xFF1E284A),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              const Icon(
+                Icons.people_outline_rounded,
+                size: 16,
+                color: Color(0xFF283B7E),
+              ),
+              const SizedBox(width: 5),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '56 témoignages',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : const Color(0xFF1E284A),
+                    ),
+                  ),
+                  Text(
+                    '120 contributions',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 9,
+                      color: subtitleColor,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

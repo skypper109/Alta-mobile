@@ -50,7 +50,7 @@ class CulturalAiCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Icon(
-                Icons.auto_awesome_rounded,
+                Icons.smart_toy_rounded,
                 size: 26,
                 color: CultureTheme.cyanTurquoise,
               ),

@@ -133,7 +133,7 @@ class _CulturalGuideScreenState extends State<CulturalGuideScreen> {
                       ),
                     ),
                     child: const Icon(
-                      Icons.auto_awesome_rounded,
+                      Icons.smart_toy_rounded,
                       color: CultureTheme.accentOrange,
                       size: 22,
                     ),
@@ -431,7 +431,7 @@ class _CulturalGuideScreenState extends State<CulturalGuideScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.auto_awesome_rounded,
+                const Icon(Icons.smart_toy_rounded,
                     size: 13, color: CultureTheme.accentOrange),
                 const SizedBox(width: 5),
                 Text(
@@ -509,7 +509,7 @@ class _CulturalGuideScreenState extends State<CulturalGuideScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.auto_awesome_rounded, size: 14, color: CultureTheme.accentOrange),
+            const Icon(Icons.smart_toy_rounded, size: 14, color: CultureTheme.accentOrange),
             const SizedBox(width: 8),
             Text(
               'Le guide réfléchit...',

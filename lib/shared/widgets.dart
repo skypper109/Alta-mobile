@@ -10,6 +10,7 @@ import '../presentation/common/widgets/custom_button.dart';
 import '../presentation/common/widgets/custom_card.dart';
 
 export '../presentation/common/widgets/alternia_logo.dart';
+export '../presentation/common/widgets/alternia_top_header_bar.dart';
 export '../presentation/common/widgets/custom_button.dart';
 export '../presentation/common/widgets/custom_card.dart';
 

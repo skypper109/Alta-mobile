@@ -92,8 +92,8 @@ class CultureNavigationTabs extends StatelessWidget {
                       duration: const Duration(milliseconds: 250),
                       curve: Curves.easeInOut,
                       padding: EdgeInsets.symmetric(
-                        horizontal: isSelected ? 14 : 10,
-                        vertical: 8,
+                        horizontal: isSelected ? 12 : 8,
+                        vertical: 7,
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
@@ -116,7 +116,7 @@ class CultureNavigationTabs extends StatelessWidget {
                         children: [
                           Icon(
                             isSelected ? tab.selectedIcon : tab.icon,
-                            size: 20,
+                            size: 19,
                             color: isSelected
                                 ? Colors.white
                                 : (isDark
@@ -124,13 +124,17 @@ class CultureNavigationTabs extends StatelessWidget {
                                     : const Color(0xFF64748B)),
                           ),
                           if (isSelected) ...[
-                            const SizedBox(width: 6),
-                            Text(
-                              tab.title,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: Text(
+                                tab.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ],

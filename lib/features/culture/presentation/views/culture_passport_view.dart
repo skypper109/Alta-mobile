@@ -11,7 +11,6 @@ import '../../core/theme/culture_theme.dart';
 import '../../exploration/data/datasources/mock_mali_regions.dart';
 import '../widgets/culture_region_bottom_sheet.dart';
 import '../widgets/passport_item_card.dart';
-import '../widgets/region_filter_pill.dart';
 
 /// Vue 4 : Passeport Culturel & Mon Parcours
 /// Carnet personnel d'exploration culturelle du Mali
@@ -79,43 +78,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── 1. FILTRE RÉGIONAL TRANSVERSAL ──────────────────────────────────
-          Row(
-            children: [
-              const RegionFilterPill(),
-              const Spacer(),
-              if (filterState.hasActiveFilter)
-                GestureDetector(
-                  onTap: () => ref.read(activeCultureRegionProvider.notifier).clearFilter(),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: CultureTheme.accentOrange.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '${displayedEntries.length} souvenir${displayedEntries.length > 1 ? 's' : ''}',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: CultureTheme.accentOrange,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.close_rounded, size: 12, color: CultureTheme.accentOrange),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // ── 2. CARTE EN-TÊTE DU PASSEPORT ───────────────────────────────────
+          // ── 1. CARTE EN-TÊTE DU PASSEPORT ───────────────────────────────────
           _buildPassportHeaderCard(context, passport, isDark, cardBg, borderCol, titleColor, subtitleColor),
 
           const SizedBox(height: 24),
@@ -908,7 +871,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.auto_awesome_rounded,
+                Icons.smart_toy_rounded,
                 color: CultureTheme.accentOrange,
                 size: 22,
               ),

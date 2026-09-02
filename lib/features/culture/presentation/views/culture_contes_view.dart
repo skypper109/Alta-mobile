@@ -8,7 +8,6 @@ import '../../core/datasources/mock_culture_stories_data.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../widgets/culture_region_bottom_sheet.dart';
-import '../widgets/region_filter_pill.dart';
 
 /// Vue 3 : Contes & Récits Interactifs du Mali
 /// Immersion culturelle chaleureuse, épurée et authentique
@@ -49,43 +48,7 @@ class CultureContesView extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── 1. FILTRE RÉGIONAL TRANSVERSAL ──────────────────────────────────
-          Row(
-            children: [
-              const RegionFilterPill(),
-              const Spacer(),
-              if (filterState.hasActiveFilter)
-                GestureDetector(
-                  onTap: () => ref.read(activeCultureRegionProvider.notifier).clearFilter(),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: CultureTheme.rougeKoulikoro.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '${filteredStories.length} conte${filteredStories.length > 1 ? 's' : ''}',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: CultureTheme.rougeKoulikoro,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.close_rounded, size: 12, color: CultureTheme.rougeKoulikoro),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
-
-          const SizedBox(height: 18),
-
-          // ── 2. SECTION « CONTINUER L'HISTOIRE » (SI EN COURS) ───────────────
+          // ── 1. SECTION « CONTINUER L'HISTOIRE » (SI EN COURS) ───────────────
           if (inProgressStories.isNotEmpty) ...[
             Row(
               children: [

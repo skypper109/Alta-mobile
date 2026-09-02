@@ -35,7 +35,7 @@ class FloatingCulturalGuideButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
-              Icons.auto_awesome_rounded,
+              Icons.smart_toy_rounded,
               color: Colors.white,
               size: 18,
             ),

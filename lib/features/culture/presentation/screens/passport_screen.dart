@@ -110,7 +110,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
                 ),
               ),
               child: const Icon(
-                Icons.auto_awesome_rounded,
+                Icons.smart_toy_rounded,
                 size: 18,
                 color: CultureTheme.accentOrange,
               ),
@@ -975,7 +975,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
                 borderRadius: BorderRadius.circular(14),
               ),
               child: const Icon(
-                Icons.auto_awesome_rounded,
+                Icons.smart_toy_rounded,
                 color: Colors.white,
                 size: 24,
               ),

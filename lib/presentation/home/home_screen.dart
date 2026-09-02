@@ -7,7 +7,6 @@ import '../../core/constants/app_colors.dart';
 import '../../features/device/device_notifier.dart';
 import '../../features/device/device_page.dart';
 import '../../features/profile/user_prefs_notifier.dart';
-import '../common/providers/theme_provider.dart';
 import '../../shared/widgets.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -31,63 +30,9 @@ class HomeScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 100), // Bottom padding prevents clipping under floating nav
           children: [
-            // ── 1. TOP HEADER : AlterniA Logo + Salon Live + Theme Switch + Profile ──
-            Row(
-              children: [
-                const AlterniaLogo(size: 34, showText: true),
-                const Spacer(),
-
-                // Avatar Salon Live Action Button
-                const AlterniaAvatarTopBarButton(),
-                const SizedBox(width: 8),
-
-                // Theme Mode Switcher (Sun ☀️ / Moon 🌙)
-                GestureDetector(
-                  onTap: () {
-                    ref.read(themeModeProvider.notifier).toggleTheme();
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.surface : Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isDark ? AppColors.border : const Color(0xFFE2E8F0),
-                      ),
-                    ),
-                    child: Icon(
-                      isDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                      size: 18,
-                      color: isDark ? AppColors.accent : AppColors.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-
-                // User Profile Avatar
-                GestureDetector(
-                  onTap: () => context.go('/profile'),
-                  child: Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.secondary, width: 2),
-                    ),
-                    child: Center(
-                      child: Text(
-                        firstName.isNotEmpty ? firstName[0].toUpperCase() : 'A',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            // ── 1. TOP HEADER UNIFIÉ : AlterniA Logo + Salon Live + Theme Switch + Profile ──
+            const AlterniaTopHeaderBar.education(
+              padding: EdgeInsets.zero,
             ),
 
             const SizedBox(height: 20),

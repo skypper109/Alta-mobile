@@ -8,7 +8,6 @@ import '../../core/datasources/mock_culture_challenges_data.dart';
 import '../../core/models/culture_challenge_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../widgets/discovery_missions_sheet.dart';
-import '../widgets/region_filter_pill.dart';
 
 /// Vue 4 : Défis & Jeux Culturels du Mali
 /// Véritable univers d'apprentissage ludique, moderne et engageant
@@ -38,42 +37,38 @@ class CultureDefisView extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── 1. BARRE DE STATUT GAMIFICATION & FILTRE RÉGIONAL ───────────────
-          Row(
-            children: [
-              const RegionFilterPill(),
-              const Spacer(),
-              // Badge Niveau / XP
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: CultureTheme.cyanTurquoise.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: CultureTheme.cyanTurquoise.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.bolt_rounded,
-                      size: 14,
-                      color: CultureTheme.accentOrange,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${userProfile.totalXp} XP',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w800,
-                        color: CultureTheme.cyanTurquoise,
-                      ),
-                    ),
-                  ],
+          // ── 1. BARRE DE STATUT GAMIFICATION ─────────────────────────────────
+          Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: CultureTheme.cyanTurquoise.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: CultureTheme.cyanTurquoise.withValues(alpha: 0.3),
                 ),
               ),
-            ],
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.bolt_rounded,
+                    size: 14,
+                    color: CultureTheme.accentOrange,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${userProfile.totalXp} XP',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w800,
+                      color: CultureTheme.cyanTurquoise,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
 
           const SizedBox(height: 16),

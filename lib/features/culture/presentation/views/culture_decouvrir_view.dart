@@ -7,8 +7,8 @@ import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../immersive/immersive.dart';
 import '../widgets/culture_region_bottom_sheet.dart';
-import '../widgets/region_filter_pill.dart';
 
 /// Vue 2 : Découverte — Hub Central d'Exploration Culturelle du Mali
 /// Grandes Figures, Monuments Historiques, Patrimoine, Villes & Villages, Explorer le Mali
@@ -66,47 +66,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── 1. FILTRE RÉGIONAL TRANSVERSAL ──────────────────────────────────
-          Row(
-            children: [
-              const RegionFilterPill(),
-              const Spacer(),
-              if (filterState.hasActiveFilter)
-                GestureDetector(
-                  onTap: () => ref
-                      .read(activeCultureRegionProvider.notifier)
-                      .clearFilter(),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: CultureTheme.accentOrange.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '${figures.length + monuments.length + villes.length} éléments',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            color: CultureTheme.accentOrange,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.close_rounded,
-                            size: 12, color: CultureTheme.accentOrange),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
-
-          const SizedBox(height: 14),
-
-          // ── 2. BARRE HORIZONTALE DE CATÉGORIES ──────────────────────────────
+          // ── 1. BARRE HORIZONTALE DE CATÉGORIES ──────────────────────────────
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -163,114 +123,152 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
 
           // ── 3. HERO ÉDITORIAL (À DÉCOUVRIR AUJOURD'HUI) ─────────────────────
           if (_selectedFilterIndex == 0) ...[
-            _buildFeaturedCard(
-              featured: featured,
-              context: context,
-              isDark: isDark,
-              cardBg: cardBg,
-              borderCol: borderCol,
-              titleColor: titleColor,
-              subtitleColor: subtitleColor,
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 60),
+              child: _buildFeaturedCard(
+                featured: featured,
+                context: context,
+                isDark: isDark,
+                cardBg: cardBg,
+                borderCol: borderCol,
+                titleColor: titleColor,
+                subtitleColor: subtitleColor,
+              ),
             ),
             const SizedBox(height: 26),
           ],
 
           // ── 4. OUTIL : EXPLORER LE MALI (CARTE / SÉLECTEUR) ─────────────────
           if (_selectedFilterIndex == 0 || _selectedFilterIndex == 5) ...[
-            _buildExploreMaliCard(
-              context: context,
-              activeRegionName: activeRegion?.nom,
-              isDark: isDark,
-              cardBg: cardBg,
-              borderCol: borderCol,
-              titleColor: titleColor,
-              subtitleColor: subtitleColor,
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 110),
+              child: _buildExploreMaliCard(
+                context: context,
+                activeRegionName: activeRegion?.nom,
+                isDark: isDark,
+                cardBg: cardBg,
+                borderCol: borderCol,
+                titleColor: titleColor,
+                subtitleColor: subtitleColor,
+              ),
             ),
             const SizedBox(height: 26),
           ],
 
           // ── 5. SECTION GRANDES FIGURES ──────────────────────────────────────
           if (_selectedFilterIndex == 0 || _selectedFilterIndex == 1) ...[
-            _buildSectionHeader(
-              title: 'GRANDES FIGURES DU MALI',
-              icon: Icons.person_rounded,
-              color: CultureTheme.primaryBlue,
-              borderCol: borderCol,
-              onSeeAll: () => context.push('/culture/personnages'),
-            ),
-            const SizedBox(height: 14),
-            _buildItemsGrid(
-              items: figures,
-              categoryRoute: 'personnage',
-              isDark: isDark,
-              cardBg: cardBg,
-              borderCol: borderCol,
-              titleColor: titleColor,
-              subtitleColor: subtitleColor,
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 160),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionHeader(
+                    title: 'GRANDES FIGURES DU MALI',
+                    icon: Icons.person_rounded,
+                    color: CultureTheme.primaryBlue,
+                    borderCol: borderCol,
+                    onSeeAll: () => context.push('/culture/personnages'),
+                  ),
+                  const SizedBox(height: 14),
+                  _buildItemsGrid(
+                    items: figures,
+                    categoryRoute: 'personnage',
+                    isDark: isDark,
+                    cardBg: cardBg,
+                    borderCol: borderCol,
+                    titleColor: titleColor,
+                    subtitleColor: subtitleColor,
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 28),
           ],
 
           // ── 6. SECTION MONUMENTS HISTORIQUES ────────────────────────────────
           if (_selectedFilterIndex == 0 || _selectedFilterIndex == 2) ...[
-            _buildSectionHeader(
-              title: 'MONUMENTS HISTORIQUES',
-              icon: Icons.museum_rounded,
-              color: CultureTheme.accentOrange,
-              borderCol: borderCol,
-              onSeeAll: () => context.push('/culture/monuments'),
-            ),
-            const SizedBox(height: 14),
-            _buildItemsGrid(
-              items: monuments,
-              categoryRoute: 'monument',
-              isDark: isDark,
-              cardBg: cardBg,
-              borderCol: borderCol,
-              titleColor: titleColor,
-              subtitleColor: subtitleColor,
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 210),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionHeader(
+                    title: 'MONUMENTS HISTORIQUES',
+                    icon: Icons.museum_rounded,
+                    color: CultureTheme.accentOrange,
+                    borderCol: borderCol,
+                    onSeeAll: () => context.push('/culture/monuments'),
+                  ),
+                  const SizedBox(height: 14),
+                  _buildItemsGrid(
+                    items: monuments,
+                    categoryRoute: 'monument',
+                    isDark: isDark,
+                    cardBg: cardBg,
+                    borderCol: borderCol,
+                    titleColor: titleColor,
+                    subtitleColor: subtitleColor,
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 28),
           ],
 
           // ── 7. SECTION VILLES & VILLAGES ────────────────────────────────────
           if (_selectedFilterIndex == 0 || _selectedFilterIndex == 3) ...[
-            _buildSectionHeader(
-              title: 'VILLES & TERROIRS DU MALI',
-              icon: Icons.location_city_rounded,
-              color: CultureTheme.cyanTurquoise,
-              borderCol: borderCol,
-              onSeeAll: () => context.push('/culture/villes'),
-            ),
-            const SizedBox(height: 14),
-            _buildItemsGrid(
-              items: villes,
-              categoryRoute: 'ville',
-              isDark: isDark,
-              cardBg: cardBg,
-              borderCol: borderCol,
-              titleColor: titleColor,
-              subtitleColor: subtitleColor,
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 260),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionHeader(
+                    title: 'VILLES & TERROIRS DU MALI',
+                    icon: Icons.location_city_rounded,
+                    color: CultureTheme.cyanTurquoise,
+                    borderCol: borderCol,
+                    onSeeAll: () => context.push('/culture/villes'),
+                  ),
+                  const SizedBox(height: 14),
+                  _buildItemsGrid(
+                    items: villes,
+                    categoryRoute: 'ville',
+                    isDark: isDark,
+                    cardBg: cardBg,
+                    borderCol: borderCol,
+                    titleColor: titleColor,
+                    subtitleColor: subtitleColor,
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 28),
           ],
 
           // ── 8. SECTION PATRIMOINE IMMATÉRIEL ────────────────────────────────
           if (_selectedFilterIndex == 0 || _selectedFilterIndex == 4) ...[
-            _buildSectionHeader(
-              title: 'PATRIMOINE & TRADITIONS VIVANTES',
-              icon: Icons.history_edu_rounded,
-              color: CultureTheme.vertNaturel,
-              borderCol: borderCol,
-            ),
-            const SizedBox(height: 14),
-            _buildHeritageSection(
-              context: context,
-              isDark: isDark,
-              cardBg: cardBg,
-              borderCol: borderCol,
-              titleColor: titleColor,
-              subtitleColor: subtitleColor,
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 310),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionHeader(
+                    title: 'PATRIMOINE & TRADITIONS VIVANTES',
+                    icon: Icons.history_edu_rounded,
+                    color: CultureTheme.vertNaturel,
+                    borderCol: borderCol,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildHeritageSection(
+                    context: context,
+                    isDark: isDark,
+                    cardBg: cardBg,
+                    borderCol: borderCol,
+                    titleColor: titleColor,
+                    subtitleColor: subtitleColor,
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
           ],
@@ -607,17 +605,19 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 0.78,
+        childAspectRatio: 0.74,
       ),
       itemCount: items.take(4).length,
       itemBuilder: (context, index) {
         final item = items[index];
-        return GestureDetector(
-          onTap: () {
-            HapticFeedback.mediumImpact();
-            context.push('/culture/$categoryRoute/${item.id}');
-          },
-          child: Container(
+        return AnimatedCulturalReveal(
+          delay: Duration(milliseconds: 35 * index),
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              context.push('/culture/$categoryRoute/${item.id}');
+            },
+            child: Container(
             decoration: BoxDecoration(
               color: cardBg,
               borderRadius: BorderRadius.circular(18),
@@ -744,8 +744,9 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
               ],
             ),
           ),
-        );
-      },
+        ),
+      );
+    },
     );
   }
 

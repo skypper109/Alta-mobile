@@ -54,7 +54,7 @@ class AskCulturalGuideButton extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.auto_awesome_rounded,
+                Icons.smart_toy_rounded,
                 size: 18,
                 color: CultureTheme.accentOrange,
               ),

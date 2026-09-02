@@ -9,16 +9,19 @@ class AlterniaLogo extends StatelessWidget {
     this.size = 32,
     this.showText = true,
     this.fontSize,
+    this.iaColor,
   });
 
   final double size;
   final bool showText;
   final double? fontSize;
+  final Color? iaColor;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryTextColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final effectiveIaColor = iaColor ?? AppColors.secondary;
 
     final textStyle = GoogleFonts.plusJakartaSans(
       fontSize: fontSize ?? (size * 0.55),
@@ -38,7 +41,7 @@ class AlterniaLogo extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.25),
+                color: (iaColor ?? AppColors.primary).withValues(alpha: 0.25),
                 blurRadius: 10,
                 spreadRadius: 1,
               ),
@@ -61,7 +64,7 @@ class AlterniaLogo extends StatelessWidget {
                 child: Center(
                   child: Icon(
                     Icons.auto_awesome_rounded,
-                    color: AppColors.secondary,
+                    color: effectiveIaColor,
                     size: size * 0.55,
                   ),
                 ),
@@ -75,11 +78,14 @@ class AlterniaLogo extends StatelessWidget {
             text: TextSpan(
               style: textStyle,
               children: [
-                TextSpan(text: 'Altern', style: textStyle.copyWith(color: primaryTextColor)),
+                TextSpan(
+                  text: 'Altern',
+                  style: textStyle.copyWith(color: primaryTextColor),
+                ),
                 TextSpan(
                   text: 'iA',
                   style: textStyle.copyWith(
-                    color: AppColors.secondary,
+                    color: effectiveIaColor,
                   ),
                 ),
               ],

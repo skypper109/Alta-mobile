@@ -9,6 +9,7 @@ import '../../core/datasources/mock_culture_stories_data.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../immersive/immersive.dart';
 import '../widgets/connected_contents_section.dart';
 import '../widgets/passport_stamp_toast.dart';
 
@@ -418,76 +419,25 @@ class _InteractiveStoryPlayerScreenState
                           final isSelected = _selectedChoiceId == choice.id;
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 10),
-                            child: GestureDetector(
+                            child: InteractiveChoiceCard(
+                              label: choice.label,
+                              subtitle: choice.description,
+                              state: isSelected
+                                  ? ChoiceCardState.selected
+                                  : ChoiceCardState.normal,
+                              accentColor: CultureTheme.rougeKoulikoro,
                               onTap: () => _onChoiceSelected(choice),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.all(14),
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? CultureTheme.rougeKoulikoro.withValues(alpha: 0.15)
-                                      : cardBg,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? CultureTheme.rougeKoulikoro
-                                        : borderCol,
-                                    width: isSelected ? 1.8 : 1.0,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                          alpha: isDark ? 0.2 : 0.03),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
+                                  color: CultureTheme.rougeKoulikoro
+                                      .withValues(alpha: 0.12),
+                                  shape: BoxShape.circle,
                                 ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: CultureTheme.rougeKoulikoro
-                                            .withValues(alpha: 0.12),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        choice.icon,
-                                        size: 18,
-                                        color: CultureTheme.rougeKoulikoro,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            choice.label,
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 13.5,
-                                              fontWeight: FontWeight.w800,
-                                              color: titleColor,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            choice.description,
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 11,
-                                              color: subtitleColor,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_forward_ios_rounded,
-                                      size: 13,
-                                      color: CultureTheme.rougeKoulikoro,
-                                    ),
-                                  ],
+                                child: Icon(
+                                  choice.icon,
+                                  size: 18,
+                                  color: CultureTheme.rougeKoulikoro,
                                 ),
                               ),
                             ),
