@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../features/culture/core/controllers/culture_filter_controller.dart';
 import '../../../features/culture/core/models/cultural_guide_models.dart';
 import '../../../features/culture/core/theme/culture_theme.dart';
 import '../../../features/culture/presentation/widgets/culture_region_bottom_sheet.dart';
-import '../../../features/profile/user_prefs_notifier.dart';
 import '../../../shared/widgets.dart';
 import '../providers/theme_provider.dart';
 
@@ -211,15 +209,11 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
 
   // ── ACTIONS POUR LA SECTION ÉDUCATION ───────────────────────────────────────
   Widget _buildEducationActions(BuildContext context, WidgetRef ref, bool isDark) {
-    final prefs = ref.watch(userPrefsProvider);
-    final rawName = prefs.name.trim();
-    final firstName = rawName.isNotEmpty ? rawName.split(' ').first : '';
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Avatar Salon Live Action Button
-        const AlterniaAvatarTopBarButton(),
+        // Avatar Salon Live Action Button (Icône seule)
+        const AlterniaAvatarTopBarButton(showLabel: false),
         const SizedBox(width: 8),
 
         // Theme Mode Switcher (Sun ☀️ / Moon 🌙)
@@ -240,31 +234,6 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
               isDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
               size: 18,
               color: isDark ? AppColors.accent : AppColors.primary,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-
-        // User Profile Avatar
-        GestureDetector(
-          onTap: () => context.go('/profile'),
-          child: Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.secondary, width: 2),
-            ),
-            child: Center(
-              child: Text(
-                firstName.isNotEmpty ? firstName[0].toUpperCase() : 'A',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
             ),
           ),
         ),

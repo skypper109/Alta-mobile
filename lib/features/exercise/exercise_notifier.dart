@@ -332,7 +332,7 @@ class _WaitingHintsView extends StatelessWidget {
         const Text('Analyse en cours…', style: DetTextStyles.headingSm),
         const SizedBox(height: DetSizes.sm),
         Text(
-          'Le moteur RAG prépare vos indices socratiques.',
+          'Le moteur RAG prépare vos indices pédagogiques.',
           style: DetTextStyles.bodySm,
           textAlign: TextAlign.center,
         ),

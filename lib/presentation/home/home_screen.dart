@@ -8,8 +8,10 @@ import '../../core/constants/app_colors.dart';
 import '../../features/device/device_notifier.dart';
 import '../../features/device/device_page.dart';
 import '../../features/discussions/subject_chat_provider.dart';
+import '../../features/profile/gamification_notifier.dart';
 import '../../features/profile/user_prefs_notifier.dart';
 import '../../shared/widgets.dart';
+import '../common/widgets/universe_splash_transition.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -18,6 +20,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userState = ref.watch(userPrefsProvider);
     final deviceState = ref.watch(deviceNotifierProvider);
+    final gamification = ref.watch(gamificationProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isConnected = deviceState.isConnected;
     final deviceName = deviceState.connectedDevice?.name ?? 'AlterniA-Box-01';
@@ -28,18 +31,10 @@ class HomeScreen extends ConsumerWidget {
     final textColor = isDark ? AppColors.textPrimary : const Color(0xFF0F172A);
 
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 100), // Bottom padding prevents clipping under floating nav
-          children: [
-            // ── 1. TOP HEADER UNIFIÉ : AlterniA Logo + Salon Live + Theme Switch + Profile ──
-            const AlterniaTopHeaderBar.education(
-              padding: EdgeInsets.zero,
-            ),
-
-            const SizedBox(height: 20),
-
-            // ── 2. GREETING BANNER ──────────────────────────────────────────
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 125), // Bottom padding prevents clipping under floating nav
+        children: [
+          // ── 1. GREETING BANNER ──────────────────────────────────────────
             Row(
               children: [
                 Flexible(
@@ -81,31 +76,31 @@ class HomeScreen extends ConsumerWidget {
 
             const SizedBox(height: 16),
 
-            // ── 3. QUICK STATS PILL ROW ──────────────────────────────────────
+            // ── 3. QUICK STATS PILL ROW (CONNECTÉ AU BACKEND) ─────────────
             Row(
-              children: const [
+              children: [
                 Expanded(
                   child: _TeenStatBadge(
                     label: 'Streak',
-                    value: '12j',
+                    value: gamification.streak,
                     icon: Icons.local_fire_department_rounded,
                     color: AppColors.accent,
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: _TeenStatBadge(
                     label: 'XP',
-                    value: '3 450',
+                    value: gamification.xp,
                     icon: Icons.stars_rounded,
                     color: AppColors.secondary,
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: _TeenStatBadge(
                     label: 'Séances',
-                    value: '28',
+                    value: gamification.seances,
                     icon: Icons.school_rounded,
                     color: AppColors.primaryLight,
                   ),
@@ -244,7 +239,7 @@ class HomeScreen extends ConsumerWidget {
                     final subject = subjects[i];
                     final color = colors[i % colors.length];
                     final icon = icons[i % icons.length];
-                    final progress = 0.0 + (i % 5) * 0.22;
+                    final progress = gamification.getProgressForSubject(subject);
 
                     return CustomCard(
                       onTap: () {
@@ -359,6 +354,49 @@ class HomeScreen extends ConsumerWidget {
 
             const SizedBox(height: 24),
 
+            // ── 7. PATRIMOINE & CULTURE DU MALI ────────────────────────────
+            DetSectionHeader(
+              title: 'Patrimoine & Culture Malienne',
+              actionLabel: 'Explorer',
+              onAction: () => UniverseSplashTransition.toCulture(
+                context,
+                onComplete: () => context.go('/culture'),
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            Row(
+              children: [
+                Expanded(
+                  child: _TeenSuggestionCard(
+                    title: 'Monuments & Histoire',
+                    subtitle: 'Djenné, Tombouctou & Rois',
+                    icon: Icons.account_balance_rounded,
+                    color: const Color(0xFFE0823D),
+                    onTap: () => UniverseSplashTransition.toCulture(
+                      context,
+                      onComplete: () => context.push('/culture/monuments'),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _TeenSuggestionCard(
+                    title: 'Contes & Devinettes',
+                    subtitle: 'Traditions des Griots',
+                    icon: Icons.auto_stories_rounded,
+                    color: const Color(0xFF2E7D32),
+                    onTap: () => UniverseSplashTransition.toCulture(
+                      context,
+                      onComplete: () => context.push('/culture/contes'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 28),
+
             // Footer Logo
             const Center(
               child: Opacity(
@@ -368,7 +406,6 @@ class HomeScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }

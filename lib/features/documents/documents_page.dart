@@ -258,20 +258,10 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
-          children: [
-            // ── En-tête ─────────────────────────────────────────────────────
-            Row(
-              children: const [
-                AlterniaLogo(size: 28, showText: true),
-                Spacer(),
-                AlterniaAvatarTopBarButton(),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Column(
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 125),
+        children: [
+          Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -408,7 +398,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                     ),
                     const SizedBox(height: DetSizes.md),
                     Text(
-                      'Traitement OCR & Analyse Socratique…',
+                      'Traitement OCR & Analyse Pédagogique…',
                       style: DetTextStyles.headingSm.copyWith(color: textPri),
                     ),
                     const SizedBox(height: 4),
@@ -778,7 +768,6 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
               ),
           ],
         ),
-      ),
     );
   }
 }

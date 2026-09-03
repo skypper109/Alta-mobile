@@ -225,12 +225,16 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
     _scrollToBottom();
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final studentName = prefs.getString('det_user_name') ?? 'Élève';
+      final studentClass = prefs.getString('det_user_class_id') ?? '11eme';
+
       final reply = await _geminiService.generateTeacherChatResponse(
         [
           {'role': 'user', 'text': userQuery.trim()}
         ],
-        studentName: 'Élève',
-        studentClass: '11eme',
+        studentName: studentName,
+        studentClass: studentClass,
       );
 
       if (mounted) {

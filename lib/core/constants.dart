@@ -304,7 +304,7 @@ abstract final class DetStrings {
 
   static const String exerciseScan    = 'Scanner un exercice';
   static const String exerciseCapture = 'Prendre une photo';
-  static const String exerciseHints   = 'Indices Socratiques';
+  static const String exerciseHints   = 'Indices Pédagogiques';
 
   static const String progressTitle  = 'Carnet de compétences';
   static const String levels         = 'Niveaux scolaires';

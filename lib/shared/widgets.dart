@@ -1,13 +1,13 @@
-library;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/constants/app_colors.dart';
+import '../presentation/common/widgets/alternia_top_header_bar.dart';
 import '../presentation/common/widgets/custom_button.dart';
 import '../presentation/common/widgets/custom_card.dart';
+import '../presentation/common/widgets/universe_splash_transition.dart';
 
 export '../presentation/common/widgets/alternia_logo.dart';
 export '../presentation/common/widgets/alternia_top_header_bar.dart';
@@ -35,7 +35,8 @@ class DetShellScaffold extends StatelessWidget {
     final isCultureTab = navigationShell.currentIndex == 3;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final navBg = isDark ? const Color(0xFF121B2D) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF23314D) : const Color(0xFFE2E8F0);
+    final borderColor =
+        isDark ? const Color(0xFF23314D) : const Color(0xFFE2E8F0);
 
     final items = const [
       _NavItemData(
@@ -65,28 +66,43 @@ class DetShellScaffold extends StatelessWidget {
     ];
 
     return Scaffold(
-      body: navigationShell,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // ── En-tête fixe et unifié dans tout l'espace Éducation ─────────
+            if (!isCultureTab)
+              const AlterniaTopHeaderBar.education(
+                padding: EdgeInsets.fromLTRB(20, 8, 20, 8),
+              ),
+            Expanded(
+              child: navigationShell,
+            ),
+          ],
+        ),
+      ),
       bottomNavigationBar: isCultureTab
           ? const SizedBox.shrink()
           : Padding(
-              padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 26),
               child: Row(
                 children: [
-                  // ── Barre de navigation Éducation ──────────────────────────
+                  // ── Barre de navigation Éducation Solide Opaque ───────────
                   Expanded(
                     child: Container(
-                      height: 58,
+                      height: 66,
                       decoration: BoxDecoration(
                         color: navBg,
-                        borderRadius: BorderRadius.circular(28),
-                        border: Border.all(color: borderColor, width: 1),
+                        borderRadius: BorderRadius.circular(33),
+                        border: Border.all(color: borderColor, width: 1.2),
                         boxShadow: [
                           BoxShadow(
                             color: (isDark ? Colors.black : AppColors.primary)
                                 .withValues(alpha: isDark ? 0.45 : 0.12),
-                            blurRadius: 20,
+                            blurRadius: 22,
                             spreadRadius: 2,
-                            offset: const Offset(0, 4),
+                            offset: const Offset(0, 5),
                           ),
                         ],
                       ),
@@ -108,13 +124,13 @@ class DetShellScaffold extends StatelessWidget {
                               duration: const Duration(milliseconds: 250),
                               curve: Curves.easeInOut,
                               padding: EdgeInsets.symmetric(
-                                horizontal: isSelected ? 14 : 10,
-                                vertical: 8,
+                                horizontal: isSelected ? 15 : 11,
+                                vertical: 10,
                               ),
                               decoration: BoxDecoration(
                                 gradient: isSelected ? AppColors.primaryGradient : null,
                                 color: isSelected ? null : Colors.transparent,
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(24),
                                 boxShadow: isSelected
                                     ? [
                                         BoxShadow(
@@ -131,7 +147,7 @@ class DetShellScaffold extends StatelessWidget {
                                 children: [
                                   Icon(
                                     isSelected ? item.selectedIcon : item.icon,
-                                    size: 20,
+                                    size: 22,
                                     color: isSelected
                                         ? AppColors.secondary
                                         : (isDark
@@ -143,7 +159,7 @@ class DetShellScaffold extends StatelessWidget {
                                     Text(
                                       item.label,
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 12,
+                                        fontSize: 12.5,
                                         fontWeight: FontWeight.w700,
                                         color: Colors.white,
                                       ),
@@ -160,7 +176,7 @@ class DetShellScaffold extends StatelessWidget {
 
                   const SizedBox(width: 8),
 
-                  // ── Bouton aller à la Culture (à droite) ───────────────────
+                  // ── Bouton aller à la Culture Solide avec Splash ───────────
                   _GoToCultureButton(
                     isDark: isDark,
                     onTap: () => _onTabSelected(3),
@@ -190,22 +206,25 @@ class _GoToCultureButton extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
-        onTap();
+        UniverseSplashTransition.toCulture(
+          context,
+          onComplete: onTap,
+        );
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        height: 58,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        height: 66,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: borderColor, width: 1),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: borderColor, width: 1.2),
           boxShadow: [
             BoxShadow(
               color: (isDark ? Colors.black : Colors.grey)
                   .withValues(alpha: isDark ? 0.35 : 0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 3),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -214,14 +233,14 @@ class _GoToCultureButton extends StatelessWidget {
           children: [
             Icon(
               Icons.public_rounded,
-              size: 20,
+              size: 22,
               color: isDark ? const Color(0xFF64748B) : const Color(0xFF64748B),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 3),
             Text(
               'Culture',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 9,
+                fontSize: 9.5,
                 fontWeight: FontWeight.w600,
                 color:
                     isDark ? const Color(0xFF64748B) : const Color(0xFF64748B),
@@ -456,7 +475,7 @@ class DetEmptyState extends StatelessWidget {
 class AlterniaAvatarTopBarButton extends StatelessWidget {
   const AlterniaAvatarTopBarButton({
     super.key,
-    this.showLabel = true,
+    this.showLabel = false,
   });
 
   final bool showLabel;
@@ -479,12 +498,13 @@ class AlterniaAvatarTopBarButton extends StatelessWidget {
       },
       child: Container(
         padding: EdgeInsets.symmetric(
-          horizontal: showLabel ? 10 : 8,
-          vertical: 6,
+          horizontal: showLabel ? 10 : 7,
+          vertical: showLabel ? 6 : 7,
         ),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(20),
+          shape: showLabel ? BoxShape.rectangle : BoxShape.circle,
+          borderRadius: showLabel ? BorderRadius.circular(20) : null,
           border: Border.all(color: borderColor, width: 1.2),
           boxShadow: [
             BoxShadow(

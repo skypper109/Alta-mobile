@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../../core/theme/culture_theme.dart';
+import '../../../../presentation/common/widgets/universe_splash_transition.dart';
 
 /// Barre de navigation Culture premium — même design que DetShellScaffold
 /// Floating pill, icônes outline/filled, label animé, couleur orange charte
@@ -48,29 +50,29 @@ class CultureNavigationTabs extends StatelessWidget {
         isDark ? const Color(0xFF23314D) : const Color(0xFFE2E8F0);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 26),
       child: Row(
         children: [
-          // ── Bouton retour éducation ──────────────────────────────────────
+          // ── Bouton retour éducation Solide Opaque ─────────────────────────
           _BackToEducationButton(isDark: isDark),
 
           const SizedBox(width: 8),
 
-          // ── Barre de navigation Culture ──────────────────────────────────
+          // ── Barre de navigation Culture Solide Opaque ─────────────────────
           Expanded(
             child: Container(
-              height: 58,
+              height: 66,
               decoration: BoxDecoration(
                 color: navBg,
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: borderColor, width: 1),
+                borderRadius: BorderRadius.circular(33),
+                border: Border.all(color: borderColor, width: 1.2),
                 boxShadow: [
                   BoxShadow(
                     color: (isDark ? Colors.black : CultureTheme.accentOrange)
                         .withValues(alpha: isDark ? 0.45 : 0.12),
-                    blurRadius: 20,
+                    blurRadius: 22,
                     spreadRadius: 2,
-                    offset: const Offset(0, 4),
+                    offset: const Offset(0, 5),
                   ),
                 ],
               ),
@@ -92,14 +94,14 @@ class CultureNavigationTabs extends StatelessWidget {
                       duration: const Duration(milliseconds: 250),
                       curve: Curves.easeInOut,
                       padding: EdgeInsets.symmetric(
-                        horizontal: isSelected ? 12 : 8,
-                        vertical: 7,
+                        horizontal: isSelected ? 14 : 9,
+                        vertical: 9,
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? CultureTheme.accentOrange
                             : Colors.transparent,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(24),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
@@ -116,7 +118,7 @@ class CultureNavigationTabs extends StatelessWidget {
                         children: [
                           Icon(
                             isSelected ? tab.selectedIcon : tab.icon,
-                            size: 19,
+                            size: 21,
                             color: isSelected
                                 ? Colors.white
                                 : (isDark
@@ -131,7 +133,7 @@ class CultureNavigationTabs extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 11.5,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.white,
                                 ),
@@ -152,10 +154,11 @@ class CultureNavigationTabs extends StatelessWidget {
   }
 }
 
-// ── Bouton retour éducation ──────────────────────────────────────────────────
+// ── Bouton retour Éducation avec Splash Transition ───────────────────────────
 class _BackToEducationButton extends StatelessWidget {
-  const _BackToEducationButton({required this.isDark});
   final bool isDark;
+
+  const _BackToEducationButton({required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -166,22 +169,25 @@ class _BackToEducationButton extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
-        context.go('/home');
+        UniverseSplashTransition.toEducation(
+          context,
+          onComplete: () => context.go('/home'),
+        );
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        height: 58,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        height: 66,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: borderColor, width: 1),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: borderColor, width: 1.2),
           boxShadow: [
             BoxShadow(
               color: (isDark ? Colors.black : Colors.grey)
                   .withValues(alpha: isDark ? 0.35 : 0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 3),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -190,14 +196,14 @@ class _BackToEducationButton extends StatelessWidget {
           children: [
             Icon(
               Icons.school_rounded,
-              size: 20,
+              size: 22,
               color: isDark ? const Color(0xFF64748B) : const Color(0xFF64748B),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 3),
             Text(
               'Éduc.',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 9,
+                fontSize: 9.5,
                 fontWeight: FontWeight.w600,
                 color:
                     isDark ? const Color(0xFF64748B) : const Color(0xFF64748B),
