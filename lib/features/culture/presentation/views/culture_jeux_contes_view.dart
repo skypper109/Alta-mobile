@@ -23,13 +23,12 @@ class CultureJeuxContesView extends ConsumerStatefulWidget {
 }
 
 class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
-  int _selectedFilterIndex = 0; // 0: Tout, 1: Contes, 2: Défis & Quiz, 3: Devinettes N'Da
+  int _selectedFilterIndex = 0; // 0: Contes, 1: Devinettes, 2: Défis
 
   static const List<String> _filters = [
-    'Tout l\'univers',
-    'Contes & Récits',
-    'Défis & Quiz',
-    'Devinettes N\'Da',
+    'Contes',
+    'Devinettes',
+    'Défis',
   ];
 
   @override
@@ -58,7 +57,6 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
           ? filteredStories.first
           : MockCultureStoriesData.stories.first,
     );
-    final dailyChallenge = MockCultureChallengesData.dailyChallenge;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -120,7 +118,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
           const SizedBox(height: 20),
 
           // ── 2. HERO VEDETTE INTERACTIF ─────────────────────────────────────
-          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 1) ...[
+          if (_selectedFilterIndex == 0) ...[
             _buildHeroStoryCard(
               story: featuredStory,
               context: context,
@@ -131,21 +129,10 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
               subtitleColor: subtitleColor,
             ),
             const SizedBox(height: 24),
-          ] else if (_selectedFilterIndex == 2 || _selectedFilterIndex == 3) ...[
-            _buildDailyChallengeCard(
-              context: context,
-              challenge: dailyChallenge,
-              isDark: isDark,
-              cardBg: cardBg,
-              borderCol: borderCol,
-              titleColor: titleColor,
-              subtitleColor: subtitleColor,
-            ),
-            const SizedBox(height: 24),
           ],
 
           // ── 3. SECTION CONTES & RÉCITS DU MALI ──────────────────────────────
-          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 1) ...[
+          if (_selectedFilterIndex == 0) ...[
             _buildSectionHeader(
               title: 'CONTES & RÉCITS TRADITIONNELS',
               icon: Icons.auto_stories_rounded,
@@ -165,8 +152,29 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
             const SizedBox(height: 28),
           ],
 
-          // ── 6. SECTION DÉFIS CULTURELS & QUIZ ───────────────────────────────
-          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 2) ...[
+          // ── 4. SECTION DEVINETTES TRADITIONNELLES ──────────────────────
+          if (_selectedFilterIndex == 1) ...[
+            _buildSectionHeader(
+              title: 'DEVINETTES TRADITIONNELLES',
+              icon: Icons.lightbulb_rounded,
+              color: CultureTheme.accentOrange,
+              borderCol: borderCol,
+            ),
+            const SizedBox(height: 14),
+            _buildRiddlesList(
+              riddles: filteredRiddles,
+              context: context,
+              isDark: isDark,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              titleColor: titleColor,
+              subtitleColor: subtitleColor,
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // ── 5. SECTION DÉFIS CULTURELS & QUIZ ───────────────────────────────
+          if (_selectedFilterIndex == 2) ...[
             _buildSectionHeader(
               title: 'DÉFIS & QUIZ DU SAVOIR',
               icon: Icons.psychology_rounded,
@@ -183,27 +191,6 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
               subtitleColor: subtitleColor,
             ),
             const SizedBox(height: 28),
-          ],
-
-          // ── 7. SECTION DEVINETTES TRADITIONNELLES N'DA ──────────────────────
-          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 3) ...[
-            _buildSectionHeader(
-              title: 'DEVINETTES TRADITIONNELLES (N\'DA)',
-              icon: Icons.lightbulb_rounded,
-              color: CultureTheme.accentOrange,
-              borderCol: borderCol,
-            ),
-            const SizedBox(height: 14),
-            _buildRiddlesList(
-              riddles: filteredRiddles,
-              context: context,
-              isDark: isDark,
-              cardBg: cardBg,
-              borderCol: borderCol,
-              titleColor: titleColor,
-              subtitleColor: subtitleColor,
-            ),
-            const SizedBox(height: 20),
           ],
         ],
       ),
@@ -496,131 +483,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     );
   }
 
-  // ── 2. CARTE DÉFI DU JOUR ───────────────────────────────────────────────────
-  Widget _buildDailyChallengeCard({
-    required BuildContext context,
-    required TraditionalRiddle challenge,
-    required bool isDark,
-    required Color cardBg,
-    required Color borderCol,
-    required Color titleColor,
-    required Color subtitleColor,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: CultureTheme.cyanTurquoise.withValues(alpha: 0.4),
-          width: 1.4,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: CultureTheme.cyanTurquoise.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  'DÉFI DU JOUR',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: CultureTheme.cyanTurquoise,
-                    letterSpacing: 0.6,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: CultureTheme.accentOrange.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '+${challenge.xpReward} XP',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: CultureTheme.accentOrange,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            challenge.formulaIntro,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: titleColor,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            challenge.category,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: CultureTheme.cyanTurquoise,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            challenge.riddleText,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12.5,
-              color: subtitleColor,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                context.push('/culture/quiz/quiz_empires');
-              },
-              icon: const Icon(Icons.play_arrow_rounded,
-                  size: 18, color: Colors.white),
-              label: Text(
-                'Relever le défi maintenant',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: CultureTheme.primaryBlue,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 11),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   // ── 3. ÉLÉMENT LISTE CONTE ──────────────────────────────────────────────────
   Widget _buildStoryRowItem({

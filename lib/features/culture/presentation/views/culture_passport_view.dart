@@ -28,7 +28,6 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
   @override
   Widget build(BuildContext context) {
     final passport = ref.watch(culturePassportProvider);
-    final notifier = ref.read(culturePassportProvider.notifier);
     final filterState = ref.watch(activeCultureRegionProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -40,8 +39,6 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
     final surfaceAlt =
         isDark ? CultureTheme.darkSurfaceAlt : CultureTheme.lightSurfaceAlt;
-
-    final distinctions = notifier.distinctions;
 
     // Filtre dynamique de collection
     List<PassportEntry> displayedEntries;
@@ -78,62 +75,26 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── 1. CARTE EN-TÊTE DU PASSEPORT ───────────────────────────────────
-          _buildPassportHeaderCard(context, passport, isDark, cardBg, borderCol, titleColor, subtitleColor),
-
-          const SizedBox(height: 24),
-
-          // ── 3. DÉCOUVERTE DU JOUR À L'HONNEUR ───────────────────────────────
-          if (passport.featuredDiscoveryOfTheDay != null) ...[
-            _buildSectionTitle('DÉCOUVERTE DU JOUR', Icons.flare_rounded, borderCol),
-            const SizedBox(height: 12),
-            PassportItemCard(
-              entry: passport.featuredDiscoveryOfTheDay!,
-              isFeatured: true,
-            ),
-            const SizedBox(height: 28),
-          ],
-
-          // ── 4. MON PARCOURS (RÉSUMÉ POÉTIQUE) ───────────────────────────────
+          // ── 1. MON PARCOURS (RÉSUMÉ POÉTIQUE) ───────────────────────────────
           _buildSectionTitle('MON PARCOURS', Icons.insights_rounded, borderCol),
           const SizedBox(height: 12),
           _buildJourneySummary(passport, isDark, cardBg, borderCol, titleColor, subtitleColor),
 
           const SizedBox(height: 28),
 
-          // ── 5. MOMENTS MÉMORABLES ───────────────────────────────────────────
-          if (passport.milestones.isNotEmpty) ...[
-            _buildSectionTitle('MOMENTS MÉMORABLES', Icons.auto_awesome_rounded, borderCol),
-            const SizedBox(height: 12),
-            _buildMilestonesCarousel(context, passport.milestones, isDark, cardBg, borderCol, titleColor, subtitleColor),
-            const SizedBox(height: 28),
-          ],
-
-          // ── 6. RÉGIONS EXPLORÉES ────────────────────────────────────────────
+          // ── 2. RÉGIONS EXPLORÉES ────────────────────────────────────────────
           _buildSectionTitle('RÉGIONS EXPLORÉES', Icons.map_rounded, borderCol),
           const SizedBox(height: 12),
           _buildRegionsExplorationTracker(context, passport, isDark, cardBg, borderCol, titleColor, subtitleColor),
 
           const SizedBox(height: 28),
 
-          // ── 7. COLLECTION DES DÉCOUVERTES (FILTRABLE) ───────────────────────
+          // ── 4. COLLECTION DES DÉCOUVERTES (FILTRABLE) ───────────────────────
           _buildSectionTitle('COLLECTION DES DÉCOUVERTES', Icons.collections_bookmark_rounded, borderCol),
           const SizedBox(height: 12),
           _buildFilterPills(isDark, surfaceAlt, borderCol),
           const SizedBox(height: 16),
           _buildDiscoveriesGrid(context, displayedEntries, isDark, surfaceAlt, subtitleColor),
-
-          const SizedBox(height: 32),
-
-          // ── 8. SCEAUX D'AMBASSADEUR CULTUREL ────────────────────────────────
-          _buildSectionTitle('SCEAUX D\'AMBASSADEUR CULTUREL', Icons.workspace_premium_rounded, borderCol),
-          const SizedBox(height: 12),
-          _buildDistinctionsList(distinctions, isDark, cardBg, borderCol, titleColor, subtitleColor),
-
-          const SizedBox(height: 24),
-
-          // ── 9. BANNIÈRE INVITATION GUIDE IA ─────────────────────────────────
-          _buildAiGuideBanner(context, isDark, cardBg, borderCol, titleColor, subtitleColor),
         ],
       ),
     );
@@ -546,7 +507,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     );
   }
 
-  // ── 4. TRACKER RÉGIONAL ─────────────────────────────────────────────────────
+  // ── 4. TRACKER RÉGIONAL — DESIGN PREMIUM ──────────────────────────────────
   Widget _buildRegionsExplorationTracker(
     BuildContext context,
     PassportState passport,
@@ -557,91 +518,238 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     Color subtitleColor,
   ) {
     final allRegions = MockMaliRegions.regions;
+    final exploredCount = passport.exploredRegionIds.length;
+    final totalCount = allRegions.length;
+    final progress = totalCount > 0 ? exploredCount / totalCount : 0.0;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: borderCol),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: CultureTheme.primaryBlue.withValues(alpha: isDark ? 0.25 : 0.15),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── En-tête avec anneau de progression ──
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Carte territoriale du voyageur',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: titleColor,
-                ),
-              ),
-              InkWell(
-                onTap: () => CultureRegionBottomSheet.show(context),
-                child: Row(
+              // Anneau circulaire de progression
+              SizedBox(
+                width: 52,
+                height: 52,
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    Text(
-                      'Changer',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: CultureTheme.accentOrange,
+                    SizedBox(
+                      width: 52,
+                      height: 52,
+                      child: CircularProgressIndicator(
+                        value: progress,
+                        strokeWidth: 4.5,
+                        backgroundColor: isDark
+                            ? const Color(0xFF1E293B)
+                            : const Color(0xFFE2E8F0),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          CultureTheme.primaryBlue,
+                        ),
+                        strokeCap: StrokeCap.round,
                       ),
                     ),
-                    const SizedBox(width: 2),
-                    const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 10,
-                      color: CultureTheme.accentOrange,
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '$exploredCount',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            color: CultureTheme.primaryBlue,
+                            height: 1,
+                          ),
+                        ),
+                        Text(
+                          '/$totalCount',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: subtitleColor,
+                            height: 1.2,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Terres Explorées',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: titleColor,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      exploredCount == 0
+                          ? 'Commencez votre odyssée malienne'
+                          : exploredCount >= totalCount
+                              ? 'Maître explorateur du Mali !'
+                              : '${totalCount - exploredCount} région${totalCount - exploredCount > 1 ? 's' : ''} à découvrir',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: subtitleColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  CultureRegionBottomSheet.show(context);
+                },
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.explore_rounded,
+                        size: 13,
+                        color: CultureTheme.accentOrange,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Explorer',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: CultureTheme.accentOrange,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: allRegions.map((region) {
+
+          const SizedBox(height: 18),
+
+          // ── Barre de progression linéaire stylée ──
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: isDark
+                  ? const Color(0xFF1E293B)
+                  : const Color(0xFFE2E8F0),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                CultureTheme.primaryBlue,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // ── Grille des régions avec design amélioré ──
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 3.2,
+            ),
+            itemCount: allRegions.length,
+            itemBuilder: (context, index) {
+              final region = allRegions[index];
               final isExplored = passport.exploredRegionIds.contains(region.id);
+              final regionColor = isExplored
+                  ? region.couleurAccent
+                  : (isDark ? const Color(0xFF475569) : const Color(0xFF94A3B8));
+
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 decoration: BoxDecoration(
                   color: isExplored
-                      ? CultureTheme.primaryBlue.withValues(alpha: isDark ? 0.25 : 0.1)
-                      : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
-                  borderRadius: BorderRadius.circular(10),
+                      ? region.couleurAccent.withValues(alpha: isDark ? 0.15 : 0.08)
+                      : (isDark ? const Color(0xFF1A2235) : const Color(0xFFF8FAFC)),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isExplored
-                        ? CultureTheme.primaryBlue.withValues(alpha: 0.4)
-                        : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                        ? region.couleurAccent.withValues(alpha: 0.4)
+                        : (isDark ? const Color(0xFF2A3549) : const Color(0xFFE2E8F0)),
+                    width: isExplored ? 1.2 : 1.0,
                   ),
                 ),
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      isExplored ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                      size: 12,
-                      color: isExplored ? CultureTheme.primaryBlue : subtitleColor,
+                    Container(
+                      width: 26,
+                      height: 26,
+                      decoration: BoxDecoration(
+                        color: isExplored
+                            ? region.couleurAccent.withValues(alpha: 0.2)
+                            : (isDark ? const Color(0xFF253048) : const Color(0xFFF1F5F9)),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          isExplored
+                              ? Icons.check_rounded
+                              : region.icone,
+                          size: 13,
+                          color: regionColor,
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 5),
-                    Text(
-                      region.nom,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: isExplored ? FontWeight.w700 : FontWeight.w500,
-                        color: isExplored ? CultureTheme.primaryBlue : subtitleColor,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        region.nom,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          fontWeight: isExplored ? FontWeight.w700 : FontWeight.w500,
+                          color: isExplored ? regionColor : subtitleColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
               );
-            }).toList(),
+            },
           ),
         ],
       ),

@@ -25,18 +25,18 @@ class CultureNavigationTabs extends StatelessWidget {
     ),
     _TabItem(
       title: 'Découverte',
-      icon: Icons.explore_outlined,
-      selectedIcon: Icons.explore_rounded,
+      icon: Icons.map_outlined,
+      selectedIcon: Icons.map_rounded,
     ),
     _TabItem(
-      title: 'Jeux & Contes',
-      icon: Icons.auto_stories_outlined,
-      selectedIcon: Icons.auto_stories_rounded,
+      title: 'Explorer+',
+      icon: Icons.widgets_outlined,
+      selectedIcon: Icons.widgets_rounded,
     ),
     _TabItem(
-      title: 'Passeport',
-      icon: Icons.badge_outlined,
-      selectedIcon: Icons.badge_rounded,
+      title: 'Parcours',
+      icon: Icons.timeline_outlined,
+      selectedIcon: Icons.timeline_rounded,
     ),
   ];
 

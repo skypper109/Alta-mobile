@@ -12,7 +12,9 @@ import '../../features/culture/exploration/presentation/screens/region_detail_sc
 import '../../features/culture/presentation/screens/challenges_home_screen.dart';
 import '../../features/culture/presentation/screens/contes_screen.dart';
 import '../../features/culture/core/models/cultural_guide_models.dart';
+import '../../features/culture/immersive/immersive.dart';
 import '../../features/culture/presentation/screens/cultural_guide_screen.dart';
+import '../../features/culture/presentation/screens/culture_intro_screen.dart';
 import '../../features/culture/presentation/screens/culture_monuments_screen.dart';
 import '../../features/culture/presentation/screens/culture_personnages_screen.dart';
 import '../../features/culture/presentation/screens/culture_villes_screen.dart';
@@ -105,7 +107,8 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/culture',
-                pageBuilder: (context, state) => _fadePage(
+                pageBuilder: (context, state) =>
+                    CultureModeTransition.buildPage(
                   key: state.pageKey,
                   child: const CultureScreen(),
                 ),
@@ -256,6 +259,14 @@ GoRouter appRouter(Ref ref) {
         path: '/culture/passport',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const PassportScreen(),
+      ),
+      GoRoute(
+        path: '/culture/intro',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => CultureModeTransition.buildPage(
+          key: state.pageKey,
+          child: const CultureIntroScreen(),
+        ),
       ),
       GoRoute(
         path: '/holo-salon',

@@ -8,7 +8,6 @@ import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
-import '../widgets/culture_region_bottom_sheet.dart';
 
 /// Vue 2 : Découverte — Hub Central d'Exploration Culturelle du Mali
 /// Grandes Figures, Monuments Historiques, Patrimoine, Villes & Villages, Explorer le Mali
@@ -26,12 +25,9 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
   int _selectedFilterIndex = 0; // 0: Tout, 1: Figures, 2: Monuments, 3: Villes, 4: Patrimoine, 5: Explorer
 
   static const List<String> _categories = [
-    'Tout',
-    'Grandes Figures',
-    'Monuments Historiques',
+    'Héros',
+    'Monuments',
     'Villes & Villages',
-    'Patrimoine',
-    'Explorer le Mali',
   ];
 
   @override
@@ -58,7 +54,6 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
     final villes = MockCultureStage1Data.villes
         .where((i) => i.matchesRegion(regionId))
         .toList();
-    final featured = MockCultureStage1Data.featuredItem;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -121,49 +116,17 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
 
           const SizedBox(height: 20),
 
-          // ── 3. HERO ÉDITORIAL (À DÉCOUVRIR AUJOURD'HUI) ─────────────────────
-          if (_selectedFilterIndex == 0) ...[
-            AnimatedCulturalReveal(
-              delay: const Duration(milliseconds: 60),
-              child: _buildFeaturedCard(
-                featured: featured,
-                context: context,
-                isDark: isDark,
-                cardBg: cardBg,
-                borderCol: borderCol,
-                titleColor: titleColor,
-                subtitleColor: subtitleColor,
-              ),
-            ),
-            const SizedBox(height: 26),
-          ],
 
-          // ── 4. OUTIL : EXPLORER LE MALI (CARTE / SÉLECTEUR) ─────────────────
-          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 5) ...[
-            AnimatedCulturalReveal(
-              delay: const Duration(milliseconds: 110),
-              child: _buildExploreMaliCard(
-                context: context,
-                activeRegionName: activeRegion?.nom,
-                isDark: isDark,
-                cardBg: cardBg,
-                borderCol: borderCol,
-                titleColor: titleColor,
-                subtitleColor: subtitleColor,
-              ),
-            ),
-            const SizedBox(height: 26),
-          ],
 
           // ── 5. SECTION GRANDES FIGURES ──────────────────────────────────────
-          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 1) ...[
+          if (_selectedFilterIndex == 0) ...[
             AnimatedCulturalReveal(
               delay: const Duration(milliseconds: 160),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSectionHeader(
-                    title: 'GRANDES FIGURES DU MALI',
+                    title: 'PERSONNAGES HISTORIQUES',
                     icon: Icons.person_rounded,
                     color: CultureTheme.primaryBlue,
                     borderCol: borderCol,
@@ -186,7 +149,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
           ],
 
           // ── 6. SECTION MONUMENTS HISTORIQUES ────────────────────────────────
-          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 2) ...[
+          if (_selectedFilterIndex == 1) ...[
             AnimatedCulturalReveal(
               delay: const Duration(milliseconds: 210),
               child: Column(
@@ -216,7 +179,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
           ],
 
           // ── 7. SECTION VILLES & VILLAGES ────────────────────────────────────
-          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 3) ...[
+          if (_selectedFilterIndex == 2) ...[
             AnimatedCulturalReveal(
               delay: const Duration(milliseconds: 260),
               child: Column(
@@ -243,34 +206,6 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
               ),
             ),
             const SizedBox(height: 28),
-          ],
-
-          // ── 8. SECTION PATRIMOINE IMMATÉRIEL ────────────────────────────────
-          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 4) ...[
-            AnimatedCulturalReveal(
-              delay: const Duration(milliseconds: 310),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionHeader(
-                    title: 'PATRIMOINE & TRADITIONS VIVANTES',
-                    icon: Icons.history_edu_rounded,
-                    color: CultureTheme.vertNaturel,
-                    borderCol: borderCol,
-                  ),
-                  const SizedBox(height: 14),
-                  _buildHeritageSection(
-                    context: context,
-                    isDark: isDark,
-                    cardBg: cardBg,
-                    borderCol: borderCol,
-                    titleColor: titleColor,
-                    subtitleColor: subtitleColor,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
           ],
         ],
       ),
@@ -330,247 +265,6 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
           ),
         ],
       ],
-    );
-  }
-
-  // ── CARTE FEATURED ÉDITORIALE ──────────────────────────────────────────────
-  Widget _buildFeaturedCard({
-    required CultureItem featured,
-    required BuildContext context,
-    required bool isDark,
-    required Color cardBg,
-    required Color borderCol,
-    required Color titleColor,
-    required Color subtitleColor,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        context.push('/culture/personnage/perso_soundiata');
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: CultureTheme.primaryBlue
-                .withValues(alpha: isDark ? 0.35 : 0.2),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
-              blurRadius: 14,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: CultureTheme.primaryBlue.withValues(alpha: 0.3),
-                  width: 1.5,
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: featured.imageUrl != null &&
-                        featured.imageUrl!.isNotEmpty
-                    ? Image.asset(
-                        featured.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: CultureTheme.primaryBlue
-                              .withValues(alpha: 0.1),
-                          child: const Icon(Icons.shield_rounded,
-                              size: 28, color: CultureTheme.primaryBlue),
-                        ),
-                      )
-                    : Container(
-                        color: CultureTheme.primaryBlue.withValues(alpha: 0.1),
-                        child: const Icon(Icons.shield_rounded,
-                            size: 28, color: CultureTheme.primaryBlue),
-                      ),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: CultureTheme.accentOrange
-                              .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          featured.tag.toUpperCase(),
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: CultureTheme.accentOrange,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        featured.regionName,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w600,
-                          color: subtitleColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    featured.title,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w800,
-                      color: titleColor,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    featured.subtitle,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
-                      color: CultureTheme.primaryBlue,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 14,
-              color: CultureTheme.accentOrange,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── CARTE OUTIL : EXPLORER LE MALI (NON BLOQUANT) ──────────────────────────
-  Widget _buildExploreMaliCard({
-    required BuildContext context,
-    required String? activeRegionName,
-    required bool isDark,
-    required Color cardBg,
-    required Color borderCol,
-    required Color titleColor,
-    required Color subtitleColor,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF131D31) : const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: CultureTheme.primaryBlue.withValues(alpha: 0.35),
-          width: 1.2,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: CultureTheme.primaryBlue.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.map_rounded,
-                  color: CultureTheme.primaryBlue,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'EXPLORER LE MALI PAR RÉGION',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: CultureTheme.primaryBlue,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      activeRegionName != null
-                          ? 'Région active : $activeRegionName'
-                          : 'Explorez les 10 terroirs et cités millénaires',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: titleColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    CultureRegionBottomSheet.show(context);
-                  },
-                  icon: const Icon(Icons.tune_rounded, size: 16),
-                  label: Text(
-                    'Changer de région',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: CultureTheme.primaryBlue,
-                    side: BorderSide(
-                      color: CultureTheme.primaryBlue.withValues(alpha: 0.4),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -747,98 +441,6 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
         ),
       );
     },
-    );
-  }
-
-  // ── SECTION PATRIMOINE IMMATÉRIEL ───────────────────────────────────────────
-  Widget _buildHeritageSection({
-    required BuildContext context,
-    required bool isDark,
-    required Color cardBg,
-    required Color borderCol,
-    required Color titleColor,
-    required Color subtitleColor,
-  }) {
-    final heritageItems = [
-      {
-        'title': 'La Charte du Manden (1236)',
-        'subtitle': 'L\'une des plus anciennes déclarations des droits de l\'Homme.',
-        'region': 'Koulikoro',
-        'icon': Icons.gavel_rounded,
-      },
-      {
-        'title': 'Le Crépissage de Djenné',
-        'subtitle': 'Tradition vivante et solidaire de restauration architecturale.',
-        'region': 'Mopti',
-        'icon': Icons.handyman_rounded,
-      },
-      {
-        'title': 'Les Manuscrits Anciens',
-        'subtitle': 'Trésors scientifiques, astronomiques et littéraires de Tombouctou.',
-        'region': 'Tombouctou',
-        'icon': Icons.menu_book_rounded,
-      },
-    ];
-
-    return Column(
-      children: heritageItems.map((item) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderCol),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: CultureTheme.vertNaturel.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Icon(
-                    item['icon'] as IconData,
-                    color: CultureTheme.vertNaturel,
-                    size: 22,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          item['title'] as String,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: titleColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      item['subtitle'] as String,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        color: subtitleColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
     );
   }
 }
