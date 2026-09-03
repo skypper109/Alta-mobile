@@ -539,10 +539,10 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatItem('📖', '128', 'Contes', const Color(0xFFDF6E21), isDark),
-              _buildStatItem('🏛️', '48', 'Monuments', const Color(0xFF2E7D32), isDark),
-              _buildStatItem('👥', '32', 'Héros', const Color(0xFF1976D2), isDark),
-              _buildStatItem('🎮', '15', 'Défis', const Color(0xFFE65100), isDark),
+              _buildStatItem(Icons.auto_stories_rounded, '128', 'Contes', const Color(0xFFDF6E21), isDark),
+              _buildStatItem(Icons.account_balance_rounded, '48', 'Monuments', const Color(0xFF2E7D32), isDark),
+              _buildStatItem(Icons.people_rounded, '32', 'Héros', const Color(0xFF1976D2), isDark),
+              _buildStatItem(Icons.sports_esports_rounded, '15', 'Défis', const Color(0xFFE65100), isDark),
             ],
           ),
 
@@ -593,10 +593,10 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
   }
 
   Widget _buildStatItem(
-    String emoji,
+    IconData icon,
     String count,
     String label,
-    Color emojiColor,
+    Color iconColor,
     bool isDark,
   ) {
     return Column(
@@ -606,7 +606,7 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 11)),
+            Icon(icon, size: 13, color: iconColor),
             const SizedBox(width: 4),
             Text(
               count,

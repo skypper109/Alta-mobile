@@ -187,7 +187,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
               ),
               const SizedBox(height: 16),
               CustomButton(
-                label: '🎭 Incarner ce personnage avec l\'Avatar',
+                label: 'Incarner ce personnage avec l\'Avatar',
                 variant: CustomButtonVariant.accent,
                 icon: Icons.theater_comedy_rounded,
                 onPressed: () {

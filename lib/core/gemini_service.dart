@@ -120,7 +120,7 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
             final shouldAskFollowup = data['should_ask_followup'] as bool? ?? false;
             
             if (shouldAskFollowup && followup != null && followup.isNotEmpty && !answer.contains(followup)) {
-              return '${answer.trim()}\n\n💡 **Conseil AlternIA :** $followup';
+              return '${answer.trim()}\n\n**Conseil AlternIA :** $followup';
             }
             return answer.trim();
           }

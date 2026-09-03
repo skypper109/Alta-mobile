@@ -54,7 +54,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Le soleil s\'enfonce à l\'horizon du Manden. La poussière ocre flotte dans l\'air chaud et l\'harmattan souffle sur la terre aride. Les animaux du village se rassemblent autour du sage patriarche. L\'eau vient à manquer.\n\nZoumana le Lièvre s\'avance au milieu du cercle. Namori l\'Hyène, la gueule béante et l\'œil avide, grogne déjà dans l\'ombre en réclamant la part du lion.',
           culturalInsight:
-              '💡 Dans la tradition mandingue, les veillées de contes débutent toujours après la tombée de la nuit par la formule rituelle : « Conte, conte, conte ! Que le conte soit beau ! »',
+              'Dans la tradition mandingue, les veillées de contes débutent toujours après la tombée de la nuit par la formule rituelle : « Conte, conte, conte ! Que le conte soit beau ! »',
           choices: [
             StoryChoice(
               id: 'c1_a',
@@ -82,7 +82,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Après des heures d\'effort où chacun a sué sur la terre dure, l\'eau jaillit enfin, claire et pure comme un miroir d\'argent.\n\nMais la nuit venue, alors que tous dorment, des pas lourds s\'approchent. Namori s\'est faufilée pour voler la réserve d\'eau et tromper ses frères. Zoumana, posté derrière un buisson d\'épineux, la voit approcher.',
           culturalInsight:
-              '💡 La solidarité communautaire (Sinankunya et Gwa) est sacralisée dans la Charte de Kouroukan Fouga de 1236.',
+              'La solidarité communautaire (Sinankunya et Gwa) est sacralisée dans la Charte de Kouroukan Fouga de 1236.',
           choices: [
             StoryChoice(
               id: 'c2_a',
@@ -110,7 +110,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'En restant dissimulé, Zoumana découvre la cachette où Namori dissimule la calebasse sacrée du village. L\'hyène compte s\'enfuir avant l\'aube vers les collines de grès.\n\nZoumana doit agir avec promptitude avant que la caravane des chasseurs ne passe.',
           culturalInsight:
-              '💡 Le lièvre incarne dans les contes ouest-africains le triomphe de la vivacité d\'esprit sur la force brute incontrôlée.',
+              'Le lièvre incarne dans les contes ouest-africains le triomphe de la vivacité d\'esprit sur la force brute incontrôlée.',
           choices: [
             StoryChoice(
               id: 'c2_c',
@@ -138,7 +138,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Attirée par l\'odeur du miel, Namori plonge la tête la première dans le piège ! Ses pattes restent collées, et ses grognements ridicules réveillent tout le village assemblé.\n\nLe sage du village s\'avance sous les acclamations. Devant la honte de l\'hyène et le sourire calme de Zoumana, la vérité éclate au grand jour.',
           culturalInsight:
-              '💡 Les fables traditionnelles ne visent pas la punition violente mais la honte éducative et le rétablissement de l\'harmonie.',
+              'Les fables traditionnelles ne visent pas la punition violente mais la honte éducative et le rétablissement de l\'harmonie.',
           isEpilogue: true,
         ),
         StoryScene(
@@ -149,7 +149,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Croyant entendre la voix des aïeux courroucés, Namori trébuche, lâche son butin et s\'enfuit à toutes jambes vers la forêt lointaine ! L\'eau du puits est sauvée pour tous les enfants du village.\n\nZoumana est salué par les anciens comme le gardien de la paix et de la justice.',
           culturalInsight:
-              '💡 La parole juste (Kuma Kuma) est considérée comme l\'arme la plus noble dans la culture malienne.',
+              'La parole juste (Kuma Kuma) est considérée comme l\'arme la plus noble dans la culture malienne.',
           isEpilogue: true,
         ),
       ],
@@ -204,7 +204,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Chaque année, le serpent géant Wagadou Bida exigeait un tribut sacré pour faire pleuvoir des pépites d\'or sur le royaume du Wagadou. Mais cette année, la jeune Sia, renommée pour sa pureté et sa bravoure, est désignée.\n\nSon fiancé, le preux cavalier Mamadou Lamine, refuse de courber l\'échine devant la fatalité.',
           culturalInsight:
-              '💡 L\'Empire du Ghana (Wagadou), fondé au IVe siècle, était surnommé « le pays de l\'or » par les chroniqueurs arabes.',
+              'L\'Empire du Ghana (Wagadou), fondé au IVe siècle, était surnommé « le pays de l\'or » par les chroniqueurs arabes.',
           choices: [
             StoryChoice(
               id: 'wb_c1_a',
@@ -232,7 +232,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Le chef des forgerons forge un sabre étincelant trempé dans les eaux mystiques du fleuve Sénégal. « Cette lame tranchera l\'illusion de la peur, Mamadou. Mais sois prêt à affronter la colère des éléments ! »\n\nMamadou monte son étalon blanc et galope jusqu\'au puits sacré.',
           culturalInsight:
-              '💡 Les Numuw (forgerons) jouissaient d\'un statut quasi-sacré au Mali, maîtres de la transformation et médiateurs du monde spirituel.',
+              'Les Numuw (forgerons) jouissaient d\'un statut quasi-sacré au Mali, maîtres de la transformation et médiateurs du monde spirituel.',
           choices: [
             StoryChoice(
               id: 'wb_c2_a',
@@ -260,7 +260,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Les anciens devins révèlent : « Le serpent n\'a de pouvoir que par la crainte qu\'il inspire. Tranche ses têtes sans hésitation, et le peuple découvrira que sa vraie richesse n\'est pas dans l\'or, mais dans sa volonté ! »',
           culturalInsight:
-              '💡 Le mythe de Wagadou Bida symbolise la fin de l\'ère des tributs archaïques et l\'essor des grands empires marchands.',
+              'Le mythe de Wagadou Bida symbolise la fin de l\'ère des tributs archaïques et l\'essor des grands empires marchands.',
           choices: [
             StoryChoice(
               id: 'wb_c2_c',
@@ -280,7 +280,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'D\'un geste magistral, Mamadou abat le monstre et sauve Sia sous les clameurs de joie du peuple de Koumbi Saleh !\n\nBien que la pluie d\'or cesse, les Soninkés se tournent vers le commerce, l\'agriculture et la sagesse, bâtissant une réputation de bâtisseurs qui traversera les siècles.',
           culturalInsight:
-              '💡 La mémoire de Wagadou Bida est encore chantée de nos jours par les griots Geseru à Kayes et dans tout le Sahel.',
+              'La mémoire de Wagadou Bida est encore chantée de nos jours par les griots Geseru à Kayes et dans tout le Sahel.',
           isEpilogue: true,
         ),
       ],
@@ -335,7 +335,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Assis au bord de l\'eau après une longue journée à souffler sur les braises, Fodé contemple le Djoliba. Soudain, perché sur la branche d\'un balanzan centenaire, un oiseau étincelant entonne une mélodie qui fait vibrer le métal de ses outils.\n\n« Forgeron, dit l\'oiseau, cherches-tu le secret qui rend le fer aussi souple que l\'eau et aussi dur que le diamant ? »',
           culturalInsight:
-              '💡 Le fleuve Niger est appelé Djoliba (« le fleuve de sang / de vie ») en langue bambara et mandingue.',
+              'Le fleuve Niger est appelé Djoliba (« le fleuve de sang / de vie ») en langue bambara et mandingue.',
           choices: [
             StoryChoice(
               id: 'fo_c1_a',
@@ -363,7 +363,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Touché par la bienveillance de Fodé, l\'oiseau plonge dans les flots et en ressort tenant une braise aquatique. « Ne frappe jamais le fer avec colère. Tempère-le avec patience, en pensant à la vie qu\'il protégera. »\n\nFodé regagne l\'atelier pour forger son premier chef-d\'œuvre.',
           culturalInsight:
-              '💡 À Ségou, la corporation des forgerons fabriquait tant les armes de défense des Tônjons que les houes agricoles nourricières.',
+              'À Ségou, la corporation des forgerons fabriquait tant les armes de défense des Tônjons que les houes agricoles nourricières.',
           choices: [
             StoryChoice(
               id: 'fo_c2_a',
@@ -383,7 +383,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'L\'oiseau s\'élève et déclenche un feu ardent. « L\'ambition sans sagesse consume celui qui la porte ! Prouve que ton cœur ne brûle pas d\'orgueil avant de toucher à ce secret. »',
           culturalInsight:
-              '💡 Les mythes initiatiques du Komo enseignent que la connaissance spirituelle précède toujours la maîtrise technique.',
+              'Les mythes initiatiques du Komo enseignent que la connaissance spirituelle précède toujours la maîtrise technique.',
           choices: [
             StoryChoice(
               id: 'fo_c2_b',
@@ -403,7 +403,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Fodé devient le plus respecté des forgerons du Royaume de Ségou. Ses ouvrages, façonnés avec respect et amour du peuple, ne rouilleront jamais.\n\nChaque soir, il dépose une pincée de grains au bord du fleuve en mémoire de l\'oiseau du Djoliba.',
           culturalInsight:
-              '💡 Les Balanzans (acacias sacrés de Ségou) sont réputés abriter les esprits protecteurs de la cité.',
+              'Les Balanzans (acacias sacrés de Ségou) sont réputés abriter les esprits protecteurs de la cité.',
           isEpilogue: true,
         ),
       ],
@@ -449,7 +449,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Le jeune Moussa porte l\'habit de toile ocre des chasseurs Dozo orné de cauris. La nuit tombe vite sur la falaise de Siby. Face à lui se dresse le tronc colossal d\'un baobab creux où brille une petite lueur chaleureuse.',
           culturalInsight:
-              '💡 La confrérie des Dozos est l\'une des plus anciennes institutions éthiques d\'Afrique, fondée sur la protection de la communauté et de l\'environnement.',
+              'La confrérie des Dozos est l\'une des plus anciennes institutions éthiques d\'Afrique, fondée sur la protection de la communauté et de l\'environnement.',
           choices: [
             StoryChoice(
               id: 'bd_c1_a',
@@ -469,7 +469,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Le sage aveugle sourit dans la pénombre : « Tu as su saluer avant de demander. Choisis maintenant l\'offrande que tu porteras à ton village à ton retour. »',
           culturalInsight:
-              '💡 Les Dozos prêtent serment de ne jamais prélever dans la nature plus que le strict besoin de subsistance.',
+              'Les Dozos prêtent serment de ne jamais prélever dans la nature plus que le strict besoin de subsistance.',
           choices: [
             StoryChoice(
               id: 'bd_c2_a',
@@ -489,7 +489,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Guidé par la bénédiction du sage, Moussa retrouve son village. Les graines semées donneront une forêt protectrice qui nourrira et abritera le Manden pendant des siècles.',
           culturalInsight:
-              '💡 Le baobab (Sira) est considéré au Mali comme l\'arbre de la vie et de la palabre.',
+              'Le baobab (Sira) est considéré au Mali comme l\'arbre de la vie et de la palabre.',
           isEpilogue: true,
         ),
       ],
@@ -544,7 +544,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Le vent s\'est tu subitement sur l\'Erg. Bilal aperçoit des lanternes suspendues à l\'entrée d\'une tente en peau de chameau. Un thé fumant à la menthe l\'attend sur un tapis d\'indigo.',
           culturalInsight:
-              '💡 L\'hospitalité (Diyafa) dans le désert malien est une règle sacrée : tout voyageur a droit à l\'eau, au thé et à l\'abri sans condition.',
+              'L\'hospitalité (Diyafa) dans le désert malien est une règle sacrée : tout voyageur a droit à l\'eau, au thé et à l\'abri sans condition.',
           choices: [
             StoryChoice(
               id: 'cs_c1_a',
@@ -564,7 +564,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'Le gardien déroule un vieux parchemin calligraphié à l\'encre de suie et d\'or. « Voici la carte que les astronomes de Sankoré ont dessinée il y a six cents ans. Regarde la constellation du Scorpion, elle t\'indique la porte de Tombouctou. »',
           culturalInsight:
-              '💡 Les manuscrits de Tombouctou couvrent des domaines savants tels que l\'astronomie, les mathématiques, la médecine et le droit.',
+              'Les manuscrits de Tombouctou couvrent des domaines savants tels que l\'astronomie, les mathématiques, la médecine et le droit.',
           choices: [
             StoryChoice(
               id: 'cs_c2_a',
@@ -584,7 +584,7 @@ abstract final class MockCultureStoriesData {
           narrativeText:
               'À l\'aube, Bilal conduit sa caravane saine et sauve jusqu\'aux marchés parfumés de Tombouctou. Il remet le parchemin aux maîtres de la bibliothèque de Sankoré, perpétuant ainsi la chaîne sacrée de la mémoire.',
           culturalInsight:
-              '💡 Tombouctou abritait plus de 25 000 étudiants au XVIe siècle au sein de l\'Université de Sankoré.',
+              'Tombouctou abritait plus de 25 000 étudiants au XVIe siècle au sein de l\'Université de Sankoré.',
           isEpilogue: true,
         ),
       ],

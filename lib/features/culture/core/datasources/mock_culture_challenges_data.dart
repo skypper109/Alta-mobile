@@ -12,9 +12,9 @@ abstract final class MockCultureChallengesData {
       riddleText:
           'Je voyage sans jambes et je parle sans bouche.\nJe caresse la tête du roi comme celle du mendiant.\nNul ne peut me voir, mais chacun entend mon passage.\n\nQui suis-je ?',
       hints: [
-        '💡 Indice 1 : Je suis invisible mais capable de faire danser les branches des baobabs.',
-        '💡 Indice 2 : Les piroguiers du Djoliba et les caravanes du désert scrutent ma direction.',
-        '💡 Indice 3 : En saison sèche, je porte le nom d\'Harmattan.',
+        'Indice 1 : Je suis invisible mais capable de faire danser les branches des baobabs.',
+        'Indice 2 : Les piroguiers du Djoliba et les caravanes du désert scrutent ma direction.',
+        'Indice 3 : En saison sèche, je porte le nom d\'Harmattan.',
       ],
       options: [
         'Le Vent (Fonyo)',
@@ -41,9 +41,9 @@ abstract final class MockCultureChallengesData {
       riddleText:
           'Si tu marches, il marche avec toi.\nSi tu cours à perdre haleine, il court à tes côtés.\nMais dès que la nuit noire tombe, il s\'évanouit sans bruit.\n\nQui suis-je ?',
       hints: [
-        '💡 Indice 1 : Il est toujours noir, quel que soit le tissu de ton boubou.',
-        '💡 Indice 2 : Il grandit quand le soleil se couche et rétrécit à midi pile.',
-        '💡 Indice 3 : Il te quitte dès que la flamme de la lampe s\'éteint.',
+        'Indice 1 : Il est toujours noir, quel que soit le tissu de ton boubou.',
+        'Indice 2 : Il grandit quand le soleil se couche et rétrécit à midi pile.',
+        'Indice 3 : Il te quitte dès que la flamme de la lampe s\'éteint.',
       ],
       options: [
         'L\'Ombre (Dounou)',
@@ -70,9 +70,9 @@ abstract final class MockCultureChallengesData {
       riddleText:
           'Un tronc d\'arbre mort, coiffé de la peau d\'une chèvre.\nOn le frappe avec les mains, et pourtant tout le village se met à danser de joie.\n\nQui suis-je ?',
       hints: [
-        '💡 Indice 1 : Les griots et forgerons taillent son bois dans le Lenké sacré.',
-        '💡 Indice 2 : Il rythme les fêtes de moisson, les mariages et les intronisations.',
-        '💡 Indice 3 : Ses frappes sont le Ton, le Slap et la Basse.',
+        'Indice 1 : Les griots et forgerons taillent son bois dans le Lenké sacré.',
+        'Indice 2 : Il rythme les fêtes de moisson, les mariages et les intronisations.',
+        'Indice 3 : Ses frappes sont le Ton, le Slap et la Basse.',
       ],
       options: [
         'Le Djembé / Tam-tam',
@@ -99,9 +99,9 @@ abstract final class MockCultureChallengesData {
       riddleText:
           'Un grand arbre couché qui glisse sur l\'eau sans jamais boire.\nIl porte cent sacs de mil et cinquante hommes sans couler,\nmais une simple goutte d\'eau au fond peut le faire pleurer.\n\nQui suis-je ?',
       hints: [
-        '💡 Indice 1 : Les pêcheurs Bozos sont ses maîtres absolus.',
-        '💡 Indice 2 : On la propulse avec une perche ou une pagaie en bois poli.',
-        '💡 Indice 3 : Elle relie Koulikoro, Mopti et Tombouctou au gré du courant.',
+        'Indice 1 : Les pêcheurs Bozos sont ses maîtres absolus.',
+        'Indice 2 : On la propulse avec une perche ou une pagaie en bois poli.',
+        'Indice 3 : Elle relie Koulikoro, Mopti et Tombouctou au gré du courant.',
       ],
       options: [
         'La Pirogue (Kounkoro)',
@@ -128,9 +128,9 @@ abstract final class MockCultureChallengesData {
       riddleText:
           'La mère donne naissance à son fils dans la rougeur.\nMais quand le fils grandit et devient tout blanc,\nil étouffe et enterre sa propre mère.\n\nQui sommes-nous ?',
       hints: [
-        '💡 Indice 1 : L\'un réchauffe les veillées et cuit le tô de mil.',
-        '💡 Indice 2 : L\'autre reste au foyer au petit matin, grise et froide.',
-        '💡 Indice 3 : L\'un est rouge et brûlant, l\'autre est cendre.',
+        'Indice 1 : L\'un réchauffe les veillées et cuit le tô de mil.',
+        'Indice 2 : L\'autre reste au foyer au petit matin, grise et froide.',
+        'Indice 3 : L\'un est rouge et brûlant, l\'autre est cendre.',
       ],
       options: [
         'Le Feu et la Cendre (Tasuma & Bugun)',
@@ -157,9 +157,9 @@ abstract final class MockCultureChallengesData {
       riddleText:
           'J\'ai un seul œil percé dans la tête.\nJe traverse sans crainte les étoffes les plus denses,\nen traînant derrière moi une longue queue qui ne me quitte jamais.\n\nQui suis-je ?',
       hints: [
-        '💡 Indice 1 : Les maîtres tisserands et tailleurs de boubous ne peuvent se passer de moi.',
-        '💡 Indice 2 : Je réunis ce qui est déchiré.',
-        '💡 Indice 3 : Mon corps est d\'acier fin et ma queue de coton filé.',
+        'Indice 1 : Les maîtres tisserands et tailleurs de boubous ne peuvent se passer de moi.',
+        'Indice 2 : Je réunis ce qui est déchiré.',
+        'Indice 3 : Mon corps est d\'acier fin et ma queue de coton filé.',
       ],
       options: [
         'L\'Aiguille et le Fil (Miseli)',
@@ -320,9 +320,9 @@ abstract final class MockCultureChallengesData {
     riddleText:
         'Je suis petite comme une perle, mais je traverse les siècles.\nLes reines du Manden m\'arboraient dans leurs tresses, et j\'achetais des chevaux au temps de Kankan Moussa.\n\nQui suis-je ?',
     hints: [
-      '💡 Indice 1 : Je viens des profondeurs de l\'océan Indien et de l\'Atlantique.',
-      '💡 Indice 2 : J\'ai servi de monnaie d\'échange sacrée dans tout l\'Empire du Mali.',
-      '💡 Indice 3 : On me brode sur le boubou des chasseurs Dozo et les masques Dogon.',
+      'Indice 1 : Je viens des profondeurs de l\'océan Indien et de l\'Atlantique.',
+      'Indice 2 : J\'ai servi de monnaie d\'échange sacrée dans tout l\'Empire du Mali.',
+      'Indice 3 : On me brode sur le boubou des chasseurs Dozo et les masques Dogon.',
     ],
     options: [
       'Le Cauri (Koni)',
