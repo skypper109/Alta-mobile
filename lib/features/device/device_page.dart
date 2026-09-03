@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/constants.dart';
 import '../../core/ws_manager.dart';
@@ -142,6 +143,7 @@ class _DeviceDiscoveryPageState extends ConsumerState<DeviceDiscoveryPage>
   }
 
   Widget _buildBody(DeviceState state) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     // Erreur seule (aucun device)
     if (state.hasError && state.devices.isEmpty) {
       return DetErrorWidget(
@@ -209,6 +211,34 @@ class _DeviceDiscoveryPageState extends ConsumerState<DeviceDiscoveryPage>
             child: DetLoading(message: DetStrings.deviceScanning),
           )
         else ...[
+          if (state.connectedDevice?.id == 'alternia-server' ||
+              (state.devices.length == 1 && state.devices.first.id == 'alternia-server')) ...[
+            Container(
+              margin: const EdgeInsets.only(bottom: DetSizes.md),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: DetColors.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: DetColors.primary.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.cloud_done_rounded, color: DetColors.primary, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Aucun boîtier physique détecté • Connexion automatique au serveur AlternIA établie.',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : const Color(0xFF1E293B),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           ...state.devices.map(
             (device) => Padding(
               padding: const EdgeInsets.only(bottom: DetSizes.md),

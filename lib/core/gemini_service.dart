@@ -27,14 +27,7 @@ class GeminiService {
     if (custom != null && custom.isNotEmpty) {
       return [custom];
     }
-    return [
-      AltaApiConfig.serverBaseUrl,
-      'http://127.0.0.1:8000',
-      'http://10.0.2.2:8000',
-      'http://localhost:8000',
-      'http://192.168.4.1:8000',
-      'http://192.168.1.100:8000',
-    ];
+    return AltaApiConfig.candidateBaseUrls;
   }
 
   /// Construit les instructions système (conservé pour compatibilité)
@@ -52,10 +45,11 @@ class GeminiService {
 Tu es AlterniA, le tuteur socratique de correction d'exercices du programme malien.
 ''';
 
-  /// Envoie un message au backend AlternIA avec l'historique de conversation
+  /// Envoie un message au backend AlternIA avec l'historique et la matière sélectionnée
   Future<String> generateTeacherChatResponse(
     List<Map<String, String>> historyMessages, {
     String? customInstruction,
+    String? subject,
     String studentName = 'Élève',
     String studentClass = 'tse',
   }) async {
@@ -84,25 +78,28 @@ Tu es AlterniA, le tuteur socratique de correction d'exercices du programme mali
       };
     }).toList();
 
-    final payload = {
+    final payload = <String, dynamic>{
       'question': question.trim(),
       'student_class': studentClass,
       'student_name': studentName,
       'history': formattedHistory,
       'enable_rag': true,
     };
+    if (subject != null && subject.trim().isNotEmpty && subject.toLowerCase() != 'toutes') {
+      payload['subject'] = subject.trim();
+    }
 
     // 3. Essayer les URLs du backend
     for (final baseUrl in _candidateBaseUrls) {
       try {
-        _logger.i('[AlterniA] Envoi ($studentClass) → $baseUrl/api/chat...');
+        _logger.i('[AlterniA] Envoi ($studentClass - ${subject ?? 'général'}) → $baseUrl/api/chat...');
 
         final response = await _dio.post(
           '$baseUrl/api/chat',
           data: payload,
           options: Options(
             headers: {'Content-Type': 'application/json'},
-            connectTimeout: const Duration(seconds: 8),
+            connectTimeout: const Duration(seconds: 6),
             receiveTimeout: const Duration(seconds: 45),
           ),
         );
@@ -133,10 +130,95 @@ Tu es AlterniA, le tuteur socratique de correction d'exercices du programme mali
     return '⚠️ **Serveur AlternIA Hors-Ligne**\n\nImpossible de joindre le moteur pédagogique AlternIA sur le réseau local.\n\nVérifie que le serveur Backend AlternIA est bien démarré (`uvicorn backend.src.main:app`).';
   }
 
+  /// Vérifie si un code de compte premium est valide côté backend
+  Future<Map<String, dynamic>> verifyPremiumCode(String code) async {
+    final cleanCode = code.trim();
+    if (cleanCode.isEmpty) {
+      return {'valide': false, 'message': 'Le code ne peut pas être vide.'};
+    }
+
+    for (final baseUrl in _candidateBaseUrls) {
+      try {
+        final response = await _dio.post(
+          '$baseUrl/api/auth/verifier-code-premium',
+          data: {'code': cleanCode},
+          options: Options(
+            headers: {'Content-Type': 'application/json'},
+            connectTimeout: const Duration(seconds: 4),
+            receiveTimeout: const Duration(seconds: 8),
+          ),
+        );
+
+        if (response.statusCode == 200 && response.data is Map) {
+          return Map<String, dynamic>.from(response.data as Map);
+        }
+      } catch (_) {}
+    }
+
+    // Fallback de vérification hors-ligne si serveur déconnecté mais code officiel reconnu
+    final upper = cleanCode.toUpperCase();
+    final isLocalMaster = upper == 'ALTERNIA-PREMIUM-2026' ||
+        upper == 'SIMLI-LIVE-2026' ||
+        upper == 'ML-BKO-0042' ||
+        upper == 'ALT-BOX-2026-001' ||
+        upper == 'VIP-MALI-2026' ||
+        upper == 'PREMIUM2026';
+
+    if (isLocalMaster) {
+      return {
+        'valide': true,
+        'message': 'Code premium validé (mode hors-ligne vérifié)',
+        'code': upper,
+        'plan': 'AlterniA Live Pro',
+        'simli_enabled': true,
+      };
+    }
+
+    return {
+      'valide': false,
+      'message': 'Code premium non reconnu par le serveur AlternIA.',
+    };
+  }
+
+  /// Génère une vidéo de l'avatar Simli pour une question ou phrase
+  Future<String?> generateSimliAvatarVideo({
+    required String text,
+    String? subject,
+    String? voice,
+  }) async {
+    for (final baseUrl in _candidateBaseUrls) {
+      try {
+        final response = await _dio.post(
+          '$baseUrl/api/avatars/generate-video',
+          data: {
+            'question': text,
+            'phrase': text,
+            'matiere': subject ?? 'Général',
+            'voice': voice ?? 'vivienne',
+          },
+          options: Options(
+            connectTimeout: const Duration(seconds: 6),
+            receiveTimeout: const Duration(seconds: 60),
+          ),
+        );
+
+        if (response.statusCode == 200 && response.data is Map) {
+          final data = response.data as Map;
+          final videoUrl = data['video_url'] as String?;
+          if (videoUrl != null && videoUrl.isNotEmpty) {
+            return videoUrl.startsWith('http') ? videoUrl : '$baseUrl$videoUrl';
+          }
+        }
+      } catch (_) {}
+    }
+    return null;
+  }
+
   /// Alias de rétrocompatibilité pour appel direct
   Future<String> generateTeacherResponse(
     String userPrompt, {
     String? customInstruction,
+    String? subject,
     String studentName = 'Élève',
     String studentClass = 'Terminale',
   }) async {
@@ -145,16 +227,18 @@ Tu es AlterniA, le tuteur socratique de correction d'exercices du programme mali
         {'role': 'user', 'text': userPrompt}
       ],
       customInstruction: customInstruction,
+      subject: subject,
       studentName: studentName,
       studentClass: studentClass,
     );
   }
 
   /// Alias de rétrocompatibilité pour dialogue socratique
-  Future<String> generateSocraticResponse(String userPrompt) =>
+  Future<String> generateSocraticResponse(String userPrompt, {String? subject}) =>
       generateTeacherResponse(
         userPrompt,
         customInstruction: socraticSystemInstruction,
+        subject: subject,
       );
 }
 

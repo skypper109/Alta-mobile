@@ -8,7 +8,19 @@ import 'package:flutter/material.dart';
 // CONFIGURATION SERVEUR ALTERNIA (BACKEND IA & RAG)
 // ══════════════════════════════════════════════════════════════════════════════
 abstract final class AltaApiConfig {
-  static const String serverBaseUrl = 'https://nation-institutional-freeware-representations.trycloudflare.com';
+  static const String serverBaseUrl = 'http://127.0.0.1:8000';
+  static const String defaultLanUrl = 'http://172.20.10.14:8000';
+  static const String cloudTunnelUrl = 'https://nation-institutional-freeware-representations.trycloudflare.com';
+
+  static const List<String> candidateBaseUrls = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'http://172.20.10.14:8000',
+    'http://10.0.2.2:8000',
+    'http://192.168.4.1:8000',
+    'http://192.168.1.100:8000',
+    'https://nation-institutional-freeware-representations.trycloudflare.com',
+  ];
 }
 
 // ══════════════════════════════════════════════════════════════════════════════

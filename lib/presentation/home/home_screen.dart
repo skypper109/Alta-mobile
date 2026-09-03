@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../features/device/device_notifier.dart';
 import '../../features/device/device_page.dart';
+import '../../features/discussions/subject_chat_provider.dart';
 import '../../features/profile/user_prefs_notifier.dart';
 import '../../shared/widgets.dart';
 
@@ -245,7 +247,11 @@ class HomeScreen extends ConsumerWidget {
                     final progress = 0.0 + (i % 5) * 0.22;
 
                     return CustomCard(
-                      onTap: () => context.go('/discussions'),
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        ref.read(activeSubjectProvider.notifier).state = subject;
+                        context.go('/discussions');
+                      },
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
