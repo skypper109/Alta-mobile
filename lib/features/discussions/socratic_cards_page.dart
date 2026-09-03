@@ -13,6 +13,7 @@ import '../../core/gemini_service.dart';
 import '../../shared/painters.dart';
 import '../../shared/widgets.dart';
 import '../profile/user_prefs_notifier.dart';
+import 'subject_chat_provider.dart';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // MODÈLES DE MESSAGES & SESSIONS
@@ -73,7 +74,8 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
   String? _regeneratingMsgId; // id du message en cours de régénération
 
   late DiscussionSession _currentSession;
-  final List<DiscussionSession> _sessionsHistory = [];
+  List<DiscussionSession> _sessionsHistory = [];
+  String? _loadedSubject;
 
   @override
   void initState() {
@@ -128,9 +130,34 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
     } catch (_) {}
   }
 
+  Future<void> _switchSubject(String? subject) async {
+    final sessions = await SubjectChatHistoryManager.loadSessions(subject);
+    if (mounted) {
+      if (sessions.isNotEmpty) {
+        setState(() {
+          _sessionsHistory = sessions;
+          _currentSession = sessions.first;
+        });
+      } else {
+        final title = subject != null ? 'Discussion en $subject' : 'Nouvelle discussion avec AlterniA';
+        final fresh = DiscussionSession(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          title: title,
+          messages: [],
+          updatedAt: DateTime.now(),
+        );
+        setState(() {
+          _sessionsHistory = [fresh];
+          _currentSession = fresh;
+        });
+      }
+    }
+  }
+
   void _createNewDiscussionSession(
       {String? initialTopic, bool autoFetch = false}) {
-    final title = initialTopic ?? 'Nouvelle discussion avec AlterniA';
+    final activeSubject = ref.read(activeSubjectProvider);
+    final title = initialTopic ?? (activeSubject != null ? 'Discussion en $activeSubject' : 'Nouvelle discussion avec AlterniA');
     final session = DiscussionSession(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
@@ -254,12 +281,14 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
       };
     }).toList();
 
+    final activeSubject = ref.read(activeSubjectProvider);
     final userPrefs = ref.read(userPrefsProvider);
 
     try {
       final gemini = GeminiService();
       final responseText = await gemini.generateTeacherChatResponse(
         geminiHistory,
+        subject: activeSubject,
         studentName: userPrefs.name,
         studentClass: userPrefs.studentClassId,
       );
@@ -274,6 +303,7 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
       });
 
       _scrollToBottom();
+      await SubjectChatHistoryManager.saveSingleSession(activeSubject, _currentSession);
     } catch (e) {
       setState(() => _isLoading = false);
     }
@@ -321,12 +351,14 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
             })
         .toList();
 
+    final activeSubject = ref.read(activeSubjectProvider);
     final userPrefs = ref.read(userPrefsProvider);
 
     try {
       final gemini = GeminiService();
       final responseText = await gemini.generateTeacherChatResponse(
         geminiHistory,
+        subject: activeSubject,
         studentName: userPrefs.name,
         studentClass: userPrefs.studentClassId,
       );
@@ -342,6 +374,7 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
       });
 
       _scrollToBottom();
+      await SubjectChatHistoryManager.saveSingleSession(activeSubject, _currentSession);
     } catch (_) {
       setState(() {
         _isLoading = false;
@@ -390,15 +423,31 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        'Historique des Discussions',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textPri,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Historique des Discussions',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: textPri,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            ref.read(activeSubjectProvider) != null
+                                ? 'Matière : ${ref.read(activeSubjectProvider)}'
+                                : 'Toutes les matières (Général)',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              color: textSec,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(width: DetSizes.sm),
@@ -507,6 +556,14 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final userPrefs = ref.watch(userPrefsProvider);
+    final activeSubject = ref.watch(activeSubjectProvider);
+
+    // Synchronisation automatique de l'historique lors du changement de matière
+    if (_loadedSubject != activeSubject) {
+      _loadedSubject = activeSubject;
+      Future.microtask(() => _switchSubject(activeSubject));
+    }
+
     final malianClass = userPrefs.malianClass;
     final suggestedQuestions = malianClass?.suggestedQuestions ??
         [
@@ -556,6 +613,48 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
                       ),
                     ),
                   ),
+                ],
+              ),
+            ),
+
+            // ── 2. SÉLECTEUR HORIZONTAL DES MATIÈRES (FILTRE STRICT) ────────
+            Container(
+              height: 44,
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  // Option Toutes les matières
+                  _buildSubjectChip(
+                    label: 'Toutes',
+                    icon: Icons.all_inclusive_rounded,
+                    isSelected: activeSubject == null,
+                    isDark: isDark,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      ref.read(activeSubjectProvider.notifier).state = null;
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  // Matières de la classe de l'élève
+                  ...userPrefs.subjects.map((sub) {
+                    final isSel = activeSubject == sub;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _buildSubjectChip(
+                        label: sub,
+                        icon: _getSubjectIcon(sub),
+                        isSelected: isSel,
+                        isDark: isDark,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          ref.read(activeSubjectProvider.notifier).state = sub;
+                        },
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
@@ -980,6 +1079,79 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
         ),
       ),
     );
+  }
+
+  Widget _buildSubjectChip({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? DetColors.primary
+              : (isDark ? DetColors.surfaceAlt : const Color(0xFFF1F5F9)),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isSelected
+                ? DetColors.primary
+                : (isDark ? DetColors.border : const Color(0xFFE2E8F0)),
+            width: 1.2,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: DetColors.primary.withValues(alpha: 0.35),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 15,
+              color: isSelected
+                  ? Colors.white
+                  : (isDark ? AltaColors.secondary : const Color(0xFF0E7490)),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                color: isSelected
+                    ? Colors.white
+                    : (isDark ? Colors.white : const Color(0xFF1E293B)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  IconData _getSubjectIcon(String subject) {
+    final s = subject.toLowerCase();
+    if (s.contains('math')) return Icons.calculate_rounded;
+    if (s.contains('phys') || s.contains('chim')) return Icons.science_rounded;
+    if (s.contains('bio') || s.contains('svt') || s.contains('scien')) return Icons.biotech_rounded;
+    if (s.contains('franc') || s.contains('litt')) return Icons.auto_stories_rounded;
+    if (s.contains('hist') || s.contains('geo')) return Icons.history_edu_rounded;
+    if (s.contains('angl') || s.contains('lang')) return Icons.language_rounded;
+    if (s.contains('philo')) return Icons.psychology_rounded;
+    if (s.contains('eco')) return Icons.balance_rounded;
+    return Icons.school_rounded;
   }
 }
 
@@ -1488,3 +1660,4 @@ class _FormattedResponseView extends StatelessWidget {
     );
   }
 }
+

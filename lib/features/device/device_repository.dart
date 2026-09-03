@@ -65,23 +65,24 @@ class DeviceRepository implements IDeviceRepository {
       final results = await Future.wait(futures, eagerError: false);
 
       final found = results.whereType<DeviceEntity>().toList();
-      final devices = [geminiVirtualDevice, ...found];
-      _logger.i('[Device] ${devices.length} boîtier(s) disponible(s)');
+      _logger.i('[Device] ${found.length} boîtier(s) physique(s) détecté(s)');
 
-      return right(devices);
+      return right(found);
     } catch (e, st) {
-      _logger.e('[Device] Erreur scan, retour serveur Gemini', error: e, stackTrace: st);
-      return right([geminiVirtualDevice]);
+      _logger.e('[Device] Erreur scan boîtiers', error: e, stackTrace: st);
+      return right([]);
     }
   }
 
   List<String> _buildCandidateList() {
     return [
+      '172.20.10.14',
       '127.0.0.1',
       'localhost',
       '10.0.2.2',
       '192.168.4.1',
       '192.168.1.1',
+      '192.168.1.100',
       '10.42.0.1',
       '172.16.0.1',
     ];
