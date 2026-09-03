@@ -10,6 +10,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/gemini_service.dart';
 import '../device/device_notifier.dart';
+import '../profile/user_prefs_notifier.dart';
 import 'session_entity.dart';
 import 'session_repository.dart';
 
@@ -86,7 +87,7 @@ class SessionNotifier extends _$SessionNotifier {
   static final List<SessionMessage> _initialMockMessages = [
     SessionMessage(
       id: 'msg-01',
-      content: 'Bonjour ! Je suis DetAI, votre tuteur socratique intelligent connecté au moteur AlternIA.',
+      content: 'Bonjour ! Je suis votre tuteur pédagogique intelligent AlterniA.',
       speaker: Speaker.ai,
       timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
     ),
@@ -178,7 +179,12 @@ class SessionNotifier extends _$SessionNotifier {
 
     // 2. Appel au Backend AlternIA Local
     final gemini = ref.read(geminiServiceProvider);
-    final responseText = await gemini.generateSocraticResponse(trimmedText);
+    final userPrefs = ref.read(userPrefsProvider);
+    final responseText = await gemini.generateSocraticResponse(
+      trimmedText,
+      studentName: userPrefs.name,
+      studentClass: userPrefs.studentClassId,
+    );
 
     final aiMsg = SessionMessage(
       id: (DateTime.now().millisecondsSinceEpoch + 1).toString(),

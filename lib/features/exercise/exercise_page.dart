@@ -79,7 +79,7 @@ class _ExerciseScannerPageState extends ConsumerState<ExerciseScannerPage> {
                     children: [
                       Text('MES EXERCICES', style: DetTextStyles.caption.copyWith(color: DetColors.primary, fontWeight: FontWeight.w700)),
                       const SizedBox(height: 2),
-                      Text('Scanner Socratique', style: DetTextStyles.displayMd, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text('Scanner Pédagogique', style: DetTextStyles.displayMd, maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),
@@ -151,7 +151,7 @@ class _ExerciseScannerPageState extends ConsumerState<ExerciseScannerPage> {
             if (_isProcessing)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: DetSizes.xxl),
-                child: DetLoading(message: 'Analyse socratique de l\'énoncé en cours…'),
+                child: DetLoading(message: 'Analyse pédagogique de l\'énoncé en cours…'),
               )
             else if (_scannedFileName != null) ...[
               DetSectionHeader(title: 'Analyse : $_scannedFileName'),

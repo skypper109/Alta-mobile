@@ -29,7 +29,7 @@ enum AiState {
   String get label => switch (this) {
     AiState.idle      => 'Inactif',
     AiState.listening => 'Écoute',
-    AiState.thinking  => 'Analyse Socratique',
+    AiState.thinking  => 'Analyse Pédagogique',
     AiState.speaking  => 'Émission Vocale',
   };
 

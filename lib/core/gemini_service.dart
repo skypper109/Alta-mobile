@@ -2,6 +2,7 @@
 // Connecté directement au serveur local AlternIA (LLM Qwen 2.5 + RAG 1573 Chunks Maliens).
 library;
 
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 
@@ -40,9 +41,9 @@ class GeminiService {
     return 'Tu es AlterniA, le professeur particulier IA pour $classLabel du programme scolaire malien.';
   }
 
-  /// Prompt Socratique (conservé pour compatibilité)
+  /// Prompt Pédagogique (conservé pour compatibilité)
   static const String socraticSystemInstruction = '''
-Tu es AlterniA, le tuteur socratique de correction d'exercices du programme malien.
+Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme malien.
 ''';
 
   /// Envoie un message au backend AlternIA avec l'historique et la matière sélectionnée
@@ -78,12 +79,17 @@ Tu es AlterniA, le tuteur socratique de correction d'exercices du programme mali
       };
     }).toList();
 
+    final cleanName = studentName.trim().isNotEmpty ? studentName.trim() : 'Élève';
+    final nameInstruction = 'IMPORTANT : Adresse-toi directement à l\'élève en utilisant souvent son prénom ou nom "$cleanName" de façon bienveillante, naturelle, pédagogique et encourageante dans tes explications.';
+
     final payload = <String, dynamic>{
       'question': question.trim(),
       'student_class': studentClass,
-      'student_name': studentName,
+      'student_name': cleanName,
       'history': formattedHistory,
       'enable_rag': true,
+      'custom_instruction': '${customInstruction ?? ''}\n$nameInstruction'.trim(),
+      'system_instruction': nameInstruction,
     };
     if (subject != null && subject.trim().isNotEmpty && subject.toLowerCase() != 'toutes') {
       payload['subject'] = subject.trim();
@@ -126,8 +132,8 @@ Tu es AlterniA, le tuteur socratique de correction d'exercices du programme mali
       }
     }
 
-    _logger.w('[AlterniA] Le serveur local AlternIA est injoignable.');
-    return '⚠️ **Serveur AlternIA Hors-Ligne**\n\nImpossible de joindre le moteur pédagogique AlternIA sur le réseau local.\n\nVérifie que le serveur Backend AlternIA est bien démarré (`uvicorn backend.src.main:app`).';
+    _logger.w('[AlterniA] Aucun serveur n\'a pu répondre parmi les URLs testées.');
+    return "Je n'ai pas pu me connecter au moteur pédagogique AlterniA. Vérifiez la connexion de votre boîtier ou serveur.";
   }
 
   /// Vérifie si un code de compte premium est valide côté backend
@@ -214,6 +220,42 @@ Tu es AlterniA, le tuteur socratique de correction d'exercices du programme mali
     return null;
   }
 
+  /// Récupère le flux audio de synthèse vocale généré par le serveur AlternIA (/api/tts)
+  Future<Uint8List?> fetchBackendTtsAudio({
+    required String text,
+    String voice = 'vivienne',
+  }) async {
+    final cleanText = text.trim();
+    if (cleanText.isEmpty) return null;
+
+    for (final baseUrl in _candidateBaseUrls) {
+      try {
+        _logger.i('[AlterniA TTS] Requête synthèse vocale ($voice) → $baseUrl/api/tts');
+        final response = await _dio.post(
+          '$baseUrl/api/tts',
+          data: {
+            'text': cleanText,
+            'voice': voice,
+          },
+          options: Options(
+            responseType: ResponseType.bytes,
+            connectTimeout: const Duration(seconds: 4),
+            receiveTimeout: const Duration(seconds: 25),
+          ),
+        );
+
+        if (response.statusCode == 200 && response.data != null) {
+          final bytes = response.data;
+          if (bytes is Uint8List) return bytes;
+          if (bytes is List<int>) return Uint8List.fromList(bytes);
+        }
+      } catch (e) {
+        _logger.w('[AlterniA TTS] Échec sur $baseUrl : $e');
+      }
+    }
+    return null;
+  }
+
   /// Alias de rétrocompatibilité pour appel direct
   Future<String> generateTeacherResponse(
     String userPrompt, {
@@ -234,11 +276,18 @@ Tu es AlterniA, le tuteur socratique de correction d'exercices du programme mali
   }
 
   /// Alias de rétrocompatibilité pour dialogue socratique
-  Future<String> generateSocraticResponse(String userPrompt, {String? subject}) =>
+  Future<String> generateSocraticResponse(
+    String userPrompt, {
+    String? subject,
+    String studentName = 'Élève',
+    String studentClass = 'Terminale',
+  }) =>
       generateTeacherResponse(
         userPrompt,
         customInstruction: socraticSystemInstruction,
         subject: subject,
+        studentName: studentName,
+        studentClass: studentClass,
       );
 }
 

@@ -143,6 +143,165 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  void _showEditNameDialog(BuildContext context, WidgetRef ref, String currentName) {
+    final textController = TextEditingController(text: currentName == 'Élève AlterniA' ? '' : currentName);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSec = isDark ? AppColors.textSecondary : const Color(0xFF475569);
+    final surfaceColor = isDark ? AppColors.surfaceAlt : const Color(0xFFF8FAFC);
+    final borderColor = isDark ? AppColors.border : const Color(0xFFE2E8F0);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? AppColors.surface : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 24,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.border : const Color(0xFFCBD5E1),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Modifier mon prénom & nom',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: textPri,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'AlterniA utilisera ce nom pour s\'adresser à vous pendant vos séances d\'apprentissage.',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12.5,
+                  color: textSec,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Container(
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderColor),
+                ),
+                child: TextField(
+                  controller: textController,
+                  autofocus: true,
+                  textCapitalization: TextCapitalization.words,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: textPri,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Votre prénom ou nom complet…',
+                    hintStyle: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      color: textSec,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.person_outline_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                  onSubmitted: (val) {
+                    final trimmed = val.trim();
+                    if (trimmed.isNotEmpty) {
+                      ref.read(userPrefsProvider.notifier).updateName(trimmed);
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Nom mis à jour : $trimmed'),
+                          backgroundColor: AppColors.primary,
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        side: BorderSide(color: borderColor),
+                      ),
+                      child: Text(
+                        'Annuler',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w600,
+                          color: textSec,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final trimmed = textController.text.trim();
+                        if (trimmed.isNotEmpty) {
+                          ref.read(userPrefsProvider.notifier).updateName(trimmed);
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Nom mis à jour : $trimmed'),
+                              backgroundColor: AppColors.primary,
+                            ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Enregistrer',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userState = ref.watch(userPrefsProvider);
@@ -155,20 +314,10 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
-          children: [
-            // ── TOP HEADER ──────────────────────────────────────────────────
-            Row(
-              children: const [
-                AlterniaLogo(size: 28, showText: true),
-                Spacer(),
-                AlterniaAvatarTopBarButton(),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 125),
+        children: [
+          Text(
               'Mon Profil',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 24,
@@ -210,13 +359,36 @@ class ProfileScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              name,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: textPri,
-                              ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    name,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: textPri,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () => _showEditNameDialog(context, ref, rawName),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary.withValues(alpha: 0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.edit_rounded,
+                                      size: 16,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 4),
                             Container(
@@ -244,12 +416,27 @@ class ProfileScreen extends ConsumerWidget {
                   Divider(color: borderCol, height: 1),
                   const SizedBox(height: 14),
 
-                  // Button Change Class
-                  CustomButton(
-                    label: 'Changer de classe (Mali)',
-                    icon: Icons.tune_rounded,
-                    variant: CustomButtonVariant.secondary,
-                    onPressed: () => _showClassSelectorDialog(context, ref, userState.studentClassId),
+                  // Actions : Modifier nom & Changer de classe
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomButton(
+                          label: 'Modifier nom',
+                          icon: Icons.edit_rounded,
+                          variant: CustomButtonVariant.secondary,
+                          onPressed: () => _showEditNameDialog(context, ref, rawName),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: CustomButton(
+                          label: 'Changer classe',
+                          icon: Icons.tune_rounded,
+                          variant: CustomButtonVariant.secondary,
+                          onPressed: () => _showClassSelectorDialog(context, ref, userState.studentClassId),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -319,7 +506,6 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 20),
           ],
         ),
-      ),
     );
   }
 }
