@@ -8,6 +8,7 @@ import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../../../presentation/common/widgets/alternia_logo.dart';
 import '../../exploration/data/datasources/mock_mali_regions.dart';
 import '../widgets/culture_region_bottom_sheet.dart';
 import '../widgets/passport_item_card.dart';
@@ -134,6 +135,21 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
 
           // ── 9. BANNIÈRE INVITATION GUIDE IA ─────────────────────────────────
           _buildAiGuideBanner(context, isDark, cardBg, borderCol, titleColor, subtitleColor),
+
+          const SizedBox(height: 28),
+
+          // Footer Logo Culture avec "iA" en jaune !
+          const Center(
+            child: Opacity(
+              opacity: 0.5,
+              child: AlterniaLogo(
+                size: 24,
+                showText: true,
+                iaColor: CultureTheme.iaYellow,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );

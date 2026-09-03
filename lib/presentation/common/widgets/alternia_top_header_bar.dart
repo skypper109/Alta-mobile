@@ -61,11 +61,11 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // ── 1. LOGO ALTERNIA (Gauche) ─────────────────────────────────────
-          // iA en bleu/cyan pour l'éducation, iA en orange pour la culture
+          // iA en bleu/cyan pour l'éducation, iA en jaune pour la culture
           AlterniaLogo(
             size: 34,
             showText: true,
-            iaColor: isCulture ? CultureTheme.accentOrange : AppColors.secondary,
+            iaColor: isCulture ? CultureTheme.iaYellow : AppColors.secondary,
           ),
 
           const Spacer(),

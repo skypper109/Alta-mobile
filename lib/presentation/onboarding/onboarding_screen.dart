@@ -112,6 +112,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     size: 34,
                     showText: true,
                     textColor: textPri,
+                    iaColor: _currentStep == 2
+                        ? const Color(0xFFFFB800)
+                        : null,
                   ),
                   Container(
                     padding:
@@ -1033,6 +1036,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
             ],
           ),
+
+          const SizedBox(height: 24),
+
+          // Footer Logo Culture avec "iA" en jaune !
+          const Center(
+            child: Opacity(
+              opacity: 0.5,
+              child: AlterniaLogo(
+                size: 24,
+                showText: true,
+                iaColor: Color(0xFFFFB800),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
         ],
       ),
     );

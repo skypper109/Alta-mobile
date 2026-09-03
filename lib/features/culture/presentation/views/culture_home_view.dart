@@ -7,6 +7,7 @@ import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../../../presentation/common/widgets/alternia_logo.dart';
 import '../widgets/culture_region_bottom_sheet.dart';
 
 /// Vue 1 : Accueil Culture
@@ -439,6 +440,21 @@ class CultureHomeView extends ConsumerWidget {
                 );
               },
             ),
+
+          const SizedBox(height: 28),
+
+          // Footer Logo Culture avec "iA" en jaune !
+          const Center(
+            child: Opacity(
+              opacity: 0.5,
+              child: AlterniaLogo(
+                size: 24,
+                showText: true,
+                iaColor: CultureTheme.iaYellow,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
         ],
       ),
     );

@@ -9,6 +9,7 @@ import '../../core/datasources/mock_culture_stories_data.dart';
 import '../../core/models/culture_challenge_models.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../../../presentation/common/widgets/alternia_logo.dart';
 import '../widgets/story_audio_player_sheet.dart';
 
 /// Vue 3 : Jeux & Contes du Mali
@@ -205,6 +206,21 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
             ),
             const SizedBox(height: 20),
           ],
+
+          const SizedBox(height: 28),
+
+          // Footer Logo Culture avec "iA" en jaune !
+          const Center(
+            child: Opacity(
+              opacity: 0.5,
+              child: AlterniaLogo(
+                size: 24,
+                showText: true,
+                iaColor: CultureTheme.iaYellow,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
