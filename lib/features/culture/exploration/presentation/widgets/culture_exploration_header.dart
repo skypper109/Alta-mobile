@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/culture_theme.dart';
 
@@ -91,6 +92,32 @@ class CultureExplorationHeader extends StatelessWidget {
               ),
 
               const Spacer(),
+
+              // Bouton Recherche IA
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  context.push('/culture/search');
+                },
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.18 : 0.10),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.45 : 0.30),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.search_rounded,
+                    size: 20,
+                    color: CultureTheme.accentOrange,
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 8),
 
               // Compteur de régions
               Container(
