@@ -13,8 +13,8 @@ import '../../core/theme/culture_theme.dart';
 class CultureModeTransition {
   CultureModeTransition._();
 
-  /// Durée officielle de passage de portail (1500 ms)
-  static const Duration portalDuration = Duration(milliseconds: 1500);
+  /// Durée fluide de passage de portail (350 ms)
+  static const Duration portalDuration = Duration(milliseconds: 350);
 
   /// Crée une [CustomTransitionPage] pour GoRouter avec la transition portail
   static CustomTransitionPage<T> buildPage<T>({

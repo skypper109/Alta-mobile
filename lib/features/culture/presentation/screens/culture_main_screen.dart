@@ -13,14 +13,25 @@ import '../widgets/culture_navigation_tabs.dart';
 /// Accueil, Découverte, Jeux & Contes, Passeport
 /// STRICTEMENT SANS DÉGRADÉS selon les règles d'architecture UX/UI
 class CultureMainScreen extends ConsumerStatefulWidget {
-  const CultureMainScreen({super.key});
+  final int initialTabIndex;
+
+  const CultureMainScreen({
+    super.key,
+    this.initialTabIndex = 0,
+  });
 
   @override
   ConsumerState<CultureMainScreen> createState() => _CultureMainScreenState();
 }
 
 class _CultureMainScreenState extends ConsumerState<CultureMainScreen> {
-  int _currentTabIndex = 0;
+  late int _currentTabIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentTabIndex = widget.initialTabIndex;
+  }
 
   void _onTabSelected(int index) {
     setState(() {

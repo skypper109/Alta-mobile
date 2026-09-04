@@ -9,21 +9,40 @@ import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../exploration/data/datasources/mock_mali_regions.dart';
-import '../widgets/culture_region_bottom_sheet.dart';
+import '../../immersive/immersive.dart';
 import '../widgets/passport_item_card.dart';
 
-/// Vue 4 : Passeport Culturel & Mon Parcours
+/// Vue 4 : Passeport Culturel & Mon Parcours (Étape 4 — Sceaux Royaux & Tampons)
 /// Carnet personnel d'exploration culturelle du Mali
 /// STRICTEMENT SANS DÉGRADÉS selon la charte UX/UI
 class CulturePassportView extends ConsumerStatefulWidget {
   const CulturePassportView({super.key});
 
   @override
-  ConsumerState<CulturePassportView> createState() => _CulturePassportViewState();
+  ConsumerState<CulturePassportView> createState() =>
+      _CulturePassportViewState();
 }
 
 class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
   int _selectedFilterIndex = 0; // 0: Tout, 1: Figures, 2: Monuments, 3: Villes, 4: Contes, 5: Défis
+
+  static const List<String> _filters = [
+    'Tout',
+    'Figures',
+    'Monuments',
+    'Villes',
+    'Contes',
+    'Défis',
+  ];
+
+  static const List<IconData> _filterIcons = [
+    Icons.auto_awesome_rounded,
+    Icons.person_rounded,
+    Icons.account_balance_rounded,
+    Icons.location_city_rounded,
+    Icons.auto_stories_rounded,
+    Icons.military_tech_rounded,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +53,9 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final subtitleColor =
         isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
     final borderCol =
         isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
-    final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
     final surfaceAlt =
         isDark ? CultureTheme.darkSurfaceAlt : CultureTheme.lightSurfaceAlt;
 
@@ -69,38 +88,84 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
           .toList();
     }
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── 1. MON PARCOURS (RÉSUMÉ POÉTIQUE) ───────────────────────────────
-          _buildSectionTitle('MON PARCOURS', Icons.insights_rounded, borderCol),
-          const SizedBox(height: 12),
-          _buildJourneySummary(passport, isDark, cardBg, borderCol, titleColor, subtitleColor),
+    return CulturalAtmosphereCanvas(
+      enableParticles: true,
+      enableBogolanMotifs: true,
+      motifOpacity: 0.11,
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── 1. GRAND PASSEPORT DU MANDEN & STATUT ROYAL ────────────────────
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 60),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle(
+                      'PASSEPORT DU MANDEN', Icons.verified_user_rounded, borderCol),
+                  const SizedBox(height: 12),
+                  _buildPassportHeaderCard(context, passport, isDark, cardBg,
+                      borderCol, titleColor, subtitleColor),
+                ],
+              ),
+            ),
 
-          const SizedBox(height: 28),
+            const SizedBox(height: 28),
 
-          // ── 2. RÉGIONS EXPLORÉES ────────────────────────────────────────────
-          _buildSectionTitle('RÉGIONS EXPLORÉES', Icons.map_rounded, borderCol),
-          const SizedBox(height: 12),
-          _buildRegionsExplorationTracker(context, passport, isDark, cardBg, borderCol, titleColor, subtitleColor),
+            // ── 2. RÉGIONS EXPLORÉES (LE CERCLE DU MALI) ──────────────────────
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 140),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle(
+                      'RÉGIONS EXPLORÉES', Icons.map_rounded, borderCol),
+                  const SizedBox(height: 12),
+                  _buildRegionsExplorationTracker(context, passport, isDark,
+                      cardBg, borderCol, titleColor, subtitleColor),
+                ],
+              ),
+            ),
 
-          const SizedBox(height: 28),
 
-          // ── 4. COLLECTION DES DÉCOUVERTES (FILTRABLE) ───────────────────────
-          _buildSectionTitle('COLLECTION DES DÉCOUVERTES', Icons.collections_bookmark_rounded, borderCol),
-          const SizedBox(height: 12),
-          _buildFilterPills(isDark, surfaceAlt, borderCol),
-          const SizedBox(height: 16),
-          _buildDiscoveriesGrid(context, displayedEntries, isDark, surfaceAlt, subtitleColor),
-        ],
+
+            const SizedBox(height: 28),
+
+            // ── 4. COLLECTION DES DÉCOUVERTES (TAMPONS & SCEAUX) ──────────────
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 260),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle('COLLECTION DES ESTAMPILLAGES',
+                      Icons.collections_bookmark_rounded, borderCol),
+                  const SizedBox(height: 12),
+                  _buildFilterPills(isDark, surfaceAlt, borderCol),
+                  const SizedBox(height: 16),
+                  _buildDiscoveriesGrid(context, displayedEntries, isDark,
+                      surfaceAlt, subtitleColor),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            // ── 5. BANNIÈRE GUIDE CULTUREL IA ─────────────────────────────────
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 320),
+              child: _buildAiGuideBanner(context, isDark, cardBg, borderCol,
+                  titleColor, subtitleColor),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // ── TITRE DE SECTION ────────────────────────────────────────────────────────
+  // ── TITRE DE SECTION AVEC LIGNE SÉPARATRICE ─────────────────────────────────
   Widget _buildSectionTitle(String title, IconData icon, Color borderCol) {
     return Row(
       children: [
@@ -137,7 +202,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     );
   }
 
-  // ── 1. CARTE EN-TÊTE DU PASSEPORT ───────────────────────────────────────────
+  // ── 1. CARTE ROYALE DU PASSEPORT ───────────────────────────────────────────
   Widget _buildPassportHeaderCard(
     BuildContext context,
     PassportState passport,
@@ -147,61 +212,55 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     Color titleColor,
     Color subtitleColor,
   ) {
-    return Container(
+    return CulturalInteractiveCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF131D31) : const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: CultureTheme.accentOrange.withValues(alpha: 0.4),
-          width: 1.4,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-            blurRadius: 18,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
+      showSudaneseCorners: true,
+      activeAccentColor: CultureTheme.accentOrange,
+      backgroundColor: cardBg,
+      borderRadius: 22,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Sceau d'or impérial
               Container(
-                width: 52,
-                height: 52,
+                width: 54,
+                height: 54,
                 decoration: BoxDecoration(
                   color: CultureTheme.accentOrange.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: CultureTheme.accentOrange,
-                    width: 1.5,
+                    width: 2.0,
                   ),
                 ),
                 child: const Center(
                   child: Icon(
-                    Icons.public_rounded,
+                    Icons.verified_user_rounded,
                     color: CultureTheme.accentOrange,
                     size: 28,
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'RÉPUBLIQUE DU MALI • ALTERNIA',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
-                        color: CultureTheme.accentOrange,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          'RÉPUBLIQUE DU MALI • ALTERNIA',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.0,
+                            color: CultureTheme.accentOrange,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -213,119 +272,45 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      'N° ${passport.passportNumber}',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: subtitleColor,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          'N° ${passport.passportNumber}',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: CultureTheme.cyanTurquoise,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: CultureTheme.vertNaturel
+                                .withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'INITIÉ DU MANDEN',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w800,
+                              color: CultureTheme.vertNaturel,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ],
           ),
+
           const SizedBox(height: 18),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isDark ? CultureTheme.darkSurface : Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: borderCol),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildPassportMiniStat(
-                  icon: Icons.person_rounded,
-                  value: passport.travelerName,
-                  label: 'Explorateur',
-                  color: CultureTheme.primaryBlue,
-                  subtitleColor: subtitleColor,
-                ),
-                Container(width: 1, height: 28, color: borderCol),
-                _buildPassportMiniStat(
-                  icon: Icons.explore_rounded,
-                  value: '${passport.totalDiscoveries}',
-                  label: 'Découvertes',
-                  color: CultureTheme.accentOrange,
-                  subtitleColor: subtitleColor,
-                ),
-                Container(width: 1, height: 28, color: borderCol),
-                _buildPassportMiniStat(
-                  icon: Icons.map_rounded,
-                  value: '${passport.exploredRegionIds.length}/10',
-                  label: 'Régions',
-                  color: CultureTheme.cyanTurquoise,
-                  subtitleColor: subtitleColor,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildPassportMiniStat({
-    required IconData icon,
-    required String value,
-    required String label,
-    required Color color,
-    required Color subtitleColor,
-  }) {
-    return Column(
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 4),
-            Text(
-              value,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w800,
-                color: color,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: subtitleColor,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ── 2. MON PARCOURS ─────────────────────────────────────────────────────────
-  Widget _buildJourneySummary(
-    PassportState passport,
-    bool isDark,
-    Color cardBg,
-    Color borderCol,
-    Color titleColor,
-    Color subtitleColor,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: borderCol),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          // Ligne de statistiques récapitulatives en 4 médaillons
           Row(
             children: [
               _buildStatPill(
@@ -348,7 +333,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                 icon: Icons.location_city_rounded,
                 count: passport.villes.length,
                 label: 'Cités',
-                color: CultureTheme.vertNaturel,
+                color: CultureTheme.cyanTurquoise,
                 isDark: isDark,
               ),
               const SizedBox(width: 8),
@@ -356,19 +341,43 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                 icon: Icons.auto_stories_rounded,
                 count: passport.contes.length,
                 label: 'Contes',
-                color: CultureTheme.cyanTurquoise,
+                color: CultureTheme.rougeKoulikoro,
                 isDark: isDark,
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          Text(
-            '« Chaque pas posé sur les terres du Mali tisse la mémoire vivante de son histoire millénaire. »',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              fontStyle: FontStyle.italic,
-              color: subtitleColor,
-              height: 1.45,
+
+          const SizedBox(height: 16),
+
+          // Citation ancestrale du Manden
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            decoration: BoxDecoration(
+              color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.08 : 0.05),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: CultureTheme.accentOrange.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.format_quote_rounded,
+                  size: 16,
+                  color: CultureTheme.accentOrange,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    '« Chaque pas posé sur les terres du Mali tisse la mémoire vivante de son histoire. »',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontStyle: FontStyle.italic,
+                      color: subtitleColor,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -385,20 +394,20 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
   }) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
         decoration: BoxDecoration(
           color: color.withValues(alpha: isDark ? 0.12 : 0.08),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: color.withValues(alpha: 0.25), width: 1),
         ),
         child: Column(
           children: [
-            Icon(icon, size: 16, color: color),
-            const SizedBox(height: 4),
+            Icon(icon, size: 15, color: color),
+            const SizedBox(height: 3),
             Text(
               count.toString(),
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 15,
+                fontSize: 14.5,
                 fontWeight: FontWeight.w800,
                 color: color,
               ),
@@ -406,7 +415,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
             Text(
               label,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 10,
+                fontSize: 9.5,
                 fontWeight: FontWeight.w600,
                 color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
               ),
@@ -417,97 +426,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     );
   }
 
-  // ── 3. CARROUSEL DES MOMENTS MÉMORABLES ──────────────────────────────────────
-  Widget _buildMilestonesCarousel(
-    BuildContext context,
-    List<PassportEntry> milestones,
-    bool isDark,
-    Color cardBg,
-    Color borderCol,
-    Color titleColor,
-    Color subtitleColor,
-  ) {
-    return SizedBox(
-      height: 115,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: milestones.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final item = milestones[index];
-          return GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              context.push(item.targetRoute);
-            },
-            child: Container(
-              width: 230,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: CultureTheme.accentOrange.withValues(alpha: 0.3),
-                  width: 1.2,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: CultureTheme.accentOrange.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        item.type.icon,
-                        color: CultureTheme.accentOrange,
-                        size: 22,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          item.title,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w700,
-                            color: titleColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          item.subtitle,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            color: subtitleColor,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  // ── 4. TRACKER RÉGIONAL — DESIGN PREMIUM ──────────────────────────────────
+  // ── 2. TRACKER RÉGIONAL — DESIGN MINIMALISTE & ÉPURÉ ──────────────────────
   Widget _buildRegionsExplorationTracker(
     BuildContext context,
     PassportState passport,
@@ -520,258 +439,198 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     final allRegions = MockMaliRegions.regions;
     final exploredCount = passport.exploredRegionIds.length;
     final totalCount = allRegions.length;
-    final progress = totalCount > 0 ? exploredCount / totalCount : 0.0;
+    final filterState = ref.watch(activeCultureRegionProvider);
+    final activeRegionId = filterState.activeRegion?.id;
 
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: CultureTheme.primaryBlue.withValues(alpha: isDark ? 0.25 : 0.15),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return CulturalInteractiveCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      showSudaneseCorners: false,
+      activeAccentColor: CultureTheme.primaryBlue,
+      backgroundColor: cardBg,
+      borderRadius: 18,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── En-tête avec anneau de progression ──
+          // ── Ligne d'en-tête épurée : Titre, Compteur & Segments ──────────
           Row(
             children: [
-              // Anneau circulaire de progression
-              SizedBox(
-                width: 52,
-                height: 52,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: 52,
-                      height: 52,
-                      child: CircularProgressIndicator(
-                        value: progress,
-                        strokeWidth: 4.5,
-                        backgroundColor: isDark
-                            ? const Color(0xFF1E293B)
-                            : const Color(0xFFE2E8F0),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          CultureTheme.primaryBlue,
-                        ),
-                        strokeCap: StrokeCap.round,
-                      ),
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '$exploredCount',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                            color: CultureTheme.primaryBlue,
-                            height: 1,
-                          ),
-                        ),
-                        Text(
-                          '/$totalCount',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w600,
-                            color: subtitleColor,
-                            height: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: CultureTheme.primaryBlue.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.explore_rounded,
+                    size: 18,
+                    color: CultureTheme.primaryBlue,
+                  ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Terres Explorées',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: titleColor,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Terroirs du Mali',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: titleColor,
+                          ),
+                        ),
+                        Text(
+                          '$exploredCount / $totalCount explorés',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: CultureTheme.primaryBlue,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      exploredCount == 0
-                          ? 'Commencez votre odyssée malienne'
-                          : exploredCount >= totalCount
-                              ? 'Maître explorateur du Mali !'
-                              : '${totalCount - exploredCount} région${totalCount - exploredCount > 1 ? 's' : ''} à découvrir',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                        color: subtitleColor,
-                      ),
+                    const SizedBox(height: 6),
+                    // Barre de progression segmentée (11 terroirs)
+                    Row(
+                      children: List.generate(totalCount, (index) {
+                        final isFilled = index < exploredCount;
+                        return Expanded(
+                          child: Container(
+                            height: 4,
+                            margin: EdgeInsets.only(
+                                right: index == totalCount - 1 ? 0 : 3),
+                            decoration: BoxDecoration(
+                              color: isFilled
+                                  ? CultureTheme.primaryBlue
+                                  : (isDark
+                                      ? const Color(0xFF1E293B)
+                                      : const Color(0xFFE2E8F0)),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        );
+                      }),
                     ),
                   ],
-                ),
-              ),
-              InkWell(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  CultureRegionBottomSheet.show(context);
-                },
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: CultureTheme.accentOrange.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: CultureTheme.accentOrange.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.explore_rounded,
-                        size: 13,
-                        color: CultureTheme.accentOrange,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Explorer',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: CultureTheme.accentOrange,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
 
-          // ── Barre de progression linéaire stylée ──
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 6,
-              backgroundColor: isDark
-                  ? const Color(0xFF1E293B)
-                  : const Color(0xFFE2E8F0),
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                CultureTheme.primaryBlue,
-              ),
-            ),
-          ),
+          // ── Ruban horizontal épuré des 11 régions ────────────────────────
+          SizedBox(
+            height: 34,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: allRegions.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 6),
+              itemBuilder: (context, index) {
+                final region = allRegions[index];
+                final isExplored =
+                    passport.exploredRegionIds.contains(region.id);
+                final isSelected = activeRegionId == region.id;
 
-          const SizedBox(height: 18),
+                Color chipBg;
+                Color chipBorder;
+                Color textColor;
+                Color iconColor;
 
-          // ── Grille des régions avec design amélioré ──
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 3.2,
-            ),
-            itemCount: allRegions.length,
-            itemBuilder: (context, index) {
-              final region = allRegions[index];
-              final isExplored = passport.exploredRegionIds.contains(region.id);
-              final regionColor = isExplored
-                  ? region.couleurAccent
-                  : (isDark ? const Color(0xFF475569) : const Color(0xFF94A3B8));
+                if (isSelected) {
+                  chipBg = CultureTheme.primaryBlue;
+                  chipBorder = CultureTheme.primaryBlue;
+                  textColor = Colors.white;
+                  iconColor = Colors.white;
+                } else if (isExplored) {
+                  chipBg = CultureTheme.primaryBlue
+                      .withValues(alpha: isDark ? 0.16 : 0.10);
+                  chipBorder = CultureTheme.primaryBlue
+                      .withValues(alpha: isDark ? 0.35 : 0.25);
+                  textColor = isDark ? Colors.white : CultureTheme.primaryBlue;
+                  iconColor = CultureTheme.primaryBlue;
+                } else {
+                  chipBg = isDark
+                      ? const Color(0xFF131B2A)
+                      : const Color(0xFFF8FAFC);
+                  chipBorder = borderCol;
+                  textColor = subtitleColor;
+                  iconColor = subtitleColor.withValues(alpha: 0.6);
+                }
 
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isExplored
-                      ? region.couleurAccent.withValues(alpha: isDark ? 0.15 : 0.08)
-                      : (isDark ? const Color(0xFF1A2235) : const Color(0xFFF8FAFC)),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isExplored
-                        ? region.couleurAccent.withValues(alpha: 0.4)
-                        : (isDark ? const Color(0xFF2A3549) : const Color(0xFFE2E8F0)),
-                    width: isExplored ? 1.2 : 1.0,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 26,
-                      height: 26,
-                      decoration: BoxDecoration(
-                        color: isExplored
-                            ? region.couleurAccent.withValues(alpha: 0.2)
-                            : (isDark ? const Color(0xFF253048) : const Color(0xFFF1F5F9)),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Icon(
+                return GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    if (isSelected) {
+                      ref
+                          .read(activeCultureRegionProvider.notifier)
+                          .clearFilter();
+                    } else {
+                      ref
+                          .read(activeCultureRegionProvider.notifier)
+                          .selectRegion(region);
+                    }
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: chipBg,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: chipBorder, width: 1),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
                           isExplored
-                              ? Icons.check_rounded
-                              : region.icone,
+                              ? (isSelected
+                                  ? Icons.filter_alt_rounded
+                                  : Icons.check_circle_rounded)
+                              : Icons.lock_outline_rounded,
                           size: 13,
-                          color: regionColor,
+                          color: iconColor,
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        region.nom,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11.5,
-                          fontWeight: isExplored ? FontWeight.w700 : FontWeight.w500,
-                          color: isExplored ? regionColor : subtitleColor,
+                        const SizedBox(width: 5),
+                        Text(
+                          region.nom,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: isExplored || isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: textColor,
+                          ),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              );
-            },
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ── 5. SÉLECTEUR DE CATÉGORIES ──────────────────────────────────────────────
-  Widget _buildFilterPills(bool isDark, Color surfaceAlt, Color borderCol) {
-    const categories = [
-      'Tout',
-      'Figures',
-      'Monuments',
-      'Villes',
-      'Contes',
-      'Défis',
-    ];
 
+
+  // ── 4. PILULES DE FILTRE DE LA COLLECTION ──────────────────────────────────
+  Widget _buildFilterPills(bool isDark, Color surfaceAlt, Color borderCol) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
-        children: List.generate(categories.length, (index) {
+        children: List.generate(_filters.length, (index) {
           final isSelected = _selectedFilterIndex == index;
           return Padding(
             padding: const EdgeInsets.only(right: 8),
@@ -784,27 +643,42 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? CultureTheme.accentOrange
-                      : (isDark ? CultureTheme.darkSurface : Colors.white),
-                  borderRadius: BorderRadius.circular(20),
+                      ? CultureTheme.primaryBlue
+                      : (isDark
+                          ? CultureTheme.darkSurface
+                          : Colors.white),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: isSelected
-                        ? CultureTheme.accentOrange
-                        : borderCol,
+                    color: isSelected ? CultureTheme.primaryBlue : borderCol,
                   ),
                 ),
-                child: Text(
-                  categories[index],
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                    color: isSelected
-                        ? Colors.white
-                        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _filterIcons[index],
+                      size: 13,
+                      color: isSelected ? Colors.white : CultureTheme.primaryBlue,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      _filters[index],
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w600,
+                        color: isSelected
+                            ? Colors.white
+                            : (isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B)),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -814,7 +688,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     );
   }
 
-  // ── 6. GRILLE DES DÉCOUVERTES ───────────────────────────────────────────────
+  // ── 5. GRILLE DES DÉCOUVERTES (TAMPONS DU PASSEPORT) ───────────────────────
   Widget _buildDiscoveriesGrid(
     BuildContext context,
     List<PassportEntry> entries,
@@ -824,16 +698,21 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
   ) {
     if (entries.isEmpty) {
       return Container(
-        padding: const EdgeInsets.all(28),
+        padding: const EdgeInsets.all(30),
         alignment: Alignment.center,
         child: Column(
           children: [
-            Icon(Icons.inventory_2_outlined, size: 36, color: subtitleColor),
+            Icon(
+              Icons.bookmark_border_rounded,
+              size: 40,
+              color: subtitleColor.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 10),
             Text(
-              'Aucune découverte dans cette catégorie pour le moment.',
+              'Aucun tampon dans cette catégorie pour le moment.',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
+                fontWeight: FontWeight.w600,
                 color: subtitleColor,
               ),
               textAlign: TextAlign.center,
@@ -854,95 +733,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     );
   }
 
-  // ── 7. LISTE DES DISTINCTIONS ───────────────────────────────────────────────
-  Widget _buildDistinctionsList(
-    List<CulturalDistinction> distinctions,
-    bool isDark,
-    Color cardBg,
-    Color borderCol,
-    Color titleColor,
-    Color subtitleColor,
-  ) {
-    return Column(
-      children: distinctions.map((distinction) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: distinction.isUnlocked
-                  ? distinction.sealColor.withValues(alpha: 0.4)
-                  : borderCol,
-              width: distinction.isUnlocked ? 1.2 : 1.0,
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: distinction.isUnlocked
-                      ? distinction.sealColor.withValues(alpha: 0.15)
-                      : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Icon(
-                    distinction.icon,
-                    size: 22,
-                    color: distinction.isUnlocked
-                        ? distinction.sealColor
-                        : (isDark ? const Color(0xFF475569) : const Color(0xFF94A3B8)),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          distinction.title,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: distinction.isUnlocked ? titleColor : subtitleColor,
-                          ),
-                        ),
-                        if (distinction.isUnlocked) ...[
-                          const SizedBox(width: 6),
-                          const Icon(
-                            Icons.verified_rounded,
-                            size: 14,
-                            color: CultureTheme.accentOrange,
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      distinction.description,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        color: subtitleColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  // ── 8. BANNIÈRE GUIDE CULTUREL IA ───────────────────────────────────────────
+  // ── 6. BANNIÈRE GUIDE CULTUREL IA ───────────────────────────────────────────
   Widget _buildAiGuideBanner(
     BuildContext context,
     bool isDark,
@@ -951,9 +742,13 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     Color titleColor,
     Color subtitleColor,
   ) {
-    return GestureDetector(
+    return CulturalInteractiveCard(
+      padding: const EdgeInsets.all(16),
+      showSudaneseCorners: true,
+      activeAccentColor: CultureTheme.accentOrange,
+      backgroundColor: isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFFFF7ED),
+      borderRadius: 20,
       onTap: () {
-        HapticFeedback.mediumImpact();
         const guideContext = CulturalGuideContext(
           contentType: CulturalContentType.passeport,
           contentTitle: 'Mon Passeport Culturel',
@@ -961,62 +756,52 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
         );
         context.push('/culture/guide', extra: guideContext);
       },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFFFF7ED),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: CultureTheme.accentOrange.withValues(alpha: 0.35),
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: CultureTheme.accentOrange.withValues(alpha: 0.18),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.smart_toy_rounded,
-                color: CultureTheme.accentOrange,
-                size: 22,
-              ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: CultureTheme.accentOrange.withValues(alpha: 0.18),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'GUIDE CULTUREL IA',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: CultureTheme.accentOrange,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Interrogez le guide sur votre parcours et vos prochaines étapes.',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: titleColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 14,
+            child: const Icon(
+              Icons.smart_toy_rounded,
               color: CultureTheme.accentOrange,
+              size: 22,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'GUIDE CULTUREL IA',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: CultureTheme.accentOrange,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Interrogez le guide IA sur votre parcours et vos prochaines étapes.',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: titleColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 14,
+            color: CultureTheme.accentOrange,
+          ),
+        ],
       ),
     );
   }
