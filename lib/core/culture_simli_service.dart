@@ -22,9 +22,9 @@ class CultureSimliService {
   }) async {
     for (final baseUrl in _candidateUrls) {
       try {
-        _logger.i('[CultureSimli] Génération vidéo pour "\$text"');
+        _logger.i('[CultureSimli] Génération vidéo pour "$text"');
         final response = await _dio.post(
-          '\$baseUrl/api/avatars/generate-video',
+          '$baseUrl/api/avatars/generate-video',
           data: {
             'question': text,
             'phrase': text,

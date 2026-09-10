@@ -954,7 +954,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
           contentTitle: 'Mon Passeport Culturel',
           subtitle: 'Conseils & prochaines découvertes suggérées par l\'IA',
         );
-        context.push('/culture/guide', extra: guideContext);
+        context.push('/culture/sage', extra: guideContext);
       },
       child: Container(
         padding: const EdgeInsets.all(18),

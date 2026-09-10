@@ -164,12 +164,6 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
             // const SizedBox(height: 12),
             // _buildDistinctionsList(distinctions, isDark, cardBg, borderCol, titleColor, subtitleColor),
 
-            const SizedBox(height: 24),
-
-            // ── 9. BANNIÈRE INVITATION GUIDE IA ─────────────────────────────────
-            _buildAiGuideBanner(
-                context, isDark, cardBg, borderCol, titleColor, subtitleColor),
-
             const SizedBox(height: 28),
 
             // Footer Logo Culture avec "iA" en jaune !
@@ -299,12 +293,15 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        Text(
-                          'N° ${passport.passportNumber}',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: CultureTheme.cyanTurquoise,
+                        Flexible(
+                          child: Text(
+                            'N° ${passport.passportNumber}',
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: CultureTheme.cyanTurquoise,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -779,7 +776,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
           contentTitle: 'Mon Passeport Culturel',
           subtitle: 'Mémoire de voyage & Recommandations personnalisées',
         );
-        context.push('/culture/guide', extra: guideContext);
+        context.push('/culture/sage', extra: guideContext);
       },
       child: Row(
         children: [
@@ -801,7 +798,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'GUIDE CULTUREL IA',
+                  'LE VIEUX SAGE IA',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
@@ -811,7 +808,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Interrogez le guide IA sur votre parcours et vos prochaines étapes.',
+                  'Interrogez le guide sur votre parcours et vos prochaines étapes.',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

@@ -7,7 +7,6 @@ import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
-import '../../../../presentation/common/widgets/alternia_logo.dart';
 import '../../immersive/immersive.dart';
 
 /// Vue 2 : Découverte — Hub Central d'Exploration Culturelle du Mali (Étape 2)
