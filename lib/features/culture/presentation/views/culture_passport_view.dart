@@ -8,6 +8,7 @@ import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../../../presentation/common/widgets/alternia_logo.dart';
 import '../../exploration/data/datasources/mock_mali_regions.dart';
 import '../../immersive/immersive.dart';
 import '../widgets/passport_item_card.dart';
@@ -24,7 +25,8 @@ class CulturePassportView extends ConsumerStatefulWidget {
 }
 
 class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
-  int _selectedFilterIndex = 0; // 0: Tout, 1: Figures, 2: Monuments, 3: Villes, 4: Contes, 5: Défis
+  int _selectedFilterIndex =
+      0; // 0: Tout, 1: Figures, 2: Monuments, 3: Villes, 4: Contes, 5: Défis
 
   static const List<String> _filters = [
     'Tout',
@@ -104,8 +106,8 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionTitle(
-                      'PASSEPORT DU MANDEN', Icons.verified_user_rounded, borderCol),
+                  _buildSectionTitle('PASSEPORT DU MANDEN',
+                      Icons.verified_user_rounded, borderCol),
                   const SizedBox(height: 12),
                   _buildPassportHeaderCard(context, passport, isDark, cardBg,
                       borderCol, titleColor, subtitleColor),
@@ -129,8 +131,6 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                 ],
               ),
             ),
-
-
 
             const SizedBox(height: 28),
 
@@ -159,6 +159,31 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
               child: _buildAiGuideBanner(context, isDark, cardBg, borderCol,
                   titleColor, subtitleColor),
             ),
+            // ── 8. SCEAUX D'AMBASSADEUR CULTUREL ────────────────────────────────
+            // _buildSectionTitle('SCEAUX D\'AMBASSADEUR CULTUREL', Icons.workspace_premium_rounded, borderCol),
+            // const SizedBox(height: 12),
+            // _buildDistinctionsList(distinctions, isDark, cardBg, borderCol, titleColor, subtitleColor),
+
+            const SizedBox(height: 24),
+
+            // ── 9. BANNIÈRE INVITATION GUIDE IA ─────────────────────────────────
+            _buildAiGuideBanner(
+                context, isDark, cardBg, borderCol, titleColor, subtitleColor),
+
+            const SizedBox(height: 28),
+
+            // Footer Logo Culture avec "iA" en jaune !
+            const Center(
+              child: Opacity(
+                opacity: 0.5,
+                child: AlterniaLogo(
+                  size: 24,
+                  showText: true,
+                  iaColor: CultureTheme.iaYellow,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -353,7 +378,8 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
             decoration: BoxDecoration(
-              color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.08 : 0.05),
+              color: CultureTheme.accentOrange
+                  .withValues(alpha: isDark ? 0.08 : 0.05),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: CultureTheme.accentOrange.withValues(alpha: 0.2),
@@ -417,7 +443,8 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 9.5,
                 fontWeight: FontWeight.w600,
-                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                color:
+                    isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
               ),
             ),
           ],
@@ -580,8 +607,8 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: chipBg,
                       borderRadius: BorderRadius.circular(10),
@@ -622,8 +649,6 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     );
   }
 
-
-
   // ── 4. PILULES DE FILTRE DE LA COLLECTION ──────────────────────────────────
   Widget _buildFilterPills(bool isDark, Color surfaceAlt, Color borderCol) {
     return SingleChildScrollView(
@@ -648,9 +673,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? CultureTheme.primaryBlue
-                      : (isDark
-                          ? CultureTheme.darkSurface
-                          : Colors.white),
+                      : (isDark ? CultureTheme.darkSurface : Colors.white),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isSelected ? CultureTheme.primaryBlue : borderCol,
@@ -662,7 +685,8 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                     Icon(
                       _filterIcons[index],
                       size: 13,
-                      color: isSelected ? Colors.white : CultureTheme.primaryBlue,
+                      color:
+                          isSelected ? Colors.white : CultureTheme.primaryBlue,
                     ),
                     const SizedBox(width: 5),
                     Text(
@@ -746,7 +770,8 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
       padding: const EdgeInsets.all(16),
       showSudaneseCorners: true,
       activeAccentColor: CultureTheme.accentOrange,
-      backgroundColor: isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFFFF7ED),
+      backgroundColor:
+          isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFFFF7ED),
       borderRadius: 20,
       onTap: () {
         const guideContext = CulturalGuideContext(

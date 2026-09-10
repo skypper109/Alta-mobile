@@ -14,6 +14,7 @@ import '../../core/constants/app_colors.dart';
 import '../../presentation/common/widgets/alternia_avatar.dart';
 import '../../shared/widgets.dart';
 import '../profile/user_prefs_notifier.dart';
+import 'core/theme/culture_theme.dart';
 
 class CulturePage extends ConsumerStatefulWidget {
   const CulturePage({super.key});
@@ -221,7 +222,11 @@ class _CulturePageState extends ConsumerState<CulturePage> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Row(
                 children: [
-                  const AlterniaLogo(size: 28, showText: true),
+                  const AlterniaLogo(
+                    size: 28,
+                    showText: true,
+                    iaColor: CultureTheme.iaYellow,
+                  ),
                   const Spacer(),
 
                   // CONSTANT CLOSE BUTTON [X] WITH ACCENT ORANGE

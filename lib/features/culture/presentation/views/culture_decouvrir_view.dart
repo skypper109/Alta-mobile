@@ -7,6 +7,7 @@ import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../../../presentation/common/widgets/alternia_logo.dart';
 import '../../immersive/immersive.dart';
 
 /// Vue 2 : Découverte — Hub Central d'Exploration Culturelle du Mali (Étape 2)
@@ -346,8 +347,8 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                   top: 10,
                   left: 12,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3.5),
                     decoration: BoxDecoration(
                       color: categoryColor,
                       borderRadius: BorderRadius.circular(6),
@@ -548,8 +549,8 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
                             color: categoryColor.withValues(alpha: 0.12),
-                            child: Icon(item.icon,
-                                color: categoryColor, size: 28),
+                            child:
+                                Icon(item.icon, color: categoryColor, size: 28),
                           ),
                         )
                       else

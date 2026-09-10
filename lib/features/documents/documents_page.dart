@@ -766,6 +766,15 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                   );
                 },
               ),
+            const SizedBox(height: 28),
+
+            // Footer Logo
+            const Center(
+              child: Opacity(
+                opacity: 0.5,
+                child: AlterniaLogo(size: 24, showText: true),
+              ),
+            ),
           ],
         ),
     );

@@ -503,7 +503,15 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
+
+            // Footer Logo
+            const Center(
+              child: Opacity(
+                opacity: 0.5,
+                child: AlterniaLogo(size: 24, showText: true),
+              ),
+            ),
           ],
         ),
     );

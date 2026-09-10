@@ -9,6 +9,7 @@ import '../../core/datasources/mock_culture_stories_data.dart';
 import '../../core/models/culture_challenge_models.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../../../presentation/common/widgets/alternia_logo.dart';
 import '../../immersive/immersive.dart';
 import '../widgets/story_audio_player_sheet.dart';
 
@@ -85,106 +86,128 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── 1. SÉLECTEUR D'UNIVERS INTERACTIF ──────────────────────────────
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                children: List.generate(_filters.length, (index) {
-                  final isSelected = _selectedFilterIndex == index;
-                  final activeCol = _getFilterColor(index);
-                  final int count = index == 0
-                      ? filteredStories.length
-                      : index == 1
-                          ? filteredRiddles.length
-                          : 2;
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          // ── 1. SÉLECTEUR D'UNIVERS INTERACTIF ──────────────────────────────
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: List.generate(_filters.length, (index) {
+                final isSelected = _selectedFilterIndex == index;
+                final activeCol = _getFilterColor(index);
+                final int count = index == 0
+                    ? filteredStories.length
+                    : index == 1
+                        ? filteredRiddles.length
+                        : 2;
 
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: GestureDetector(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        setState(() {
-                          _selectedFilterIndex = index;
-                        });
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 220),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? activeCol
-                              : (isDark
-                                  ? CultureTheme.darkSurface
-                                  : Colors.white),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: isSelected ? activeCol : borderCol,
-                            width: isSelected ? 1.4 : 1.0,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _filterIcons[index],
-                              size: 14,
-                              color: isSelected ? Colors.white : activeCol,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _filters[index],
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                fontWeight: isSelected
-                                    ? FontWeight.w800
-                                    : FontWeight.w600,
-                                color: isSelected
-                                    ? Colors.white
-                                    : subtitleColor,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 1.5),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Colors.black.withValues(alpha: 0.25)
-                                    : activeCol.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                '$count',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: isSelected ? Colors.white : activeCol,
-                                ),
-                              ),
-                            ),
-                          ],
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() {
+                        _selectedFilterIndex = index;
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? activeCol
+                            : (isDark
+                                ? CultureTheme.darkSurface
+                                : Colors.white),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isSelected ? activeCol : borderCol,
+                          width: isSelected ? 1.4 : 1.0,
                         ),
                       ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _filterIcons[index],
+                            size: 14,
+                            color: isSelected ? Colors.white : activeCol,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _filters[index],
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              fontWeight: isSelected
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
+                              color: isSelected ? Colors.white : subtitleColor,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.black.withValues(alpha: 0.25)
+                                  : activeCol.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              '$count',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: isSelected ? Colors.white : activeCol,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  );
-                }),
+                  ),
+                );
+              }),
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // ── 2. SOUS-UNIVERS 1 : CONTES & RÉCITS DES VEILLÉES ───────────────
+          if (_selectedFilterIndex == 0) ...[
+            // Grand Conte en Vedette
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 80),
+              child: _buildHeroStoryCard(
+                story: featuredStory,
+                context: context,
+                isDark: isDark,
+                cardBg: cardBg,
+                borderCol: borderCol,
+                titleColor: titleColor,
+                subtitleColor: subtitleColor,
               ),
             ),
+            const SizedBox(height: 24),
 
-            const SizedBox(height: 18),
+            // Section Tous les Contes
+            _buildSectionHeader(
+              title: 'TOUS LES CONTES & RÉCITS',
+              icon: Icons.auto_stories_rounded,
+              color: CultureTheme.accentOrange,
+              borderCol: borderCol,
+              count: filteredStories.length,
+            ),
+            const SizedBox(height: 14),
 
-            // ── 2. SOUS-UNIVERS 1 : CONTES & RÉCITS DES VEILLÉES ───────────────
-            if (_selectedFilterIndex == 0) ...[
-              // Grand Conte en Vedette
-              AnimatedCulturalReveal(
-                delay: const Duration(milliseconds: 80),
-                child: _buildHeroStoryCard(
-                  story: featuredStory,
+            ...filteredStories.map((story) {
+              final index = filteredStories.indexOf(story);
+              return AnimatedCulturalReveal(
+                delay: Duration(milliseconds: 60 * index),
+                child: _buildStoryRowItem(
+                  story: story,
                   context: context,
                   isDark: isDark,
                   cardBg: cardBg,
@@ -192,81 +215,69 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                   titleColor: titleColor,
                   subtitleColor: subtitleColor,
                 ),
-              ),
-              const SizedBox(height: 24),
-
-              // Section Tous les Contes
-              _buildSectionHeader(
-                title: 'TOUS LES CONTES & RÉCITS',
-                icon: Icons.auto_stories_rounded,
-                color: CultureTheme.accentOrange,
-                borderCol: borderCol,
-                count: filteredStories.length,
-              ),
-              const SizedBox(height: 14),
-
-              ...filteredStories.map((story) {
-                final index = filteredStories.indexOf(story);
-                return AnimatedCulturalReveal(
-                  delay: Duration(milliseconds: 60 * index),
-                  child: _buildStoryRowItem(
-                    story: story,
-                    context: context,
-                    isDark: isDark,
-                    cardBg: cardBg,
-                    borderCol: borderCol,
-                    titleColor: titleColor,
-                    subtitleColor: subtitleColor,
-                  ),
-                );
-              }),
-              const SizedBox(height: 20),
-            ],
-
-            // ── 3. SOUS-UNIVERS 2 : DEVINETTES N'DA ─────────────────────────────
-            if (_selectedFilterIndex == 1) ...[
-              _buildSectionHeader(
-                title: 'DEVINETTES TRADITIONNELLES N\'DA',
-                icon: Icons.lightbulb_rounded,
-                color: CultureTheme.accentOrange,
-                borderCol: borderCol,
-                count: filteredRiddles.length,
-              ),
-              const SizedBox(height: 14),
-              _buildRiddlesList(
-                riddles: filteredRiddles,
-                context: context,
-                isDark: isDark,
-                cardBg: cardBg,
-                borderCol: borderCol,
-                titleColor: titleColor,
-                subtitleColor: subtitleColor,
-              ),
-              const SizedBox(height: 20),
-            ],
-
-            // ── 4. SOUS-UNIVERS 3 : DÉFIS CULTURELS & QUIZ ─────────────────────
-            if (_selectedFilterIndex == 2) ...[
-              _buildSectionHeader(
-                title: 'DÉFIS & QUIZ DU SAVOIR',
-                icon: Icons.psychology_rounded,
-                color: CultureTheme.primaryBlue,
-                borderCol: borderCol,
-                count: 2,
-              ),
-              const SizedBox(height: 14),
-              _buildQuizGrid(
-                context: context,
-                isDark: isDark,
-                cardBg: cardBg,
-                borderCol: borderCol,
-                titleColor: titleColor,
-                subtitleColor: subtitleColor,
-              ),
-              const SizedBox(height: 20),
-            ],
+              );
+            }),
+            const SizedBox(height: 20),
           ],
-        ),
+
+          // ── 3. SOUS-UNIVERS 2 : DEVINETTES N'DA ─────────────────────────────
+          if (_selectedFilterIndex == 1) ...[
+            _buildSectionHeader(
+              title: 'DEVINETTES TRADITIONNELLES N\'DA',
+              icon: Icons.lightbulb_rounded,
+              color: CultureTheme.accentOrange,
+              borderCol: borderCol,
+              count: filteredRiddles.length,
+            ),
+            const SizedBox(height: 14),
+            _buildRiddlesList(
+              riddles: filteredRiddles,
+              context: context,
+              isDark: isDark,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              titleColor: titleColor,
+              subtitleColor: subtitleColor,
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // ── 7. SECTION DEVINETTES TRADITIONNELLES N'DA ──────────────────────
+          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 3) ...[
+            _buildSectionHeader(
+              title: 'DEVINETTES TRADITIONNELLES (N\'DA)',
+              icon: Icons.lightbulb_rounded,
+              color: CultureTheme.accentOrange,
+              borderCol: borderCol,
+            ),
+            const SizedBox(height: 14),
+            _buildRiddlesList(
+              riddles: filteredRiddles,
+              context: context,
+              isDark: isDark,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              titleColor: titleColor,
+              subtitleColor: subtitleColor,
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          const SizedBox(height: 28),
+
+          // Footer Logo Culture avec "iA" en jaune !
+          const Center(
+            child: Opacity(
+              opacity: 0.5,
+              child: AlterniaLogo(
+                size: 24,
+                showText: true,
+                iaColor: CultureTheme.iaYellow,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ]),
       ),
     );
   }
@@ -604,8 +615,8 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                         story.photoUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
-                          color: CultureTheme.accentOrange
-                              .withValues(alpha: 0.15),
+                          color:
+                              CultureTheme.accentOrange.withValues(alpha: 0.15),
                           child: const Icon(Icons.auto_stories_rounded,
                               size: 24, color: CultureTheme.accentOrange),
                         ),
@@ -629,7 +640,8 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: CultureTheme.accentOrange.withValues(alpha: 0.1),
+                          color:
+                              CultureTheme.accentOrange.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(5),
                         ),
                         child: Text(

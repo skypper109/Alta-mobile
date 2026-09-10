@@ -10,6 +10,7 @@ import '../../core/models/culture_item.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
+import '../../../../presentation/common/widgets/alternia_logo.dart';
 import '../widgets/culture_region_bottom_sheet.dart';
 
 /// Vue 1 : Accueil Culture
@@ -28,9 +29,11 @@ class CultureHomeView extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final subtitleColor =
+        isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
-    final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
+    final borderCol =
+        isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
     final featured = MockCultureStage1Data.featuredItem;
     final recommendations = [
@@ -107,361 +110,396 @@ class CultureHomeView extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Bandeau visuel photographique réel
-                SizedBox(
-                  height: 145,
-                  width: double.infinity,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      if (featured.imageUrl != null && featured.imageUrl!.isNotEmpty)
-                        Image.asset(
-                          featured.imageUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            color: CultureTheme.primaryDark,
-                            child: const Center(
-                              child: Icon(Icons.shield_rounded, size: 40, color: Colors.white54),
-                            ),
+                    SizedBox(
+                      height: 145,
+                      width: double.infinity,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          if (featured.imageUrl != null &&
+                              featured.imageUrl!.isNotEmpty)
+                            Image.asset(
+                              featured.imageUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                color: CultureTheme.primaryDark,
+                                child: const Center(
+                                  child: Icon(Icons.shield_rounded,
+                                      size: 40, color: Colors.white54),
+                                ),
+                              ),
+                            )
+                          else
+                            Container(color: CultureTheme.primaryDark),
+
+                          // Overlay sombre uni pour contraste texte (strictement sans dégradé)
+                          Container(
+                            color: Colors.black.withValues(alpha: 0.45),
                           ),
-                        )
-                      else
-                        Container(color: CultureTheme.primaryDark),
 
-                      // Overlay sombre uni pour contraste texte (strictement sans dégradé)
-                      Container(
-                        color: Colors.black.withValues(alpha: 0.45),
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.all(14),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
+                          Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: CultureTheme.accentOrange,
-                                    borderRadius: BorderRadius.circular(6),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: CultureTheme.accentOrange.withValues(alpha: 0.4),
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Text(
-                                    featured.tag.toUpperCase(),
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                      color: Colors.white,
-                                      letterSpacing: 0.4,
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withValues(alpha: 0.55),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: Colors.white.withValues(alpha: 0.25),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Icons.location_on_rounded,
-                                        size: 11,
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
                                         color: CultureTheme.accentOrange,
+                                        borderRadius: BorderRadius.circular(6),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: CultureTheme.accentOrange
+                                                .withValues(alpha: 0.4),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(width: 3),
-                                      Text(
-                                        featured.regionName,
+                                      child: Text(
+                                        featured.tag.toUpperCase(),
                                         style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w800,
                                           color: Colors.white,
+                                          letterSpacing: 0.4,
                                         ),
                                       ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black
+                                            .withValues(alpha: 0.55),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.25),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.location_on_rounded,
+                                            size: 11,
+                                            color: CultureTheme.accentOrange,
+                                          ),
+                                          const SizedBox(width: 3),
+                                          Text(
+                                            featured.regionName,
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  featured.info,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    shadows: const [
+                                      Shadow(
+                                          color: Colors.black, blurRadius: 4),
                                     ],
                                   ),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              featured.info,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                shadows: const [
-                                  Shadow(color: Colors.black, blurRadius: 4),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Corps éditorial
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        featured.title,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: titleColor,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        featured.subtitle,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: CultureTheme.accentOrange,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        featured.description,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          color: subtitleColor,
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              HapticFeedback.mediumImpact();
-                              context.push('/culture/personnage/perso_soundiata');
-                            },
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Découvrir Soundiata Keïta',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: CultureTheme.accentOrange,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                const Icon(
-                                  Icons.arrow_forward_rounded,
-                                  size: 14,
-                                  color: CultureTheme.accentOrange,
                                 ),
                               ],
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+                    ),
 
-          const SizedBox(height: 24),
-
-          // ── 3. REPRENDRE — ACTIVITÉ RÉCENTE PERSONNALISÉE ────────────────
-          Builder(
-            builder: (context) {
-              final passport = ref.watch(culturePassportProvider);
-              // Récupérer les dernières activités par type
-              final recentItems = <PassportEntry>[];
-              // Dernier conte
-              if (passport.contes.isNotEmpty) recentItems.add(passport.contes.first);
-              // Dernier défi
-              if (passport.defis.isNotEmpty) recentItems.add(passport.defis.first);
-              // Dernier monument
-              if (passport.monuments.isNotEmpty) recentItems.add(passport.monuments.first);
-              // Dernière figure
-              if (passport.figures.isNotEmpty) recentItems.add(passport.figures.first);
-
-              if (recentItems.isEmpty) return const SizedBox.shrink();
-
-              // Trier par date la plus récente
-              recentItems.sort((a, b) => b.discoveredAt.compareTo(a.discoveredAt));
-              final displayItems = recentItems.take(3).toList();
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: CultureTheme.primaryBlue.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.history_rounded,
-                              size: 14,
-                              color: CultureTheme.primaryBlue,
+                    // Corps éditorial
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            featured.title,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color: titleColor,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'REPRENDRE',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.8,
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            featured.subtitle,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: CultureTheme.accentOrange,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            featured.description,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              color: subtitleColor,
+                              height: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  HapticFeedback.mediumImpact();
+                                  context.push(
+                                      '/culture/personnage/perso_soundiata');
+                                },
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Découvrir Soundiata Keïta',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: CultureTheme.accentOrange,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(
+                                      Icons.arrow_forward_rounded,
+                                      size: 14,
+                                      color: CultureTheme.accentOrange,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // ── 3. REPRENDRE — ACTIVITÉ RÉCENTE PERSONNALISÉE ────────────────
+            Builder(
+              builder: (context) {
+                final passport = ref.watch(culturePassportProvider);
+                // Récupérer les dernières activités par type
+                final recentItems = <PassportEntry>[];
+                // Dernier conte
+                if (passport.contes.isNotEmpty)
+                  recentItems.add(passport.contes.first);
+                // Dernier défi
+                if (passport.defis.isNotEmpty)
+                  recentItems.add(passport.defis.first);
+                // Dernier monument
+                if (passport.monuments.isNotEmpty)
+                  recentItems.add(passport.monuments.first);
+                // Dernière figure
+                if (passport.figures.isNotEmpty)
+                  recentItems.add(passport.figures.first);
+
+                if (recentItems.isEmpty) return const SizedBox.shrink();
+
+                // Trier par date la plus récente
+                recentItems
+                    .sort((a, b) => b.discoveredAt.compareTo(a.discoveredAt));
+                final displayItems = recentItems.take(3).toList();
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: CultureTheme.primaryBlue
+                                .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.history_rounded,
+                                size: 14,
                                 color: CultureTheme.primaryBlue,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              Text(
+                                'REPRENDRE',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                  color: CultureTheme.primaryBlue,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(child: Container(height: 1, color: borderCol)),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 140,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: displayItems.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 12),
-                      itemBuilder: (ctx, index) {
-                        return _buildRecentActivityCard(
-                          context: context,
-                          entry: displayItems[index],
-                          isDark: isDark,
-                        );
-                      },
+                        const SizedBox(width: 10),
+                        Expanded(child: Container(height: 1, color: borderCol)),
+                      ],
                     ),
-                  ),
-                ],
-              );
-            },
-          ),
-
-          const SizedBox(height: 24),
-
-          // ── 4. RECOMMANDATIONS FILTRÉES ─────────────────────────────────────
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: CultureTheme.vertNaturel.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.auto_awesome_rounded,
-                      size: 14,
-                      color: CultureTheme.vertNaturel,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      activeRegion != null
-                          ? 'SÉLECTION : ${activeRegion.nom.toUpperCase()}'
-                          : 'RECOMMANDATIONS',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
-                        color: CultureTheme.vertNaturel,
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 140,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: displayItems.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        itemBuilder: (ctx, index) {
+                          return _buildRecentActivityCard(
+                            context: context,
+                            entry: displayItems[index],
+                            isDark: isDark,
+                          );
+                        },
                       ),
                     ),
                   ],
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(child: Container(height: 1, color: borderCol)),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          if (recommendations.isEmpty)
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: borderCol),
-              ),
-              child: Center(
-                child: Column(
-                  children: [
-                    Icon(Icons.location_off_rounded, color: subtitleColor, size: 28),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Aucun élément spécifique pour cette région',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: titleColor,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    TextButton(
-                      onPressed: () => CultureRegionBottomSheet.show(context),
-                      child: const Text('Changer de région'),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: recommendations.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (ctx, index) {
-                final item = recommendations[index];
-                return AnimatedCulturalReveal(
-                  delay: Duration(milliseconds: 200 + (index * 60)),
-                  child: _buildRecommendationTile(
-                    context,
-                    item: item,
-                    isDark: isDark,
-                    cardBg: cardBg,
-                    borderCol: borderCol,
-                    titleColor: titleColor,
-                    subtitleColor: subtitleColor,
-                  ),
                 );
               },
             ),
-        ],
+
+            const SizedBox(height: 24),
+
+            // ── 4. RECOMMANDATIONS FILTRÉES ─────────────────────────────────────
+            Row(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: CultureTheme.vertNaturel.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.auto_awesome_rounded,
+                        size: 14,
+                        color: CultureTheme.vertNaturel,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        activeRegion != null
+                            ? 'SÉLECTION : ${activeRegion.nom.toUpperCase()}'
+                            : 'RECOMMANDATIONS',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                          color: CultureTheme.vertNaturel,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(child: Container(height: 1, color: borderCol)),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            if (recommendations.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderCol),
+                ),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.location_off_rounded,
+                          color: subtitleColor, size: 28),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Aucun élément spécifique pour cette région',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: titleColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      TextButton(
+                        onPressed: () => CultureRegionBottomSheet.show(context),
+                        child: const Text('Changer de région'),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: recommendations.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (ctx, index) {
+                  final item = recommendations[index];
+                  return AnimatedCulturalReveal(
+                    delay: Duration(milliseconds: 200 + (index * 60)),
+                    child: _buildRecommendationTile(
+                      context,
+                      item: item,
+                      isDark: isDark,
+                      cardBg: cardBg,
+                      borderCol: borderCol,
+                      titleColor: titleColor,
+                      subtitleColor: subtitleColor,
+                    ),
+                  );
+                },
+              ),
+
+            const SizedBox(height: 28),
+
+            // Footer Logo Culture avec "iA" en jaune !
+            const Center(
+              child: Opacity(
+                opacity: 0.5,
+                child: AlterniaLogo(
+                  size: 24,
+                  showText: true,
+                  iaColor: CultureTheme.iaYellow,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -472,7 +510,8 @@ class CultureHomeView extends ConsumerWidget {
   }) {
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final subtitleColor =
+        isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
     // Couleur d'accent par type
     Color typeColor;
@@ -784,4 +823,3 @@ class CultureHomeView extends ConsumerWidget {
     );
   }
 }
-
