@@ -17,10 +17,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../core/culture_ai_service.dart';
-import '../../../../../core/culture_simli_service.dart';
 import '../../../core/datasources/mock_cultural_guide_knowledge.dart';
 import '../../../core/models/cultural_guide_models.dart';
 import '../../../core/theme/culture_theme.dart';
@@ -336,8 +336,9 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
           _currentlySpeakingMessageId = botMsg.id;
         });
         _scrollToBottom();
-       // _simliService.generateSageVideo(text: reply);
-        await _tts.speak(reply);
+        try {
+          await _tts.speak(reply);
+        } catch (_) {}
       }
     } catch (_) {
       if (mounted) {
@@ -455,7 +456,11 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
           GestureDetector(
             onTap: () {
               HapticFeedback.lightImpact();
-              Navigator.pop(context);
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/culture');
+              }
             },
             child: Container(
               width: 40,
@@ -867,7 +872,6 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
             children: [
               // Header du message
               Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     isUser ? Icons.person_rounded : Icons.auto_stories_rounded,

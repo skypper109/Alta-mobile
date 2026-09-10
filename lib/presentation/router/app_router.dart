@@ -7,6 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/culture/exploration/data/datasources/mock_mali_regions.dart';
 import '../../features/culture/exploration/data/models/mali_region.dart';
+import '../../features/culture/exploration/presentation/screens/cultural_sage_chat_page.dart';
 import '../../features/culture/exploration/presentation/screens/culture_search_page.dart';
 import '../../features/culture/exploration/presentation/screens/explore_mali_screen.dart';
 import '../../features/culture/exploration/presentation/screens/region_detail_screen.dart';
@@ -14,7 +15,6 @@ import '../../features/culture/presentation/screens/challenges_home_screen.dart'
 import '../../features/culture/presentation/screens/contes_screen.dart';
 import '../../features/culture/core/models/cultural_guide_models.dart';
 import '../../features/culture/immersive/immersive.dart';
-import '../../features/culture/presentation/screens/cultural_guide_screen.dart';
 import '../../features/culture/presentation/screens/culture_intro_screen.dart';
 import '../../features/culture/presentation/screens/culture_monuments_screen.dart';
 import '../../features/culture/presentation/screens/culture_personnages_screen.dart';
@@ -139,6 +139,19 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) => const CultureSearchPage(),
       ),
       GoRoute(
+        path: '/culture/sage',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra is CulturalGuideContext) {
+            return CulturalSageChatPage(guideContext: extra);
+          } else if (extra is MaliRegion) {
+            return CulturalSageChatPage(contextRegion: extra);
+          }
+          return const CulturalSageChatPage();
+        },
+      ),
+      GoRoute(
         path: '/culture/map',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const ExploreMaliScreen(),
@@ -255,10 +268,13 @@ GoRouter appRouter(Ref ref) {
         path: '/culture/guide',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
-          final contextData = state.extra is CulturalGuideContext
-              ? state.extra as CulturalGuideContext
-              : CulturalGuideContext.general;
-          return CulturalGuideScreen(contextData: contextData);
+          final extra = state.extra;
+          if (extra is CulturalGuideContext) {
+            return CulturalSageChatPage(guideContext: extra);
+          } else if (extra is MaliRegion) {
+            return CulturalSageChatPage(contextRegion: extra);
+          }
+          return const CulturalSageChatPage();
         },
       ),
       GoRoute(
