@@ -59,6 +59,7 @@ class PassportEntry {
   final bool isMilestone;
   final String? milestoneLabel;
   final String targetRoute;
+  final int xpEarned;
 
   const PassportEntry({
     required this.id,
@@ -74,6 +75,7 @@ class PassportEntry {
     this.isMilestone = false,
     this.milestoneLabel,
     required this.targetRoute,
+    this.xpEarned = 50,
   });
 
   PassportEntry copyWith({
@@ -90,6 +92,7 @@ class PassportEntry {
     bool? isMilestone,
     String? milestoneLabel,
     String? targetRoute,
+    int? xpEarned,
   }) {
     return PassportEntry(
       id: id ?? this.id,
@@ -105,6 +108,7 @@ class PassportEntry {
       isMilestone: isMilestone ?? this.isMilestone,
       milestoneLabel: milestoneLabel ?? this.milestoneLabel,
       targetRoute: targetRoute ?? this.targetRoute,
+      xpEarned: xpEarned ?? this.xpEarned,
     );
   }
 }
@@ -172,6 +176,86 @@ class PassportState {
       entries.where((e) => e.isMilestone).toList();
 
   int get totalDiscoveries => entries.length;
+
+  // Calculs d'XP de Sagesse
+  int get totalXp => entries.fold<int>(0, (sum, e) => sum + e.xpEarned);
+  int get defisXp => defis.fold<int>(0, (sum, e) => sum + e.xpEarned);
+  int get contesXp => contes.fold<int>(0, (sum, e) => sum + e.xpEarned);
+  int get monumentsXp => monuments.fold<int>(0, (sum, e) => sum + e.xpEarned);
+  int get figuresXp => figures.fold<int>(0, (sum, e) => sum + e.xpEarned);
+  int get villesXp => villes.fold<int>(0, (sum, e) => sum + e.xpEarned);
+
+  int get level {
+    final xp = totalXp;
+    if (xp < 250) return 1;
+    if (xp < 600) return 2;
+    if (xp < 1200) return 3;
+    return 4;
+  }
+
+  int get rankLevel => level;
+
+  String get rankTitle {
+    switch (level) {
+      case 1:
+        return 'Apprenti du Sahel';
+      case 2:
+        return 'Initié du Manden';
+      case 3:
+        return 'Gardien des Savoirs';
+      case 4:
+      default:
+        return 'Maître Dozo & Érudit';
+    }
+  }
+
+  String get nextRankTitle {
+    switch (level) {
+      case 1:
+        return 'Initié du Manden';
+      case 2:
+        return 'Gardien des Savoirs';
+      case 3:
+      case 4:
+      default:
+        return 'Maître Dozo & Érudit';
+    }
+  }
+
+  int get nextRankXp {
+    switch (level) {
+      case 1:
+        return 250;
+      case 2:
+        return 600;
+      case 3:
+        return 1200;
+      case 4:
+      default:
+        return 2000;
+    }
+  }
+
+  int get currentRankBaseXp {
+    switch (level) {
+      case 1:
+        return 0;
+      case 2:
+        return 250;
+      case 3:
+        return 600;
+      case 4:
+      default:
+        return 1200;
+    }
+  }
+
+  double get rankProgress {
+    final base = currentRankBaseXp;
+    final target = nextRankXp;
+    if (target <= base) return 1.0;
+    return ((totalXp - base) / (target - base)).clamp(0.0, 1.0);
+  }
 
   bool isDiscovered(PassportItemType type, String id) {
     return entries.any((e) => e.type == type && e.id == id);

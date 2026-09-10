@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_filter_controller.dart';
+import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/datasources/mock_culture_challenges_data.dart';
 import '../../core/models/culture_challenge_models.dart';
 import '../../core/theme/culture_theme.dart';
@@ -29,7 +30,7 @@ class CultureDefisView extends ConsumerWidget {
       regionId: activeRegion?.id,
     );
 
-    const userProfile = ChallengeUserProfile();
+    final passport = ref.watch(culturePassportProvider);
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -37,36 +38,49 @@ class CultureDefisView extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── 1. BARRE DE STATUT GAMIFICATION ─────────────────────────────────
+          // ── 1. BARRE DE STATUT GAMIFICATION (DIRECT VERS PASSEPORT) ──────────
           Align(
             alignment: Alignment.centerRight,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: CultureTheme.cyanTurquoise.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: CultureTheme.cyanTurquoise.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.bolt_rounded,
-                    size: 14,
-                    color: CultureTheme.accentOrange,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                context.push('/culture/passport');
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: CultureTheme.cyanTurquoise.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: CultureTheme.cyanTurquoise.withValues(alpha: 0.3),
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${userProfile.totalXp} XP',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w800,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.bolt_rounded,
+                      size: 14,
+                      color: CultureTheme.accentOrange,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${passport.totalXp} XP • NIVEAU ${passport.rankLevel}',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w800,
+                        color: CultureTheme.cyanTurquoise,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 10,
                       color: CultureTheme.cyanTurquoise,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -182,7 +196,7 @@ class CultureDefisView extends ConsumerWidget {
               // 1. Devinettes traditionnelles
               _buildCategoryCard(
                 context: context,
-                title: 'Devinettes « N\'Da »',
+                title: 'Devinettes',
                 subtitle: 'Énigmes orales des aînés',
                 icon: Icons.psychology_rounded,
                 accentColor: CultureTheme.accentOrange,
@@ -223,7 +237,7 @@ class CultureDefisView extends ConsumerWidget {
                 title: 'Défis Express',
                 subtitle: '60 secondes chrono',
                 icon: Icons.flash_on_rounded,
-                accentColor: CultureTheme.rougeKoulikoro,
+                accentColor: CultureTheme.accentOrange,
                 badgeText: 'Rapide',
                 isDark: isDark,
                 cardBg: cardBg,

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../core/theme/culture_theme.dart';
+
+import '../services/cultural_haptics.dart';
 
 /// Carte culturelle interactive avec motion design tactile
 ///
 /// Fonctionnalités :
-/// - Effet ressort tactile naturel (Scale 0.982 lors de la pression)
+/// - Effet ressort tactile naturel calibré (Scale 0.972 avec amortissement élastique)
 /// - Éclairage de bordure réactif au toucher (sans dégradé)
 /// - Ornementation architecturale soudanaise (témoins de banco aux angles)
-/// - Retour haptique doux
+/// - Retour haptique double phase (pression / relâchement)
 /// - STRICTEMENT SANS DÉGRADÉS selon la charte UX/UI
 class CulturalInteractiveCard extends StatefulWidget {
   final Widget child;
@@ -52,14 +53,14 @@ class _CulturalInteractiveCardState extends State<CulturalInteractiveCard>
     super.initState();
     _pressController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 140),
-      reverseDuration: const Duration(milliseconds: 240),
+      duration: const Duration(milliseconds: 110),
+      reverseDuration: const Duration(milliseconds: 220),
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.982).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.972).animate(
       CurvedAnimation(
         parent: _pressController,
-        curve: Curves.easeOutCubic,
+        curve: Curves.easeOutQuad,
         reverseCurve: Curves.easeOutBack,
       ),
     );
@@ -75,14 +76,14 @@ class _CulturalInteractiveCardState extends State<CulturalInteractiveCard>
     if (widget.onTap == null) return;
     setState(() => _isPressed = true);
     _pressController.forward();
-    HapticFeedback.selectionClick();
+    CulturalHaptics.cardPress();
   }
 
   void _handleTapUp(TapUpDetails details) {
     if (widget.onTap == null) return;
     setState(() => _isPressed = false);
     _pressController.reverse();
-    HapticFeedback.lightImpact();
+    CulturalHaptics.cardRelease();
     widget.onTap!();
   }
 
@@ -124,15 +125,15 @@ class _CulturalInteractiveCardState extends State<CulturalInteractiveCard>
             borderRadius: BorderRadius.circular(widget.borderRadius),
             border: Border.all(
               color: currentBorder,
-              width: _isPressed ? 1.6 : 1.2,
+              width: _isPressed ? 1.8 : 1.2,
             ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(
-                  alpha: isDark ? (_isPressed ? 0.35 : 0.22) : 0.05,
+                  alpha: isDark ? (_isPressed ? 0.38 : 0.22) : 0.05,
                 ),
-                blurRadius: _isPressed ? 8 : 14,
-                offset: Offset(0, _isPressed ? 2 : 5),
+                blurRadius: _isPressed ? 6 : 14,
+                offset: Offset(0, _isPressed ? 1.5 : 5),
               ),
             ],
           ),

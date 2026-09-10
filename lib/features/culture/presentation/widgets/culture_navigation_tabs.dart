@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../immersive/immersive.dart';
 
 /// Barre de navigation Culture premium — même design que DetShellScaffold
 /// Floating pill, icônes outline/filled, label animé, couleur orange charte
@@ -83,7 +84,7 @@ class CultureNavigationTabs extends StatelessWidget {
                   return GestureDetector(
                     onTap: () {
                       if (selectedIndex != index) {
-                        HapticFeedback.selectionClick();
+                        CulturalHaptics.tabSwitch();
                         onTabSelected(index);
                       }
                     },

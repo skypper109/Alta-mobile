@@ -11,17 +11,20 @@ import '../../core/theme/culture_theme.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/authentic_photo_hero.dart';
 import '../widgets/connected_contents_section.dart';
+import '../widgets/culture_audio_listen_badge.dart';
 import '../widgets/passport_stamp_toast.dart';
 
 /// Fiche de consultation immersive d'un Monument Historique
 class MonumentDetailScreen extends ConsumerWidget {
   final String id;
   final MonumentDetail? monument;
+  final String? heroTag;
 
   const MonumentDetailScreen({
     super.key,
     required this.id,
     this.monument,
+    this.heroTag,
   });
 
   @override
@@ -73,6 +76,7 @@ class MonumentDetailScreen extends ConsumerWidget {
               regionName: item.regionName,
               subtitleInfo: item.era,
               accentColor: CultureTheme.accentOrange,
+              heroTag: heroTag ?? 'culture_monument_${item.id}',
             ),
           ),
 
@@ -167,6 +171,64 @@ class MonumentDetailScreen extends ConsumerWidget {
                 ),
 
                 const SizedBox(height: 16),
+
+                // Écoute audio de l'histoire du monument par le Griot
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? CultureTheme.darkSurfaceAlt
+                        : const Color(0xFFFFF7ED),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.record_voice_over_rounded,
+                        size: 20,
+                        color: CultureTheme.accentOrange,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Écouter l\'histoire orale',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w800,
+                                color: titleColor,
+                              ),
+                            ),
+                            Text(
+                              'Architecture & mémoire contées',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10.5,
+                                color: subtitleColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      CultureAudioListenBadge(
+                        contentId: 'detail_monument_${item.id}',
+                        speechText:
+                            '${item.name}. ${item.subtitle}. Époque : ${item.era}. '
+                            'Localisation : ${item.locationDetails}. ${item.presentation}. '
+                            '${item.chapters.map((c) => '${c.title} : ${c.content}').join(' ')}',
+                        label: 'Écouter',
+                        compact: true,
+                        activeColor: CultureTheme.accentOrange,
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 14),
 
                 // Guide Culturel IA Contextuel
                 AskCulturalGuideButton(

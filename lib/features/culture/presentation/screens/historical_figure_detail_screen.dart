@@ -11,17 +11,20 @@ import '../../core/theme/culture_theme.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/authentic_photo_hero.dart';
 import '../widgets/connected_contents_section.dart';
+import '../widgets/culture_audio_listen_badge.dart';
 import '../widgets/passport_stamp_toast.dart';
 
 /// Fiche de consultation immersive d'un Grand Personnage Historique
 class HistoricalFigureDetailScreen extends ConsumerWidget {
   final String id;
   final HistoricalFigureDetail? figure;
+  final String? heroTag;
 
   const HistoricalFigureDetailScreen({
     super.key,
     required this.id,
     this.figure,
+    this.heroTag,
   });
 
   @override
@@ -73,6 +76,7 @@ class HistoricalFigureDetailScreen extends ConsumerWidget {
               regionName: item.regionName,
               subtitleInfo: item.period,
               accentColor: CultureTheme.primaryBlue,
+              heroTag: heroTag ?? 'culture_figure_${item.id}',
             ),
           ),
 
@@ -144,6 +148,65 @@ class HistoricalFigureDetailScreen extends ConsumerWidget {
                 ),
 
                 const SizedBox(height: 16),
+
+                // Écoute audio du récit par le Griot
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? CultureTheme.darkSurfaceAlt
+                        : const Color(0xFFEFF6FF),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: CultureTheme.primaryBlue.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.record_voice_over_rounded,
+                        size: 20,
+                        color: CultureTheme.primaryBlue,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Écouter l\'épopée orale',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w800,
+                                color: titleColor,
+                              ),
+                            ),
+                            Text(
+                              'Récit conté par la voix du Griot',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10.5,
+                                color: subtitleColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      CultureAudioListenBadge(
+                        contentId: 'detail_${item.id}',
+                        speechText:
+                            '${item.name}. ${item.titleHonorifique}. Période : ${item.period}. '
+                            '${item.resume}. '
+                            '${item.citationHistorique ?? ''}. '
+                            '${item.chapters.map((c) => '${c.title} : ${c.content}').join(' ')}',
+                        label: 'Écouter',
+                        compact: true,
+                        activeColor: CultureTheme.primaryBlue,
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 14),
 
                 // Guide Culturel IA Contextuel
                 AskCulturalGuideButton(

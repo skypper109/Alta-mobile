@@ -88,6 +88,14 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── L'ÉPREUVE ÉCLAIR DU CRÉPUSCULE ───────────────────────────────
+            const AnimatedCulturalReveal(
+              delay: Duration(milliseconds: 60),
+              child: CulturalSpeedTrialWidget(),
+            ),
+
+            const SizedBox(height: 20),
+
             // ── 1. SÉLECTEUR D'UNIVERS INTERACTIF ──────────────────────────────
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -100,7 +108,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                       ? filteredStories.length
                       : index == 1
                           ? filteredRiddles.length
-                          : 2;
+                          : MockCultureChallengesData.quizPacks.length;
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -226,7 +234,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
             // ── 3. SOUS-UNIVERS 2 : DEVINETTES N'DA ─────────────────────────────
             if (_selectedFilterIndex == 1) ...[
               _buildSectionHeader(
-                title: 'DEVINETTES TRADITIONNELLES N\'DA',
+                title: 'DEVINETTES TRADITIONNELLES ',
                 icon: Icons.lightbulb_rounded,
                 color: CultureTheme.accentOrange,
                 borderCol: borderCol,
@@ -247,12 +255,26 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
 
             // ── 4. SOUS-UNIVERS 3 : DÉFIS CULTURELS & QUIZ ─────────────────────
             if (_selectedFilterIndex == 2) ...[
+              // Défi en Vedette
+              AnimatedCulturalReveal(
+                delay: const Duration(milliseconds: 60),
+                child: _buildFeaturedChallengeCard(
+                  context: context,
+                  isDark: isDark,
+                  cardBg: cardBg,
+                  borderCol: borderCol,
+                  titleColor: titleColor,
+                  subtitleColor: subtitleColor,
+                ),
+              ),
+              const SizedBox(height: 22),
+
               _buildSectionHeader(
-                title: 'DÉFIS & QUIZ DU SAVOIR',
+                title: 'TOUS LES QUIZ DU SAVOIR',
                 icon: Icons.psychology_rounded,
                 color: CultureTheme.primaryBlue,
                 borderCol: borderCol,
-                count: 2,
+                count: MockCultureChallengesData.quizPacks.length,
               ),
               const SizedBox(height: 14),
               _buildQuizGrid(
@@ -511,10 +533,10 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: CultureTheme.primaryBlue,
+                          foregroundColor: CultureTheme.accentOrange,
                           side: BorderSide(
                             color:
-                                CultureTheme.primaryBlue.withValues(alpha: 0.5),
+                                CultureTheme.accentOrange.withValues(alpha: 0.5),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -594,7 +616,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: CultureTheme.rougeKoulikoro.withValues(alpha: 0.3),
+                  color: CultureTheme.accentOrange.withValues(alpha: 0.3),
                 ),
               ),
               child: ClipRRect(
@@ -678,6 +700,19 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
               ),
             ),
             const SizedBox(width: 8),
+            IconButton(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                StoryAudioPlayerSheet.show(context, story);
+              },
+              icon: const Icon(
+                Icons.headphones_rounded,
+                size: 20,
+                color: CultureTheme.accentOrange,
+              ),
+              tooltip: 'Écouter le conte',
+            ),
+            const SizedBox(width: 4),
             const Icon(
               Icons.arrow_forward_ios_rounded,
               size: 13,
@@ -689,7 +724,176 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     );
   }
 
-  // ── 3. GRILLE DE QUIZ DU SAVOIR (INTERACTIF) ───────────────────────────────
+  // ── 3. CARTE DU GRAND DÉFI EN VEDETTE ─────────────────────────────────────
+  Widget _buildFeaturedChallengeCard({
+    required BuildContext context,
+    required bool isDark,
+    required Color cardBg,
+    required Color borderCol,
+    required Color titleColor,
+    required Color subtitleColor,
+  }) {
+    final featuredPack = MockCultureChallengesData.quizPacks.first;
+
+    return CulturalInteractiveCard(
+      padding: EdgeInsets.zero,
+      showSudaneseCorners: false,
+      activeAccentColor: CultureTheme.accentOrange,
+      backgroundColor: cardBg,
+      borderRadius: 22,
+      onTap: () {
+        context.push('/culture/quiz/${featuredPack.id}');
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Visuel authentique du Défi
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+            child: SizedBox(
+              height: 145,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(
+                    featuredPack.photoUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: CultureTheme.primaryBlue,
+                      child: const Center(
+                        child: Icon(Icons.account_balance_rounded,
+                            color: Colors.white, size: 40),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    color: Colors.black.withValues(alpha: 0.40),
+                  ),
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.5, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: CultureTheme.accentOrange,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star_rounded,
+                              size: 13, color: Colors.white),
+                          const SizedBox(width: 4),
+                          Text(
+                            'DÉFI DU SAVOIR EN VEDETTE',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 12,
+                    left: 14,
+                    right: 14,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          featuredPack.title,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          featuredPack.subtitle,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: Colors.white.withValues(alpha: 0.88),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Pied de carte avec statistiques et action
+          Padding(
+            padding: const EdgeInsets.all(15),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 3.5),
+                  decoration: BoxDecoration(
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '+${featuredPack.xpReward} XP',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: CultureTheme.accentOrange,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '${featuredPack.questionsCount} questions • ~${featuredPack.timeMinutes} min',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: subtitleColor,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: CultureTheme.primaryBlue,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Relever le défi',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_forward_rounded,
+                          size: 14, color: Colors.white),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── 4. GRILLE DE QUIZ DU SAVOIR (INTERACTIF) ───────────────────────────────
   Widget _buildQuizGrid({
     required BuildContext context,
     required bool isDark,
@@ -698,31 +902,12 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     required Color titleColor,
     required Color subtitleColor,
   }) {
-    final quizzes = [
-      {
-        'id': 'quiz_empires',
-        'title': 'Les Grands Empires du Mali',
-        'desc': 'Sundiata, Kouroukan Fouga & Mansa Moussa',
-        'questions': '10 questions',
-        'xp': '+120 XP',
-        'color': CultureTheme.primaryBlue,
-        'icon': Icons.account_balance_rounded,
-      },
-      {
-        'id': 'quiz_monuments',
-        'title': 'Monuments & Architecture Banco',
-        'desc': 'Djenné, Tombouctou & Askia',
-        'questions': '8 questions',
-        'xp': '+100 XP',
-        'color': CultureTheme.accentOrange,
-        'icon': Icons.museum_rounded,
-      },
-    ];
+    final packs = MockCultureChallengesData.quizPacks;
 
     return Column(
-      children: quizzes.map((quiz) {
-        final color = quiz['color'] as Color;
-        final quizId = quiz['id'] as String;
+      children: packs.map((pack) {
+        final color = pack.themeColor;
+        final quizId = pack.id;
 
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
@@ -738,20 +923,21 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
             child: Row(
               children: [
                 Container(
-                  width: 46,
-                  height: 46,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(
                       color: color.withValues(alpha: 0.3),
+                      width: 1.0,
                     ),
                   ),
                   child: Center(
                     child: Icon(
-                      quiz['icon'] as IconData,
+                      pack.icon,
                       color: color,
-                      size: 22,
+                      size: 24,
                     ),
                   ),
                 ),
@@ -760,34 +946,73 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Text(
+                              pack.category.toUpperCase(),
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                color: color,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            pack.regionName,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: subtitleColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
                       Text(
-                        quiz['title'] as String,
+                        pack.title,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13.5,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w800,
                           color: titleColor,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        quiz['desc'] as String,
+                        pack.subtitle,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           color: subtitleColor,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 5),
                       Row(
                         children: [
                           Text(
-                            quiz['questions'] as String,
+                            '${pack.questionsCount} questions',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w600,
                               color: color,
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
+                          Text(
+                            '• ~${pack.timeMinutes} min',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w500,
+                              color: subtitleColor,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 1.5),
@@ -797,7 +1022,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                               borderRadius: BorderRadius.circular(5),
                             ),
                             child: Text(
-                              quiz['xp'] as String,
+                              '+${pack.xpReward} XP',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,

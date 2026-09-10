@@ -223,7 +223,7 @@ class _InteractiveStoryPlayerScreenState
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: CultureTheme.rougeKoulikoro,
+                                color: CultureTheme.accentOrange,
                               ),
                             ),
                           ],
@@ -241,13 +241,13 @@ class _InteractiveStoryPlayerScreenState
                           ),
                           decoration: BoxDecoration(
                             color: narrationState.isSpeaking
-                                ? CultureTheme.rougeKoulikoro
-                                : CultureTheme.rougeKoulikoro.withValues(
+                                ? CultureTheme.accentOrange
+                                : CultureTheme.accentOrange.withValues(
                                     alpha: 0.12,
                                   ),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: CultureTheme.rougeKoulikoro.withValues(
+                              color: CultureTheme.accentOrange.withValues(
                                 alpha: narrationState.isSpeaking ? 1.0 : 0.25,
                               ),
                             ),
@@ -262,7 +262,7 @@ class _InteractiveStoryPlayerScreenState
                                 size: 16,
                                 color: narrationState.isSpeaking
                                     ? Colors.white
-                                    : CultureTheme.rougeKoulikoro,
+                                    : CultureTheme.accentOrange,
                               ),
                               const SizedBox(width: 5),
                               Text(
@@ -274,7 +274,7 @@ class _InteractiveStoryPlayerScreenState
                                   fontWeight: FontWeight.w700,
                                   color: narrationState.isSpeaking
                                       ? Colors.white
-                                      : CultureTheme.rougeKoulikoro,
+                                      : CultureTheme.accentOrange,
                                 ),
                               ),
                             ],
@@ -321,7 +321,7 @@ class _InteractiveStoryPlayerScreenState
                       backgroundColor:
                           isDark ? Colors.white10 : const Color(0xFFE2E8F0),
                       valueColor: const AlwaysStoppedAnimation<Color>(
-                        CultureTheme.rougeKoulikoro,
+                        CultureTheme.accentOrange,
                       ),
                     ),
                   ),
@@ -378,12 +378,12 @@ class _InteractiveStoryPlayerScreenState
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: CultureTheme.rougeKoulikoro.withValues(
+                              color: CultureTheme.cyanTurquoise.withValues(
                                 alpha: isDark ? 0.20 : 0.08,
                               ),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: CultureTheme.rougeKoulikoro.withValues(
+                                color: CultureTheme.cyanTurquoise.withValues(
                                   alpha: 0.25,
                                 ),
                               ),
@@ -394,7 +394,7 @@ class _InteractiveStoryPlayerScreenState
                                 const Icon(
                                   Icons.wb_twilight_rounded,
                                   size: 14,
-                                  color: CultureTheme.rougeKoulikoro,
+                                  color: CultureTheme.cyanTurquoise,
                                 ),
                                 const SizedBox(width: 6),
                                 Flexible(
@@ -403,7 +403,7 @@ class _InteractiveStoryPlayerScreenState
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
-                                      color: CultureTheme.rougeKoulikoro,
+                                      color: CultureTheme.cyanTurquoise,
                                       letterSpacing: 0.2,
                                     ),
                                   ),
@@ -539,7 +539,7 @@ class _InteractiveStoryPlayerScreenState
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.8,
-                              color: CultureTheme.rougeKoulikoro,
+                              color: CultureTheme.accentOrange,
                             ),
                           ),
                         ),
@@ -558,19 +558,19 @@ class _InteractiveStoryPlayerScreenState
                                 state: isSelected
                                     ? ChoiceCardState.selected
                                     : ChoiceCardState.normal,
-                                accentColor: CultureTheme.rougeKoulikoro,
+                                accentColor: CultureTheme.accentOrange,
                                 onTap: () => _onChoiceSelected(choice),
                                 leading: Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: CultureTheme.rougeKoulikoro
+                                    color: CultureTheme.accentOrange
                                         .withValues(alpha: 0.12),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
                                     choice.icon,
                                     size: 18,
-                                    color: CultureTheme.rougeKoulikoro,
+                                    color: CultureTheme.accentOrange,
                                   ),
                                 ),
                               ),
@@ -598,17 +598,61 @@ class _InteractiveStoryPlayerScreenState
     Color subtitleColor,
   ) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // Sceau royal physique estampillé
+        CulturalRoyalStampAnimation(
+          size: 84,
+          icon: Icons.auto_awesome_rounded,
+          label: 'SCEAU DU CONTE',
+          color: CultureTheme.accentOrange,
+          photoUrl: _story.photoUrl,
+        ),
+        const SizedBox(height: 12),
+
+        // Pilule XP dynamique avec compteur roulant
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: CultureTheme.primaryBlue.withValues(alpha: isDark ? 0.25 : 0.10),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: CultureTheme.primaryBlue.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.bolt_rounded,
+                size: 16,
+                color: CultureTheme.primaryBlue,
+              ),
+              const SizedBox(width: 4),
+              CulturalRollingXpCounter(
+                targetXp: 50,
+                prefix: '+',
+                suffix: ' XP Conte',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: CultureTheme.primaryBlue,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
+
         // Morale traditionnelle du Griot
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFFFFBEB),
+            color: isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFFFF7ED),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: CultureTheme.orPatrimoine,
+              color: CultureTheme.accentOrange.withValues(alpha: 0.35),
               width: 1.5,
             ),
           ),
@@ -619,7 +663,7 @@ class _InteractiveStoryPlayerScreenState
                 children: [
                   const Icon(
                     Icons.stars_rounded,
-                    color: CultureTheme.orPatrimoine,
+                    color: CultureTheme.accentOrange,
                     size: 22,
                   ),
                   const SizedBox(width: 8),
@@ -628,9 +672,7 @@ class _InteractiveStoryPlayerScreenState
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
-                      color: isDark
-                          ? CultureTheme.orPatrimoine
-                          : const Color(0xFFB45309),
+                      color: CultureTheme.accentOrange,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -660,7 +702,7 @@ class _InteractiveStoryPlayerScreenState
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   side: BorderSide(
-                    color: CultureTheme.rougeKoulikoro.withValues(alpha: 0.5),
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.5),
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -670,14 +712,14 @@ class _InteractiveStoryPlayerScreenState
                 icon: const Icon(
                   Icons.replay_rounded,
                   size: 16,
-                  color: CultureTheme.rougeKoulikoro,
+                  color: CultureTheme.accentOrange,
                 ),
                 label: Text(
-                  'Rejouer d\'autres choix',
+                  'Rejouer le conte',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: CultureTheme.rougeKoulikoro,
+                    color: CultureTheme.accentOrange,
                   ),
                 ),
               ),
@@ -686,7 +728,8 @@ class _InteractiveStoryPlayerScreenState
             Expanded(
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: CultureTheme.rougeKoulikoro,
+                  backgroundColor: CultureTheme.primaryBlue,
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -694,16 +737,16 @@ class _InteractiveStoryPlayerScreenState
                   ),
                 ),
                 onPressed: () {
-                  HapticFeedback.lightImpact();
-                  if (context.canPop()) context.pop();
+                  HapticFeedback.mediumImpact();
+                  context.push('/culture/passport');
                 },
                 icon: const Icon(
-                  Icons.check_circle_outline_rounded,
+                  Icons.badge_rounded,
                   size: 16,
                   color: Colors.white,
                 ),
                 label: Text(
-                  'Terminer l\'aventure',
+                  'Voir mon Passeport',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,

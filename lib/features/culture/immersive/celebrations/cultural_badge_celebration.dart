@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/culture_theme.dart';
+import '../widgets/cultural_royal_stamp_animation.dart';
+import '../widgets/cultural_rolling_xp_counter.dart';
 
 /// Modal de célébration élégante pour les badges, tampons du passeport et niveaux culturels.
 /// Séquence animée : Apparition fond -> Badge avec scale/rotation -> Titre -> XP -> Bouton Continuer.
@@ -60,8 +62,6 @@ class CulturalBadgeCelebration extends StatefulWidget {
 class _CulturalBadgeCelebrationState extends State<CulturalBadgeCelebration>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _rotateAnimation;
   late Animation<double> _contentFadeAnimation;
 
   @override
@@ -72,24 +72,10 @@ class _CulturalBadgeCelebrationState extends State<CulturalBadgeCelebration>
       duration: const Duration(milliseconds: 650),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.65, curve: Curves.easeOutBack),
-      ),
-    );
-
-    _rotateAnimation = Tween<double>(begin: -0.08, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.65, curve: Curves.easeOutCubic),
-      ),
-    );
-
     _contentFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.45, 1.0, curve: Curves.easeOut),
+        curve: const Interval(0.35, 1.0, curve: Curves.easeOut),
       ),
     );
 
@@ -146,46 +132,13 @@ class _CulturalBadgeCelebrationState extends State<CulturalBadgeCelebration>
               ),
               const SizedBox(height: 12),
 
-              // ── 2. BADGE AVEC ANIMATION SCALE & ROTATION ───────────────────
-              AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _scaleAnimation.value,
-                    child: Transform.rotate(
-                      angle: _rotateAnimation.value,
-                      child: child,
-                    ),
-                  );
-                },
-                child: Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    color: CultureTheme.accentOrange.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: CultureTheme.accentOrange,
-                      width: 2.5,
-                    ),
-                  ),
-                  child: Center(
-                    child: widget.photoUrl != null
-                        ? ClipOval(
-                            child: Image.asset(
-                              widget.photoUrl!,
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : Icon(
-                            widget.badgeIcon,
-                            size: 44,
-                            color: CultureTheme.accentOrange,
-                          ),
-                  ),
-                ),
+              // ── 2. BADGE AVEC ANIMATION PHYSIQUE DU SCEAU ROYAL ─────────
+              CulturalRoyalStampAnimation(
+                size: 92,
+                icon: widget.badgeIcon,
+                label: widget.category != null ? widget.category!.toUpperCase() : 'SCEAU GRAVÉ',
+                color: CultureTheme.accentOrange,
+                photoUrl: widget.photoUrl,
               ),
               const SizedBox(height: 18),
 
@@ -232,7 +185,7 @@ class _CulturalBadgeCelebrationState extends State<CulturalBadgeCelebration>
                     ),
                     const SizedBox(height: 16),
 
-                    // Pilule XP
+                    // Pilule XP avec compteur roulant
                     if (widget.xpGained > 0) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -257,8 +210,10 @@ class _CulturalBadgeCelebrationState extends State<CulturalBadgeCelebration>
                               color: CultureTheme.primaryBlue,
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              '+${widget.xpGained} XP',
+                            CulturalRollingXpCounter(
+                              targetXp: widget.xpGained,
+                              prefix: '+',
+                              suffix: ' XP',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
