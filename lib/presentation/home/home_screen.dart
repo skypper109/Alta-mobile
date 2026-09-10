@@ -190,7 +190,7 @@ class HomeScreen extends ConsumerWidget {
 
             // ── 5. VOS MATIÈRES (CARDS DE SUGGESTIONS GRID FOR TEENS) ────────
             DetSectionHeader(
-              title: 'Matières du Programme (${userState.classShortLabel})',
+              title: 'Programmes (${userState.classShortLabel})',
             ),
             const SizedBox(height: 14),
 

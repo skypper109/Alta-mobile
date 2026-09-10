@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 abstract final class AltaApiConfig {
   static const String serverBaseUrl = 'http://127.0.0.1:8000';
   static const String defaultLanUrl = 'http://172.20.10.14:8000';
-  static const String cloudTunnelUrl = 'https://nation-institutional-freeware-representations.trycloudflare.com';
+  static const String cloudTunnelUrl = 'https://governing-besides-transmit-importance.trycloudflare.com';
 
   static const List<String> candidateBaseUrls = [
     'http://127.0.0.1:8000',
@@ -20,6 +20,7 @@ abstract final class AltaApiConfig {
     'http://192.168.4.1:8000',
     'http://192.168.1.100:8000',
     'https://nation-institutional-freeware-representations.trycloudflare.com',
+    'https://governing-besides-transmit-importance.trycloudflare.com',
   ];
 }
 

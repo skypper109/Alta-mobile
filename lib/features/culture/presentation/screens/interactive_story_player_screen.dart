@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/datasources/mock_culture_stories_data.dart';
+import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
+import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/connected_contents_section.dart';
 
 /// Moteur immersif de Narration Interactive Scène par Scène
@@ -713,6 +715,18 @@ class _InteractiveStoryPlayerScreenState
               ),
             ),
           ],
+        ),
+
+        const SizedBox(height: 18),
+
+        // Échanger avec le Vieux Sage sur ce conte
+        AskCulturalGuideButton(
+          contextData: CulturalGuideContext(
+            contentType: CulturalContentType.conte,
+            contentId: _story.id,
+            contentTitle: _story.title,
+            subtitle: 'Morale et sagesse de ce conte',
+          ),
         ),
 
         const SizedBox(height: 24),

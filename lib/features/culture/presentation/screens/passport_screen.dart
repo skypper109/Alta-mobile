@@ -122,7 +122,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
                 contentTitle: 'Mon Passeport Culturel',
                 subtitle: 'Mémoire de voyage & Recommandations personnalisées',
               );
-              context.push('/culture/guide', extra: guideContext);
+              context.push('/culture/sage', extra: guideContext);
             },
           ),
           const SizedBox(width: 8),

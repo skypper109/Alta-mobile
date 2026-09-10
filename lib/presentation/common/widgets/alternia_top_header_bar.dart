@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../features/culture/core/controllers/culture_filter_controller.dart';
-import '../../../features/culture/core/models/cultural_guide_models.dart';
 import '../../../features/culture/core/theme/culture_theme.dart';
 import '../../../features/culture/presentation/widgets/culture_region_bottom_sheet.dart';
 import '../../../shared/widgets.dart';
@@ -27,6 +26,8 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
   final EdgeInsetsGeometry padding;
   final VoidCallback? onLocationTap;
   final VoidCallback? onGuideAiTap;
+  final VoidCallback? onSearchTap;
+  final VoidCallback? onSageTap;
 
   const AlterniaTopHeaderBar({
     super.key,
@@ -34,6 +35,8 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
     this.padding = const EdgeInsets.fromLTRB(20, 12, 16, 10),
     this.onLocationTap,
     this.onGuideAiTap,
+    this.onSearchTap,
+    this.onSageTap,
   });
 
   const AlterniaTopHeaderBar.education({
@@ -41,13 +44,17 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
     this.padding = const EdgeInsets.fromLTRB(20, 12, 16, 10),
   })  : variant = AlterniaHeaderVariant.education,
         onLocationTap = null,
-        onGuideAiTap = null;
+        onGuideAiTap = null,
+        onSearchTap = null,
+        onSageTap = null;
 
   const AlterniaTopHeaderBar.culture({
     super.key,
     this.padding = const EdgeInsets.fromLTRB(20, 12, 16, 10),
     this.onLocationTap,
     this.onGuideAiTap,
+    this.onSearchTap,
+    this.onSageTap,
   }) : variant = AlterniaHeaderVariant.culture;
 
   @override
@@ -91,7 +98,43 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 1. Filtre Régional Transversal (Icône seule avec indicateur actif)
+        // 1. Bouton Recherche Culturelle IA (Icône Loupe Plein Écran)
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onSearchTap ??
+                () {
+                  HapticFeedback.lightImpact();
+                  context.push('/culture/search');
+                },
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: CultureTheme.accentOrange.withValues(
+                  alpha: isDark ? 0.20 : 0.12,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: CultureTheme.accentOrange.withValues(alpha: 0.4),
+                  width: 1.2,
+                ),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.search_rounded,
+                  size: 20,
+                  color: CultureTheme.accentOrange,
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 8),
+
+        // 2. Filtre Régional Transversal (Icône seule avec indicateur actif)
         Material(
           color: Colors.transparent,
           child: InkWell(
@@ -159,37 +202,27 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
 
         const SizedBox(width: 8),
 
-        // 2. Bouton Guide Culturel IA (Icône Robot)
+        // 3. Bouton Vieux Sage Culturel IA (Chat Immersif avec Avatar & Voix)
         Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: onGuideAiTap ??
+            onTap: onSageTap ??
                 () {
                   HapticFeedback.mediumImpact();
                   final activeReg = filterState.activeRegion;
-                  final guideContext = activeReg != null
-                      ? CulturalGuideContext(
-                          contentType: CulturalContentType.region,
-                          contentId: activeReg.id,
-                          contentTitle: activeReg.nom,
-                          subtitle: activeReg.surnom,
-                          regionId: activeReg.id,
-                          regionName: activeReg.nom,
-                        )
-                      : CulturalGuideContext.general;
-                  context.push('/culture/guide', extra: guideContext);
+                  context.push('/culture/sage', extra: activeReg);
                 },
             borderRadius: BorderRadius.circular(12),
             child: Container(
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: CultureTheme.accentOrange.withValues(
+                color: CultureTheme.primaryBlue.withValues(
                   alpha: isDark ? 0.20 : 0.12,
                 ),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: CultureTheme.accentOrange.withValues(alpha: 0.4),
+                  color: CultureTheme.primaryBlue.withValues(alpha: 0.4),
                   width: 1.2,
                 ),
               ),
@@ -197,7 +230,7 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
                 child: Icon(
                   Icons.smart_toy_rounded,
                   size: 20,
-                  color: CultureTheme.accentOrange,
+                  color: CultureTheme.primaryBlue,
                 ),
               ),
             ),

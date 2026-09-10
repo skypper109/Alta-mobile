@@ -25,7 +25,7 @@ class AskCulturalGuideButton extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
-        context.push('/culture/guide', extra: contextData);
+        context.push('/culture/sage', extra: contextData);
       },
       child: Container(
         width: double.infinity,
@@ -67,7 +67,7 @@ class AskCulturalGuideButton extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        'GUIDE CULTUREL IA',
+                        'LE VIEUX SAGE IA',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 9.5,
                           fontWeight: FontWeight.w800,

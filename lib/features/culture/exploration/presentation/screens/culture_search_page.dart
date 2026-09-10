@@ -486,47 +486,62 @@ class _CultureSearchPageState extends ConsumerState<CultureSearchPage>
   }
 
   Widget _buildAiBanner(bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: CultureTheme.primaryBlue.withValues(alpha: isDark ? 0.14 : 0.06),
-        borderRadius: BorderRadius.circular(18),
-        border:
-            Border.all(color: CultureTheme.primaryBlue.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        context.push('/culture/sage');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: CultureTheme.primaryBlue.withValues(alpha: isDark ? 0.14 : 0.06),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: CultureTheme.primaryBlue.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
                 color: CultureTheme.primaryBlue.withValues(alpha: 0.15),
-                shape: BoxShape.circle),
-            child: const Icon(Icons.smart_toy_rounded,
-                size: 22, color: CultureTheme.primaryBlue),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.smart_toy_rounded, size: 22, color: CultureTheme.primaryBlue),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
               child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Guide Culturel IA — LLM Mali",
-                  style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: CultureTheme.primaryBlue)),
-              const SizedBox(height: 3),
-              Text(
-                  "Posez n'importe quelle question sur le Mali : histoire, contes, regions, traditions…",
-                  style: GoogleFonts.plusJakartaSans(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Discuter avec le Vieux Sage IA',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: CultureTheme.primaryBlue,
+                        ),
+                      ),
+                      const Spacer(),
+                      const Icon(Icons.arrow_forward_ios_rounded, size: 13, color: CultureTheme.primaryBlue),
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    "Posez n'importe quelle question sur le Mali : histoire, contes, régions, traditions…",
+                    style: GoogleFonts.plusJakartaSans(
                       fontSize: 11.5,
-                      color: isDark
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF475569),
-                      height: 1.4)),
-            ],
-          )),
-        ],
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

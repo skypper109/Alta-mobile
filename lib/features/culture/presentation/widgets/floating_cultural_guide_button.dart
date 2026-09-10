@@ -16,7 +16,7 @@ class FloatingCulturalGuideButton extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
-        context.push('/culture/guide', extra: contextData ?? CulturalGuideContext.general);
+        context.push('/culture/sage', extra: contextData ?? CulturalGuideContext.general);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
