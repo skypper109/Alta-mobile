@@ -221,6 +221,14 @@ GoRouter appRouter(Ref ref) {
         },
       ),
       GoRoute(
+        path: '/culture/conte-interactif/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return InteractiveStoryPlayerScreen(id: id);
+        },
+      ),
+      GoRoute(
         path: '/culture/conte/:id/read',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {

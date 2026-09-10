@@ -361,7 +361,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
       borderRadius: 22,
       onTap: () {
         context.push(
-          '/culture/conte-interactif/${story.id}',
+          '/culture/conte/${story.id}/play',
           extra: story,
         );
       },
@@ -552,7 +552,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                         onPressed: () {
                           HapticFeedback.mediumImpact();
                           context.push(
-                            '/culture/conte-interactif/${story.id}',
+                            '/culture/conte/${story.id}/play',
                             extra: story,
                           );
                         },
