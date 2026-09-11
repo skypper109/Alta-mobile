@@ -714,7 +714,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
       {
         'id': 'quiz_empires',
         'title': 'Les Grands Empires du Mali',
-        'desc': 'Sundiata, Kouroukan Fouga & Mansa Moussa',
+        'desc': 'Soundiata, Kouroukan Fouga & Mansa Moussa',
         'questions': '10 questions',
         'xp': '+120 XP',
         'color': CultureTheme.primaryBlue,
