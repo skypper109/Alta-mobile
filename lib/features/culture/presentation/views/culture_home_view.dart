@@ -308,17 +308,21 @@ class CultureHomeView extends ConsumerWidget {
                 // Récupérer les dernières activités par type
                 final recentItems = <PassportEntry>[];
                 // Dernier conte
-                if (passport.contes.isNotEmpty)
+                if (passport.contes.isNotEmpty) {
                   recentItems.add(passport.contes.first);
+                }
                 // Dernier défi
-                if (passport.defis.isNotEmpty)
+                if (passport.defis.isNotEmpty) {
                   recentItems.add(passport.defis.first);
+                }
                 // Dernier monument
-                if (passport.monuments.isNotEmpty)
+                if (passport.monuments.isNotEmpty) {
                   recentItems.add(passport.monuments.first);
+                }
                 // Dernière figure
-                if (passport.figures.isNotEmpty)
+                if (passport.figures.isNotEmpty) {
                   recentItems.add(passport.figures.first);
+                }
 
                 if (recentItems.isEmpty) return const SizedBox.shrink();
 
