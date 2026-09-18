@@ -26,8 +26,8 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
 
   static const List<String> _categories = [
     'Personnages',
-    'Monuments ',
-    'Villes & Villages',
+    'Monuments',
+    'Villes',
   ];
 
   static const List<IconData> _categoryIcons = [
@@ -37,16 +37,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
   ];
 
   Color _getCategoryColor(int index) {
-    switch (index) {
-      case 0:
-        return CultureTheme.primaryBlue;
-      case 1:
-        return const Color.fromRGBO(241, 133, 31, 1);
-      case 2:
-        return CultureTheme.cyanTurquoise;
-      default:
-        return CultureTheme.primaryBlue;
-    }
+    return CultureTheme.accentOrange;
   }
 
   @override
@@ -86,22 +77,18 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── 1. BARRE HORIZONTALE DE SÉLECTION DE CATÉGORIE ─────────────────
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                children: List.generate(_categories.length, (index) {
-                  final isSelected = _selectedFilterIndex == index;
-                  final activeCol = _getCategoryColor(index);
-                  final int count = index == 0
-                      ? figures.length
-                      : index == 1
-                          ? monuments.length
-                          : villes.length;
+            // ── 1. BARRE DE SÉLECTION DE CATÉGORIE RESPONSIVE (FIGÉE) ───────────
+            Row(
+              children: List.generate(_categories.length, (index) {
+                final isSelected = _selectedFilterIndex == index;
+                final activeCol = _getCategoryColor(index);
 
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: index == 0 ? 0 : 4,
+                      right: index == _categories.length - 1 ? 0 : 4,
+                    ),
                     child: GestureDetector(
                       onTap: () {
                         HapticFeedback.selectionClick();
@@ -112,7 +99,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 220),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
+                            horizontal: 6, vertical: 9),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? activeCol
@@ -126,44 +113,28 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                           ),
                         ),
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               _categoryIcons[index],
                               size: 14,
                               color: isSelected ? Colors.white : activeCol,
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _categories[index],
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                fontWeight: isSelected
-                                    ? FontWeight.w800
-                                    : FontWeight.w600,
-                                color: isSelected
-                                    ? Colors.white
-                                    : (isDark
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF64748B)),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 1.5),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Colors.black.withValues(alpha: 0.25)
-                                    : activeCol.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                '$count',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: isSelected ? Colors.white : activeCol,
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  _categories[index],
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w800
+                                        : FontWeight.w600,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : subtitleColor,
+                                  ),
                                 ),
                               ),
                             ),
@@ -171,9 +142,9 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                         ),
                       ),
                     ),
-                  );
-                }),
-              ),
+                  ),
+                );
+              }),
             ),
 
             const SizedBox(height: 18),
@@ -201,7 +172,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
               _buildSectionHeader(
                 title: 'TOUS LES HÉROS & FIGURES',
                 icon: Icons.shield_rounded,
-                color: CultureTheme.primaryBlue,
+                color: CultureTheme.accentOrange,
                 borderCol: borderCol,
                 count: figures.length,
               ),
@@ -209,7 +180,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
               _buildItemsGrid(
                 items: figures,
                 categoryRoute: 'personnage',
-                categoryColor: CultureTheme.primaryBlue,
+                categoryColor: CultureTheme.accentOrange,
                 isDark: isDark,
                 cardBg: cardBg,
                 borderCol: borderCol,
@@ -239,7 +210,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
               _buildSectionHeader(
                 title: 'CITÉS MILLÉNAIRES & TERROIRS',
                 icon: Icons.location_city_rounded,
-                color: CultureTheme.cyanTurquoise,
+                color: CultureTheme.accentOrange,
                 borderCol: borderCol,
                 count: villes.length,
               ),
@@ -247,7 +218,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
               _buildItemsGrid(
                 items: villes,
                 categoryRoute: 'ville',
-                categoryColor: CultureTheme.cyanTurquoise,
+                categoryColor: CultureTheme.accentOrange,
                 isDark: isDark,
                 cardBg: cardBg,
                 borderCol: borderCol,

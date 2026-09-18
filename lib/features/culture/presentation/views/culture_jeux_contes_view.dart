@@ -28,15 +28,15 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
   int _selectedFilterIndex = 0; // 0: Contes, 1: Devinettes, 2: Défis
 
   static const List<String> _filters = [
-    'Contes ',
-    'Devinettes ',
-    'Défis ',
+    'Contes',
+    'Devinettes',
+    'Proverbes',
   ];
 
   static const List<IconData> _filterIcons = [
     Icons.auto_stories_rounded,
     Icons.lightbulb_rounded,
-    Icons.psychology_rounded,
+    Icons.format_quote_rounded,
   ];
 
   Color _getFilterColor(int index) {
@@ -87,22 +87,18 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          // ── 1. SÉLECTEUR D'UNIVERS INTERACTIF ──────────────────────────────
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              children: List.generate(_filters.length, (index) {
-                final isSelected = _selectedFilterIndex == index;
-                final activeCol = _getFilterColor(index);
-                final int count = index == 0
-                    ? filteredStories.length
-                    : index == 1
-                        ? filteredRiddles.length
-                        : 2;
+          // ── 1. SÉLECTEUR D'UNIVERS INTERACTIF RESPONSIVE (FIGÉ) ────────────
+          Row(
+            children: List.generate(_filters.length, (index) {
+              final isSelected = _selectedFilterIndex == index;
+              final activeCol = _getFilterColor(index);
 
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: index == 0 ? 0 : 4,
+                    right: index == _filters.length - 1 ? 0 : 4,
+                  ),
                   child: GestureDetector(
                     onTap: () {
                       HapticFeedback.selectionClick();
@@ -113,7 +109,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 220),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
+                          horizontal: 6, vertical: 9),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? activeCol
@@ -127,40 +123,27 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                         ),
                       ),
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             _filterIcons[index],
                             size: 14,
                             color: isSelected ? Colors.white : activeCol,
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            _filters[index],
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              fontWeight: isSelected
-                                  ? FontWeight.w800
-                                  : FontWeight.w600,
-                              color: isSelected ? Colors.white : subtitleColor,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 1.5),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.black.withValues(alpha: 0.25)
-                                  : activeCol.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '$count',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: isSelected ? Colors.white : activeCol,
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                _filters[index],
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w800
+                                      : FontWeight.w600,
+                                  color:
+                                      isSelected ? Colors.white : subtitleColor,
+                                ),
                               ),
                             ),
                           ),
@@ -168,9 +151,9 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                       ),
                     ),
                   ),
-                );
-              }),
-            ),
+                ),
+              );
+            }),
           ),
 
           const SizedBox(height: 18),
@@ -242,17 +225,22 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
             const SizedBox(height: 20),
           ],
 
-          // ── 7. SECTION DEVINETTES TRADITIONNELLES N'DA ──────────────────────
-          if (_selectedFilterIndex == 0 || _selectedFilterIndex == 3) ...[
+          // ── 4. SOUS-UNIVERS 3 : PROVERBES & SAGESSES DU MALI ────────────────
+          if (_selectedFilterIndex == 2) ...[
             _buildSectionHeader(
-              title: 'DEVINETTES TRADITIONNELLES (N\'DA)',
-              icon: Icons.lightbulb_rounded,
+              title: 'PROVERBES & SAGESSES ANCESTRALES',
+              icon: Icons.format_quote_rounded,
               color: CultureTheme.accentOrange,
               borderCol: borderCol,
             ),
             const SizedBox(height: 14),
-            _buildRiddlesList(
-              riddles: filteredRiddles,
+            _buildProverbsList(
+              proverbs: _malianProverbs
+                  .where((p) =>
+                      activeRegion == null ||
+                      p.regionId == null ||
+                      p.regionId == activeRegion.id)
+                  .toList(),
               context: context,
               isDark: isDark,
               cardBg: cardBg,
@@ -701,8 +689,9 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     );
   }
 
-  // ── 3. GRILLE DE QUIZ DU SAVOIR (INTERACTIF) ───────────────────────────────
-  Widget _buildQuizGrid({
+  // ── 3. LISTE DES PROVERBES ET SAGESSES DU MALI ────────────────────────────
+  Widget _buildProverbsList({
+    required List<_MalianProverb> proverbs,
     required BuildContext context,
     required bool isDark,
     required Color cardBg,
@@ -710,122 +699,181 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     required Color titleColor,
     required Color subtitleColor,
   }) {
-    final quizzes = [
-      {
-        'id': 'quiz_empires',
-        'title': 'Les Grands Empires du Mali',
-        'desc': 'Soundiata, Kouroukan Fouga & Mansa Moussa',
-        'questions': '10 questions',
-        'xp': '+120 XP',
-        'color': CultureTheme.primaryBlue,
-        'icon': Icons.account_balance_rounded,
-      },
-      {
-        'id': 'quiz_monuments',
-        'title': 'Monuments & Architecture Banco',
-        'desc': 'Djenné, Tombouctou & Askia',
-        'questions': '8 questions',
-        'xp': '+100 XP',
-        'color': CultureTheme.accentOrange,
-        'icon': Icons.museum_rounded,
-      },
-    ];
-
     return Column(
-      children: quizzes.map((quiz) {
-        final color = quiz['color'] as Color;
-        final quizId = quiz['id'] as String;
-
+      children: proverbs.map((prov) {
         return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: CulturalInteractiveCard(
-            padding: const EdgeInsets.all(14),
-            showSudaneseCorners: false,
-            activeAccentColor: color,
-            backgroundColor: cardBg,
-            borderRadius: 18,
-            onTap: () {
-              context.push('/culture/quiz/$quizId');
-            },
-            child: Row(
+          margin: const EdgeInsets.only(bottom: 14),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: borderCol, width: 1.2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: color.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      quiz['icon'] as IconData,
-                      color: color,
-                      size: 22,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        quiz['title'] as String,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w700,
-                          color: titleColor,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3.5),
+                      decoration: BoxDecoration(
+                        color: CultureTheme.accentOrange.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color:
+                              CultureTheme.accentOrange.withValues(alpha: 0.3),
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        quiz['desc'] as String,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          color: subtitleColor,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            quiz['questions'] as String,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w600,
-                              color: color,
-                            ),
+                          const Icon(
+                            Icons.format_quote_rounded,
+                            size: 12,
+                            color: CultureTheme.accentOrange,
                           ),
-                          const SizedBox(width: 10),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 1.5),
-                            decoration: BoxDecoration(
-                              color: CultureTheme.accentOrange
-                                  .withValues(alpha: 0.14),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Text(
-                              quiz['xp'] as String,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: CultureTheme.accentOrange,
-                              ),
+                          const SizedBox(width: 4),
+                          Text(
+                            prov.theme.toUpperCase(),
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              color: CultureTheme.accentOrange,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ],
                       ),
-                    ],
+                    ),
+                    Text(
+                      prov.regionName,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: subtitleColor,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  prov.text,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
+                    height: 1.4,
+                    color: titleColor,
                   ),
                 ),
-                Icon(
-                  Icons.play_circle_fill_rounded,
-                  size: 28,
-                  color: color,
+                if (prov.originalText != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    prov.originalText!,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFFD97706),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 10),
+                Text(
+                  prov.meaning,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    height: 1.45,
+                    color: subtitleColor,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Divider(height: 1, color: borderCol),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.history_edu_rounded,
+                          size: 13,
+                          color: subtitleColor,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          prov.origin,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w500,
+                            color: subtitleColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        Clipboard.setData(ClipboardData(
+                          text: '${prov.text}\n— ${prov.origin}',
+                        ));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Proverbe copié dans le presse-papier',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            backgroundColor: CultureTheme.accentOrange,
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? CultureTheme.darkSurfaceAlt
+                              : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.copy_rounded,
+                              size: 12,
+                              color: subtitleColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Copier',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                                color: subtitleColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -959,3 +1007,119 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     );
   }
 }
+
+/// Modèle pour les proverbes traditionnels du Mali
+class _MalianProverb {
+  final String id;
+  final String text;
+  final String? originalText;
+  final String meaning;
+  final String origin;
+  final String theme;
+  final String? regionId;
+  final String regionName;
+
+  const _MalianProverb({
+    required this.id,
+    required this.text,
+    this.originalText,
+    required this.meaning,
+    required this.origin,
+    required this.theme,
+    this.regionId,
+    required this.regionName,
+  });
+}
+
+/// Données authentiques de proverbes et sagesses du Mali
+const List<_MalianProverb> _malianProverbs = [
+  _MalianProverb(
+    id: 'prov_humilite',
+    text: "L'eau chaude n'oublie jamais qu'elle a été froide.",
+    originalText: "Ji kalan tɛ ɲina a nɛnɛ kɔ.",
+    meaning:
+        "Peu importe ton ascension ou ta réussite, n'oublie jamais d'où tu viens et garde l'humilité.",
+    origin: "Tradition Bamanan (Manden)",
+    theme: "Humilité",
+    regionId: "koulikoro",
+    regionName: "Koulikoro / Manden",
+  ),
+  _MalianProverb(
+    id: 'prov_sagesse_vieillesse',
+    text: "Ce qu'un vieillard voit assis, un jeune homme debout ne peut l'apercevoir.",
+    originalText: "Kɔrɔkɛ sigilen fɛn min ye, kamalen lɔnin t'o ye.",
+    meaning:
+        "L'expérience et la sagesse acquises avec le temps surpassent la seule vivacité ou la fougue de la jeunesse.",
+    origin: "Tradition Bamanan (Ségou)",
+    theme: "Sagesse & Respect",
+    regionId: "segou",
+    regionName: "Ségou",
+  ),
+  _MalianProverb(
+    id: 'prov_solidarite',
+    text: "Une seule main ne peut pas ramasser la farine.",
+    originalText: "Bolo kelen tɛ mugu ta.",
+    meaning:
+        "L'union et l'entraide communautaire sont indispensables pour accomplir de grandes œuvres.",
+    origin: "Sagesse Populaire & Dogon",
+    theme: "Solidarité",
+    regionId: "mopti",
+    regionName: "Mopti / Pays Dogon",
+  ),
+  _MalianProverb(
+    id: 'prov_savoir_tombouctou',
+    text: "L'encre de l'écolier est plus précieuse que le sang du martyr.",
+    originalText: "Al-’ilmu nūr (Le savoir est lumière)",
+    meaning:
+        "La quête du savoir, la préservation des manuscrits et la tolérance sont les plus hautes vertus de la cité savante.",
+    origin: "Tradition des Sages de Tombouctou",
+    theme: "Savoir & Éducation",
+    regionId: "tombouctou",
+    regionName: "Tombouctou",
+  ),
+  _MalianProverb(
+    id: 'prov_verite_nature',
+    text: "Même si la bûche séjourne cent ans dans l'eau, elle ne deviendra jamais un crocodile.",
+    originalText: "Jiri koro men ji la cogo o cogo, a tɛ kɛ bama ye.",
+    meaning:
+        "Chacun doit assumer sa vraie nature et ses racines, nul ne peut masquer son identité profonde.",
+    origin: "Tradition Sénoufo / Kénédougou",
+    theme: "Vérité & Identité",
+    regionId: "sikasso",
+    regionName: "Sikasso",
+  ),
+  _MalianProverb(
+    id: 'prov_racines',
+    text: "L'arbre qui s'élève vers le ciel doit la vigueur de ses branches à la profondeur de ses racines.",
+    originalText: "Yiri janya be bɔ a dugukolo jukɔrɔ.",
+    meaning:
+        "La prospérité d'un être humain repose sur son attachement à son terroir, à sa mémoire et à ses aïeux.",
+    origin: "Tradition Khassonké / Soninké",
+    theme: "Racines",
+    regionId: "kayes",
+    regionName: "Kayes",
+  ),
+  _MalianProverb(
+    id: 'prov_patience_unite',
+    text: "Si tu veux aller vite, marche seul ; mais si tu veux aller loin, marchons ensemble.",
+    originalText: "A borey kulu ga bindi (Ensemble nous avançons)",
+    meaning:
+        "La concertation et le cheminement collectif garantissent un avenir stable et pérenne pour la communauté.",
+    origin: "Tradition Songhaï & Sahélienne",
+    theme: "Patience & Unité",
+    regionId: "gao",
+    regionName: "Gao",
+  ),
+  _MalianProverb(
+    id: 'prov_parole_donnee',
+    text: "La parole est comme l'eau : une fois versée à terre, nul ne peut la ramasser.",
+    originalText: "Kuma ye ji ye, n'a bɔra a tɛ se ka sɔrɔ tuguni.",
+    meaning:
+        "La parole donnée engage l'honneur et la dignité humaine ; il convient de mesurer chaque parole prononcée.",
+    origin: "Parole des Griots & Anciens",
+    theme: "Honneur & Tempérance",
+    regionId: null,
+    regionName: "Tout le Mali",
+  ),
+];
+

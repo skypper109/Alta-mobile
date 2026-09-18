@@ -303,12 +303,14 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                 children: [
                   // Carte vectorielle interactive
                   Positioned.fill(
-                    child: Padding(
+                    child: AnimatedPadding(
+                      duration: const Duration(milliseconds: 260),
+                      curve: Curves.easeOutCubic,
                       padding: EdgeInsets.fromLTRB(
                         14,
                         10,
                         14,
-                        selectedRegion != null ? 225 : 80,
+                        selectedRegion != null ? 245 : 72,
                       ),
                       child: MaliInteractiveMap(
                         regions: allRegions,
@@ -318,11 +320,11 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                     ),
                   ),
 
-                  // Panneau Flottant de Région Sélectionnée
+                  // Panneau Flottant : Fiche Région Sélectionnée OU Barre d'indication
                   Positioned(
                     left: 14,
                     right: 14,
-                    bottom: bottomPadding + 52,
+                    bottom: bottomPadding + 8,
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 260),
                       switchInCurve: Curves.easeOutCubic,
@@ -337,16 +339,8 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                               titleColor: titleColor,
                               subtitleColor: subtitleColor,
                             )
-                          : const SizedBox.shrink(),
+                          : _buildBottomIndicator(isDark, subtitleColor),
                     ),
-                  ),
-
-                  // Barre d'indication inférieure
-                  Positioned(
-                    left: 14,
-                    right: 14,
-                    bottom: bottomPadding + 8,
-                    child: _buildBottomIndicator(isDark, subtitleColor),
                   ),
                 ],
               ),
@@ -636,6 +630,7 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
   // ── BARRE D'INDICATION INFÉRIEURE (FOOTER) ─────────────────────────────────
   Widget _buildBottomIndicator(bool isDark, Color subtitleColor) {
     return Container(
+      key: const ValueKey<String>('bottom_indicator'),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF131D30) : const Color(0xFFF1F4F9),

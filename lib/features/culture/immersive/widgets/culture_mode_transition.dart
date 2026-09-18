@@ -1,90 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/theme/culture_theme.dart';
 
-/// Transition portail dédiée : Éducation → Culture
-///
-/// Durée : 1500 ms (entre 1200 et 1800 ms selon la spécification)
-/// Animation :
-/// - Fondu progressif et immersif (Fade)
-/// - Mise à l'échelle cinématique douce (Scale 0.94 → 1.0)
-/// - Voile de passage sombre unifié sans dégradé pour sceller l'immersion
-/// - STRICTEMENT SANS DÉGRADÉS selon la charte UX/UI
+/// Transition fluide et instantanée pour l'espace Culture sans lenteur ni animation de zoom
 class CultureModeTransition {
   CultureModeTransition._();
 
-  /// Durée fluide de passage de portail (350 ms)
-  static const Duration portalDuration = Duration(milliseconds: 350);
+  static const Duration portalDuration = Duration.zero;
 
-  /// Crée une [CustomTransitionPage] pour GoRouter avec la transition portail
+  /// Crée une [CustomTransitionPage] pour GoRouter sans animation parasite
   static CustomTransitionPage<T> buildPage<T>({
     required LocalKey key,
     required Widget child,
-    Duration duration = portalDuration,
+    Duration duration = Duration.zero,
   }) {
     return CustomTransitionPage<T>(
       key: key,
       child: child,
-      transitionDuration: duration,
-      reverseTransitionDuration: duration,
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return buildPortalTransition(
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
-          child: child,
-        );
+        return child;
       },
     );
   }
 
-  /// Fonction de construction de transition réutilisable
+  /// Construction directe sans mise à l'échelle ni décalage
   static Widget buildPortalTransition({
     required Animation<double> animation,
     required Animation<double> secondaryAnimation,
     required Widget child,
   }) {
-    // Courbe d'entrée douce et solennelle
-    final portalCurved = CurvedAnimation(
-      parent: animation,
-      curve: Curves.easeInOutCubic,
-      reverseCurve: Curves.easeInOutCubic,
-    );
-
-    // Fondu profond
-    final fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(portalCurved);
-
-    // Expansion d'entrée dans le portail
-    final scaleAnimation = Tween<double>(
-      begin: 0.94,
-      end: 1.0,
-    ).animate(portalCurved);
-
-    // Léger décalage vertical cinématographique
-    final slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 0.02),
-      end: Offset.zero,
-    ).animate(portalCurved);
-
-    return Container(
-      color: CultureTheme.darkBackground,
-      child: FadeTransition(
-        opacity: fadeAnimation,
-        child: ScaleTransition(
-          scale: scaleAnimation,
-          child: SlideTransition(
-            position: slideAnimation,
-            child: child,
-          ),
-        ),
-      ),
-    );
+    return child;
   }
 }
 
-/// Conteneur animé pour basculer en douceur entre le portail d'intro et le contenu principal
+/// Conteneur direct pour basculer instantanément sans animation
 class CulturePortalSwitcher extends StatelessWidget {
   final Widget child;
   final Duration duration;
@@ -92,28 +42,11 @@ class CulturePortalSwitcher extends StatelessWidget {
   const CulturePortalSwitcher({
     super.key,
     required this.child,
-    this.duration = CultureModeTransition.portalDuration,
+    this.duration = Duration.zero,
   });
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: duration,
-      switchInCurve: Curves.easeInOutCubic,
-      switchOutCurve: Curves.easeInOutCubic,
-      transitionBuilder: (Widget widget, Animation<double> animation) {
-        final scale = Tween<double>(begin: 0.96, end: 1.0).animate(animation);
-        final fade = Tween<double>(begin: 0.0, end: 1.0).animate(animation);
-
-        return FadeTransition(
-          opacity: fade,
-          child: ScaleTransition(
-            scale: scale,
-            child: widget,
-          ),
-        );
-      },
-      child: child,
-    );
+    return child;
   }
 }
