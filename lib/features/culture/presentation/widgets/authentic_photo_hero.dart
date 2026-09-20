@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../immersive/services/cultural_haptics.dart';
 
 /// Hero photographique authentique grand format pour les fiches de consultation Culture.
 /// Utilise des photographies réelles avec contraste optimisé, badges patrimoniaux et crédits.
@@ -14,6 +15,7 @@ class AuthenticPhotoHero extends StatefulWidget {
   final String? subtitleInfo;
   final Color accentColor;
   final VoidCallback? onBack;
+  final String? heroTag;
 
   const AuthenticPhotoHero({
     super.key,
@@ -24,6 +26,7 @@ class AuthenticPhotoHero extends StatefulWidget {
     this.subtitleInfo,
     this.accentColor = CultureTheme.accentOrange,
     this.onBack,
+    this.heroTag,
   });
 
   @override
@@ -34,9 +37,10 @@ class _AuthenticPhotoHeroState extends State<AuthenticPhotoHero> {
   bool _isBookmarked = false;
 
   void _toggleBookmark() {
-    HapticFeedback.mediumImpact();
+    final nextState = !_isBookmarked;
+    CulturalHaptics.bookmarkToggle(nextState);
     setState(() {
-      _isBookmarked = !_isBookmarked;
+      _isBookmarked = nextState;
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -65,30 +69,8 @@ class _AuthenticPhotoHeroState extends State<AuthenticPhotoHero> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // ── 1. PHOTOGRAPHIE RÉELLE AUTHENTIQUE ─────────────────────────────
-          widget.photoUrl.startsWith('assets/')
-              ? Image.asset(
-                  widget.photoUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => _buildFallback(),
-                )
-              : Image.network(
-                  widget.photoUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => _buildFallback(),
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      color: CultureTheme.darkSurface,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: widget.accentColor,
-                        ),
-                      ),
-                    );
-                  },
-                ),
+          // ── 1. PHOTOGRAPHIE RÉELLE AUTHENTIQUE (AVEC HERO TRANSITION) ───────
+          _buildHeroImage(),
 
           // ── 2. VOILE NOIR ÉLÉGANT POUR LISIBILITÉ (SANS DÉGRADÉ) ──────────────
           Positioned.fill(
@@ -161,14 +143,19 @@ class _AuthenticPhotoHeroState extends State<AuthenticPhotoHero> {
                         ),
                       ],
                     ),
-                    child: Icon(
-                      _isBookmarked
-                          ? Icons.bookmark_rounded
-                          : Icons.bookmark_border_rounded,
-                      color: _isBookmarked
-                          ? widget.accentColor
-                          : Colors.white,
-                      size: 20,
+                    child: AnimatedScale(
+                      scale: _isBookmarked ? 1.15 : 1.0,
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeOutBack,
+                      child: Icon(
+                        _isBookmarked
+                            ? Icons.bookmark_rounded
+                            : Icons.bookmark_border_rounded,
+                        color: _isBookmarked
+                            ? widget.accentColor
+                            : Colors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ),
@@ -270,6 +257,43 @@ class _AuthenticPhotoHeroState extends State<AuthenticPhotoHero> {
         ],
       ),
     );
+  }
+
+  Widget _buildHeroImage() {
+    final imageWidget = widget.photoUrl.startsWith('assets/')
+        ? Image.asset(
+            widget.photoUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => _buildFallback(),
+          )
+        : Image.network(
+            widget.photoUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => _buildFallback(),
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Container(
+                color: CultureTheme.darkSurface,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: widget.accentColor,
+                  ),
+                ),
+              );
+            },
+          );
+
+    if (widget.heroTag != null) {
+      return Hero(
+        tag: widget.heroTag!,
+        child: Material(
+          color: Colors.transparent,
+          child: imageWidget,
+        ),
+      );
+    }
+    return imageWidget;
   }
 
   Widget _buildFallback() {

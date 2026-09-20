@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,11 +7,12 @@ import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
+import '../widgets/culture_audio_listen_badge.dart';
 
-/// Vue 2 : Découverte — Hub Central d'Exploration Culturelle du Mali (Étape 2)
+/// Vue 2 : Découverte — Hub Central d'Exploration Culturelle du Mali
 /// Grandes Figures, Monuments Historiques, Villes & Terroirs
-/// Ambiance culturelle 60 FPS, cartes interactives avec ornementation soudanaise
-/// STRICTEMENT SANS DÉGRADÉS selon la charte UX/UI
+/// Immersion culturelle complète avec écoute audio orale (Griot TTS)
+/// STRICTEMENT SANS DÉGRADÉS selon la charte UX/UI Alta-mobile
 class CultureDecouvrirView extends ConsumerStatefulWidget {
   const CultureDecouvrirView({super.key});
 
@@ -26,8 +26,8 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
 
   static const List<String> _categories = [
     'Personnages',
-    'Monuments',
-    'Villes',
+    'Monuments ',
+    'Villes & Villages',
   ];
 
   static const List<IconData> _categoryIcons = [
@@ -91,7 +91,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                     ),
                     child: GestureDetector(
                       onTap: () {
-                        HapticFeedback.selectionClick();
+                        CulturalHaptics.tabSwitch();
                         setState(() {
                           _selectedFilterIndex = index;
                         });
@@ -232,7 +232,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
     );
   }
 
-  // ── CARTE VEDETTE D'EN-TÊTE DE CATÉGORIE ────────────────────────────────────
+  // ── 1. CARTE VEDETTE D'EN-TÊTE DE CATÉGORIE ────────────────────────────────
   Widget _buildCategoryHeroCard({
     required BuildContext context,
     required int categoryIndex,
@@ -481,6 +481,8 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
       );
     }
 
+    final narration = ref.watch(narrationCoordinatorProvider);
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -488,13 +490,21 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 0.72,
+        childAspectRatio: 0.66,
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
+        final isPlayingItem = narration.isSpeaking &&
+            narration.activeContentId == item.id;
+        final speechText =
+            '${item.title}. ${item.subtitle}. Région de ${item.regionName}. ${item.description}';
+
+        final itemHeroTag = 'decouvrir_grid_${categoryRoute}_${item.id}';
+
         return AnimatedCulturalReveal(
-          delay: Duration(milliseconds: 60 * index),
+          key: ValueKey('grid_${categoryRoute}_${item.id}'),
+          delay: Duration(milliseconds: 35 * (index % 8)),
           child: CulturalInteractiveCard(
             padding: EdgeInsets.zero,
             showSudaneseCorners: true,
@@ -502,25 +512,28 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
             backgroundColor: cardBg,
             borderRadius: 18,
             onTap: () {
-              context.push('/culture/$categoryRoute/${item.id}');
+              context.push('/culture/$categoryRoute/${item.id}', extra: itemHeroTag);
             },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Photographie réelle avec badge
+                // Image réelle avec Hero transition fluide
                 Expanded(
                   flex: 5,
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
                       if (item.imageUrl != null && item.imageUrl!.isNotEmpty)
-                        Image.asset(
-                          item.imageUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: categoryColor.withValues(alpha: 0.12),
-                            child:
-                                Icon(item.icon, color: categoryColor, size: 28),
+                        Hero(
+                          tag: itemHeroTag,
+                          child: Image.asset(
+                            item.imageUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: categoryColor.withValues(alpha: 0.12),
+                              child: Icon(item.icon,
+                                  color: categoryColor, size: 28),
+                            ),
                           ),
                         )
                       else
@@ -553,6 +566,18 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                           ),
                         ),
                       ),
+                      // Badge Écouter en bas à gauche de la photo
+                      Positioned(
+                        bottom: 6,
+                        left: 6,
+                        child: CultureAudioListenBadge(
+                          contentId: item.id,
+                          speechText: speechText,
+                          label: 'Écouter',
+                          compact: true,
+                          activeColor: categoryColor,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -574,7 +599,9 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
-                                color: titleColor,
+                                color: isPlayingItem
+                                    ? categoryColor
+                                    : titleColor,
                                 height: 1.2,
                               ),
                               maxLines: 1,

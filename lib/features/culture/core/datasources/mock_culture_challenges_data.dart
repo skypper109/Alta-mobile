@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/culture_challenge_models.dart';
+import '../theme/culture_theme.dart';
 
 /// Banques de données authentiques des Devinettes « N'Da ! », Quiz et Missions
 abstract final class MockCultureChallengesData {
@@ -180,94 +181,449 @@ abstract final class MockCultureChallengesData {
     ),
   ];
 
-  // ── 2. QUIZ CULTURELS ──────────────────────────────────────────────────────
-  static const List<CultureQuizQuestion> quizQuestions = [
-    CultureQuizQuestion(
-      id: 'q_soundiata_charte',
-      question: 'Quel texte fondamental a été proclamé par Soundiata Keïta en 1236 ?',
-      options: [
-        'La Charte de Kouroukan Fouga',
-        'Le Traité de Tombouctou',
-        'Le Pacte de Koumbi Saleh',
-        'La Déclaration du Djoliba',
-      ],
-      correctIndex: 0,
-      explanation:
-          'Proclamée en 1236 lors de l\'intronisation de Soundiata Keïta, la Charte de Kouroukan Fouga est l\'une des plus anciennes déclarations des droits de l\'Homme au monde.',
-      category: 'Histoire des Empires',
+  // ── 2. PACKS THÉMATIQUES DE QUIZ DU SAVOIR ─────────────────────────────────
+  static const List<CultureQuizPack> quizPacks = [
+    // PACK 1 : LES GRANDS EMPIRES DU MALI
+    CultureQuizPack(
+      id: 'quiz_empires',
+      title: 'Les Grands Empires du Mali',
+      subtitle: 'Sundiata, Kouroukan Fouga & Mansa Moussa',
+      description:
+          'Explorez l\'épopée fondatrice du Manden, la grande charte de 1236 et le rayonnement économique et intellectuel des souverains maliens.',
+      category: 'Histoire des Rois',
       regionId: 'koulikoro',
-      regionName: 'Koulikoro',
-      xp: 35,
-    ),
-    CultureQuizQuestion(
-      id: 'q_djenne_architecture',
-      question: 'En quel matériau traditionnel la Grande Mosquée de Djenné est-elle entièrement construite ?',
-      options: [
-        'En banco (terre crue mêlée de paille)',
-        'En pierre de taille calcaire',
-        'En briques cuites rouges',
-        'En marbre du Sahara',
+      regionName: 'Koulikoro & Manden',
+      xpReward: 120,
+      timeMinutes: 6,
+      icon: Icons.account_balance_rounded,
+      themeColor: CultureTheme.accentOrange,
+      photoUrl: 'assets/images/culture/personnages/soundiata.jpg',
+      stampBadgeTitle: 'Sceau des Grands Rois du Manden',
+      questions: [
+        CultureQuizQuestion(
+          id: 'q_soundiata_charte',
+          question: 'Quel texte fondamental a été solennellement proclamé par Soundiata Keïta en 1236 ?',
+          options: [
+            'La Charte de Kouroukan Fouga',
+            'Le Traité de Tombouctou',
+            'Le Pacte de Koumbi Saleh',
+            'La Déclaration du Djoliba',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Proclamée en 1236 à Kouroukan Fouga, cette charte universelle est considérée comme l\'une des premières déclarations des droits de l\'Homme au monde.',
+          category: 'Histoire des Rois',
+          regionId: 'koulikoro',
+          regionName: 'Koulikoro',
+          xp: 20,
+        ),
+        CultureQuizQuestion(
+          id: 'q_mansa_moussa_pelerinage',
+          question: 'En quelle année Mansa Moussa a-t-il réalisé son pèlerinage historique vers La Mecque ?',
+          options: [
+            '1324',
+            '1235',
+            '1492',
+            '1591',
+          ],
+          correctIndex: 0,
+          explanation:
+              'En 1324, la caravane fastueuse de Mansa Moussa distribua tellement d\'or au Caire que le cours mondial du métal précieux fut déstabilisé pendant plus d\'une décennie.',
+          category: 'Histoire des Rois',
+          regionId: null,
+          regionName: 'Tout le Mali',
+          xp: 20,
+        ),
+        CultureQuizQuestion(
+          id: 'q_kirina_bataille',
+          question: 'Quelle bataille décisive de 1235 permit à Soundiata de vaincre le roi sorcier Soumaoro Kanté ?',
+          options: [
+            'La Bataille de Kirina',
+            'La Bataille de Tondibi',
+            'La Prise de Koumbi Saleh',
+            'Le Siège de Djenné',
+          ],
+          correctIndex: 0,
+          explanation:
+              'La bataille de Kirina en 1235 scella la libération des peuples du Manden et marqua l\'avènement du grand Empire du Mali.',
+          category: 'Histoire des Rois',
+          regionId: 'koulikoro',
+          regionName: 'Koulikoro',
+          xp: 20,
+        ),
+        CultureQuizQuestion(
+          id: 'q_titre_mansa',
+          question: 'Que signifie exactement le titre impérial « Mansa » porté par les empereurs du Mali ?',
+          options: [
+            'Roi des Rois / Souverain Suprême',
+            'Maître de l\'Or pur',
+            'Gardien des Eaux du Niger',
+            'Général des Cavaleries',
+          ],
+          correctIndex: 0,
+          explanation:
+              '« Mansa » en langue mandingue désigne le roi des rois, garant de l\'unité spirituelle, militaire et judiciaire de toutes les provinces.',
+          category: 'Histoire des Rois',
+          regionId: null,
+          regionName: 'Tout le Mali',
+          xp: 20,
+        ),
+        CultureQuizQuestion(
+          id: 'q_ghana_capitale',
+          question: 'Quelle cité antique était la prestigieuse capitale de l\'Empire du Ghana (Wagadou) ?',
+          options: [
+            'Koumbi Saleh',
+            'Gao',
+            'Tombouctou',
+            'Oualata',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Koumbi Saleh, située aux confins nord du Mali actuel, était le centre névralgique du commerce transsaharien de l\'or et du sel dès le VIIIe siècle.',
+          category: 'Histoire des Rois',
+          regionId: 'kayes',
+          regionName: 'Kayes',
+          xp: 20,
+        ),
+        CultureQuizQuestion(
+          id: 'q_songhai_askia',
+          question: 'Quel grand réformateur de l\'Empire Songhaï a fondé la dynastie des Askia en 1493 ?',
+          options: [
+            'Askia Mohammed',
+            'Sonni Ali Ber',
+            'Kankou Moussa',
+            'Mamadou Keïta',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Askia Mohammed instaura une administration centralisée exemplaire, favorisa l\'Université de Sankoré et fit de Gao l\'une des capitales les plus prospères d\'Afrique.',
+          category: 'Histoire des Rois',
+          regionId: 'gao',
+          regionName: 'Gao',
+          xp: 20,
+        ),
       ],
-      correctIndex: 0,
-      explanation:
-          'La Grande Mosquée de Djenné est le plus vaste édifice en terre crue (banco) au monde, restauré annuellement lors de la fête du Crépissage (Le Béré).',
-      category: 'Monuments & Architecture',
+    ),
+
+    // PACK 2 : MONUMENTS & ARCHITECTURE BANCO
+    CultureQuizPack(
+      id: 'quiz_monuments',
+      title: 'Monuments & Architecture Banco',
+      subtitle: 'Djenné, Tombouctou & Askia',
+      description:
+          'Plongez dans le génie des maîtres maçons soudanais : terre crue crêpie, minarets coniques et chefs-d\'œuvre classés à l\'UNESCO.',
+      category: 'Architecture & Sacré',
       regionId: 'mopti',
-      regionName: 'Mopti',
-      xp: 30,
-    ),
-    CultureQuizQuestion(
-      id: 'q_mansa_moussa_pelerinage',
-      question: 'En quelle année Mansa Moussa a-t-il effectué son célèbre pèlerinage fastueux à La Mecque ?',
-      options: [
-        '1324',
-        '1235',
-        '1492',
-        '1591',
+      regionName: 'Mopti & Tombouctou',
+      xpReward: 100,
+      timeMinutes: 5,
+      icon: Icons.museum_rounded,
+      themeColor: CultureTheme.primaryBlue,
+      photoUrl: 'assets/images/culture/monuments/mosquee_djenne.jpg',
+      stampBadgeTitle: 'Sceau d\'Or des Bâtisseurs Soudanais',
+      questions: [
+        CultureQuizQuestion(
+          id: 'q_djenne_architecture',
+          question: 'En quel matériau traditionnel la Grande Mosquée de Djenné est-elle entièrement bâtie ?',
+          options: [
+            'En banco (argile crue mêlée de son et paille)',
+            'En pierre calcaire taillée',
+            'En briques rouges cuites au four',
+            'En marbre blanc importé',
+          ],
+          correctIndex: 0,
+          explanation:
+              'La Grande Mosquée de Djenné est le plus vaste édifice en banco au monde. Ses murs respirent et maintiennent une fraîcheur naturelle sous la chaleur sahélienne.',
+          category: 'Architecture & Sacré',
+          regionId: 'mopti',
+          regionName: 'Mopti',
+          xp: 20,
+        ),
+        CultureQuizQuestion(
+          id: 'q_djenne_bere',
+          question: 'Comment s\'appelle la grande fête annuelle collective de restauration de la mosquée de Djenné ?',
+          options: [
+            'Le Crépissage (Le Béré)',
+            'La Fête du Sanké Mon',
+            'Le Gna',
+            'La Tabaski de l\'Eau',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Le Béré réunit toute la population en une journée : jeunes et anciens grimpent sur les échafaudages de palmiers pour enduire à nouveau la terre protectrice.',
+          category: 'Architecture & Sacré',
+          regionId: 'mopti',
+          regionName: 'Mopti',
+          xp: 20,
+        ),
+        CultureQuizQuestion(
+          id: 'q_tombeau_askia',
+          question: 'Quelle forme architecturale unique caractérise le célèbre Tombeau des Askia à Gao ?',
+          options: [
+            'Une pyramide sahélienne à degrés en terre crue',
+            'Un dôme circulaire en pierre',
+            'Une tour octogonale en marbre',
+            'Une forteresse carrée souterraine',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Édifié en 1495 par l\'empereur Askia Mohammed, ce tombeau pyramidal haut de 17 mètres témoigne du rayonnement impérial Songhaï au bord du fleuve Niger.',
+          category: 'Architecture & Sacré',
+          regionId: 'gao',
+          regionName: 'Gao',
+          xp: 20,
+        ),
+        CultureQuizQuestion(
+          id: 'q_sankore_mosquee',
+          question: 'À quelle célèbre université médiévale de Tombouctou la mosquée de Sankoré est-elle associée ?',
+          options: [
+            'L\'Université de Sankoré',
+            'L\'Académie de Djenné',
+            'La Médersa d\'Al-Azhar',
+            'L\'Institut de Ségou',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Au XVIe siècle, l\'Université de Sankoré comptait plus de 25 000 étudiants venus de toute l\'Afrique et du Moyen-Orient pour étudier le droit, l\'astronomie et la médecine.',
+          category: 'Architecture & Sacré',
+          regionId: 'tombouctou',
+          regionName: 'Tombouctou',
+          xp: 20,
+        ),
+        CultureQuizQuestion(
+          id: 'q_fort_medine',
+          question: 'Près de quelle grande ville fluviale se dresse le Fort historique de Médine ?',
+          options: [
+            'Kayes',
+            'Koulikoro',
+            'Sikasso',
+            'Kidal',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Bâti en 1855 au bord des chutes de Félou à Kayes, le Fort de Médine fut le théâtre du siège héroïque soutenu contre les troupes d\'El Hadj Oumar Tall.',
+          category: 'Architecture & Sacré',
+          regionId: 'kayes',
+          regionName: 'Kayes',
+          xp: 20,
+        ),
       ],
-      correctIndex: 0,
-      explanation:
-          'En 1324, la caravane de Mansa Moussa distribua tellement d\'or au Caire qu\'elle fit chuter le cours mondial du métal précieux pendant plus de dix ans.',
-      category: 'Histoire des Empires',
+    ),
+
+    // PACK 3 : CITÉS MILLÉNAIRES & TERROIRS
+    CultureQuizPack(
+      id: 'quiz_villes',
+      title: 'Cités Millénaires & Terroirs',
+      subtitle: 'Tombouctou, Ségou, Mopti & Sikasso',
+      description:
+          'Parcourez les routes mythiques des caravanes, les 333 saints protecteurs du désert et les remparts imprenables du Kénédougou.',
+      category: 'Cités & Géographie',
+      regionId: 'tombouctou',
+      regionName: 'Tout le Mali',
+      xpReward: 110,
+      timeMinutes: 5,
+      icon: Icons.location_city_rounded,
+      themeColor: CultureTheme.cyanTurquoise,
+      photoUrl: 'assets/images/culture/villes/tombouctou_ville.jpg',
+      stampBadgeTitle: 'Sceau des Cités et Caravanes du Sahel',
+      questions: [
+        CultureQuizQuestion(
+          id: 'q_tombouctou_saints',
+          question: 'Combien de saints patrons veillent traditionnellement sur la cité mystique de Tombouctou ?',
+          options: [
+            '333 Saints',
+            '99 Saints',
+            '120 Saints',
+            '777 Saints',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Tombouctou est appelée « La Cité des 333 Saints », sanctuaire historique de sagesse, de manuscrits précieux et de haute spiritualité soufie.',
+          category: 'Cités & Géographie',
+          regionId: 'tombouctou',
+          regionName: 'Tombouctou',
+          xp: 25,
+        ),
+        CultureQuizQuestion(
+          id: 'q_segou_arbres',
+          question: 'Quel arbre sacré a donné à Ségou son surnom de « Cité des 4 444... » ?',
+          options: [
+            'Les Balanzans (acacias sacrés)',
+            'Les Baobabs millénaires',
+            'Les Palmiers rôniers',
+            'Les Céréaliers de karité',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Ségou est la « Cité des 4 444 Balanzans », arbres mystiques qui ont la particularité de reverdir en saison sèche et de perdre leurs feuilles pendant les pluies.',
+          category: 'Cités & Géographie',
+          regionId: 'segou',
+          regionName: 'Ségou',
+          xp: 25,
+        ),
+        CultureQuizQuestion(
+          id: 'q_mopti_surnom',
+          question: 'En raison de ses canaux et de sa flotte de pirogues, quel surnom donne-t-on souvent à Mopti ?',
+          options: [
+            'La Venise du Mali',
+            'Le Phare du Sahel',
+            'La Reine des Sables',
+            'L\'Oasis d\'Or',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Mopti est surnommée la « Venise du Mali » en raison de sa situation au confluent du fleuve Niger et de la rivière Bani, créant un port fluvial effervescent.',
+          category: 'Cités & Géographie',
+          regionId: 'mopti',
+          regionName: 'Mopti',
+          xp: 20,
+        ),
+        CultureQuizQuestion(
+          id: 'q_sikasso_tata',
+          question: 'Quelle formidable muraille défensive en terre crue protégeait autrefois la ville de Sikasso ?',
+          options: [
+            'Le Tata de Sikasso',
+            'Les Remparts de Bandiagara',
+            'La Muraille du Manden',
+            'Le Fort de Médine',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Érigé par le roi Tiéba Traoré à la fin du XIXe siècle, le Tata de Sikasso mesurait plus de 9 kilomètres de long et résista à de multiples sièges.',
+          category: 'Cités & Géographie',
+          regionId: 'sikasso',
+          regionName: 'Sikasso',
+          xp: 20,
+        ),
+        CultureQuizQuestion(
+          id: 'q_bamako_caimans',
+          question: 'Quel fleuve majestueux traverse la capitale Bamako et irrigue tout le Mali ?',
+          options: [
+            'Le Djoliba (Fleuve Niger)',
+            'Le Fleuve Sénégal',
+            'Le Bani',
+            'Le Fleuve Gambie',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Le Djoliba (fleuve Niger) est le cœur battant du Mali, nourricier des civilisations Bozo, Bambara, Songhaï et Peule depuis des millénaires.',
+          category: 'Cités & Géographie',
+          regionId: 'bamako',
+          regionName: 'Bamako',
+          xp: 20,
+        ),
+      ],
+    ),
+
+    // PACK 4 : ARTS, MUSIQUE & SAGESSES DOZO
+    CultureQuizPack(
+      id: 'quiz_arts_traditions',
+      title: 'Arts, Musique & Sagesses Dozo',
+      subtitle: 'Kora, Balafon, Bogolan & Masques',
+      description:
+          'Célébrez la voix des maîtres de la parole, les secrets de teinture de terre et les symboles sacrés gravés par les anciens.',
+      category: 'Arts & Traditions',
       regionId: null,
       regionName: 'Tout le Mali',
-      xp: 40,
-    ),
-    CultureQuizQuestion(
-      id: 'q_segou_arbres',
-      question: 'Quel arbre emblématique a donné à Ségou son surnom poétique de « Cité des 4 444... » ?',
-      options: [
-        'Les Balanzans (acacias sacrés)',
-        'Les Baobabs millénaires',
-        'Les Palmiers rôniers',
-        'Les Céréaliers de karité',
+      xpReward: 130,
+      timeMinutes: 6,
+      icon: Icons.auto_awesome_rounded,
+      themeColor: CultureTheme.accentOrange,
+      photoUrl: 'assets/images/culture/villes/bandiagara_falaise.jpg',
+      stampBadgeTitle: 'Sceau des Maîtres de la Parole & des Dozos',
+      questions: [
+        CultureQuizQuestion(
+          id: 'q_kora_cordes',
+          question: 'Combien de cordes comporte traditionnellement la Kora mandingue classique ?',
+          options: [
+            '21 cordes',
+            '12 cordes',
+            '7 cordes',
+            '33 cordes',
+          ],
+          correctIndex: 0,
+          explanation:
+              'La Kora classique possède 21 cordes tendues sur une demi-calebasse recouverte d\'une peau de vache. Elle est l\'instrument royal par excellence des griots généalogistes.',
+          category: 'Arts & Traditions',
+          regionId: 'koulikoro',
+          regionName: 'Koulikoro',
+          xp: 25,
+        ),
+        CultureQuizQuestion(
+          id: 'q_bogolan_teinture',
+          question: 'Quels ingrédients naturels sont indispensables pour teindre le tissu traditionnel Bogolan ?',
+          options: [
+            'De la boue fermentée et des décoctions de feuilles',
+            'De la cire d\'abeille et de l\'encre de Chine',
+            'De la poudre d\'or et du sel de Taoudénit',
+            'De la cendre de bois et du sang de karité',
+          ],
+          correctIndex: 0,
+          explanation:
+              '« Bogolan » signifie « fait avec la terre » en bambara. L\'argile du fleuve réagit avec les tanins des plantes végétales pour donner ces motifs protecteurs bruns et noirs.',
+          category: 'Arts & Traditions',
+          regionId: 'segou',
+          regionName: 'Ségou',
+          xp: 25,
+        ),
+        CultureQuizQuestion(
+          id: 'q_balafon_sosso',
+          question: 'Quel instrument sacré légendaire, conservé depuis le XIIIe siècle, est inscrit au patrimoine immatériel de l\'UNESCO ?',
+          options: [
+            'Le Sosso-Bala',
+            'La Kora de Soundiata',
+            'Le Djembé d\'Askia',
+            'Le Tam-tam de Koumbi',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Le Sosso-Bala, balafon sacré ayant appartenu à Soumaoro Kanté puis confié au griot Balla Fasséké en 1235, est précieusement gardé par la lignée des Kouyaté.',
+          category: 'Arts & Traditions',
+          regionId: 'koulikoro',
+          regionName: 'Koulikoro',
+          xp: 25,
+        ),
+        CultureQuizQuestion(
+          id: 'q_masque_kanaga',
+          question: 'Quel masque dogon célèbre représente la liaison entre la Terre et le Ciel dans la cosmogonie ?',
+          options: [
+            'Le Masque Kanaga (croix à double traverse)',
+            'Le Masque Sirige (très haute échelle)',
+            'Le Masque Satimbe',
+            'Le Masque Walu (antilope)',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Le Kanaga, avec sa structure en double croix, symbolise le geste divin d\'Amma créant l\'univers et organisant l\'harmonie cosmique.',
+          category: 'Arts & Traditions',
+          regionId: 'mopti',
+          regionName: 'Mopti & Pays Dogon',
+          xp: 30,
+        ),
+        CultureQuizQuestion(
+          id: 'q_confrerie_dozo',
+          question: 'Quelle est la valeur centrale transmise par les confréries initiatiques de chasseurs Dozos ?',
+          options: [
+            'L\'humilité, la protection de la nature et la justice',
+            'La conquête de nouveaux territoires',
+            'L\'accumulation de richesses matérielles',
+            'Le secret exclusif sans transmission',
+          ],
+          correctIndex: 0,
+          explanation:
+              'Les Dozos sont les gardiens de l\'écologie traditionnelle et du code d\'honneur. Leur devise est de ne jamais prélever dans la nature plus que ce qui est nécessaire.',
+          category: 'Arts & Traditions',
+          regionId: null,
+          regionName: 'Tout le Mali',
+          xp: 25,
+        ),
       ],
-      correctIndex: 0,
-      explanation:
-          'Ségou est renommée comme la « Cité des 4 444 Balanzans », arbres sacrés qui perdent leurs feuilles pendant l\'hivernage et verdissent en saison sèche.',
-      category: 'Villes & Terroirs',
-      regionId: 'segou',
-      regionName: 'Ségou',
-      xp: 30,
-    ),
-    CultureQuizQuestion(
-      id: 'q_tombouctou_saints',
-      question: 'Combien de saints patrons veillent traditionnellement sur la cité de Tombouctou ?',
-      options: [
-        '333 Saints',
-        '99 Saints',
-        '120 Saints',
-        '777 Saints',
-      ],
-      correctIndex: 0,
-      explanation:
-          'Tombouctou est universellement célébrée comme « La Cité des 333 Saints », sanctuaire historique de la spiritualité et des manuscrits savants.',
-      category: 'Spiritualité & Savoirs',
-      regionId: 'tombouctou',
-      regionName: 'Tombouctou',
-      xp: 35,
     ),
   ];
+
+  /// Liste globale des questions de quiz (rétrocompatibilité)
+  static List<CultureQuizQuestion> get quizQuestions =>
+      quizPacks.expand((pack) => pack.questions).toList();
 
   // ── 3. MISSIONS DÉCOUVERTE DU PATRIMOINE ──────────────────────────────────
   static const List<DiscoveryMission> discoveryMissions = [
@@ -341,6 +697,15 @@ abstract final class MockCultureChallengesData {
     xpReward: 100,
     photoUrl: 'assets/images/culture/personnages/soundiata.jpg',
   );
+
+  /// Récupère un pack de quiz par son ID
+  static CultureQuizPack getQuizPackById(String? id) {
+    if (id == null || id.isEmpty) return quizPacks.first;
+    return quizPacks.firstWhere(
+      (pack) => pack.id == id,
+      orElse: () => quizPacks.first,
+    );
+  }
 
   /// Récupère une devinette par son ID
   static TraditionalRiddle getRiddleById(String id) {

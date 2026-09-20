@@ -84,6 +84,43 @@ class CultureQuizQuestion {
   }
 }
 
+/// Thématique / Pack complet de quiz culturel
+class CultureQuizPack {
+  final String id;
+  final String title;
+  final String subtitle;
+  final String description;
+  final String category;
+  final String? regionId;
+  final String regionName;
+  final int xpReward;
+  final int timeMinutes;
+  final IconData icon;
+  final Color themeColor;
+  final String photoUrl;
+  final String stampBadgeTitle;
+  final List<CultureQuizQuestion> questions;
+
+  const CultureQuizPack({
+    required this.id,
+    required this.title,
+    required this.subtitle,
+    required this.description,
+    required this.category,
+    this.regionId,
+    required this.regionName,
+    required this.xpReward,
+    this.timeMinutes = 5,
+    required this.icon,
+    required this.themeColor,
+    required this.photoUrl,
+    required this.stampBadgeTitle,
+    required this.questions,
+  });
+
+  int get questionsCount => questions.length;
+}
+
 /// Quête / Mission découverte du patrimoine
 class DiscoveryMission {
   final String id;

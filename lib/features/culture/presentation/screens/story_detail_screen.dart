@@ -15,11 +15,13 @@ import '../widgets/story_audio_player_sheet.dart';
 class StoryDetailScreen extends StatelessWidget {
   final String id;
   final InteractiveStory? story;
+  final String? heroTag;
 
   const StoryDetailScreen({
     super.key,
     required this.id,
     this.story,
+    this.heroTag,
   });
 
   @override
@@ -45,7 +47,8 @@ class StoryDetailScreen extends StatelessWidget {
               tag: item.tag,
               regionName: item.regionName,
               subtitleInfo: item.origin,
-              accentColor: CultureTheme.rougeKoulikoro,
+              accentColor: CultureTheme.accentOrange,
+              heroTag: heroTag ?? 'culture_story_${item.id}',
             ),
           ),
 
@@ -73,7 +76,7 @@ class StoryDetailScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
-                    color: CultureTheme.rougeKoulikoro,
+                    color: CultureTheme.accentOrange,
                     height: 1.3,
                   ),
                 ),
@@ -153,11 +156,11 @@ class StoryDetailScreen extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                     decoration: BoxDecoration(
-                      color: CultureTheme.rougeKoulikoro,
+                      color: CultureTheme.accentOrange,
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: CultureTheme.rougeKoulikoro.withValues(alpha: 0.35),
+                          color: CultureTheme.accentOrange.withValues(alpha: 0.35),
                           blurRadius: 14,
                           offset: const Offset(0, 4),
                         ),

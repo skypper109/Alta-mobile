@@ -79,6 +79,7 @@ flutter:
     - assets/images/culture/personnages/
     - assets/images/culture/monuments/
     - assets/images/culture/villes/
+    - assets/images/culture/contes/
     - assets/icons/
     - assets/animations/
 

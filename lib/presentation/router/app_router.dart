@@ -15,7 +15,7 @@ import '../../features/culture/presentation/screens/challenges_home_screen.dart'
 import '../../features/culture/presentation/screens/contes_screen.dart';
 import '../../features/culture/core/models/cultural_guide_models.dart';
 import '../../features/culture/immersive/immersive.dart';
-import '../../features/culture/presentation/screens/culture_intro_screen.dart';
+import '../../features/culture/presentation/screens/cultural_guide_screen.dart';
 import '../../features/culture/presentation/screens/culture_monuments_screen.dart';
 import '../../features/culture/presentation/screens/culture_personnages_screen.dart';
 import '../../features/culture/presentation/screens/culture_villes_screen.dart';
@@ -180,7 +180,8 @@ GoRouter appRouter(Ref ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return HistoricalFigureDetailScreen(id: id);
+          final heroTag = state.extra is String ? state.extra as String : null;
+          return HistoricalFigureDetailScreen(id: id, heroTag: heroTag);
         },
       ),
       GoRoute(
@@ -188,7 +189,8 @@ GoRouter appRouter(Ref ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return MonumentDetailScreen(id: id);
+          final heroTag = state.extra is String ? state.extra as String : null;
+          return MonumentDetailScreen(id: id, heroTag: heroTag);
         },
       ),
       GoRoute(
@@ -196,7 +198,8 @@ GoRouter appRouter(Ref ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return PlaceDetailScreen(id: id);
+          final heroTag = state.extra is String ? state.extra as String : null;
+          return PlaceDetailScreen(id: id, heroTag: heroTag);
         },
       ),
       GoRoute(
@@ -225,11 +228,20 @@ GoRouter appRouter(Ref ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return StoryDetailScreen(id: id);
+          final heroTag = state.extra is String ? state.extra as String : null;
+          return StoryDetailScreen(id: id, heroTag: heroTag);
         },
       ),
       GoRoute(
         path: '/culture/conte/:id/play',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return InteractiveStoryPlayerScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/conte-interactif/:id',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
@@ -260,9 +272,76 @@ GoRouter appRouter(Ref ref) {
         },
       ),
       GoRoute(
+        path: '/culture/defis/devinettes/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/devinette/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/devinettes/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/devinette',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/devinettes',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
         path: '/culture/defis/quiz',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const QuizCultureScreen(),
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return QuizCultureScreen(quizId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/defis/quiz/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return QuizCultureScreen(quizId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/quiz',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return QuizCultureScreen(quizId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/quiz/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return QuizCultureScreen(quizId: id);
+        },
       ),
       GoRoute(
         path: '/culture/guide',
@@ -281,14 +360,6 @@ GoRouter appRouter(Ref ref) {
         path: '/culture/passport',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const PassportScreen(),
-      ),
-      GoRoute(
-        path: '/culture/intro',
-        parentNavigatorKey: _rootNavigatorKey,
-        pageBuilder: (context, state) => CultureModeTransition.buildPage(
-          key: state.pageKey,
-          child: const CultureIntroScreen(),
-        ),
       ),
       GoRoute(
         path: '/holo-salon',

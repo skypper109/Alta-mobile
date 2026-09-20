@@ -14,7 +14,7 @@ abstract final class MockCultureStoriesData {
       regionId: null,
       regionName: 'Tout le Mali',
       tag: 'Fable Mandingue',
-      photoUrl: 'assets/images/culture/villes/djenne_ville.jpg',
+      photoUrl: 'assets/images/culture/contes/savane_crepuscule_stage.jpg',
       photoCredits: 'Contes des Veillées Sahéliennes • Archives Nationales du Mali',
       summary:
           'Lors d\'une grande sécheresse sur la savane, les animaux décident de creuser un puits commun. Tandis que Namori l\'hyène cherche à s\'accaparer les réserves par la force, le lièvre Zoumana use d\'intelligence et de ruse pour préserver la justice du village.',
@@ -164,7 +164,7 @@ abstract final class MockCultureStoriesData {
       regionId: 'kayes',
       regionName: 'Kayes',
       tag: 'Récit Mythique Fondateur',
-      photoUrl: 'assets/images/culture/monuments/fort_medine.jpg',
+      photoUrl: 'assets/images/culture/contes/wagadou_koumbi_stage.jpg',
       photoCredits: 'Tradition Soninké • Archives Régionales de Kayes',
       summary:
           'À Koumbi Saleh, le pacte conclu avec le serpent sacré Wagadou Bida garantissait pluie abondante et pépites d\'or sur l\'empire. Mais un jour, un jeune guerrier épris de justice et d\'amour décide de défier le destin.',
@@ -295,7 +295,7 @@ abstract final class MockCultureStoriesData {
       regionId: 'segou',
       regionName: 'Ségou',
       tag: 'Conte Initiatique',
-      photoUrl: 'assets/images/culture/villes/segou_koro.jpg',
+      photoUrl: 'assets/images/culture/contes/segou_djoliba_stage.jpg',
       photoCredits: 'Contes des 4 444 Balanzans • Archives Culturelles de Ségou',
       summary:
           'Sur les rives du fleuve Niger à Ségou-Koro, le jeune apprenti forgeron Fodé entend le chant envoûtant d\'un oiseau aux plumes d\'argent. Pour percer le secret du métal indestructible, il doit choisir entre la soif de puissance et l\'harmonie avec les esprits de l\'eau.',
@@ -418,7 +418,7 @@ abstract final class MockCultureStoriesData {
       regionId: 'koulikoro',
       regionName: 'Koulikoro',
       tag: 'Conte Initiatique Dozo',
-      photoUrl: 'assets/images/culture/personnages/soundiata.jpg',
+      photoUrl: 'assets/images/culture/contes/manden_baobab_stage.jpg',
       photoCredits: 'Confrérie Dozo du Manden • Mémorial de Siby',
       summary:
           'Dans les collines sacrées du Manden, le jeune chasseur Moussa s\'égare au cœur de la forêt touffue. Arrivé au pied d\'un gigantesque baobab millénaire, il rencontre un vieil aveugle qui lui propose trois maximes initiatiques pour retrouver son chemin.',
@@ -504,7 +504,7 @@ abstract final class MockCultureStoriesData {
       regionId: 'tombouctou',
       regionName: 'Tombouctou',
       tag: 'Légende Sahélienne',
-      photoUrl: 'assets/images/culture/villes/tombouctou_ville.jpg',
+      photoUrl: 'assets/images/culture/contes/tombouctou_dunes_stage.jpg',
       photoCredits: 'Récits des Caravanes Transsahariennes • Bibliothèque Ahmed Baba',
       summary:
           'Au cœur du désert au nord de Tombouctou, une tempête de sable sépare le jeune chamelier Bilal de sa caravane de sel. Il découvre dans les dunes une mystérieuse tente bleue où réside le gardien des étoiles.',

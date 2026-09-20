@@ -28,15 +28,15 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
   int _selectedFilterIndex = 0; // 0: Contes, 1: Devinettes, 2: Défis
 
   static const List<String> _filters = [
-    'Contes',
-    'Devinettes',
-    'Proverbes',
+    'Contes ',
+    'Devinettes ',
+    'Défis ',
   ];
 
   static const List<IconData> _filterIcons = [
     Icons.auto_stories_rounded,
     Icons.lightbulb_rounded,
-    Icons.format_quote_rounded,
+    Icons.psychology_rounded,
   ];
 
   Color _getFilterColor(int index) {
@@ -86,75 +86,105 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          // ── 1. SÉLECTEUR D'UNIVERS INTERACTIF RESPONSIVE (FIGÉ) ────────────
-          Row(
-            children: List.generate(_filters.length, (index) {
-              final isSelected = _selectedFilterIndex == index;
-              final activeCol = _getFilterColor(index);
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start, children: [
+           children: [
+            // ── L'ÉPREUVE ÉCLAIR DU CRÉPUSCULE ───────────────────────────────
+            const AnimatedCulturalReveal(
+              delay: Duration(milliseconds: 60),
+              child: CulturalSpeedTrialWidget(),
+            ),
 
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: index == 0 ? 0 : 4,
-                    right: index == _filters.length - 1 ? 0 : 4,
-                  ),
-                  child: GestureDetector(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      setState(() {
-                        _selectedFilterIndex = index;
-                      });
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 220),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 9),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? activeCol
-                            : (isDark
-                                ? CultureTheme.darkSurface
-                                : Colors.white),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isSelected ? activeCol : borderCol,
-                          width: isSelected ? 1.4 : 1.0,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _filterIcons[index],
-                            size: 14,
-                            color: isSelected ? Colors.white : activeCol,
+            const SizedBox(height: 20),
+
+            // ── 1. SÉLECTEUR D'UNIVERS INTERACTIF ──────────────────────────────
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: List.generate(_filters.length, (index) {
+                  final isSelected = _selectedFilterIndex == index;
+                  final activeCol = _getFilterColor(index);
+                  final int count = index == 0
+                      ? filteredStories.length
+                      : index == 1
+                          ? filteredRiddles.length
+                          : MockCultureChallengesData.quizPacks.length;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          _selectedFilterIndex = index;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? activeCol
+                              : (isDark
+                                  ? CultureTheme.darkSurface
+                                  : Colors.white),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isSelected ? activeCol : borderCol,
+                            width: isSelected ? 1.4 : 1.0,
                           ),
-                          const SizedBox(width: 5),
-                          Flexible(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _filterIcons[index],
+                              size: 14,
+                              color: isSelected ? Colors.white : activeCol,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              _filters[index],
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                fontWeight: isSelected
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
+                                color: isSelected
+                                    ? Colors.white
+                                    : subtitleColor,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 1.5),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? Colors.black.withValues(alpha: 0.25)
+                                    : activeCol.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                               child: Text(
-                                _filters[index],
+                                '$count',
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w800
-                                      : FontWeight.w600,
-                                  color:
-                                      isSelected ? Colors.white : subtitleColor,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: isSelected ? Colors.white : activeCol,
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              );
-            }),
-          ),
+                  );
+                  ]
+        }),
+      ),
+    ),
 
           const SizedBox(height: 18),
 
@@ -225,47 +255,42 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
             const SizedBox(height: 20),
           ],
 
-          // ── 4. SOUS-UNIVERS 3 : PROVERBES & SAGESSES DU MALI ────────────────
-          if (_selectedFilterIndex == 2) ...[
-            _buildSectionHeader(
-              title: 'PROVERBES & SAGESSES ANCESTRALES',
-              icon: Icons.format_quote_rounded,
-              color: CultureTheme.accentOrange,
-              borderCol: borderCol,
-            ),
-            const SizedBox(height: 14),
-            _buildProverbsList(
-              proverbs: _malianProverbs
-                  .where((p) =>
-                      activeRegion == null ||
-                      p.regionId == null ||
-                      p.regionId == activeRegion.id)
-                  .toList(),
-              context: context,
-              isDark: isDark,
-              cardBg: cardBg,
-              borderCol: borderCol,
-              titleColor: titleColor,
-              subtitleColor: subtitleColor,
-            ),
-            const SizedBox(height: 20),
-          ],
-
-          const SizedBox(height: 28),
-
-          // Footer Logo Culture avec "iA" en jaune !
-          const Center(
-            child: Opacity(
-              opacity: 0.5,
-              child: AlterniaLogo(
-                size: 24,
-                showText: true,
-                iaColor: CultureTheme.iaYellow,
+            // ── 4. SOUS-UNIVERS 3 : DÉFIS CULTURELS & QUIZ ─────────────────────
+            if (_selectedFilterIndex == 2) ...[
+              // Défi en Vedette
+              AnimatedCulturalReveal(
+                delay: const Duration(milliseconds: 60),
+                child: _buildFeaturedChallengeCard(
+                  context: context,
+                  isDark: isDark,
+                  cardBg: cardBg,
+                  borderCol: borderCol,
+                  titleColor: titleColor,
+                  subtitleColor: subtitleColor,
+                ),
               ),
-            ),
-          ),
-          const SizedBox(height: 16),
-        ]),
+              const SizedBox(height: 22),
+
+              _buildSectionHeader(
+                title: 'TOUS LES QUIZ DU SAVOIR',
+                icon: Icons.psychology_rounded,
+                color: CultureTheme.primaryBlue,
+                borderCol: borderCol,
+                count: MockCultureChallengesData.quizPacks.length,
+              ),
+              const SizedBox(height: 14),
+              _buildQuizGrid(
+                context: context,
+                isDark: isDark,
+                cardBg: cardBg,
+                borderCol: borderCol,
+                titleColor: titleColor,
+                subtitleColor: subtitleColor,
+              ),
+              const SizedBox(height: 20),
+            ],
+        ],
+        ),
       ),
     );
   }
@@ -338,7 +363,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
       borderRadius: 22,
       onTap: () {
         context.push(
-          '/culture/conte-interactif/${story.id}',
+          '/culture/conte/${story.id}/play',
           extra: story,
         );
       },
@@ -510,10 +535,10 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: CultureTheme.primaryBlue,
+                          foregroundColor: CultureTheme.accentOrange,
                           side: BorderSide(
                             color:
-                                CultureTheme.primaryBlue.withValues(alpha: 0.5),
+                                CultureTheme.accentOrange.withValues(alpha: 0.5),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -529,7 +554,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                         onPressed: () {
                           HapticFeedback.mediumImpact();
                           context.push(
-                            '/culture/conte-interactif/${story.id}',
+                            '/culture/conte/${story.id}/play',
                             extra: story,
                           );
                         },
@@ -593,7 +618,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: CultureTheme.rougeKoulikoro.withValues(alpha: 0.3),
+                  color: CultureTheme.accentOrange.withValues(alpha: 0.3),
                 ),
               ),
               child: ClipRRect(
@@ -603,8 +628,8 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                         story.photoUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
-                          color:
-                              CultureTheme.accentOrange.withValues(alpha: 0.15),
+                          color: CultureTheme.accentOrange
+                              .withValues(alpha: 0.15),
                           child: const Icon(Icons.auto_stories_rounded,
                               size: 24, color: CultureTheme.accentOrange),
                         ),
@@ -678,6 +703,19 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
               ),
             ),
             const SizedBox(width: 8),
+            IconButton(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                StoryAudioPlayerSheet.show(context, story);
+              },
+              icon: const Icon(
+                Icons.headphones_rounded,
+                size: 20,
+                color: CultureTheme.accentOrange,
+              ),
+              tooltip: 'Écouter le conte',
+            ),
+            const SizedBox(width: 4),
             const Icon(
               Icons.arrow_forward_ios_rounded,
               size: 13,
@@ -689,9 +727,8 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     );
   }
 
-  // ── 3. LISTE DES PROVERBES ET SAGESSES DU MALI ────────────────────────────
-  Widget _buildProverbsList({
-    required List<_MalianProverb> proverbs,
+  // ── 3. CARTE DU GRAND DÉFI EN VEDETTE ─────────────────────────────────────
+  Widget _buildFeaturedChallengeCard({
     required BuildContext context,
     required bool isDark,
     required Color cardBg,
@@ -699,8 +736,182 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     required Color titleColor,
     required Color subtitleColor,
   }) {
+    final featuredPack = MockCultureChallengesData.quizPacks.first;
+
+    return CulturalInteractiveCard(
+      padding: EdgeInsets.zero,
+      showSudaneseCorners: false,
+      activeAccentColor: CultureTheme.accentOrange,
+      backgroundColor: cardBg,
+      borderRadius: 22,
+      onTap: () {
+        context.push('/culture/quiz/${featuredPack.id}');
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Visuel authentique du Défi
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+            child: SizedBox(
+              height: 145,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(
+                    featuredPack.photoUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: CultureTheme.primaryBlue,
+                      child: const Center(
+                        child: Icon(Icons.account_balance_rounded,
+                            color: Colors.white, size: 40),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    color: Colors.black.withValues(alpha: 0.40),
+                  ),
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.5, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: CultureTheme.accentOrange,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star_rounded,
+                              size: 13, color: Colors.white),
+                          const SizedBox(width: 4),
+                          Text(
+                            'DÉFI DU SAVOIR EN VEDETTE',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 12,
+                    left: 14,
+                    right: 14,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          featuredPack.title,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          featuredPack.subtitle,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: Colors.white.withValues(alpha: 0.88),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Pied de carte avec statistiques et action
+          Padding(
+            padding: const EdgeInsets.all(15),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 3.5),
+                  decoration: BoxDecoration(
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '+${featuredPack.xpReward} XP',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: CultureTheme.accentOrange,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '${featuredPack.questionsCount} questions • ~${featuredPack.timeMinutes} min',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: subtitleColor,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: CultureTheme.primaryBlue,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Relever le défi',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_forward_rounded,
+                          size: 14, color: Colors.white),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── 4. GRILLE DE QUIZ DU SAVOIR (INTERACTIF) ───────────────────────────────
+  Widget _buildQuizGrid({
+    required BuildContext context,
+    required bool isDark,
+    required Color cardBg,
+    required Color borderCol,
+    required Color titleColor,
+    required Color subtitleColor,
+  }) {
+    final packs = MockCultureChallengesData.quizPacks;
+
     return Column(
-      children: proverbs.map((prov) {
+      children: packs.map((pack) {
+        final color = pack.themeColor;
+        final quizId = pack.id;
+
         return Container(
           margin: const EdgeInsets.only(bottom: 14),
           decoration: BoxDecoration(
@@ -720,160 +931,123 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3.5),
-                      decoration: BoxDecoration(
-                        color: CultureTheme.accentOrange.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color:
-                              CultureTheme.accentOrange.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: color.withValues(alpha: 0.3),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      pack.icon,
+                      color: color,
+                      size: 24,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          const Icon(
-                            Icons.format_quote_rounded,
-                            size: 12,
-                            color: CultureTheme.accentOrange,
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Text(
+                              pack.category.toUpperCase(),
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                color: color,
+                              ),
+                            ),
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 6),
                           Text(
-                            prov.theme.toUpperCase(),
+                            pack.regionName,
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w800,
-                              color: CultureTheme.accentOrange,
-                              letterSpacing: 0.5,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: subtitleColor,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    Text(
-                      prov.regionName,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: subtitleColor,
+                      const SizedBox(height: 4),
+                      Text(
+                        pack.title,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w800,
+                          color: titleColor,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  prov.text,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w800,
-                    height: 1.4,
-                    color: titleColor,
-                  ),
-                ),
-                if (prov.originalText != null) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    prov.originalText!,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontStyle: FontStyle.italic,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFFD97706),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 10),
-                Text(
-                  prov.meaning,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    height: 1.45,
-                    color: subtitleColor,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Divider(height: 1, color: borderCol),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.history_edu_rounded,
-                          size: 13,
+                      const SizedBox(height: 2),
+                      Text(
+                        pack.subtitle,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
                           color: subtitleColor,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          prov.origin,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w500,
-                            color: subtitleColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        Clipboard.setData(ClipboardData(
-                          text: '${prov.text}\n— ${prov.origin}',
-                        ));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Proverbe copié dans le presse-papier',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            backgroundColor: CultureTheme.accentOrange,
-                            behavior: SnackBarBehavior.floating,
-                            duration: const Duration(seconds: 2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Text(
+                            '${pack.questionsCount} questions',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600,
+                              color: color,
                             ),
                           ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? CultureTheme.darkSurfaceAlt
-                              : const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.copy_rounded,
-                              size: 12,
+                          const SizedBox(width: 8),
+                          Text(
+                            '• ~${pack.timeMinutes} min',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w500,
                               color: subtitleColor,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Copier',
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: CultureTheme.accentOrange
+                                  .withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Text(
+                              '+${pack.xpReward} XP',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
-                                color: subtitleColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: CultureTheme.accentOrange,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.play_circle_fill_rounded,
+                  size: 28,
+                  color: color,
                 ),
               ],
             ),

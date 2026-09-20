@@ -13,8 +13,12 @@ import '../../immersive/immersive.dart';
 import '../../../../presentation/common/widgets/alternia_logo.dart';
 import '../widgets/culture_region_bottom_sheet.dart';
 
-/// Vue 1 : Accueil Culture
-/// STRICTEMENT SANS DÉGRADÉS selon les règles d'architecture UX/UI
+/// Vue 1 : Accueil Culture — « Le Sanctuaire Vivant du Mali »
+/// Expérience immersive et cinématique de classe mondiale.
+/// ZÉRO répétition de catalogue des autres onglets.
+/// Vraie 3D gyroscopique au toucher, Médaillon sacré à déflagration radiale,
+/// Compas orbital des terroirs et Défi éclair du Crépuscule.
+/// STRICTEMENT SANS DÉGRADÉS selon les 3 couleurs de marque AlterniA.
 class CultureHomeView extends ConsumerWidget {
   final ValueChanged<int> onNavigateToTab;
 
@@ -823,3 +827,4 @@ class CultureHomeView extends ConsumerWidget {
     );
   }
 }
+
