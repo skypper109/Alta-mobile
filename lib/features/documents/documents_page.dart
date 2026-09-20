@@ -210,7 +210,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-                'Le serveur AlternIA n\'a pas répondu. Vérifiez que le backend est démarré.'),
+                'Le serveur AlternIA n\'a pas répondu. Vérifiez que vous etes bien connectés à internet.'),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -262,521 +262,516 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 125),
         children: [
           Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'ESPACE ÉDUCATION',
+                style: GoogleFonts.plusJakartaSans(
+                  color: AltaColors.accent,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Mes Devoirs & Scanner OCR',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: textPri,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: DetSizes.xl),
+
+          // ── Zone d'importation réelle ───────────────────────────────────
+          Container(
+            padding: const EdgeInsets.all(DetSizes.xl),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AltaColors.primary.withValues(alpha: isDark ? 0.2 : 0.08),
+                  AltaColors.secondary.withValues(alpha: isDark ? 0.1 : 0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: DetSizes.borderRadiusXl,
+              border: Border.all(
+                color: AltaColors.primary.withValues(alpha: 0.4),
+                width: DetSizes.borderWidth,
+              ),
+            ),
+            child: Column(
               children: [
-                Text(
-                  'ESPACE ÉDUCATION',
-                  style: GoogleFonts.plusJakartaSans(
-                    color: AltaColors.accent,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.8,
+                Container(
+                  padding: const EdgeInsets.all(DetSizes.lg),
+                  decoration: BoxDecoration(
+                    color: AltaColors.primary.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.document_scanner_rounded,
+                    size: 40,
+                    color: AltaColors.primary,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: DetSizes.md),
                 Text(
-                  'Mes Devoirs & Scanner OCR',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: textPri,
-                  ),
+                  'Scanner un devoir ou exercice',
+                  style: DetTextStyles.headingMd.copyWith(color: textPri),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Prenez une photo : le service AlternIA extrait le texte par OCR et vous guide pas à pas.',
+                  textAlign: TextAlign.center,
+                  style: DetTextStyles.bodySm.copyWith(color: textSec),
+                ),
+                const SizedBox(height: DetSizes.lg),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DetButton(
+                        label: 'Caméra',
+                        icon: Icons.camera_alt_rounded,
+                        onPressed: () =>
+                            _pickAndAnalyzeDocument(ImageSource.camera),
+                      ),
+                    ),
+                    const SizedBox(width: DetSizes.md),
+                    Expanded(
+                      child: DetButton(
+                        label: 'Galerie',
+                        icon: Icons.photo_library_rounded,
+                        variant: DetButtonVariant.secondary,
+                        onPressed: () =>
+                            _pickAndAnalyzeDocument(ImageSource.gallery),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
+          ),
 
-            const SizedBox(height: DetSizes.xl),
+          const SizedBox(height: DetSizes.xl),
 
-            // ── Zone d'importation réelle ───────────────────────────────────
+          // ── Résultat de l'analyse ou Chargement ──────────────────────────
+          if (_isProcessing) ...[
             Container(
               padding: const EdgeInsets.all(DetSizes.xl),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AltaColors.primary.withValues(alpha: isDark ? 0.2 : 0.08),
-                    AltaColors.secondary.withValues(alpha: isDark ? 0.1 : 0.05),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: DetSizes.borderRadiusXl,
-                border: Border.all(
-                  color: AltaColors.primary.withValues(alpha: 0.4),
-                  width: DetSizes.borderWidth,
-                ),
+                color: cardBg,
+                borderRadius: DetSizes.borderRadiusLg,
+                border: Border.all(color: borderCol),
               ),
               child: Column(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(DetSizes.lg),
-                    decoration: BoxDecoration(
-                      color: AltaColors.primary.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.document_scanner_rounded,
-                      size: 40,
-                      color: AltaColors.primary,
-                    ),
+                  AnimatedBuilder(
+                    animation: _pulseCtrl,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale: 0.95 + 0.1 * _pulseCtrl.value,
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AltaColors.secondary.withValues(alpha: 0.2),
+                            border: Border.all(
+                              color: AltaColors.secondary,
+                              width: 2,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.psychology_rounded,
+                            color: AltaColors.secondary,
+                            size: 32,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: DetSizes.md),
                   Text(
-                    'Scanner un devoir ou exercice',
-                    style: DetTextStyles.headingMd.copyWith(color: textPri),
+                    'Traitement OCR & Analyse Pédagogique…',
+                    style: DetTextStyles.headingSm.copyWith(color: textPri),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Prenez une photo : le service AlternIA extrait le texte par OCR et vous guide pas à pas.',
-                    textAlign: TextAlign.center,
+                    'Extraction du texte par OCR et résolution guidée (${userPrefs.classFullLabel})',
                     style: DetTextStyles.bodySm.copyWith(color: textSec),
                   ),
-                  const SizedBox(height: DetSizes.lg),
+                ],
+              ),
+            ),
+            const SizedBox(height: DetSizes.xl),
+          ] else if (_scannedFileName != null && _socraticSteps.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.all(DetSizes.lg),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: DetSizes.borderRadiusLg,
+                border: Border.all(
+                  color: AltaColors.secondary.withValues(alpha: 0.5),
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Row(
                     children: [
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        color: AltaColors.secondary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(
-                        child: DetButton(
-                          label: 'Caméra',
-                          icon: Icons.camera_alt_rounded,
-                          onPressed: () =>
-                              _pickAndAnalyzeDocument(ImageSource.camera),
+                        child: Text(
+                          _scannedFileName!,
+                          style: DetTextStyles.bodyMd.copyWith(
+                            color: textPri,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: DetSizes.md),
-                      Expanded(
-                        child: DetButton(
-                          label: 'Galerie',
-                          icon: Icons.photo_library_rounded,
+                      if (_detectedSubject != null) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AltaColors.primary.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            _detectedSubject!,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: AltaColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+
+                  // Aperçu miniature de la photo du devoir scanné
+                  if (_scannedImageFile != null &&
+                      _scannedImageFile!.existsSync()) ...[
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        _scannedImageFile!,
+                        height: 140,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ],
+
+                  // Texte extrait par OCR de l'exercice
+                  if (_extractedOcrText != null &&
+                      _extractedOcrText!.trim().isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF0F172A)
+                            : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: borderCol),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.document_scanner_rounded,
+                                  size: 14, color: AltaColors.secondary),
+                              const SizedBox(width: 6),
+                              Text(
+                                'ÉNONCÉ DÉTECTÉ PAR OCR',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: AltaColors.secondary,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            _extractedOcrText!,
+                            maxLines: 4,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              color: textPri,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
+                  const Divider(height: 24),
+                  Text(
+                    _socraticSteps[_currentStep]['title']!,
+                    style: DetTextStyles.headingSm.copyWith(
+                      color: AltaColors.accent,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _socraticSteps[_currentStep]['content']!,
+                    style: DetTextStyles.bodyMd.copyWith(
+                      color: textPri,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(DetSizes.md),
+                    decoration: BoxDecoration(
+                      color: AltaColors.primary
+                          .withValues(alpha: isDark ? 0.15 : 0.06),
+                      borderRadius: DetSizes.borderRadiusMd,
+                      border: Border.all(
+                        color: AltaColors.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.help_outline_rounded,
+                          color: AltaColors.primary,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _socraticSteps[_currentStep]['question']!,
+                            style: DetTextStyles.bodySm.copyWith(
+                              color: textPri,
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: DetSizes.md),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (_currentStep > 0)
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() => _currentStep--);
+                          },
+                          icon: const Icon(Icons.arrow_back_rounded, size: 16),
+                          label: const Text('Précédent'),
+                        )
+                      else
+                        const SizedBox.shrink(),
+                      if (_currentStep < _socraticSteps.length - 1)
+                        DetButton(
+                          label: 'Étape suivante',
+                          icon: Icons.arrow_forward_rounded,
+                          onPressed: () {
+                            setState(() => _currentStep++);
+                          },
+                        )
+                      else
+                        DetButton(
+                          label: 'Fermer',
+                          icon: Icons.check_circle_rounded,
                           variant: DetButtonVariant.secondary,
-                          onPressed: () =>
-                              _pickAndAnalyzeDocument(ImageSource.gallery),
+                          onPressed: () {
+                            setState(() {
+                              _scannedFileName = null;
+                              _scannedImageFile = null;
+                              _extractedOcrText = null;
+                              _currentStep = 0;
+                            });
+                          },
                         ),
-                      ),
                     ],
                   ),
                 ],
               ),
             ),
-
             const SizedBox(height: DetSizes.xl),
+          ],
 
-            // ── Résultat de l'analyse ou Chargement ──────────────────────────
-            if (_isProcessing) ...[
-              Container(
-                padding: const EdgeInsets.all(DetSizes.xl),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: DetSizes.borderRadiusLg,
-                  border: Border.all(color: borderCol),
-                ),
-                child: Column(
-                  children: [
-                    AnimatedBuilder(
-                      animation: _pulseCtrl,
-                      builder: (context, child) {
-                        return Transform.scale(
-                          scale: 0.95 + 0.1 * _pulseCtrl.value,
-                          child: Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color:
-                                  AltaColors.secondary.withValues(alpha: 0.2),
-                              border: Border.all(
-                                color: AltaColors.secondary,
-                                width: 2,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.psychology_rounded,
-                              color: AltaColors.secondary,
-                              size: 32,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: DetSizes.md),
-                    Text(
-                      'Traitement OCR & Analyse Pédagogique…',
-                      style: DetTextStyles.headingSm.copyWith(color: textPri),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Extraction du texte par OCR et résolution guidée (${userPrefs.classFullLabel})',
-                      style: DetTextStyles.bodySm.copyWith(color: textSec),
-                    ),
-                  ],
+          // ── Historique personnel des devoirs scannés ─────────────────────
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'HISTORIQUE DE MES DEVOIRS SCANNÉS',
+                style: GoogleFonts.plusJakartaSans(
+                  color: textSec,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
                 ),
               ),
-              const SizedBox(height: DetSizes.xl),
-            ] else if (_scannedFileName != null &&
-                _socraticSteps.isNotEmpty) ...[
-              Container(
-                padding: const EdgeInsets.all(DetSizes.lg),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: DetSizes.borderRadiusLg,
-                  border: Border.all(
-                    color: AltaColors.secondary.withValues(alpha: 0.5),
-                    width: 1.5,
+              if (_history.isNotEmpty)
+                GestureDetector(
+                  onTap: _clearScansHistory,
+                  child: Text(
+                    'Effacer l\'historique',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: Colors.redAccent,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+            ],
+          ),
+          const SizedBox(height: DetSizes.sm),
+
+          if (_isLoadingHistory)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                  child: CircularProgressIndicator(color: AltaColors.primary)),
+            )
+          else if (_history.isEmpty)
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: borderCol),
+              ),
+              child: Column(
+                children: [
+                  Icon(Icons.photo_camera_back_rounded,
+                      size: 40, color: textSec.withValues(alpha: 0.5)),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Aucun devoir scanné pour le moment',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: textPri,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Prenez une photo de votre exercice ou devoir avec la Caméra pour lancer l\'OCR et la résolution guidée.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12, color: textSec),
+                  ),
+                ],
+              ),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _history.length,
+              separatorBuilder: (context, index) =>
+                  const SizedBox(height: DetSizes.sm),
+              itemBuilder: (context, index) {
+                final doc = _history[index];
+                return GestureDetector(
+                  onTap: () => _openDocumentDetails(doc),
+                  child: Container(
+                    padding: const EdgeInsets.all(DetSizes.md),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: DetSizes.borderRadiusLg,
+                      border: Border.all(color: borderCol),
+                    ),
+                    child: Row(
                       children: [
-                        const Icon(
-                          Icons.check_circle_rounded,
-                          color: AltaColors.secondary,
-                          size: 20,
+                        Container(
+                          padding: const EdgeInsets.all(DetSizes.md),
+                          decoration: BoxDecoration(
+                            color: doc.color.withValues(alpha: 0.12),
+                            borderRadius: DetSizes.borderRadiusMd,
+                          ),
+                          child: Icon(
+                            Icons.photo_camera_rounded,
+                            color: doc.color,
+                            size: 24,
+                          ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: DetSizes.md),
                         Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                doc.name,
+                                style: DetTextStyles.bodyMd.copyWith(
+                                  color: textPri,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${doc.subject} • ${doc.date}',
+                                style: DetTextStyles.bodySm
+                                    .copyWith(color: textSec),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: DetSizes.sm,
+                            vertical: DetSizes.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AltaColors.secondary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(DetSizes.xs),
+                          ),
                           child: Text(
-                            _scannedFileName!,
-                            style: DetTextStyles.bodyMd.copyWith(
-                              color: textPri,
+                            '${doc.stepsCount} étapes',
+                            style: DetTextStyles.caption.copyWith(
+                              color: AltaColors.secondary,
                               fontWeight: FontWeight.w600,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (_detectedSubject != null) ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AltaColors.primary.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              _detectedSubject!,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AltaColors.primary,
-                              ),
-                            ),
-                          ),
-                        ],
                       ],
                     ),
-
-                    // Aperçu miniature de la photo du devoir scanné
-                    if (_scannedImageFile != null &&
-                        _scannedImageFile!.existsSync()) ...[
-                      const SizedBox(height: 12),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.file(
-                          _scannedImageFile!,
-                          height: 140,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ],
-
-                    // Texte extrait par OCR de l'exercice
-                    if (_extractedOcrText != null &&
-                        _extractedOcrText!.trim().isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF0F172A)
-                              : const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: borderCol),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.document_scanner_rounded,
-                                    size: 14, color: AltaColors.secondary),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'ÉNONCÉ DÉTECTÉ PAR OCR',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: AltaColors.secondary,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              _extractedOcrText!,
-                              maxLines: 4,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                color: textPri,
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-
-                    const Divider(height: 24),
-                    Text(
-                      _socraticSteps[_currentStep]['title']!,
-                      style: DetTextStyles.headingSm.copyWith(
-                        color: AltaColors.accent,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _socraticSteps[_currentStep]['content']!,
-                      style: DetTextStyles.bodyMd.copyWith(
-                        color: textPri,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(DetSizes.md),
-                      decoration: BoxDecoration(
-                        color: AltaColors.primary
-                            .withValues(alpha: isDark ? 0.15 : 0.06),
-                        borderRadius: DetSizes.borderRadiusMd,
-                        border: Border.all(
-                          color: AltaColors.primary.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.help_outline_rounded,
-                            color: AltaColors.primary,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _socraticSteps[_currentStep]['question']!,
-                              style: DetTextStyles.bodySm.copyWith(
-                                color: textPri,
-                                fontStyle: FontStyle.italic,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: DetSizes.md),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (_currentStep > 0)
-                          TextButton.icon(
-                            onPressed: () {
-                              setState(() => _currentStep--);
-                            },
-                            icon:
-                                const Icon(Icons.arrow_back_rounded, size: 16),
-                            label: const Text('Précédent'),
-                          )
-                        else
-                          const SizedBox.shrink(),
-                        if (_currentStep < _socraticSteps.length - 1)
-                          DetButton(
-                            label: 'Étape suivante',
-                            icon: Icons.arrow_forward_rounded,
-                            onPressed: () {
-                              setState(() => _currentStep++);
-                            },
-                          )
-                        else
-                          DetButton(
-                            label: 'Fermer',
-                            icon: Icons.check_circle_rounded,
-                            variant: DetButtonVariant.secondary,
-                            onPressed: () {
-                              setState(() {
-                                _scannedFileName = null;
-                                _scannedImageFile = null;
-                                _extractedOcrText = null;
-                                _currentStep = 0;
-                              });
-                            },
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: DetSizes.xl),
-            ],
-
-            // ── Historique personnel des devoirs scannés ─────────────────────
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'HISTORIQUE DE MES DEVOIRS SCANNÉS',
-                  style: GoogleFonts.plusJakartaSans(
-                    color: textSec,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.8,
                   ),
-                ),
-                if (_history.isNotEmpty)
-                  GestureDetector(
-                    onTap: _clearScansHistory,
-                    child: Text(
-                      'Effacer l\'historique',
-                      style: GoogleFonts.plusJakartaSans(
-                        color: Colors.redAccent,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-              ],
+                );
+              },
             ),
-            const SizedBox(height: DetSizes.sm),
+          const SizedBox(height: 28),
 
-            if (_isLoadingHistory)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Center(
-                    child:
-                        CircularProgressIndicator(color: AltaColors.primary)),
-              )
-            else if (_history.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: borderCol),
-                ),
-                child: Column(
-                  children: [
-                    Icon(Icons.photo_camera_back_rounded,
-                        size: 40, color: textSec.withValues(alpha: 0.5)),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Aucun devoir scanné pour le moment',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: textPri,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Prenez une photo de votre exercice ou devoir avec la Caméra pour lancer l\'OCR et la résolution guidée.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12, color: textSec),
-                    ),
-                  ],
-                ),
-              )
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _history.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: DetSizes.sm),
-                itemBuilder: (context, index) {
-                  final doc = _history[index];
-                  return GestureDetector(
-                    onTap: () => _openDocumentDetails(doc),
-                    child: Container(
-                      padding: const EdgeInsets.all(DetSizes.md),
-                      decoration: BoxDecoration(
-                        color: cardBg,
-                        borderRadius: DetSizes.borderRadiusLg,
-                        border: Border.all(color: borderCol),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(DetSizes.md),
-                            decoration: BoxDecoration(
-                              color: doc.color.withValues(alpha: 0.12),
-                              borderRadius: DetSizes.borderRadiusMd,
-                            ),
-                            child: Icon(
-                              Icons.photo_camera_rounded,
-                              color: doc.color,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: DetSizes.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  doc.name,
-                                  style: DetTextStyles.bodyMd.copyWith(
-                                    color: textPri,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '${doc.subject} • ${doc.date}',
-                                  style: DetTextStyles.bodySm
-                                      .copyWith(color: textSec),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: DetSizes.sm,
-                              vertical: DetSizes.xs,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  AltaColors.secondary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(DetSizes.xs),
-                            ),
-                            child: Text(
-                              '${doc.stepsCount} étapes',
-                              style: DetTextStyles.caption.copyWith(
-                                color: AltaColors.secondary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            const SizedBox(height: 28),
-
-            // Footer Logo
-            const Center(
-              child: Opacity(
-                opacity: 0.5,
-                child: AlterniaLogo(size: 24, showText: true),
-              ),
+          // Footer Logo
+          const Center(
+            child: Opacity(
+              opacity: 0.5,
+              child: AlterniaLogo(size: 24, showText: true),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }

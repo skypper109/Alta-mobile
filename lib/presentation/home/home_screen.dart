@@ -32,380 +32,396 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 125), // Bottom padding prevents clipping under floating nav
+        padding: const EdgeInsets.fromLTRB(20, 8, 20,
+            125), // Bottom padding prevents clipping under floating nav
         children: [
           // ── 1. GREETING BANNER ──────────────────────────────────────────
-            Row(
-              children: [
-                Flexible(
-                  child: Text(
-                    'Bonjour $firstName',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
-                      letterSpacing: -0.4,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  'Bonjour $firstName',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                    letterSpacing: -0.4,
                   ),
-                ),
-                const SizedBox(width: 8),
-                const Icon(Icons.waving_hand_rounded, color: AppColors.accent, size: 22),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: isDark ? 0.18 : 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isDark ? AppColors.primary.withValues(alpha: 0.4) : AppColors.primary.withValues(alpha: 0.25),
-                    ),
-                  ),
-                  child: Text(
-                    userState.classShortLabel,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? AppColors.secondary : AppColors.primary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // ── 3. QUICK STATS PILL ROW (CONNECTÉ AU BACKEND) ─────────────
-            Row(
-              children: [
-                Expanded(
-                  child: _TeenStatBadge(
-                    label: 'Streak',
-                    value: gamification.streak,
-                    icon: Icons.local_fire_department_rounded,
-                    color: AppColors.accent,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _TeenStatBadge(
-                    label: 'XP',
-                    value: gamification.xp,
-                    icon: Icons.stars_rounded,
-                    color: AppColors.secondary,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _TeenStatBadge(
-                    label: 'Séances',
-                    value: gamification.seances,
-                    icon: Icons.school_rounded,
-                    color: AppColors.primaryLight,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // ── 4. HERO BANNER BOÎTIER ALTERNIA ─────────────────────────────
-            GestureDetector(
-              onTap: () => showDeviceModalSheet(context),
-              child: Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  gradient: AppColors.primaryGradient,
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.35),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        isConnected ? Icons.router_rounded : Icons.wifi_tethering_rounded,
-                        size: 26,
-                        color: isConnected ? AppColors.secondary : Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            isConnected ? 'Boîtier AlterniA Connecté' : 'Boîtier AlterniA',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            isConnected ? 'Wi-Fi local • $deviceName' : 'Appairer ou utiliser le Cloud IA',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              color: Colors.white.withValues(alpha: 0.8),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: isConnected ? AppColors.secondary : AppColors.accent,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        isConnected ? 'EN LIGNE' : 'HORS-LIGNE',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // ── 5. VOS MATIÈRES (CARDS DE SUGGESTIONS GRID FOR TEENS) ────────
-            DetSectionHeader(
-              title: 'Programmes (${userState.classShortLabel})',
-            ),
-            const SizedBox(height: 14),
-
-            ...() {
-              final subjects = userState.subjects;
-              if (subjects.isEmpty) {
-                return [
-                  const DetEmptyState(
-                    icon: Icons.menu_book_rounded,
-                    title: 'Aucune matière disponible',
-                    subtitle: 'Sélectionnez votre classe dans le profil.',
-                  )
-                ];
-              }
-
-              final colors = [
-                AppColors.primary,
-                AppColors.accent,
-                AppColors.secondary,
-                AppColors.accentViolet,
-                AppColors.success,
-              ];
-
-              final icons = [
-                Icons.calculate_rounded,
-                Icons.science_rounded,
-                Icons.biotech_rounded,
-                Icons.auto_stories_rounded,
-                Icons.history_edu_rounded,
-                Icons.language_rounded,
-                Icons.balance_rounded,
-              ];
-
-              return [
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 1.2,
+              const SizedBox(width: 8),
+              // const Icon(Icons.waving_hand_rounded, color: AppColors.accent, size: 22),
+              const SizedBox(width: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color:
+                      AppColors.primary.withValues(alpha: isDark ? 0.18 : 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.primary.withValues(alpha: 0.4)
+                        : AppColors.primary.withValues(alpha: 0.25),
                   ),
-                  itemCount: subjects.length,
-                  itemBuilder: (context, i) {
-                    final subject = subjects[i];
-                    final color = colors[i % colors.length];
-                    final icon = icons[i % icons.length];
-                    final progress = gamification.getProgressForSubject(subject);
-
-                    return CustomCard(
-                      onTap: () {
-                        HapticFeedback.mediumImpact();
-                        ref.read(activeSubjectProvider.notifier).state = subject;
-                        context.go('/discussions');
-                      },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: color.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(icon, size: 22, color: color),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: color.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  '${(progress * 100).toInt()}%',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: color,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                subject,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: textColor,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 6),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(3),
-                                child: LinearProgressIndicator(
-                                  value: progress,
-                                  minHeight: 5,
-                                  backgroundColor: isDark ? AppColors.surfaceAlt : const Color(0xFFE2E8F0),
-                                  color: color,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  },
                 ),
-              ];
-            }(),
+                child: Text(
+                  userState.classShortLabel,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? AppColors.secondary : AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
 
-            const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
-            // ── 6. SUGGESTIONS IA VISUELLES ─────────────────────────────────
-            DetSectionHeader(
-              title: 'Suggestions IA Révision',
-              actionLabel: 'Discuter',
-              onAction: () => context.go('/discussions'),
-            ),
-            const SizedBox(height: 14),
+          // ── 3. QUICK STATS PILL ROW (CONNECTÉ AU BACKEND) ─────────────
+          Row(
+            children: [
+              Expanded(
+                child: _TeenStatBadge(
+                  label: 'Streak',
+                  value: gamification.streak,
+                  icon: Icons.local_fire_department_rounded,
+                  color: AppColors.accent,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _TeenStatBadge(
+                  label: 'XP',
+                  value: gamification.xp,
+                  icon: Icons.stars_rounded,
+                  color: AppColors.secondary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _TeenStatBadge(
+                  label: 'Séances',
+                  value: gamification.seances,
+                  icon: Icons.school_rounded,
+                  color: AppColors.primaryLight,
+                ),
+              ),
+            ],
+          ),
 
-            Builder(builder: (context) {
-              final subjects = userState.subjects;
-              final s1 = subjects.isNotEmpty ? subjects[0] : 'Mathématiques';
-              final s2 = subjects.length > 1 ? subjects[1] : 'Histoire-Géo';
+          const SizedBox(height: 20),
 
-              return Row(
+          // ── 4. HERO BANNER BOÎTIER ALTERNIA ─────────────────────────────
+          GestureDetector(
+            onTap: () => showDeviceModalSheet(context),
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.35),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
                 children: [
-                  Expanded(
-                    child: _TeenSuggestionCard(
-                      title: 'Réviser $s1',
-                      subtitle: 'Carte interactive • 15 min',
-                      icon: Icons.auto_awesome_rounded,
-                      color: AppColors.primary,
-                      onTap: () => context.go('/discussions'),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      isConnected
+                          ? Icons.router_rounded
+                          : Icons.wifi_tethering_rounded,
+                      size: 26,
+                      color: isConnected ? AppColors.secondary : Colors.white,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   Expanded(
-                    child: _TeenSuggestionCard(
-                      title: 'Quiz $s2',
-                      subtitle: 'Défi Tuteur • 20 min',
-                      icon: Icons.quiz_rounded,
-                      color: AppColors.accent,
-                      onTap: () => context.go('/discussions'),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isConnected
+                              ? 'Boîtier AlterniA Connecté'
+                              : 'Boîtier AlterniA',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          isConnected
+                              ? 'Wi-Fi local • $deviceName'
+                              : 'Appairer ou utiliser le Cloud IA',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color:
+                          isConnected ? AppColors.secondary : AppColors.accent,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      isConnected ? 'EN LIGNE' : 'HORS-LIGNE',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
-              );
-            }),
-
-            const SizedBox(height: 24),
-
-            // ── 7. PATRIMOINE & CULTURE DU MALI ────────────────────────────
-            DetSectionHeader(
-              title: 'Patrimoine & Culture Malienne',
-              actionLabel: 'Explorer',
-              onAction: () => UniverseSplashTransition.toCulture(
-                context,
-                onComplete: () => context.go('/culture'),
               ),
             ),
-            const SizedBox(height: 14),
+          ),
 
-            Row(
+          const SizedBox(height: 24),
+
+          // ── 5. VOS MATIÈRES (CARDS DE SUGGESTIONS GRID FOR TEENS) ────────
+          DetSectionHeader(
+            title: 'Programmes (${userState.classShortLabel})',
+          ),
+          const SizedBox(height: 14),
+
+          ...() {
+            final subjects = userState.subjects;
+            if (subjects.isEmpty) {
+              return [
+                const DetEmptyState(
+                  icon: Icons.menu_book_rounded,
+                  title: 'Aucune matière disponible',
+                  subtitle: 'Sélectionnez votre classe dans le profil.',
+                )
+              ];
+            }
+
+            final colors = [
+              AppColors.primary,
+              AppColors.accent,
+              AppColors.secondary,
+              AppColors.accentViolet,
+              AppColors.success,
+            ];
+
+            final icons = [
+              Icons.calculate_rounded,
+              Icons.science_rounded,
+              Icons.biotech_rounded,
+              Icons.auto_stories_rounded,
+              Icons.history_edu_rounded,
+              Icons.language_rounded,
+              Icons.balance_rounded,
+            ];
+
+            return [
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.2,
+                ),
+                itemCount: subjects.length,
+                itemBuilder: (context, i) {
+                  final subject = subjects[i];
+                  final color = colors[i % colors.length];
+                  final icon = icons[i % icons.length];
+                  final progress = gamification.getProgressForSubject(subject);
+
+                  return CustomCard(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      ref.read(activeSubjectProvider.notifier).state = subject;
+                      context.go('/discussions');
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: color.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(icon, size: 22, color: color),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: color.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '${(progress * 100).toInt()}%',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: color,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              subject,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: textColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 6),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(3),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                minHeight: 5,
+                                backgroundColor: isDark
+                                    ? AppColors.surfaceAlt
+                                    : const Color(0xFFE2E8F0),
+                                color: color,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ];
+          }(),
+
+          const SizedBox(height: 24),
+
+          // ── 6. SUGGESTIONS IA VISUELLES ─────────────────────────────────
+          DetSectionHeader(
+            title: 'Suggestions IA Révision',
+            actionLabel: 'Discuter',
+            onAction: () => context.go('/discussions'),
+          ),
+          const SizedBox(height: 14),
+
+          Builder(builder: (context) {
+            final subjects = userState.subjects;
+            final s1 = subjects.isNotEmpty ? subjects[0] : 'Mathématiques';
+            final s2 = subjects.length > 1 ? subjects[1] : 'Histoire-Géo';
+
+            return Row(
               children: [
                 Expanded(
                   child: _TeenSuggestionCard(
-                    title: 'Monuments & Histoire',
-                    subtitle: 'Djenné, Tombouctou & Rois',
-                    icon: Icons.account_balance_rounded,
-                    color: const Color(0xFFE0823D),
-                    onTap: () => UniverseSplashTransition.toCulture(
-                      context,
-                      onComplete: () => context.push('/culture/monuments'),
-                    ),
+                    title: 'Réviser $s1',
+                    subtitle: 'Carte interactive • 15 min',
+                    icon: Icons.auto_awesome_rounded,
+                    color: AppColors.primary,
+                    onTap: () => context.go('/discussions'),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _TeenSuggestionCard(
-                    title: 'Contes & Devinettes',
-                    subtitle: 'Traditions des Griots',
-                    icon: Icons.auto_stories_rounded,
-                    color: const Color(0xFF2E7D32),
-                    onTap: () => UniverseSplashTransition.toCulture(
-                      context,
-                      onComplete: () => context.push('/culture/contes'),
-                    ),
+                    title: 'Quiz $s2',
+                    subtitle: 'Défi Tuteur • 20 min',
+                    icon: Icons.quiz_rounded,
+                    color: AppColors.accent,
+                    onTap: () => context.go('/discussions'),
                   ),
                 ),
               ],
+            );
+          }),
+
+          const SizedBox(height: 24),
+
+          // ── 7. PATRIMOINE & CULTURE DU MALI ────────────────────────────
+          DetSectionHeader(
+            title: 'Patrimoine & Culture Malienne',
+            actionLabel: 'Explorer',
+            onAction: () => UniverseSplashTransition.toCulture(
+              context,
+              onComplete: () => context.go('/culture'),
             ),
+          ),
+          const SizedBox(height: 14),
 
-            const SizedBox(height: 28),
-
-            // Footer Logo
-            const Center(
-              child: Opacity(
-                opacity: 0.5,
-                child: AlterniaLogo(size: 24, showText: true),
+          Row(
+            children: [
+              Expanded(
+                child: _TeenSuggestionCard(
+                  title: 'Monuments & Histoire',
+                  subtitle: 'Djenné, Tombouctou & Rois',
+                  icon: Icons.account_balance_rounded,
+                  color: const Color(0xFFE0823D),
+                  onTap: () => UniverseSplashTransition.toCulture(
+                    context,
+                    onComplete: () => context.push('/culture/monuments'),
+                  ),
+                ),
               ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _TeenSuggestionCard(
+                  title: 'Contes & Devinettes',
+                  subtitle: 'Traditions des Griots',
+                  icon: Icons.auto_stories_rounded,
+                  color: const Color(0xFF2E7D32),
+                  onTap: () => UniverseSplashTransition.toCulture(
+                    context,
+                    onComplete: () => context.push('/culture/contes'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 28),
+
+          // Footer Logo
+          const Center(
+            child: Opacity(
+              opacity: 0.5,
+              child: AlterniaLogo(size: 24, showText: true),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }
