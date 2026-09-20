@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/constants/app_colors.dart';
+import '../features/profile/user_prefs_notifier.dart';
 import '../presentation/common/widgets/alternia_top_header_bar.dart';
+import '../presentation/common/widgets/class_selection_required_sheet.dart';
 import '../presentation/common/widgets/custom_button.dart';
 import '../presentation/common/widgets/custom_card.dart';
 import '../presentation/common/widgets/universe_splash_transition.dart';
@@ -14,7 +17,7 @@ export '../presentation/common/widgets/alternia_top_header_bar.dart';
 export '../presentation/common/widgets/custom_button.dart';
 export '../presentation/common/widgets/custom_card.dart';
 
-class DetShellScaffold extends StatelessWidget {
+class DetShellScaffold extends ConsumerWidget {
   const DetShellScaffold({
     super.key,
     required this.navigationShell,
@@ -22,7 +25,19 @@ class DetShellScaffold extends StatelessWidget {
 
   final StatefulNavigationShell navigationShell;
 
-  void _onTabSelected(int index) {
+  Future<void> _onTabSelected(
+      BuildContext context, WidgetRef ref, int index) async {
+    // Les branches 0 (Accueil), 1 (Discussions) et 2 (Documents) appartiennent au pôle Éducation
+    if (index == 0 || index == 1 || index == 2) {
+      final userPrefs = ref.read(userPrefsProvider);
+      if (!userPrefs.hasSelectedClass) {
+        final chosen = await showClassSelectionRequiredSheet(context);
+        if (!chosen || !context.mounted) {
+          return;
+        }
+      }
+    }
+
     HapticFeedback.selectionClick();
     navigationShell.goBranch(
       index,
@@ -31,7 +46,7 @@ class DetShellScaffold extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isCultureTab = navigationShell.currentIndex == 3;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final navBg = isDark ? const Color(0xFF121B2D) : Colors.white;
@@ -116,7 +131,7 @@ class DetShellScaffold extends StatelessWidget {
                           return GestureDetector(
                             onTap: () {
                               if (navigationShell.currentIndex != item.branchIndex) {
-                                _onTabSelected(item.branchIndex);
+                                _onTabSelected(context, ref, item.branchIndex);
                               }
                             },
                             behavior: HitTestBehavior.opaque,
@@ -179,7 +194,7 @@ class DetShellScaffold extends StatelessWidget {
                   // ── Bouton aller à la Culture Solide avec Splash ───────────
                   _GoToCultureButton(
                     isDark: isDark,
-                    onTap: () => _onTabSelected(3),
+                    onTap: () => _onTabSelected(context, ref, 3),
                   ),
                 ],
               ),

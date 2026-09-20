@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../core/theme/culture_theme.dart';
+import '../../../../presentation/common/widgets/class_selection_required_sheet.dart';
 import '../../../../presentation/common/widgets/universe_splash_transition.dart';
+import '../../../profile/user_prefs_notifier.dart';
+import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
 
 /// Barre de navigation Culture premium — même design que DetShellScaffold
@@ -156,24 +159,33 @@ class CultureNavigationTabs extends StatelessWidget {
 }
 
 // ── Bouton retour Éducation avec Splash Transition ───────────────────────────
-class _BackToEducationButton extends StatelessWidget {
+class _BackToEducationButton extends ConsumerWidget {
   final bool isDark;
 
   const _BackToEducationButton({required this.isDark});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bgColor = isDark ? const Color(0xFF121B2D) : Colors.white;
     final borderColor =
         isDark ? const Color(0xFF23314D) : const Color(0xFFE2E8F0);
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         HapticFeedback.mediumImpact();
-        UniverseSplashTransition.toEducation(
-          context,
-          onComplete: () => context.go('/home'),
-        );
+        final userPrefs = ref.read(userPrefsProvider);
+        if (!userPrefs.hasSelectedClass) {
+          final chosen = await showClassSelectionRequiredSheet(context);
+          if (!chosen || !context.mounted) {
+            return;
+          }
+        }
+        if (context.mounted) {
+          UniverseSplashTransition.toEducation(
+            context,
+            onComplete: () => context.go('/home'),
+          );
+        }
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

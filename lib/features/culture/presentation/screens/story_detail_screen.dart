@@ -83,7 +83,9 @@ class StoryDetailScreen extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 // Badge Origine & Récitant
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -112,7 +114,6 @@ class StoryDetailScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(

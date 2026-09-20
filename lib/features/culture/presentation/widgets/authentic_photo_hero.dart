@@ -16,6 +16,7 @@ class AuthenticPhotoHero extends StatefulWidget {
   final Color accentColor;
   final VoidCallback? onBack;
   final String? heroTag;
+  final bool showTopActions;
 
   const AuthenticPhotoHero({
     super.key,
@@ -27,6 +28,7 @@ class AuthenticPhotoHero extends StatefulWidget {
     this.accentColor = CultureTheme.accentOrange,
     this.onBack,
     this.heroTag,
+    this.showTopActions = true,
   });
 
   @override
@@ -80,11 +82,12 @@ class _AuthenticPhotoHeroState extends State<AuthenticPhotoHero> {
           ),
 
           // ── 3. BOUTONS D'ACTION SUPÉRIEURS (RETOUR & FAVORIS) ───────────────
-          Positioned(
-            top: topPadding > 0 ? topPadding + 10 : 16,
-            left: 16,
-            right: 16,
-            child: Row(
+          if (widget.showTopActions)
+            Positioned(
+              top: topPadding > 0 ? topPadding + 10 : 16,
+              left: 16,
+              right: 16,
+              child: Row(
               children: [
                 // Bouton Retour
                 GestureDetector(
@@ -166,8 +169,8 @@ class _AuthenticPhotoHeroState extends State<AuthenticPhotoHero> {
           // ── 4. BADGES BAS : STATUT & RÉGION ─────────────────────────────────
           Positioned(
             bottom: 16,
-            left: 16,
-            right: 16,
+            left: 20,
+            right: 20,
             child: Wrap(
               spacing: 8,
               runSpacing: 6,

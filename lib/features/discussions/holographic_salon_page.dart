@@ -1,6 +1,6 @@
-// ─── AlterniA — Feature: Salon Holographique Live (Avatar Simli & Mode Premium) ──
+// ─── AlterniA — Feature: Salon Holographique Live (Avatar AlternIA & Mode Premium) ──
 // Accès conditionné à la validation d'un code de compte premium côté backend AlternIA.
-// Conversation en direct avec l'avatar Simli AI, synchronisation labiale et réponses vocales.
+// Conversation en direct avec l'avatar AlternIA AI, synchronisation labiale et réponses vocales.
 library;
 
 import 'dart:async';
@@ -40,7 +40,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
 
   final List<_SalonMessage> _transcript = [
     const _SalonMessage(
-      sender: 'AlterniA (Simli Live)',
+      sender: 'AlterniA (AlternIA Live)',
       text:
           'Bonjour ! Je suis ton professeur particulier animé par AlternIA. Pose-moi tes questions à l\'oral ou à l\'écrit !',
       isUser: false,
@@ -111,7 +111,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
         });
 
         _speakText(
-            'Code premium validé avec succès. Bienvenue dans ton salon live Simli AI !');
+            'Code premium validé avec succès. Bienvenue dans ton salon live AlternIA AI !');
       } else {
         setState(() {
           _isVerifyingCode = false;
@@ -190,7 +190,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
     setState(() {
       _avatarState = AvatarState.speaking;
       _transcript.add(_SalonMessage(
-        sender: 'AlterniA (Simli)',
+        sender: 'AlterniA (AlternIA)',
         text: text,
         isUser: false,
         timestamp: 'Maintenant',
@@ -241,8 +241,8 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
         final cleanReply = reply.replaceAll('*', '');
         _speakText(cleanReply);
 
-        // Appel asynchrone pour générer la vidéo labiale Simli en tâche de fond
-        unawaited(_geminiService.generateSimliAvatarVideo(text: cleanReply));
+        // Appel asynchrone pour générer la vidéo labiale AlternIA en tâche de fond
+        unawaited(_geminiService.generateAlternIAAvatarVideo(text: cleanReply));
       }
     } catch (_) {
       if (mounted) {
@@ -263,8 +263,8 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: textPri, size: 20),
+          icon:
+              Icon(Icons.arrow_back_ios_new_rounded, color: textPri, size: 20),
           onPressed: () {
             HapticFeedback.lightImpact();
             Navigator.pop(context);
@@ -276,7 +276,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
             Row(
               children: [
                 Text(
-                  'SALON LIVE SIMLI',
+                  'SALON LIVE AlternIA',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -362,7 +362,8 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
   Widget _buildPremiumGateView(bool isDark) {
     final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
     final textSec = isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569);
-    final borderCol = isDark ? const Color(0xFF263554) : const Color(0xFFCBD5E1);
+    final borderCol =
+        isDark ? const Color(0xFF263554) : const Color(0xFFCBD5E1);
 
     return Center(
       child: SingleChildScrollView(
@@ -407,7 +408,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
             const SizedBox(height: 22),
 
             Text(
-              'Activation du Salon Live Simli',
+              'Activation du Salon Live AlternIA',
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 22,
@@ -422,7 +423,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
-                'La conversation live avec l\'Avatar Simli HD requiert un code de compte premium validé par votre établissement ou votre boîtier AlterniA.',
+                'La conversation live avec l\'Avatar AlternIA HD requiert un code de compte premium validé par votre établissement ou votre boîtier AlterniA.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13.5,
@@ -569,8 +570,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF314999)
-                              .withValues(alpha: 0.4),
+                          color: const Color(0xFF314999).withValues(alpha: 0.4),
                           blurRadius: 18,
                           offset: const Offset(0, 6),
                         ),
@@ -593,7 +593,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'Vérifier et Débloquer Simli Live',
+                                      'Vérifier et Débloquer AlternIA Live',
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 13.5,
                                         fontWeight: FontWeight.w700,
@@ -624,7 +624,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
       children: [
         const SizedBox(height: 8),
 
-        // Badge Simli HD
+        // Badge AlternIA HD
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
@@ -640,7 +640,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
                   size: 14, color: AppColors.secondary),
               const SizedBox(width: 6),
               Text(
-                'Moteur Photoréaliste Simli AI Connecté',
+                'Moteur Photoréaliste AlternIA AI Connecté',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -665,7 +665,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
 
         Text(
           _avatarState == AvatarState.speaking
-              ? 'L\'Avatar Simli s\'exprime...'
+              ? 'L\'Avatar AlternIA s\'exprime...'
               : (_avatarState == AvatarState.thinking
                   ? 'AlterniA réfléchit avec le RAG Malien...'
                   : 'Touche l\'Avatar ou écris ta question ci-dessous'),
@@ -777,7 +777,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
             const SizedBox(height: 6),
             Text('Offre : ${_activePlanName ?? "AlterniA Live Pro"}'),
             const SizedBox(height: 6),
-            const Text('Accès Simli AI : Illimité'),
+            const Text('Accès AlternIA AI : Illimité'),
           ],
         ),
         actions: [

@@ -9,7 +9,6 @@ import '../../core/datasources/mock_culture_stories_data.dart';
 import '../../core/models/culture_challenge_models.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
-import '../../../../presentation/common/widgets/alternia_logo.dart';
 import '../../immersive/immersive.dart';
 import '../widgets/story_audio_player_sheet.dart';
 
@@ -87,8 +86,8 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, children: [
-           children: [
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             // ── L'ÉPREUVE ÉCLAIR DU CRÉPUSCULE ───────────────────────────────
             const AnimatedCulturalReveal(
               delay: Duration(milliseconds: 60),
@@ -181,10 +180,9 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                       ),
                     ),
                   );
-                  ]
-        }),
-      ),
-    ),
+                }),
+              ),
+            ),
 
           const SizedBox(height: 18),
 
@@ -910,7 +908,6 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     return Column(
       children: packs.map((pack) {
         final color = pack.themeColor;
-        final quizId = pack.id;
 
         return Container(
           margin: const EdgeInsets.only(bottom: 14),
@@ -928,8 +925,8 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   width: 48,

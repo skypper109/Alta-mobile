@@ -15,7 +15,6 @@ import '../../features/culture/presentation/screens/challenges_home_screen.dart'
 import '../../features/culture/presentation/screens/contes_screen.dart';
 import '../../features/culture/core/models/cultural_guide_models.dart';
 import '../../features/culture/immersive/immersive.dart';
-import '../../features/culture/presentation/screens/cultural_guide_screen.dart';
 import '../../features/culture/presentation/screens/culture_monuments_screen.dart';
 import '../../features/culture/presentation/screens/culture_personnages_screen.dart';
 import '../../features/culture/presentation/screens/culture_villes_screen.dart';
@@ -46,9 +45,14 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 GoRouter appRouter(Ref ref) {
   final userPrefs = ref.watch(userPrefsProvider);
 
+  final defaultLocation =
+      (!userPrefs.hasCompletedOnboarding || userPrefs.hasSelectedClass)
+          ? '/home'
+          : '/culture';
+
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/home',
+    initialLocation: defaultLocation,
     debugLogDiagnostics: false,
     redirect: (context, state) {
       if (userPrefs.isLoading) return null;
@@ -56,6 +60,17 @@ GoRouter appRouter(Ref ref) {
       if (!userPrefs.hasCompletedOnboarding && !isOnboarding) {
         return '/onboarding';
       }
+
+      // Verrouillage de l'espace Éducation si aucune classe n'a été sélectionnée
+      if (userPrefs.hasCompletedOnboarding && !userPrefs.hasSelectedClass) {
+        final isEducationRoute = state.matchedLocation == '/home' ||
+            state.matchedLocation == '/discussions' ||
+            state.matchedLocation == '/documents';
+        if (isEducationRoute) {
+          return '/culture';
+        }
+      }
+
       return null;
     },
     routes: [

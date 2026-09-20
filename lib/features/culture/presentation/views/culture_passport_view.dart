@@ -31,7 +31,6 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
   int _selectedFilterIndex = 0; // 0: Héros, 1: Monuments, 2: Villes, 3: Contes, 4: Défis
 
   static const List<String> _filters = [
-    'Tout',
     'Figures',
     'Monuments',
     'Villes',
@@ -833,7 +832,9 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        _filterIcons[index],
+                        index < _filterIcons.length
+                            ? _filterIcons[index]
+                            : Icons.category_rounded,
                         size: 13,
                         color: isSelected ? Colors.white : CultureTheme.accentOrange,
                       ),

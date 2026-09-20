@@ -79,8 +79,10 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
       };
     }).toList();
 
-    final cleanName = studentName.trim().isNotEmpty ? studentName.trim() : 'Élève';
-    final nameInstruction = 'IMPORTANT : Adresse-toi directement à l\'élève en utilisant souvent son prénom ou nom "$cleanName" de façon bienveillante, naturelle, pédagogique et encourageante dans tes explications.';
+    final cleanName =
+        studentName.trim().isNotEmpty ? studentName.trim() : 'Élève';
+    final nameInstruction =
+        'IMPORTANT : Adresse-toi directement à l\'élève en utilisant souvent son prénom ou nom "$cleanName" de façon bienveillante, naturelle, pédagogique et encourageante dans tes explications.';
 
     final payload = <String, dynamic>{
       'question': question.trim(),
@@ -88,17 +90,21 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
       'student_name': cleanName,
       'history': formattedHistory,
       'enable_rag': true,
-      'custom_instruction': '${customInstruction ?? ''}\n$nameInstruction'.trim(),
+      'custom_instruction':
+          '${customInstruction ?? ''}\n$nameInstruction'.trim(),
       'system_instruction': nameInstruction,
     };
-    if (subject != null && subject.trim().isNotEmpty && subject.toLowerCase() != 'toutes') {
+    if (subject != null &&
+        subject.trim().isNotEmpty &&
+        subject.toLowerCase() != 'toutes') {
       payload['subject'] = subject.trim();
     }
 
     // 3. Essayer les URLs du backend
     for (final baseUrl in _candidateBaseUrls) {
       try {
-        _logger.i('[AlterniA] Envoi ($studentClass - ${subject ?? 'général'}) → $baseUrl/api/chat...');
+        _logger.i(
+            '[AlterniA] Envoi ($studentClass - ${subject ?? 'général'}) → $baseUrl/api/chat...');
 
         final response = await _dio.post(
           '$baseUrl/api/chat',
@@ -114,25 +120,32 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
           final data = response.data as Map<String, dynamic>;
           final answer = data['answer'] as String?;
           if (answer != null && answer.trim().isNotEmpty) {
-            _logger.i('[AlterniA] Réponse reçue avec succès du serveur AlternIA !');
-            
+            _logger.i(
+                '[AlterniA] Réponse reçue avec succès du serveur AlternIA !');
+
             final followup = data['followup_question'] as String?;
-            final shouldAskFollowup = data['should_ask_followup'] as bool? ?? false;
-            
-            if (shouldAskFollowup && followup != null && followup.isNotEmpty && !answer.contains(followup)) {
+            final shouldAskFollowup =
+                data['should_ask_followup'] as bool? ?? false;
+
+            if (shouldAskFollowup &&
+                followup != null &&
+                followup.isNotEmpty &&
+                !answer.contains(followup)) {
               return '${answer.trim()}\n\n**Conseil AlternIA :** $followup';
             }
             return answer.trim();
           }
         }
       } on DioException catch (dioErr) {
-        _logger.w('[AlterniA] Serveur non joignable sur $baseUrl : ${dioErr.message}');
+        _logger.w(
+            '[AlterniA] Serveur non joignable sur $baseUrl : ${dioErr.message}');
       } catch (e) {
         _logger.w('[AlterniA] Erreur sur $baseUrl : $e');
       }
     }
 
-    _logger.w('[AlterniA] Aucun serveur n\'a pu répondre parmi les URLs testées.');
+    _logger
+        .w('[AlterniA] Aucun serveur n\'a pu répondre parmi les URLs testées.');
     return "Je n'ai pas pu me connecter au moteur pédagogique AlterniA. Vérifiez la connexion de votre boîtier ou serveur.";
   }
 
@@ -164,7 +177,7 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
     // Fallback de vérification hors-ligne si serveur déconnecté mais code officiel reconnu
     final upper = cleanCode.toUpperCase();
     final isLocalMaster = upper == 'ALTERNIA-PREMIUM-2026' ||
-        upper == 'SIMLI-LIVE-2026' ||
+        upper == 'AlternIA-LIVE-2026' ||
         upper == 'ML-BKO-0042' ||
         upper == 'ALT-BOX-2026-001' ||
         upper == 'VIP-MALI-2026' ||
@@ -176,7 +189,7 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
         'message': 'Code premium validé (mode hors-ligne vérifié)',
         'code': upper,
         'plan': 'AlterniA Live Pro',
-        'simli_enabled': true,
+        'AlternIA_enabled': true,
       };
     }
 
@@ -186,8 +199,8 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
     };
   }
 
-  /// Génère une vidéo de l'avatar Simli pour une question ou phrase
-  Future<String?> generateSimliAvatarVideo({
+  /// Génère une vidéo de l'avatar AlternIA pour une question ou phrase
+  Future<String?> generateAlternIAAvatarVideo({
     required String text,
     String? subject,
     String? voice,
@@ -230,7 +243,8 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
 
     for (final baseUrl in _candidateBaseUrls) {
       try {
-        _logger.i('[AlterniA TTS] Requête synthèse vocale ($voice) → $baseUrl/api/tts');
+        _logger.i(
+            '[AlterniA TTS] Requête synthèse vocale ($voice) → $baseUrl/api/tts');
         final response = await _dio.post(
           '$baseUrl/api/tts',
           data: {
