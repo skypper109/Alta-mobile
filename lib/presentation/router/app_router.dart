@@ -5,6 +5,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../features/culture/exploration/data/datasources/mock_mali_regions.dart';
+import '../../features/culture/exploration/data/models/mali_region.dart';
+import '../../features/culture/exploration/presentation/screens/cultural_sage_chat_page.dart';
+import '../../features/culture/exploration/presentation/screens/culture_search_page.dart';
+import '../../features/culture/exploration/presentation/screens/explore_mali_screen.dart';
+import '../../features/culture/exploration/presentation/screens/region_detail_screen.dart';
+import '../../features/culture/presentation/screens/challenges_home_screen.dart';
+import '../../features/culture/presentation/screens/contes_screen.dart';
+import '../../features/culture/core/models/cultural_guide_models.dart';
+import '../../features/culture/immersive/immersive.dart';
+import '../../features/culture/presentation/screens/culture_monuments_screen.dart';
+import '../../features/culture/presentation/screens/culture_personnages_screen.dart';
+import '../../features/culture/presentation/screens/culture_villes_screen.dart';
+import '../../features/culture/presentation/screens/historical_figure_detail_screen.dart';
+import '../../features/culture/presentation/screens/interactive_story_player_screen.dart';
+import '../../features/culture/presentation/screens/monument_detail_screen.dart';
+import '../../features/culture/presentation/screens/place_detail_screen.dart';
+import '../../features/culture/presentation/screens/quiz_culture_screen.dart';
+import '../../features/culture/presentation/screens/riddle_screen.dart';
+import '../../features/culture/presentation/screens/passport_screen.dart';
+import '../../features/culture/presentation/screens/story_detail_screen.dart';
+import '../../features/culture/presentation/screens/story_reader_screen.dart';
 import '../../features/discussions/holographic_salon_page.dart';
 import '../../features/profile/user_prefs_notifier.dart';
 import '../../shared/widgets.dart';
@@ -23,9 +45,14 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 GoRouter appRouter(Ref ref) {
   final userPrefs = ref.watch(userPrefsProvider);
 
+  final defaultLocation =
+      (!userPrefs.hasCompletedOnboarding || userPrefs.hasSelectedClass)
+          ? '/home'
+          : '/culture';
+
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/home',
+    initialLocation: defaultLocation,
     debugLogDiagnostics: false,
     redirect: (context, state) {
       if (userPrefs.isLoading) return null;
@@ -33,6 +60,17 @@ GoRouter appRouter(Ref ref) {
       if (!userPrefs.hasCompletedOnboarding && !isOnboarding) {
         return '/onboarding';
       }
+
+      // Verrouillage de l'espace Éducation si aucune classe n'a été sélectionnée
+      if (userPrefs.hasCompletedOnboarding && !userPrefs.hasSelectedClass) {
+        final isEducationRoute = state.matchedLocation == '/home' ||
+            state.matchedLocation == '/discussions' ||
+            state.matchedLocation == '/documents';
+        if (isEducationRoute) {
+          return '/culture';
+        }
+      }
+
       return null;
     },
     routes: [
@@ -85,7 +123,8 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/culture',
-                pageBuilder: (context, state) => _fadePage(
+                pageBuilder: (context, state) =>
+                    CultureModeTransition.buildPage(
                   key: state.pageKey,
                   child: const CultureScreen(),
                 ),
@@ -109,6 +148,234 @@ GoRouter appRouter(Ref ref) {
       ),
 
       // ── Modals & Standalone Routes ───────────────────────────────────────
+      GoRoute(
+        path: '/culture/search',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CultureSearchPage(),
+      ),
+      GoRoute(
+        path: '/culture/sage',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra is CulturalGuideContext) {
+            return CulturalSageChatPage(guideContext: extra);
+          } else if (extra is MaliRegion) {
+            return CulturalSageChatPage(contextRegion: extra);
+          }
+          return const CulturalSageChatPage();
+        },
+      ),
+      GoRoute(
+        path: '/culture/map',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ExploreMaliScreen(),
+      ),
+
+      // ── Culture Étape 2 : Écrans Découverte ──────────────────────────────
+      GoRoute(
+        path: '/culture/personnages',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CulturePersonnagesScreen(),
+      ),
+      GoRoute(
+        path: '/culture/villes',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CultureVillesScreen(),
+      ),
+      GoRoute(
+        path: '/culture/monuments',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CultureMonumentsScreen(),
+      ),
+
+      // ── Culture Étape 3 : Fiches Immersives de Consultation ──────────────
+      GoRoute(
+        path: '/culture/personnage/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          final heroTag = state.extra is String ? state.extra as String : null;
+          return HistoricalFigureDetailScreen(id: id, heroTag: heroTag);
+        },
+      ),
+      GoRoute(
+        path: '/culture/monument/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          final heroTag = state.extra is String ? state.extra as String : null;
+          return MonumentDetailScreen(id: id, heroTag: heroTag);
+        },
+      ),
+      GoRoute(
+        path: '/culture/ville/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          final heroTag = state.extra is String ? state.extra as String : null;
+          return PlaceDetailScreen(id: id, heroTag: heroTag);
+        },
+      ),
+      GoRoute(
+        path: '/culture/region/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final regionId = state.pathParameters['id'] ?? '';
+          final extraRegion = state.extra as MaliRegion?;
+          final region = extraRegion ??
+              MockMaliRegions.regions.firstWhere(
+                (r) => r.id == regionId,
+                orElse: () => MockMaliRegions.regions.first,
+              );
+          return RegionDetailScreen(region: region);
+        },
+      ),
+
+      // ── Culture Étape 4 : Contes & Récits Interactifs ────────────────────
+      GoRoute(
+        path: '/culture/contes',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ContesScreen(),
+      ),
+      GoRoute(
+        path: '/culture/conte/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          final heroTag = state.extra is String ? state.extra as String : null;
+          return StoryDetailScreen(id: id, heroTag: heroTag);
+        },
+      ),
+      GoRoute(
+        path: '/culture/conte/:id/play',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return InteractiveStoryPlayerScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/conte-interactif/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return InteractiveStoryPlayerScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/conte/:id/read',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return StoryReaderScreen(id: id);
+        },
+      ),
+
+      // ── Culture Étape 5 : Défis & Jeux Culturels ─────────────────────────
+      GoRoute(
+        path: '/culture/defis',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ChallengesHomeScreen(),
+      ),
+      GoRoute(
+        path: '/culture/defis/devinettes',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/defis/devinettes/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/devinette/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/devinettes/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/devinette',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/devinettes',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/defis/quiz',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return QuizCultureScreen(quizId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/defis/quiz/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return QuizCultureScreen(quizId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/quiz',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return QuizCultureScreen(quizId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/quiz/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return QuizCultureScreen(quizId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/guide',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra is CulturalGuideContext) {
+            return CulturalSageChatPage(guideContext: extra);
+          } else if (extra is MaliRegion) {
+            return CulturalSageChatPage(contextRegion: extra);
+          }
+          return const CulturalSageChatPage();
+        },
+      ),
+      GoRoute(
+        path: '/culture/passport',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PassportScreen(),
+      ),
       GoRoute(
         path: '/holo-salon',
         parentNavigatorKey: _rootNavigatorKey,

@@ -1,19 +1,23 @@
-library;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/constants/app_colors.dart';
+import '../features/profile/user_prefs_notifier.dart';
+import '../presentation/common/widgets/alternia_top_header_bar.dart';
+import '../presentation/common/widgets/class_selection_required_sheet.dart';
 import '../presentation/common/widgets/custom_button.dart';
 import '../presentation/common/widgets/custom_card.dart';
+import '../presentation/common/widgets/universe_splash_transition.dart';
 
 export '../presentation/common/widgets/alternia_logo.dart';
+export '../presentation/common/widgets/alternia_top_header_bar.dart';
 export '../presentation/common/widgets/custom_button.dart';
 export '../presentation/common/widgets/custom_card.dart';
 
-class DetShellScaffold extends StatelessWidget {
+class DetShellScaffold extends ConsumerWidget {
   const DetShellScaffold({
     super.key,
     required this.navigationShell,
@@ -21,7 +25,19 @@ class DetShellScaffold extends StatelessWidget {
 
   final StatefulNavigationShell navigationShell;
 
-  void _onTabSelected(int index) {
+  Future<void> _onTabSelected(
+      BuildContext context, WidgetRef ref, int index) async {
+    // Les branches 0 (Accueil), 1 (Discussions) et 2 (Documents) appartiennent au pôle Éducation
+    if (index == 0 || index == 1 || index == 2) {
+      final userPrefs = ref.read(userPrefsProvider);
+      if (!userPrefs.hasSelectedClass) {
+        final chosen = await showClassSelectionRequiredSheet(context);
+        if (!chosen || !context.mounted) {
+          return;
+        }
+      }
+    }
+
     HapticFeedback.selectionClick();
     navigationShell.goBranch(
       index,
@@ -30,114 +46,222 @@ class DetShellScaffold extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isCultureTab = navigationShell.currentIndex == 3;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final navBg = isDark ? const Color(0xFF121B2D) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF23314D) : const Color(0xFFCBD5E1);
+    final borderColor =
+        isDark ? const Color(0xFF23314D) : const Color(0xFFE2E8F0);
 
     final items = const [
-      _NavItemData(icon: Icons.home_outlined, selectedIcon: Icons.home_rounded, label: 'Accueil'),
-      _NavItemData(icon: Icons.forum_outlined, selectedIcon: Icons.forum_rounded, label: 'Discussions'),
-      _NavItemData(icon: Icons.folder_open_outlined, selectedIcon: Icons.folder_rounded, label: 'Documents'),
-      _NavItemData(icon: Icons.public_outlined, selectedIcon: Icons.public_rounded, label: 'Culture'),
-      _NavItemData(icon: Icons.person_outline_rounded, selectedIcon: Icons.person_rounded, label: 'Profil'),
+      _NavItemData(
+        branchIndex: 0,
+        icon: Icons.home_outlined,
+        selectedIcon: Icons.home_rounded,
+        label: 'Accueil',
+      ),
+      _NavItemData(
+        branchIndex: 1,
+        icon: Icons.forum_outlined,
+        selectedIcon: Icons.forum_rounded,
+        label: 'Discussions',
+      ),
+      _NavItemData(
+        branchIndex: 2,
+        icon: Icons.folder_open_outlined,
+        selectedIcon: Icons.folder_rounded,
+        label: 'Documents',
+      ),
+      _NavItemData(
+        branchIndex: 4,
+        icon: Icons.person_outline_rounded,
+        selectedIcon: Icons.person_rounded,
+        label: 'Profil',
+      ),
     ];
 
     return Scaffold(
-      body: navigationShell,
-      floatingActionButton: isCultureTab
-          ? null
-          : Padding(
-              padding: const EdgeInsets.only(bottom: 60), // float right above floating navbar
-              child: FloatingActionButton(
-                heroTag: 'global_avatar_fab',
-                onPressed: () {
-                  HapticFeedback.heavyImpact();
-                  context.push('/holo-salon');
-                },
-                backgroundColor: AppColors.primary,
-                elevation: 6,
-                shape: const CircleBorder(),
-                child: const Icon(Icons.psychology_rounded, color: Colors.white, size: 24),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // ── En-tête fixe et unifié dans tout l'espace Éducation ─────────
+            if (!isCultureTab)
+              const AlterniaTopHeaderBar.education(
+                padding: EdgeInsets.fromLTRB(20, 8, 20, 8),
               ),
+            Expanded(
+              child: navigationShell,
             ),
+          ],
+        ),
+      ),
       bottomNavigationBar: isCultureTab
           ? const SizedBox.shrink()
           : Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: Container(
-                height: 58,
-                decoration: BoxDecoration(
-                  color: navBg,
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: borderColor, width: 1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: (isDark ? Colors.black : AppColors.primary).withValues(alpha: isDark ? 0.45 : 0.12),
-                      blurRadius: 20,
-                      spreadRadius: 2,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(items.length, (index) {
-              final isSelected = navigationShell.currentIndex == index;
-              final item = items[index];
-
-              return GestureDetector(
-                onTap: () => _onTabSelected(index),
-                behavior: HitTestBehavior.opaque,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeInOut,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isSelected ? 14 : 10,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: isSelected ? AppColors.primaryGradient : null,
-                    color: isSelected ? null : Colors.transparent,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: isDark ? 0.4 : 0.25),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isSelected ? item.selectedIcon : item.icon,
-                        size: 20,
-                        color: isSelected
-                            ? AppColors.secondary
-                            : (isDark ? AppColors.textMuted : const Color(0xFF64748B)),
-                      ),
-                      if (isSelected) ...[
-                        const SizedBox(width: 6),
-                        Text(
-                          item.label,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 26),
+              child: Row(
+                children: [
+                  // ── Barre de navigation Éducation Solide Opaque ───────────
+                  Expanded(
+                    child: Container(
+                      height: 66,
+                      decoration: BoxDecoration(
+                        color: navBg,
+                        borderRadius: BorderRadius.circular(33),
+                        border: Border.all(color: borderColor, width: 1.2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: (isDark ? Colors.black : AppColors.primary)
+                                .withValues(alpha: isDark ? 0.45 : 0.12),
+                            blurRadius: 22,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 5),
                           ),
-                        ),
-                      ],
-                    ],
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(items.length, (index) {
+                          final item = items[index];
+                          final isSelected =
+                              navigationShell.currentIndex == item.branchIndex;
+
+                          return GestureDetector(
+                            onTap: () {
+                              if (navigationShell.currentIndex != item.branchIndex) {
+                                _onTabSelected(context, ref, item.branchIndex);
+                              }
+                            },
+                            behavior: HitTestBehavior.opaque,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isSelected ? 15 : 11,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: isSelected ? AppColors.primaryGradient : null,
+                                color: isSelected ? null : Colors.transparent,
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: AppColors.primary
+                                              .withValues(alpha: isDark ? 0.4 : 0.25),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    isSelected ? item.selectedIcon : item.icon,
+                                    size: 22,
+                                    color: isSelected
+                                        ? AppColors.secondary
+                                        : (isDark
+                                            ? AppColors.textMuted
+                                            : const Color(0xFF64748B)),
+                                  ),
+                                  if (isSelected) ...[
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      item.label,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
                   ),
-                ),
-              );
-            }),
-          ),
+
+                  const SizedBox(width: 8),
+
+                  // ── Bouton aller à la Culture Solide avec Splash ───────────
+                  _GoToCultureButton(
+                    isDark: isDark,
+                    onTap: () => _onTabSelected(context, ref, 3),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+}
+
+class _GoToCultureButton extends StatelessWidget {
+  const _GoToCultureButton({
+    required this.isDark,
+    required this.onTap,
+  });
+
+  final bool isDark;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final bgColor = isDark ? const Color(0xFF121B2D) : Colors.white;
+    final borderColor =
+        isDark ? const Color(0xFF23314D) : const Color(0xFFE2E8F0);
+
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        UniverseSplashTransition.toCulture(
+          context,
+          onComplete: onTap,
+        );
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 66,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: borderColor, width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: (isDark ? Colors.black : Colors.grey)
+                  .withValues(alpha: isDark ? 0.35 : 0.08),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.public_rounded,
+              size: 22,
+              color: isDark ? const Color(0xFF64748B) : const Color(0xFF64748B),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              'Culture',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 9.5,
+                fontWeight: FontWeight.w600,
+                color:
+                    isDark ? const Color(0xFF64748B) : const Color(0xFF64748B),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -146,10 +270,12 @@ class DetShellScaffold extends StatelessWidget {
 
 class _NavItemData {
   const _NavItemData({
+    required this.branchIndex,
     required this.icon,
     required this.selectedIcon,
     required this.label,
   });
+  final int branchIndex;
   final IconData icon;
   final IconData selectedIcon;
   final String label;
@@ -352,6 +478,86 @@ class DetEmptyState extends StatelessWidget {
             if (action != null) ...[
               const SizedBox(height: 16),
               action!,
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Bouton stylisé d'accès à l'Avatar / Salon Live pour les TopBars
+class AlterniaAvatarTopBarButton extends StatelessWidget {
+  const AlterniaAvatarTopBarButton({
+    super.key,
+    this.showLabel = false,
+  });
+
+  final bool showLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? AppColors.surfaceAlt : Colors.white;
+    final borderColor = isDark
+        ? AppColors.secondary.withValues(alpha: 0.4)
+        : AppColors.secondary.withValues(alpha: 0.5);
+    final textColor = isDark
+        ? AppColors.secondary
+        : const Color(0xFF0E7490);
+
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        context.push('/holo-salon');
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: showLabel ? 10 : 7,
+          vertical: showLabel ? 6 : 7,
+        ),
+        decoration: BoxDecoration(
+          color: bgColor,
+          shape: showLabel ? BoxShape.rectangle : BoxShape.circle,
+          borderRadius: showLabel ? BorderRadius.circular(20) : null,
+          border: Border.all(color: borderColor, width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.secondary.withValues(alpha: isDark ? 0.25 : 0.12),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              decoration: const BoxDecoration(
+                gradient: AppColors.cyanGradient,
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.psychology_rounded,
+                  color: Colors.white,
+                  size: 14,
+                ),
+              ),
+            ),
+            if (showLabel) ...[
+              const SizedBox(width: 6),
+              Text(
+                'Salon Live',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
+                  letterSpacing: 0.2,
+                ),
+              ),
             ],
           ],
         ),

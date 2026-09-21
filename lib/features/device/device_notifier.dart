@@ -102,21 +102,40 @@ class DeviceNotifier extends _$DeviceNotifier {
   // ── Scan des boîtiers ────────────────────────────────────────────────────
 
   /// Lance un scan du réseau local pour détecter les boîtiers DetAI.
+  /// Si aucun boîtier physique n'est trouvé, se connecte automatiquement au serveur AlternIA.
   Future<void> scanDevices() async {
     state = state.copyWith(isScanning: true, clearError: true);
 
     final result = await ref.read(deviceRepositoryProvider).scanDevices();
 
-    result.fold(
-      (failure) => state = state.copyWith(
-        isScanning: false,
-        error: failure.message,
-      ),
-      (devices) => state = state.copyWith(
-        isScanning: false,
-        devices: devices,
-        error: devices.isEmpty ? 'Aucun boîtier DetAI trouvé sur ce réseau.' : null,
-      ),
+    await result.fold(
+      (failure) async {
+        final serverDevice = DeviceRepository.geminiVirtualDevice;
+        state = state.copyWith(
+          isScanning: false,
+          devices: [serverDevice],
+          clearError: true,
+        );
+        await connectToDevice(serverDevice);
+      },
+      (devices) async {
+        if (devices.isNotEmpty) {
+          state = state.copyWith(
+            isScanning: false,
+            devices: devices,
+            clearError: true,
+          );
+        } else {
+          // Aucun boîtier physique trouvé : connexion automatique au serveur AlternIA !
+          final serverDevice = DeviceRepository.geminiVirtualDevice;
+          state = state.copyWith(
+            isScanning: false,
+            devices: [serverDevice],
+            clearError: true,
+          );
+          await connectToDevice(serverDevice);
+        }
+      },
     );
   }
 

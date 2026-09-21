@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/constants.dart';
 import '../../core/ws_manager.dart';
@@ -21,6 +22,9 @@ import 'device_repository.dart';
 
 void showDeviceModalSheet(BuildContext context) {
   HapticFeedback.mediumImpact();
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final borderCol = isDark ? DetColors.border : const Color(0xFFE2E8F0);
+
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -38,7 +42,7 @@ void showDeviceModalSheet(BuildContext context) {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: DetColors.border,
+                color: borderCol,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -109,12 +113,15 @@ class _DeviceDiscoveryPageState extends ConsumerState<DeviceDiscoveryPage>
   }
 
   PreferredSizeWidget _buildAppBar(DeviceState state) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderCol = isDark ? DetColors.border : const Color(0xFFE2E8F0);
+
     return PreferredSize(
       preferredSize: const Size.fromHeight(DetSizes.appBarHeight),
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: DetColors.border, width: DetSizes.borderWidth),
+            bottom: BorderSide(color: borderCol, width: DetSizes.borderWidth),
           ),
         ),
         child: AppBar(
@@ -136,6 +143,7 @@ class _DeviceDiscoveryPageState extends ConsumerState<DeviceDiscoveryPage>
   }
 
   Widget _buildBody(DeviceState state) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     // Erreur seule (aucun device)
     if (state.hasError && state.devices.isEmpty) {
       return DetErrorWidget(
@@ -203,6 +211,34 @@ class _DeviceDiscoveryPageState extends ConsumerState<DeviceDiscoveryPage>
             child: DetLoading(message: DetStrings.deviceScanning),
           )
         else ...[
+          if (state.connectedDevice?.id == 'alternia-server' ||
+              (state.devices.length == 1 && state.devices.first.id == 'alternia-server')) ...[
+            Container(
+              margin: const EdgeInsets.only(bottom: DetSizes.md),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: DetColors.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: DetColors.primary.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.cloud_done_rounded, color: DetColors.primary, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Aucun boîtier physique détecté • Connexion automatique au serveur AlternIA établie.',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : const Color(0xFF1E293B),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           ...state.devices.map(
             (device) => Padding(
               padding: const EdgeInsets.only(bottom: DetSizes.md),

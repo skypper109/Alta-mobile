@@ -30,12 +30,14 @@ class _AlterniaAvatarState extends State<AlterniaAvatar> with TickerProviderStat
     super.initState();
     _animCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 3),
+      // Ralenti pour réduire la charge CPU de rendu
+      duration: const Duration(seconds: 4),
     )..repeat();
 
     _pulseCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      // Ralenti : moins de repaints par seconde
+      duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
   }
 
@@ -57,53 +59,56 @@ class _AlterniaAvatarState extends State<AlterniaAvatar> with TickerProviderStat
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: widget.onTap,
-      child: AnimatedBuilder(
-        animation: Listenable.merge([_animCtrl, _pulseCtrl]),
-        builder: (context, child) {
-          final scale = 1.0 + (_pulseCtrl.value * 0.05);
+      // RepaintBoundary isole le painter du reste du widget tree
+      child: RepaintBoundary(
+        child: AnimatedBuilder(
+          animation: Listenable.merge([_animCtrl, _pulseCtrl]),
+          builder: (context, child) {
+            final scale = 1.0 + (_pulseCtrl.value * 0.05);
 
-          return Transform.scale(
-            scale: scale,
-            child: SizedBox(
-              width: widget.size,
-              height: widget.size,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Outer Glow Ring
-                  Container(
-                    width: widget.size,
-                    height: widget.size,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: _glowColor.withValues(alpha: 0.35 + (_pulseCtrl.value * 0.2)),
-                          blurRadius: 30,
-                          spreadRadius: 5,
-                        ),
-                      ],
+            return Transform.scale(
+              scale: scale,
+              child: SizedBox(
+                width: widget.size,
+                height: widget.size,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Outer Glow Ring
+                    Container(
+                      width: widget.size,
+                      height: widget.size,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: _glowColor.withValues(alpha: 0.35 + (_pulseCtrl.value * 0.2)),
+                            blurRadius: 30,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
 
-                  // Custom Painted Avatar Face & Core
-                  CustomPaint(
-                    size: Size(widget.size, widget.size),
-                    painter: _AvatarPainter(
-                      progress: _animCtrl.value,
-                      pulse: _pulseCtrl.value,
-                      state: widget.state,
-                      accentColor: _glowColor,
+                    // Custom Painted Avatar Face & Core
+                    CustomPaint(
+                      size: Size(widget.size, widget.size),
+                      painter: _AvatarPainter(
+                        progress: _animCtrl.value,
+                        pulse: _pulseCtrl.value,
+                        state: widget.state,
+                        accentColor: _glowColor,
+                      ),
                     ),
-                  ),
 
-                  // Avatar Center Face (Holographic Eyes & Expression)
-                  _buildFacialFeatures(),
-                ],
+                    // Avatar Center Face (Holographic Eyes & Expression)
+                    _buildFacialFeatures(),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -260,4 +265,7 @@ class _AvatarPainter extends CustomPainter {
   bool shouldRepaint(covariant _AvatarPainter oldDelegate) {
     return oldDelegate.progress != progress || oldDelegate.state != state;
   }
+
+  @override
+  bool shouldRebuildSemantics(covariant _AvatarPainter oldDelegate) => false;
 }

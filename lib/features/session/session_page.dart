@@ -28,7 +28,7 @@ class _SessionMonitorPageState extends ConsumerState<SessionMonitorPage>
   late final AnimationController _waveCtrl;
   late final AnimationController _holoCtrl;
   late final AnimationController _pulseCtrl;
-  late final Animation<double>   _pulseAnim;
+  late final Animation<double> _pulseAnim;
 
   final _scrollCtrl = ScrollController();
 
@@ -68,7 +68,7 @@ class _SessionMonitorPageState extends ConsumerState<SessionMonitorPage>
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(sessionNotifierProvider);
-    final device  = ref.watch(deviceNotifierProvider);
+    final device = ref.watch(deviceNotifierProvider);
 
     ref.listen(sessionNotifierProvider, (prev, next) {
       if ((prev?.messages.length ?? 0) < next.messages.length) {
@@ -83,31 +83,32 @@ class _SessionMonitorPageState extends ConsumerState<SessionMonitorPage>
           children: [
             // ── 1. En-tête HUD Futuriste ──────────────────────────────────
             _CyberHudHeader(
-              aiState:     session.aiState,
+              aiState: session.aiState,
               isConnected: device.isConnected,
-              deviceName:  device.connectedDevice?.name,
-              onClear:     () => ref.read(sessionNotifierProvider.notifier).clearMessages(),
+              deviceName: device.connectedDevice?.name,
+              onClear: () =>
+                  ref.read(sessionNotifierProvider.notifier).clearMessages(),
             ),
 
             // ── 2. Core Orbe Holo & Visualiseur Sonore ────────────────────
             _CyberKineticHeader(
-              amplitudes:  session.amplitudes,
-              aiState:     session.aiState,
-              waveAnim:    _waveCtrl,
-              holoAnim:    _holoCtrl,
-              pulseAnim:   _pulseAnim,
+              amplitudes: session.amplitudes,
+              aiState: session.aiState,
+              waveAnim: _waveCtrl,
+              holoAnim: _holoCtrl,
+              pulseAnim: _pulseAnim,
             ),
 
             // ── 3. Brique d'état Neural Core ──────────────────────────────
             _NeuralStateHUD(
-              state:     session.aiState,
+              state: session.aiState,
               pulseAnim: _pulseAnim,
             ),
 
             // ── 4. Flux de transcription Cyber-Glass ──────────────────────
             Expanded(
               child: _FuturisticTranscriptFeed(
-                messages:   session.messages,
+                messages: session.messages,
                 scrollCtrl: _scrollCtrl,
                 isConnected: device.isConnected,
               ),
@@ -115,8 +116,9 @@ class _SessionMonitorPageState extends ConsumerState<SessionMonitorPage>
 
             // ── 5. Console de saisie interactive Gemini ───────────────────
             _CyberConsoleInput(
-              onSend: (text) =>
-                  ref.read(sessionNotifierProvider.notifier).sendStudentMessage(text),
+              onSend: (text) => ref
+                  .read(sessionNotifierProvider.notifier)
+                  .sendStudentMessage(text),
             ),
           ],
         ),
@@ -149,9 +151,9 @@ class _CyberHudHeader extends StatelessWidget {
     required this.onClear,
   });
 
-  final AiState   aiState;
-  final bool      isConnected;
-  final String?   deviceName;
+  final AiState aiState;
+  final bool isConnected;
+  final String? deviceName;
   final VoidCallback onClear;
 
   @override
@@ -164,7 +166,8 @@ class _CyberHudHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: DetColors.surface.withValues(alpha: 0.8),
         border: const Border(
-          bottom: BorderSide(color: DetColors.border, width: DetSizes.borderWidth),
+          bottom:
+              BorderSide(color: DetColors.border, width: DetSizes.borderWidth),
         ),
       ),
       child: Row(
@@ -173,7 +176,8 @@ class _CyberHudHeader extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 10, height: 10,
+                width: 10,
+                height: 10,
                 decoration: const BoxDecoration(
                   color: DetColors.accentGreen,
                   shape: BoxShape.circle,
@@ -187,7 +191,7 @@ class _CyberHudHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'DETAI SOCRATIC CORE',
+                    'AlternIA • TUTORAT PÉDAGOGIQUE',
                     style: DetTextStyles.headingSm.copyWith(
                       letterSpacing: 1.2,
                       fontWeight: FontWeight.w700,
@@ -195,7 +199,8 @@ class _CyberHudHeader extends StatelessWidget {
                   ),
                   Text(
                     deviceName ?? 'ALTERNIA LOCAL IA • PROGRAMME MALI',
-                    style: DetTextStyles.codeSm.copyWith(color: DetColors.accentCyan),
+                    style: DetTextStyles.codeSm
+                        .copyWith(color: DetColors.accentCyan),
                   ),
                 ],
               ),
@@ -214,9 +219,12 @@ class _CyberHudHeader extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.bolt_rounded, size: 12, color: DetColors.accentGreen),
+                const Icon(Icons.bolt_rounded,
+                    size: 12, color: DetColors.accentGreen),
                 const SizedBox(width: 2),
-                Text('18ms', style: DetTextStyles.codeSm.copyWith(color: DetColors.accentGreen)),
+                Text('18ms',
+                    style: DetTextStyles.codeSm
+                        .copyWith(color: DetColors.accentGreen)),
               ],
             ),
           ),
@@ -230,11 +238,13 @@ class _CyberHudHeader extends StatelessWidget {
               onClear();
             },
             child: Container(
-              width: 36, height: 36,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 color: DetColors.surfaceAlt,
                 borderRadius: DetSizes.borderRadiusSm,
-                border: Border.all(color: DetColors.border, width: DetSizes.borderWidth),
+                border: Border.all(
+                    color: DetColors.border, width: DetSizes.borderWidth),
               ),
               child: const Icon(
                 Icons.delete_sweep_outlined,
@@ -262,18 +272,18 @@ class _CyberKineticHeader extends StatelessWidget {
     required this.pulseAnim,
   });
 
-  final List<double>      amplitudes;
-  final AiState           aiState;
+  final List<double> amplitudes;
+  final AiState aiState;
   final Animation<double> waveAnim;
   final Animation<double> holoAnim;
   final Animation<double> pulseAnim;
 
   Color get _coreColor => switch (aiState) {
-    AiState.listening => DetColors.accentGreen,
-    AiState.thinking  => DetColors.accentCyan,
-    AiState.speaking  => DetColors.accentOrange,
-    AiState.idle      => DetColors.textMuted,
-  };
+        AiState.listening => DetColors.accentGreen,
+        AiState.thinking => DetColors.accentCyan,
+        AiState.speaking => DetColors.accentOrange,
+        AiState.idle => DetColors.textMuted,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -283,7 +293,8 @@ class _CyberKineticHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: DetColors.surface,
         border: const Border(
-          bottom: BorderSide(color: DetColors.border, width: DetSizes.borderWidth),
+          bottom:
+              BorderSide(color: DetColors.border, width: DetSizes.borderWidth),
         ),
       ),
       child: Stack(
@@ -292,7 +303,8 @@ class _CyberKineticHeader extends StatelessWidget {
           // Grille cyber
           Positioned.fill(
             child: CustomPaint(
-              painter: _CyberGridBackgroundPainter(color: DetColors.border.withValues(alpha: 0.4)),
+              painter: _CyberGridBackgroundPainter(
+                  color: DetColors.border.withValues(alpha: 0.4)),
             ),
           ),
 
@@ -305,10 +317,10 @@ class _CyberKineticHeader extends StatelessWidget {
                 size: const Size(double.infinity, 90),
                 painter: WaveformPainter(
                   samples: amplitudes,
-                  color:   _coreColor,
+                  color: _coreColor,
                   isActive: aiState != AiState.idle || amplitudes.isNotEmpty,
                   barWidth: 4.0,
-                  barGap:   2.0,
+                  barGap: 2.0,
                 ),
               ),
             ),
@@ -320,9 +332,9 @@ class _CyberKineticHeader extends StatelessWidget {
             builder: (_, __) => CustomPaint(
               size: const Size(110, 110),
               painter: HolographicCorePainter(
-                progress:   holoAnim.value,
+                progress: holoAnim.value,
                 pulseValue: pulseAnim.value,
-                color:      _coreColor,
+                color: _coreColor,
                 isThinking: aiState == AiState.thinking,
               ),
             ),
@@ -340,32 +352,35 @@ class _CyberKineticHeader extends StatelessWidget {
 class _NeuralStateHUD extends StatelessWidget {
   const _NeuralStateHUD({required this.state, required this.pulseAnim});
 
-  final AiState           state;
+  final AiState state;
   final Animation<double> pulseAnim;
 
   Color get _color => switch (state) {
-    AiState.listening => DetColors.accentGreen,
-    AiState.thinking  => DetColors.accentCyan,
-    AiState.speaking  => DetColors.accentOrange,
-    AiState.idle      => DetColors.textMuted,
-  };
+        AiState.listening => DetColors.accentGreen,
+        AiState.thinking => DetColors.accentCyan,
+        AiState.speaking => DetColors.accentOrange,
+        AiState.idle => DetColors.textMuted,
+      };
 
   IconData get _icon => switch (state) {
-    AiState.listening => Icons.graphic_eq_rounded,
-    AiState.thinking  => Icons.psychology_rounded,
-    AiState.speaking  => Icons.spatial_audio_off_rounded,
-    AiState.idle      => Icons.pause_circle_rounded,
-  };
+        AiState.listening => Icons.graphic_eq_rounded,
+        AiState.thinking => Icons.psychology_rounded,
+        AiState.speaking => Icons.spatial_audio_off_rounded,
+        AiState.idle => Icons.pause_circle_rounded,
+      };
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: DetSizes.lg, vertical: DetSizes.sm + 2),
+      padding: const EdgeInsets.symmetric(
+          horizontal: DetSizes.lg, vertical: DetSizes.sm + 2),
       decoration: BoxDecoration(
         color: _color.withValues(alpha: 0.08),
         border: Border(
-          bottom: BorderSide(color: _color.withValues(alpha: 0.3), width: DetSizes.borderWidth),
+          bottom: BorderSide(
+              color: _color.withValues(alpha: 0.3),
+              width: DetSizes.borderWidth),
         ),
       ),
       child: Row(
@@ -378,15 +393,14 @@ class _NeuralStateHUD extends StatelessWidget {
                 color: _color.withValues(alpha: 0.2 * pulseAnim.value),
                 shape: BoxShape.circle,
                 boxShadow: [
-                  BoxShadow(color: _color.withValues(alpha: 0.4), blurRadius: 8),
+                  BoxShadow(
+                      color: _color.withValues(alpha: 0.4), blurRadius: 8),
                 ],
               ),
               child: Icon(_icon, size: 16, color: _color),
             ),
           ),
-
           const SizedBox(width: DetSizes.md),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -403,18 +417,20 @@ class _NeuralStateHUD extends StatelessWidget {
                   state == AiState.thinking
                       ? 'AlternIA réfléchit avec le programme malien…'
                       : state == AiState.speaking
-                          ? 'Synthèse vocale Socratique en cours…'
-                          : 'Écoute active du micro DetAI…',
-                  style: DetTextStyles.codeSm.copyWith(color: DetColors.textSecondary),
+                          ? 'Synthèse vocale Pédagogique en cours…'
+                          : 'Écoute active…',
+                  style: DetTextStyles.codeSm
+                      .copyWith(color: DetColors.textSecondary),
                 ),
               ],
             ),
           ),
-
           if (state == AiState.thinking)
             const SizedBox(
-              width: 16, height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2, color: DetColors.accentCyan),
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                  strokeWidth: 2, color: DetColors.accentCyan),
             ),
         ],
       ),
@@ -434,8 +450,8 @@ class _FuturisticTranscriptFeed extends StatelessWidget {
   });
 
   final List<SessionMessage> messages;
-  final ScrollController     scrollCtrl;
-  final bool                 isConnected;
+  final ScrollController scrollCtrl;
+  final bool isConnected;
 
   @override
   Widget build(BuildContext context) {
@@ -445,28 +461,28 @@ class _FuturisticTranscriptFeed extends StatelessWidget {
       itemCount: messages.length,
       itemBuilder: (context, index) {
         final message = messages[index];
-        final isAi    = message.speaker == Speaker.ai;
+        final isAi = message.speaker == Speaker.ai;
 
         return Padding(
           padding: const EdgeInsets.only(bottom: DetSizes.md),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: isAi ? MainAxisAlignment.start : MainAxisAlignment.end,
+            mainAxisAlignment:
+                isAi ? MainAxisAlignment.start : MainAxisAlignment.end,
             children: [
               if (isAi) ...[
                 _CyberAvatar(label: 'AI', color: DetColors.accentGreen),
                 const SizedBox(width: DetSizes.sm),
               ],
-
               Flexible(
                 child: Container(
                   padding: const EdgeInsets.all(DetSizes.md),
                   decoration: BoxDecoration(
                     color: isAi ? DetColors.surface : DetColors.surfaceAlt,
                     borderRadius: BorderRadius.only(
-                      topLeft:     Radius.circular(isAi ? 2 : DetSizes.radiusLg),
-                      topRight:    Radius.circular(isAi ? DetSizes.radiusLg : 2),
-                      bottomLeft:  const Radius.circular(DetSizes.radiusLg),
+                      topLeft: Radius.circular(isAi ? 2 : DetSizes.radiusLg),
+                      topRight: Radius.circular(isAi ? DetSizes.radiusLg : 2),
+                      bottomLeft: const Radius.circular(DetSizes.radiusLg),
                       bottomRight: const Radius.circular(DetSizes.radiusLg),
                     ),
                     border: Border.all(
@@ -477,7 +493,10 @@ class _FuturisticTranscriptFeed extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: (isAi ? DetColors.accentGreen : DetColors.accentOrange).withValues(alpha: 0.05),
+                        color: (isAi
+                                ? DetColors.accentGreen
+                                : DetColors.accentOrange)
+                            .withValues(alpha: 0.05),
                         blurRadius: 12,
                         spreadRadius: 2,
                       ),
@@ -490,9 +509,11 @@ class _FuturisticTranscriptFeed extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            isAi ? 'DetAI • SOCRATIC CORE' : 'ÉLÈVE',
+                            isAi ? 'AlterniA • TUTORAT PÉDAGOGIQUE' : 'ÉLÈVE',
                             style: DetTextStyles.caption.copyWith(
-                              color: isAi ? DetColors.accentGreen : DetColors.accentOrange,
+                              color: isAi
+                                  ? DetColors.accentGreen
+                                  : DetColors.accentOrange,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -507,14 +528,15 @@ class _FuturisticTranscriptFeed extends StatelessWidget {
                       Text(
                         message.content,
                         style: isAi
-                            ? DetTextStyles.codeMd.copyWith(color: DetColors.textPrimary)
-                            : DetTextStyles.bodyMd.copyWith(color: DetColors.textPrimary),
+                            ? DetTextStyles.codeMd
+                                .copyWith(color: DetColors.textPrimary)
+                            : DetTextStyles.bodyMd
+                                .copyWith(color: DetColors.textPrimary),
                       ),
                     ],
                   ),
                 ),
               ),
-
               if (!isAi) ...[
                 const SizedBox(width: DetSizes.sm),
                 _CyberAvatar(label: 'TU', color: DetColors.accentOrange),
@@ -534,12 +556,13 @@ class _FuturisticTranscriptFeed extends StatelessWidget {
 class _CyberAvatar extends StatelessWidget {
   const _CyberAvatar({required this.label, required this.color});
   final String label;
-  final Color  color;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 34, height: 34,
+      width: 34,
+      height: 34,
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: DetSizes.borderRadiusSm,
@@ -608,23 +631,27 @@ class _CyberConsoleInputState extends State<_CyberConsoleInput> {
             child: Row(
               children: [
                 _QuickChip(
-                  label: '📐 Mathématiques',
-                  onTap: () => widget.onSend('Comment résoudre une équation de second degré ?'),
+                  label: 'Mathématiques',
+                  onTap: () => widget.onSend(
+                      'Comment résoudre une équation de second degré ?'),
                 ),
                 const SizedBox(width: 6),
                 _QuickChip(
-                  label: '⚡ Physique',
-                  onTap: () => widget.onSend('Explique-moi la relation fondamentale de la dynamique.'),
+                  label: 'Physique',
+                  onTap: () => widget.onSend(
+                      'Explique-moi la relation fondamentale de la dynamique.'),
                 ),
                 const SizedBox(width: 6),
                 _QuickChip(
-                  label: '🧬 SVT',
-                  onTap: () => widget.onSend('Quel est le rôle de la réplication de l\'ADN ?'),
+                  label: 'SVT',
+                  onTap: () => widget
+                      .onSend('Quel est le rôle de la réplication de l\'ADN ?'),
                 ),
                 const SizedBox(width: 6),
                 _QuickChip(
-                  label: '💡 Indice socratique',
-                  onTap: () => widget.onSend('Donne-moi un premier indice pour commencer.'),
+                  label: 'Indice pédagogique',
+                  onTap: () => widget
+                      .onSend('Donne-moi un premier indice pour commencer.'),
                 ),
               ],
             ),
@@ -638,12 +665,14 @@ class _CyberConsoleInputState extends State<_CyberConsoleInput> {
               Expanded(
                 child: TextField(
                   controller: _textCtrl,
-                  style: DetTextStyles.bodyMd.copyWith(color: DetColors.textPrimary),
+                  style: DetTextStyles.bodyMd
+                      .copyWith(color: DetColors.textPrimary),
                   textInputAction: TextInputAction.send,
                   onSubmitted: (_) => _submit(),
                   decoration: InputDecoration(
-                    hintText: 'Pose ta question au Professeur AlternIA…',
-                    hintStyle: DetTextStyles.bodySm.copyWith(color: DetColors.textMuted),
+                    hintText: 'Pose ta question au Professeur AltA…',
+                    hintStyle: DetTextStyles.bodySm
+                        .copyWith(color: DetColors.textMuted),
                     filled: true,
                     fillColor: DetColors.surfaceAlt,
                     contentPadding: const EdgeInsets.symmetric(
@@ -652,11 +681,13 @@ class _CyberConsoleInputState extends State<_CyberConsoleInput> {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: DetSizes.borderRadiusMd,
-                      borderSide: const BorderSide(color: DetColors.border, width: 1.0),
+                      borderSide:
+                          const BorderSide(color: DetColors.border, width: 1.0),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: DetSizes.borderRadiusMd,
-                      borderSide: const BorderSide(color: DetColors.accentGreen, width: 1.5),
+                      borderSide: const BorderSide(
+                          color: DetColors.accentGreen, width: 1.5),
                     ),
                   ),
                 ),
@@ -668,7 +699,8 @@ class _CyberConsoleInputState extends State<_CyberConsoleInput> {
                   _submit();
                 },
                 child: Container(
-                  height: 48, width: 48,
+                  height: 48,
+                  width: 48,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [AltaColors.primary, AltaColors.primaryLight],
@@ -697,7 +729,7 @@ class _CyberConsoleInputState extends State<_CyberConsoleInput> {
 
 class _QuickChip extends StatelessWidget {
   const _QuickChip({required this.label, required this.onTap});
-  final String       label;
+  final String label;
   final VoidCallback onTap;
 
   @override
@@ -714,7 +746,9 @@ class _QuickChip extends StatelessWidget {
           borderRadius: DetSizes.borderRadiusSm,
           border: Border.all(color: DetColors.border, width: 1),
         ),
-        child: Text(label, style: DetTextStyles.caption.copyWith(color: DetColors.textSecondary)),
+        child: Text(label,
+            style:
+                DetTextStyles.caption.copyWith(color: DetColors.textSecondary)),
       ),
     );
   }

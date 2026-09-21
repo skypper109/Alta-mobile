@@ -1,13 +1,13 @@
-import 'package:alternia/features/profile/user_prefs_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/constants.dart';
 import '../../core/malian_school_system.dart';
-import '../../shared/widgets.dart';
+import '../../features/profile/user_prefs_notifier.dart';
+import '../common/widgets/alternia_logo.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -21,6 +21,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final TextEditingController _nameCtrl = TextEditingController();
 
   int _currentStep = 0;
+  bool _wantsClassSelection = true;
   String _selectedLevel = 'Terminale';
   String _selectedClassId = defaultClassId;
 
@@ -31,34 +32,77 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     super.dispose();
   }
 
-  void _nextPage() {
+  int get _totalSteps => _wantsClassSelection ? 4 : 3;
+
+  int get _displayStep {
+    if (_currentStep == 0) return 1;
+    if (_currentStep == 1) return 2;
+    if (_currentStep == 2) return 3;
+    // _currentStep == 3 (Culture universe)
+    return _wantsClassSelection ? 4 : 3;
+  }
+
+  void _goToPage(int page) {
     HapticFeedback.lightImpact();
-    if (_currentStep == 0) {
-      if (_nameCtrl.text.trim().isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Veuillez saisir votre nom ou prénom.'),
-            backgroundColor: AppColors.warning,
-            behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    _pageCtrl.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
+  void _onStep1Next() {
+    HapticFeedback.lightImpact();
+    if (_nameCtrl.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Veuillez saisir votre prénom pour continuer.',
+            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
           ),
-        );
-        return;
-      }
-      _pageCtrl.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+          backgroundColor: AltaColors.accent,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
       );
+      return;
+    }
+    _goToPage(1);
+  }
+
+  void _onStep2DecisionContinue() {
+    HapticFeedback.lightImpact();
+    if (_wantsClassSelection) {
+      _goToPage(2);
+    } else {
+      _selectedClassId = '';
+      _goToPage(3);
     }
   }
 
-  void _previousPage() {
+  void _onStep3ClassContinue() {
     HapticFeedback.lightImpact();
-    _pageCtrl.previousPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    _wantsClassSelection = true;
+    _goToPage(3);
+  }
+
+  void _onStep3ClassSkip() {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _wantsClassSelection = false;
+      _selectedClassId = '';
+    });
+    _goToPage(3);
+  }
+
+  void _onStep4Back() {
+    HapticFeedback.lightImpact();
+    if (_wantsClassSelection) {
+      _goToPage(2);
+    } else {
+      _goToPage(1);
+    }
   }
 
   Future<void> _finishOnboarding() async {
@@ -67,53 +111,106 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         ? 'Élève AlterniA'
         : _nameCtrl.text.trim();
 
+    final classToSave = _wantsClassSelection ? _selectedClassId : '';
+
     await ref.read(userPrefsProvider.notifier).saveRegistration(
           name: name,
-          classId: _selectedClassId,
+          classId: classToSave,
         );
 
     if (mounted) {
-      context.go('/home');
+      if (_wantsClassSelection && classToSave.isNotEmpty) {
+        context.go('/home');
+      } else {
+        context.go('/culture');
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF0B111E) : const Color(0xFFF8FAFC);
+    final surfaceColor = isDark ? const Color(0xFF131D33) : Colors.white;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSec = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final borderColor =
+        isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: bgColor,
       body: SafeArea(
         child: Column(
           children: [
-            // ── TOP BAR : Logo + Indicator ──────────────────────────────────
+            // ── EN-TÊTE SUPÉRIEUR : Logo AlterniA & Indicateur d'étape ─────────
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const AlterniaLogo(size: 32, showText: true),
-                  Row(
-                    children: List.generate(2, (index) {
-                      final isActive = index <= _currentStep;
-                      return AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        margin: const EdgeInsets.only(left: 6),
-                        width: isActive ? 24 : 10,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color:
-                              isActive ? AppColors.secondary : AppColors.border,
-                          borderRadius: BorderRadius.circular(3),
+                  AlterniaLogo(
+                    size: 34,
+                    showText: true,
+                    textColor: textPri,
+                    iaColor: _currentStep == 3
+                        ? const Color(0xFFFFB800)
+                        : null,
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: surfaceColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: borderColor),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black
+                              .withValues(alpha: isDark ? 0.2 : 0.03),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
                         ),
-                      );
-                    }),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Étape $_displayStep / $_totalSteps',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            color: AltaColors.secondary,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Row(
+                          children: List.generate(_totalSteps, (index) {
+                            final isActive = index < _displayStep;
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              margin: const EdgeInsets.only(left: 4),
+                              width: isActive ? 18 : 6,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: isActive
+                                    ? AltaColors.secondary
+                                    : borderColor,
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            );
+                          }),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
 
-            const Divider(color: AppColors.border, height: 1),
+            Divider(color: borderColor, height: 1),
 
-            // ── PAGEVIEW ────────────────────────────────────────────────────
+            // ── CONTENU DES ÉTAPES (PAGEVIEW) ───────────────────────────────
             Expanded(
               child: PageView(
                 controller: _pageCtrl,
@@ -122,8 +219,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   setState(() => _currentStep = index);
                 },
                 children: [
-                  _buildStep1Name(),
-                  _buildStep2ClassSelection(),
+                  _buildStep1Name(
+                      isDark, surfaceColor, borderColor, textPri, textSec),
+                  _buildStep2Decision(
+                      isDark, surfaceColor, borderColor, textPri, textSec),
+                  _buildStep3ClassSelection(
+                      isDark, surfaceColor, borderColor, textPri, textSec),
+                  _buildStep4CultureUniverse(
+                      isDark, surfaceColor, borderColor, textPri, textSec),
                 ],
               ),
             ),
@@ -134,145 +237,832 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   // ── ÉTAPE 1 : Nom & Prénom ────────────────────────────────────────────────
-  Widget _buildStep1Name() {
-    return Padding(
-      padding: const EdgeInsets.all(24),
+  Widget _buildStep1Name(
+    bool isDark,
+    Color surfaceColor,
+    Color borderColor,
+    Color textPri,
+    Color textSec,
+  ) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-              border:
-                  Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
-            ),
-            child: Text(
-              'Étape 1 / 2',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: AppColors.secondary,
-              ),
+          // Orbe AlterniA animé & Accroche
+          Center(
+            child: Column(
+              children: [
+                Container(
+                  width: 68,
+                  height: 68,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF314999), Color(0xFF40BBCC)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF314999).withValues(alpha: 0.35),
+                        blurRadius: 20,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.auto_awesome_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AltaColors.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AltaColors.primary.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Text(
+                    'BIENVENUE SUR ALTERNIA',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? AltaColors.secondary : AltaColors.primary,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
+
+          const SizedBox(height: 20),
+
           Text(
-            'Comment vous appelez-vous ?',
+            'Comment t\'appelles-tu ?',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: textPri,
               letterSpacing: -0.4,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
-            'AlterniA vous appellera par votre prénom dans chaque explication personnalisée.',
+            'AlterniA adaptera son accompagnement pédagogique et s\'adressera à toi par ton prénom.',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-              height: 1.4,
+              fontSize: 13.5,
+              color: textSec,
+              height: 1.45,
             ),
           ),
+
+          const SizedBox(height: 22),
+
+          // Champ de saisie élégant
+          Container(
+            decoration: BoxDecoration(
+              color: surfaceColor,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: borderColor, width: 1.2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: _nameCtrl,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 15.5,
+                color: textPri,
+                fontWeight: FontWeight.w600,
+              ),
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(
+                hintText: 'Ton prénom ou nom complet…',
+                hintStyle: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  color: isDark
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFF94A3B8),
+                ),
+                prefixIcon: const Icon(
+                  Icons.person_outline_rounded,
+                  color: AltaColors.secondary,
+                  size: 22,
+                ),
+                filled: false,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+              onSubmitted: (_) => _onStep1Next(),
+            ),
+          ),
+
+          const SizedBox(height: 28),
+
+          // ── PÔLE 1 : ÉDUCATION & RÉUSSITE SCOLAIRE ───────────────────────
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: AltaColors.primary,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'PÔLE ÉDUCATION NATIONALE DU MALI',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? AltaColors.secondary : AltaColors.primary,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          _buildFeatureCard(
+            icon: Icons.school_rounded,
+            iconColor: const Color(0xFF314999),
+            title: 'Programme officiel du Mali (BAC)',
+            description:
+                'Couverture intégrale des référentiels nationaux, fiches de révision structurées et annales.',
+            surfaceColor: surfaceColor,
+            borderColor: borderColor,
+            textPri: textPri,
+            textSec: textSec,
+          ),
+          const SizedBox(height: 10),
+          _buildFeatureCard(
+            icon: Icons.psychology_rounded,
+            iconColor: const Color(0xFF40BBCC),
+            title: 'Tuteur Pédagogique IA Interactif',
+            description:
+                'Accompagnement bienveillant pas-à-pas, méthodologie guidée et explications adaptées.',
+            surfaceColor: surfaceColor,
+            borderColor: borderColor,
+            textPri: textPri,
+            textSec: textSec,
+          ),
+
           const SizedBox(height: 32),
 
-          // Champ Texte Premium
-          TextField(
-            controller: _nameCtrl,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 16,
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
+          // Bouton Continuer
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: _onStep1Next,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AltaColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Continuer',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_forward_rounded, size: 18),
+                ],
+              ),
             ),
-            textCapitalization: TextCapitalization.words,
-            decoration: InputDecoration(
-              hintText: 'Nom & Prénom',
-              prefixIcon: const Icon(Icons.person_outline_rounded,
-                  color: AppColors.secondary),
-              filled: true,
-              fillColor: AppColors.surface,
-            ),
-            onSubmitted: (_) => _nextPage(),
-          ),
-
-          const Spacer(),
-
-          // CTA Button
-          CustomButton(
-            label: 'Continuer',
-            icon: Icons.arrow_forward_rounded,
-            variant: CustomButtonVariant.accent,
-            onPressed: _nextPage,
           ),
         ],
       ),
     );
   }
 
-  // ── ÉTAPE 2 : Sélection de la classe malienne ────────────────────────────
-  Widget _buildStep2ClassSelection() {
-    final currentClasses = classesByLevel(_selectedLevel);
+  Widget _buildFeatureCard({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String description,
+    required Color surfaceColor,
+    required Color borderColor,
+    required Color textPri,
+    required Color textSec,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: textPri,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11.5,
+                    color: textSec,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCultureFeatureCard({
+    required IconData icon,
+    required String badge,
+    required Color badgeColor,
+    required String title,
+    required String description,
+    required Color surfaceColor,
+    required Color borderColor,
+    required Color textPri,
+    required Color textSec,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: badgeColor.withValues(alpha: isDark ? 0.35 : 0.25),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: badgeColor.withValues(alpha: isDark ? 0.12 : 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: badgeColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: badgeColor, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: badgeColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  badge,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: badgeColor,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: textPri,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            description,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              color: textSec,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── ÉTAPE 2 : Décision — Configurer sa classe ou découvrir la Culture ─────
+  Widget _buildStep2Decision(
+    bool isDark,
+    Color surfaceColor,
+    Color borderColor,
+    Color textPri,
+    Color textSec,
+  ) {
+    final activeBorderColor = AltaColors.secondary;
+    final activeBgSchool =
+        AltaColors.primary.withValues(alpha: isDark ? 0.2 : 0.08);
+    final activeBgCulture =
+        const Color(0xFFE0823D).withValues(alpha: isDark ? 0.2 : 0.08);
 
     return Column(
       children: [
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+            physics: const BouncingScrollPhysics(),
             children: [
+              // Header Back + Tag
               Row(
                 children: [
                   GestureDetector(
-                    onTap: _previousPage,
+                    onTap: () => _goToPage(0),
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.border),
+                        color: surfaceColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: borderColor),
                       ),
-                      child: const Icon(Icons.arrow_back_rounded,
-                          color: AppColors.textPrimary, size: 20),
+                      child: Icon(
+                        Icons.arrow_back_rounded,
+                        color: textPri,
+                        size: 18,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.4)),
-                    ),
-                    child: Text(
-                      'Étape 2 / 2',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.secondary,
-                      ),
+                  Text(
+                    'OBJECTIF & PARCOURS',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: AltaColors.secondary,
+                      letterSpacing: 0.8,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
               Text(
-                'Votre classe au Mali',
+                'Souhaites-tu configurer ta classe dès maintenant ?',
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: textPri,
+                  letterSpacing: -0.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Choisis selon ton besoin : réviser le programme officiel malien ou explorer d\'abord notre univers culturel.',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13.5,
+                  color: textSec,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Option 1 : Oui, choisir ma classe (Pôle Éducation)
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  setState(() => _wantsClassSelection = true);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: _wantsClassSelection ? activeBgSchool : surfaceColor,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: _wantsClassSelection
+                          ? activeBorderColor
+                          : borderColor,
+                      width: _wantsClassSelection ? 1.8 : 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (_wantsClassSelection
+                                ? AltaColors.primary
+                                : Colors.black)
+                            .withValues(alpha: isDark ? 0.25 : 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AltaColors.primary.withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.school_rounded,
+                              color: AltaColors.primary,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: AltaColors.primary
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    'PROGRAMME MALIEN & EXAMENS',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: isDark
+                                          ? AltaColors.secondary
+                                          : AltaColors.primary,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Oui, choisir ma classe',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                    color: textPri,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            _wantsClassSelection
+                                ? Icons.check_circle_rounded
+                                : Icons.radio_button_unchecked_rounded,
+                            color: _wantsClassSelection
+                                ? AltaColors.secondary
+                                : (isDark
+                                    ? const Color(0xFF475569)
+                                    : const Color(0xFFCBD5E1)),
+                            size: 24,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Accède aux cours complets, fiches de révision, annales du BAC et tuteur IA adapté à ton niveau (10ème, 11ème, Terminale).',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12.5,
+                          color: textSec,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Option 2 : Non, explorer la Culture d'abord
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  setState(() => _wantsClassSelection = false);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color:
+                        !_wantsClassSelection ? activeBgCulture : surfaceColor,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: !_wantsClassSelection
+                          ? const Color(0xFFE0823D)
+                          : borderColor,
+                      width: !_wantsClassSelection ? 1.8 : 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (!_wantsClassSelection
+                                ? const Color(0xFFE0823D)
+                                : Colors.black)
+                            .withValues(alpha: isDark ? 0.25 : 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE0823D)
+                                  .withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.public_rounded,
+                              color: Color(0xFFE0823D),
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE0823D)
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    'DÉCOUVERTE & PATRIMOINE DU MALI',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: const Color(0xFFE0823D),
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Non, découvrir la Culture d\'abord',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                    color: textPri,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            !_wantsClassSelection
+                                ? Icons.check_circle_rounded
+                                : Icons.radio_button_unchecked_rounded,
+                            color: !_wantsClassSelection
+                                ? const Color(0xFFE0823D)
+                                : (isDark
+                                    ? const Color(0xFF475569)
+                                    : const Color(0xFFCBD5E1)),
+                            size: 24,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Plonge immédiatement dans les contes de nos griots, les grandes figures historiques et les 19 régions du Mali sans configurer de classe.',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12.5,
+                          color: textSec,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              // Note d'information bienveillante
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: (isDark
+                          ? const Color(0xFF1E293B)
+                          : const Color(0xFFF1F5F9))
+                      .withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: borderColor),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 18,
+                      color: isDark ? AltaColors.secondary : AltaColors.primary,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Tu pourras toujours configurer ta classe plus tard depuis ton profil ou lors de ton premier accès aux cours.',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          color: textSec,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Bottom Navigation CTA
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderColor),
+                ),
+                child: IconButton(
+                  onPressed: () => _goToPage(0),
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  color: textPri,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: _onStep2DecisionContinue,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _wantsClassSelection
+                          ? AltaColors.primary
+                          : const Color(0xFFE0823D),
+                      foregroundColor: Colors.white,
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _wantsClassSelection
+                              ? 'Choisir ma classe'
+                              : 'Découvrir la Culture',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward_rounded, size: 18),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── ÉTAPE 3 : Sélection de la classe malienne ────────────────────────────
+  Widget _buildStep3ClassSelection(
+    bool isDark,
+    Color surfaceColor,
+    Color borderColor,
+    Color textPri,
+    Color textSec,
+  ) {
+    final currentClasses = classesByLevel(_selectedLevel);
+
+    return Column(
+      children: [
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+            physics: const BouncingScrollPhysics(),
+            children: [
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => _goToPage(1),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: surfaceColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: borderColor),
+                      ),
+                      child: Icon(
+                        Icons.arrow_back_rounded,
+                        color: textPri,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'CHOISIR MA CLASSE',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: AltaColors.secondary,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Quelle est ta classe actuelle ?',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: textPri,
                   letterSpacing: -0.4,
                 ),
               ),
               const SizedBox(height: 6),
               Text(
-                'L\'IA adaptera le programme, les matières et le niveau de rigueur.',
+                'AlterniA adaptera immédiatement le programme officiel, les matières et le niveau de rigueur.',
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
+                  fontSize: 13.5,
+                  color: textSec,
+                  height: 1.45,
                 ),
               ),
               const SizedBox(height: 20),
@@ -298,26 +1088,31 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.surface,
+                          color: isSelected ? AltaColors.primary : surfaceColor,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSelected
-                                ? AppColors.secondary
-                                : AppColors.border,
+                            color:
+                                isSelected ? AltaColors.secondary : borderColor,
                             width: isSelected ? 1.5 : 1,
                           ),
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: AltaColors.primary
+                                        .withValues(alpha: 0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
                         ),
                         child: Text(
                           lvl,
                           textAlign: TextAlign.center,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13,
+                            fontSize: 12.5,
                             fontWeight: FontWeight.bold,
-                            color: isSelected
-                                ? Colors.white
-                                : AppColors.textSecondary,
+                            color: isSelected ? Colors.white : textSec,
                           ),
                         ),
                       ),
@@ -334,89 +1129,396 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 final color = Color(cls.color);
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: CustomCard(
-                    backgroundColor: isSelected
-                        ? AppColors.primary.withValues(alpha: 0.18)
-                        : AppColors.surface,
-                    borderColor:
-                        isSelected ? AppColors.secondary : AppColors.border,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      setState(() => _selectedClassId = cls.id);
-                    },
-                    child: Row(
-                      children: [
-                        // Icon Box (No missing icons!)
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: color.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12),
-                            border:
-                                Border.all(color: color.withValues(alpha: 0.3)),
-                          ),
-                          child: Icon(cls.iconData, color: color, size: 22),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                cls.shortLabel,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: isSelected
-                                      ? AppColors.secondary
-                                      : AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                cls.description,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          isSelected
-                              ? Icons.check_circle_rounded
-                              : Icons.radio_button_unchecked_rounded,
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() => _selectedClassId = cls.id);
+                      },
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
                           color: isSelected
-                              ? AppColors.secondary
-                              : AppColors.textMuted,
-                          size: 24,
+                              ? AltaColors.primary
+                                  .withValues(alpha: isDark ? 0.2 : 0.08)
+                              : surfaceColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color:
+                                isSelected ? AltaColors.secondary : borderColor,
+                            width: isSelected ? 1.5 : 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black
+                                  .withValues(alpha: isDark ? 0.2 : 0.03),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                      ],
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: color.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                    color: color.withValues(alpha: 0.3)),
+                              ),
+                              child: Icon(cls.iconData, color: color, size: 20),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    cls.shortLabel,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: isSelected
+                                          ? AltaColors.secondary
+                                          : textPri,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    cls.description,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 11.5,
+                                      color: textSec,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              isSelected
+                                  ? Icons.check_circle_rounded
+                                  : Icons.radio_button_unchecked_rounded,
+                              color: isSelected
+                                  ? AltaColors.secondary
+                                  : (isDark
+                                      ? const Color(0xFF475569)
+                                      : const Color(0xFFCBD5E1)),
+                              size: 22,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 );
               }),
+
+              const SizedBox(height: 6),
+
+              // Lien discret pour passer
+              Center(
+                child: TextButton.icon(
+                  onPressed: _onStep3ClassSkip,
+                  icon: const Icon(Icons.fast_forward_rounded, size: 16),
+                  label: Text(
+                    'Passer pour l\'instant et explorer la Culture',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: textSec,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
 
         // Bottom CTA
         Padding(
-          padding: const EdgeInsets.all(24),
-          child: CustomButton(
-            label: 'Valider et Démarrer',
-            icon: Icons.rocket_launch_rounded,
-            variant: CustomButtonVariant.accent,
-            onPressed: _finishOnboarding,
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderColor),
+                ),
+                child: IconButton(
+                  onPressed: () => _goToPage(1),
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  color: textPri,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: _onStep3ClassContinue,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AltaColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Continuer vers la Culture',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward_rounded, size: 18),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
+    );
+  }
+
+  // ── ÉTAPE 4 : Découverte du Pôle Patrimoine & Culture Malienne ───────────
+  Widget _buildStep4CultureUniverse(
+    bool isDark,
+    Color surfaceColor,
+    Color borderColor,
+    Color textPri,
+    Color textSec,
+  ) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Orbe Culturel chaleureux & Badge
+          Center(
+            child: Column(
+              children: [
+                Container(
+                  width: 68,
+                  height: 68,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFE0823D), Color(0xFFB45309)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFE0823D).withValues(alpha: 0.35),
+                        blurRadius: 20,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.public_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0823D).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: const Color(0xFFE0823D).withValues(alpha: 0.35),
+                    ),
+                  ),
+                  child: Text(
+                    '✦ UNIVERS CULTUREL DU MALI',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFFE0823D),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          Text(
+            'Explore les Trésors du Mali',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: textPri,
+              letterSpacing: -0.4,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'AlterniA t\'ouvre les portes de l\'histoire du Mali, des contes de nos griots et des 19 régions.',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13.5,
+              color: textSec,
+              height: 1.45,
+            ),
+          ),
+
+          const SizedBox(height: 22),
+
+          // Section Culture 1 : Monuments & Grandes Figures
+          _buildCultureFeatureCard(
+            icon: Icons.account_balance_rounded,
+            badge: 'HISTOIRE & MONUMENTS',
+            badgeColor: const Color(0xFFE0823D),
+            title: 'Monuments & Grandes Figures',
+            description:
+                'Explore la Grande Mosquée de Djenné, les manuscrits de Tombouctou, le Tombeau des Askia et l\'épopée de Soundiata Keïta.',
+            surfaceColor: surfaceColor,
+            borderColor: borderColor,
+            textPri: textPri,
+            textSec: textSec,
+            isDark: isDark,
+          ),
+          const SizedBox(height: 12),
+
+          // Section Culture 2 : Contes, Légendes & Devinettes
+          _buildCultureFeatureCard(
+            icon: Icons.auto_stories_rounded,
+            badge: 'TRADITIONS & CONTES',
+            badgeColor: const Color(0xFF2E7D32),
+            title: 'Contes, Devinettes & Sagesses des Griots',
+            description:
+                'Écoute les récits oraux du terroir malien, résous les énigmes des anciens et enrichis ton passeport culturel.',
+            surfaceColor: surfaceColor,
+            borderColor: borderColor,
+            textPri: textPri,
+            textSec: textSec,
+            isDark: isDark,
+          ),
+          const SizedBox(height: 12),
+
+          // Section Culture 3 : Carte Interactive des Régions & Défis
+          _buildCultureFeatureCard(
+            icon: Icons.explore_rounded,
+            badge: 'EXPLORATION & RÉGIONS',
+            badgeColor: const Color(0xFF314999),
+            title: 'Carte des 19 Régions & Quiz Culturels',
+            description:
+                'Voyage de Kayes à Kidal à travers la carte interactive, relève les défis culturels et collectionne tes trophées.',
+            surfaceColor: surfaceColor,
+            borderColor: borderColor,
+            textPri: textPri,
+            textSec: textSec,
+            isDark: isDark,
+          ),
+
+          const SizedBox(height: 30),
+
+          // Bouton Final d'Inscription
+          Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderColor),
+                ),
+                child: IconButton(
+                  onPressed: _onStep4Back,
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  color: textPri,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: _finishOnboarding,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE0823D),
+                      foregroundColor: Colors.white,
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _wantsClassSelection
+                              ? Icons.arrow_forward_rounded
+                              : Icons.explore_rounded,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _wantsClassSelection
+                              ? 'Démarrer l\'Aventure'
+                              : 'Découvrir la Culture Malienne',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // Footer Logo Culture avec "iA" en jaune !
+          const Center(
+            child: Opacity(
+              opacity: 0.5,
+              child: AlterniaLogo(
+                size: 24,
+                showText: true,
+                iaColor: Color(0xFFFFB800),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
     );
   }
 }

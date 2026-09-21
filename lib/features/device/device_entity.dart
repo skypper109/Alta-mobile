@@ -55,10 +55,24 @@ abstract class DeviceEntity with _$DeviceEntity {
 // Elles seront disponibles une fois que `flutter pub run build_runner build` a été lancé.
 extension DeviceEntityX on DeviceEntity {
   /// URL WebSocket complète.
-  String get wsUrl => 'ws://$ipAddress:$port/ws';
+  String get wsUrl {
+    if (ipAddress.startsWith('https://') || ipAddress.contains('trycloudflare.com')) {
+      final cleanHost = ipAddress.replaceAll('https://', '').replaceAll('http://', '');
+      return 'wss://$cleanHost/ws';
+    }
+    return 'ws://$ipAddress:$port/ws';
+  }
 
-  /// URL de base HTTP pour l\'API REST du boîtier.
-  String get httpUrl => 'http://$ipAddress:$port';
+  /// URL de base HTTP pour l'API REST du boîtier.
+  String get httpUrl {
+    if (ipAddress.startsWith('http://') || ipAddress.startsWith('https://')) {
+      return ipAddress;
+    }
+    if (ipAddress.contains('trycloudflare.com')) {
+      return 'https://$ipAddress';
+    }
+    return 'http://$ipAddress:$port';
+  }
 
   /// Qualité du signal sous forme de libellé lisible.
   String get signalLabel {
