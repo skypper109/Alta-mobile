@@ -1,16 +1,14 @@
+import 'package:alternia/features/culture/core/controllers/culture_filter_controller.dart';
 import 'package:alternia/features/culture/exploration/data/datasources/mock_mali_regions.dart';
 import 'package:alternia/features/culture/exploration/data/models/mali_region.dart';
 import 'package:alternia/features/culture/exploration/data/models/region_geo_path.dart';
-import 'package:alternia/features/culture/exploration/data/repositories/culture_repository.dart';
-import 'package:alternia/features/culture/exploration/presentation/controllers/culture_exploration_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('Culture Module - Étape 1 Tests', () {
-    test('MockCultureRepository returns 11 regions of Mali', () async {
-      const repository = MockCultureRepository();
-      final regions = await repository.getRegions();
+  group('Culture Module - Exploration Tests', () {
+    test('MockMaliRegions returns 11 regions of Mali', () {
+      final regions = MockMaliRegions.regions;
 
       expect(regions.length, equals(11));
       expect(regions.map((r) => r.id), containsAll([
@@ -28,11 +26,20 @@ void main() {
       ]));
     });
 
-    test('MaliGeoRegistry contains geometry for all 11 regions', () {
+    test('MaliGeoRegistry contains geometry for all 8 historical regions of the interactive map', () {
       final geoRegionIds = MaliGeoRegistry.all.map((g) => g.regionId).toSet();
-      final mockRegionIds = MockMaliRegions.regions.map((r) => r.id).toSet();
 
-      expect(geoRegionIds, equals(mockRegionIds));
+      expect(geoRegionIds.length, equals(8));
+      expect(geoRegionIds, containsAll([
+        'tombouctou',
+        'kidal',
+        'gao',
+        'mopti',
+        'segou',
+        'kayes',
+        'koulikoro',
+        'sikasso',
+      ]));
       for (final geo in MaliGeoRegistry.all) {
         final path = geo.toPath(const Size(1000, 1000));
         expect(path, isNotNull);
@@ -54,30 +61,34 @@ void main() {
       expect(fromJson.pointsForts, equals(region.pointsForts));
     });
 
-    test('CultureExplorationNotifier handles region selection and toggle', () async {
-      const repository = MockCultureRepository();
-      final notifier = CultureExplorationNotifier(repository);
+    test('CultureFilterNotifier handles region selection and toggle', () {
+      final notifier = CultureFilterNotifier();
 
-      // Wait for initial load
-      await Future.delayed(const Duration(milliseconds: 300));
-      expect(notifier.state.regions.length, equals(11));
-      expect(notifier.state.selectedRegion, isNull);
+      expect(notifier.state.activeRegion, isNull);
+      expect(notifier.state.hasActiveFilter, isFalse);
+      expect(notifier.state.displayName, equals('Tout le Mali'));
 
-      // Select 'tombouctou'
-      notifier.selectRegion('tombouctou');
-      expect(notifier.state.selectedRegion?.id, equals('tombouctou'));
+      // Select 'tombouctou' by ID
+      notifier.selectRegionById('tombouctou');
+      expect(notifier.state.activeRegionId, equals('tombouctou'));
+      expect(notifier.state.displayName, equals('Tombouctou'));
+      expect(notifier.state.hasActiveFilter, isTrue);
+
+      // Select region object
+      final mopti = MockMaliRegions.regions.firstWhere((r) => r.id == 'mopti');
+      notifier.selectRegion(mopti);
+      expect(notifier.state.activeRegionId, equals('mopti'));
 
       // Toggle selection (tapping the same unselects)
-      notifier.selectRegion('tombouctou');
-      expect(notifier.state.selectedRegion, isNull);
+      notifier.toggleRegion(mopti);
+      expect(notifier.state.activeRegion, isNull);
+      expect(notifier.state.hasActiveFilter, isFalse);
 
-      // Select 'mopti'
-      notifier.selectRegion('mopti');
-      expect(notifier.state.selectedRegion?.id, equals('mopti'));
-
-      // Clear selection
-      notifier.clearSelection();
-      expect(notifier.state.selectedRegion, isNull);
+      // Clear filter
+      notifier.selectRegionById('kayes');
+      expect(notifier.state.activeRegionId, equals('kayes'));
+      notifier.clearFilter();
+      expect(notifier.state.activeRegion, isNull);
     });
   });
 }

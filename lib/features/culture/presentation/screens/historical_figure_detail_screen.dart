@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/controllers/culture_passport_controller.dart';
@@ -8,6 +9,7 @@ import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_detail_models.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../immersive/services/cultural_haptics.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/authentic_photo_hero.dart';
 import '../widgets/connected_contents_section.dart';
@@ -148,6 +150,68 @@ class HistoricalFigureDetailScreen extends ConsumerWidget {
                 ),
 
                 const SizedBox(height: 16),
+
+                // ── BOUTON EXPÉRIENCE IMMERSIVE CINÉMATIQUE ───────────────────
+                GestureDetector(
+                  onTap: () {
+                    CulturalHaptics.stamp();
+                    context.push('/culture/story-experience/${item.id}');
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
+                    decoration: BoxDecoration(
+                      color: CultureTheme.accentOrange,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: CultureTheme.accentOrange.withValues(alpha: 0.38),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.play_circle_fill_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Vivre l\'épopée en immersion',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.25),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'CINÉMA',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
 
                 // Écoute audio du récit par le Griot
                 Container(

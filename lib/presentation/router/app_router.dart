@@ -17,6 +17,7 @@ import '../../features/culture/presentation/screens/cultural_guide_screen.dart';
 import '../../features/culture/presentation/screens/culture_monuments_screen.dart';
 import '../../features/culture/presentation/screens/culture_personnages_screen.dart';
 import '../../features/culture/presentation/screens/culture_villes_screen.dart';
+import '../../features/culture/narrative_engine/narrative_engine.dart';
 import '../../features/culture/presentation/screens/historical_figure_detail_screen.dart';
 import '../../features/culture/presentation/screens/interactive_story_player_screen.dart';
 import '../../features/culture/presentation/screens/monument_detail_screen.dart';
@@ -234,6 +235,14 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
           return StoryReaderScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/story-experience/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return StoryExperienceMasterScreen(storyId: id);
         },
       ),
 
