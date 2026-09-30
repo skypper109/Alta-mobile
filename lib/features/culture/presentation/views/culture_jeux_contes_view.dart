@@ -1,19 +1,24 @@
+import 'package:alternia/presentation/common/widgets/alternia_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_challenges_data.dart';
+import '../../core/datasources/mock_culture_proverbs_data.dart';
 import '../../core/datasources/mock_culture_stories_data.dart';
 import '../../core/models/culture_challenge_models.dart';
+import '../../core/models/culture_proverb_models.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
+import '../widgets/culture_share_sheet.dart';
 import '../widgets/story_audio_player_sheet.dart';
 
 /// Vue 3 : Jeux & Contes du Mali (Étape 3 — Veillée sous l'arbre à palabres)
-/// Univers interactif fusionnant Contes oraux immersifs, Devinettes N'Da et Défis du Savoir
+/// Univers interactif fusionnant Contes oraux immersifs, Devinettes, Défis et Proverbes
 /// STRICTEMENT SANS DÉGRADÉS selon la charte UX/UI
 class CultureJeuxContesView extends ConsumerStatefulWidget {
   const CultureJeuxContesView({super.key});
@@ -24,18 +29,57 @@ class CultureJeuxContesView extends ConsumerStatefulWidget {
 }
 
 class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
-  int _selectedFilterIndex = 0; // 0: Contes, 1: Devinettes, 2: Défis
+  int _selectedFilterIndex = 0; // 0: Contes, 1: Devinettes, 2: Défis, 3: Proverbes
+  final FlutterTts _flutterTts = FlutterTts();
+  String? _currentlySpeakingProverbId;
+
+  @override
+  void initState() {
+    super.initState();
+    _initTts();
+  }
+
+  Future<void> _initTts() async {
+    try {
+      await _flutterTts.setLanguage('fr-FR');
+      await _flutterTts.setSpeechRate(0.48);
+      await _flutterTts.setPitch(0.95);
+      _flutterTts.setCompletionHandler(() {
+        if (mounted) setState(() => _currentlySpeakingProverbId = null);
+      });
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _flutterTts.stop();
+    super.dispose();
+  }
+
+  Future<void> _toggleSpeakProverb(CultureProverb p) async {
+    HapticFeedback.lightImpact();
+    if (_currentlySpeakingProverbId == p.id) {
+      await _flutterTts.stop();
+      setState(() => _currentlySpeakingProverbId = null);
+    } else {
+      setState(() => _currentlySpeakingProverbId = p.id);
+      final text = 'Sagesse du Mali. ${p.text}. Signification : ${p.meaning}';
+      await _flutterTts.speak(text);
+    }
+  }
 
   static const List<String> _filters = [
     'Contes ',
     'Devinettes ',
     'Défis ',
+    'Proverbes ',
   ];
 
   static const List<IconData> _filterIcons = [
     Icons.auto_stories_rounded,
     Icons.lightbulb_rounded,
     Icons.psychology_rounded,
+    Icons.format_quote_rounded,
   ];
 
   Color _getFilterColor(int index) {
@@ -45,6 +89,8 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
       case 1:
         return CultureTheme.accentOrange;
       case 2:
+        return CultureTheme.accentOrange;
+      case 3:
         return CultureTheme.accentOrange;
       default:
         return CultureTheme.accentOrange;
@@ -71,12 +117,16 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     final filteredRiddles = MockCultureChallengesData.getFilteredRiddles(
       regionId: activeRegion?.id,
     );
+    final filteredProverbs = MockCultureProverbsData.getFiltered(
+      regionId: activeRegion?.id,
+    );
     final featuredStory = filteredStories.firstWhere(
       (s) => s.isFeatured,
       orElse: () => filteredStories.isNotEmpty
           ? filteredStories.first
           : MockCultureStoriesData.stories.first,
     );
+    final featuredProverb = MockCultureProverbsData.featuredProverb;
 
     return CulturalAtmosphereCanvas(
       enableParticles: true,
@@ -84,18 +134,10 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
       motifOpacity: 0.11,
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 36),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── L'ÉPREUVE ÉCLAIR DU CRÉPUSCULE ───────────────────────────────
-            const AnimatedCulturalReveal(
-              delay: Duration(milliseconds: 60),
-              child: CulturalSpeedTrialWidget(),
-            ),
-
-            const SizedBox(height: 20),
-
             // ── 1. SÉLECTEUR D'UNIVERS INTERACTIF ──────────────────────────────
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -108,7 +150,9 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                       ? filteredStories.length
                       : index == 1
                           ? filteredRiddles.length
-                          : MockCultureChallengesData.quizPacks.length;
+                          : index == 2
+                              ? MockCultureChallengesData.quizPacks.length
+                              : filteredProverbs.length;
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -151,9 +195,8 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                                 fontWeight: isSelected
                                     ? FontWeight.w800
                                     : FontWeight.w600,
-                                color: isSelected
-                                    ? Colors.white
-                                    : subtitleColor,
+                                color:
+                                    isSelected ? Colors.white : subtitleColor,
                               ),
                             ),
                             const SizedBox(width: 6),
@@ -184,41 +227,15 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
               ),
             ),
 
-          const SizedBox(height: 18),
+            const SizedBox(height: 18),
 
-          // ── 2. SOUS-UNIVERS 1 : CONTES & RÉCITS DES VEILLÉES ───────────────
-          if (_selectedFilterIndex == 0) ...[
-            // Grand Conte en Vedette
-            AnimatedCulturalReveal(
-              delay: const Duration(milliseconds: 80),
-              child: _buildHeroStoryCard(
-                story: featuredStory,
-                context: context,
-                isDark: isDark,
-                cardBg: cardBg,
-                borderCol: borderCol,
-                titleColor: titleColor,
-                subtitleColor: subtitleColor,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Section Tous les Contes
-            _buildSectionHeader(
-              title: 'TOUS LES CONTES & RÉCITS',
-              icon: Icons.auto_stories_rounded,
-              color: CultureTheme.accentOrange,
-              borderCol: borderCol,
-              count: filteredStories.length,
-            ),
-            const SizedBox(height: 14),
-
-            ...filteredStories.map((story) {
-              final index = filteredStories.indexOf(story);
-              return AnimatedCulturalReveal(
-                delay: Duration(milliseconds: 60 * index),
-                child: _buildStoryRowItem(
-                  story: story,
+            // ── 2. SOUS-UNIVERS 1 : CONTES & RÉCITS DES VEILLÉES ───────────────
+            if (_selectedFilterIndex == 0) ...[
+              // Grand Conte en Vedette
+              AnimatedCulturalReveal(
+                delay: const Duration(milliseconds: 80),
+                child: _buildHeroStoryCard(
+                  story: featuredStory,
                   context: context,
                   isDark: isDark,
                   cardBg: cardBg,
@@ -226,32 +243,58 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                   titleColor: titleColor,
                   subtitleColor: subtitleColor,
                 ),
-              );
-            }),
-            const SizedBox(height: 20),
-          ],
+              ),
+              const SizedBox(height: 24),
 
-          // ── 3. SOUS-UNIVERS 2 : DEVINETTES N'DA ─────────────────────────────
-          if (_selectedFilterIndex == 1) ...[
-            _buildSectionHeader(
-              title: 'DEVINETTES TRADITIONNELLES N\'DA',
-              icon: Icons.lightbulb_rounded,
-              color: CultureTheme.accentOrange,
-              borderCol: borderCol,
-              count: filteredRiddles.length,
-            ),
-            const SizedBox(height: 14),
-            _buildRiddlesList(
-              riddles: filteredRiddles,
-              context: context,
-              isDark: isDark,
-              cardBg: cardBg,
-              borderCol: borderCol,
-              titleColor: titleColor,
-              subtitleColor: subtitleColor,
-            ),
-            const SizedBox(height: 20),
-          ],
+              // Section Tous les Contes
+              _buildSectionHeader(
+                title: 'TOUS LES CONTES & RÉCITS',
+                icon: Icons.auto_stories_rounded,
+                color: CultureTheme.accentOrange,
+                borderCol: borderCol,
+                count: filteredStories.length,
+              ),
+              const SizedBox(height: 14),
+
+              ...filteredStories.map((story) {
+                final index = filteredStories.indexOf(story);
+                return AnimatedCulturalReveal(
+                  delay: Duration(milliseconds: 60 * index),
+                  child: _buildStoryRowItem(
+                    story: story,
+                    context: context,
+                    isDark: isDark,
+                    cardBg: cardBg,
+                    borderCol: borderCol,
+                    titleColor: titleColor,
+                    subtitleColor: subtitleColor,
+                  ),
+                );
+              }),
+              const SizedBox(height: 20),
+            ],
+
+            // ── 3. SOUS-UNIVERS 2 : DEVINETTES   ─────────────────────────────
+            if (_selectedFilterIndex == 1) ...[
+              _buildSectionHeader(
+                title: 'DEVINETTES TRADITIONNELLES  ',
+                icon: Icons.lightbulb_rounded,
+                color: CultureTheme.accentOrange,
+                borderCol: borderCol,
+                count: filteredRiddles.length,
+              ),
+              const SizedBox(height: 14),
+              _buildRiddlesList(
+                riddles: filteredRiddles,
+                context: context,
+                isDark: isDark,
+                cardBg: cardBg,
+                borderCol: borderCol,
+                titleColor: titleColor,
+                subtitleColor: subtitleColor,
+              ),
+              const SizedBox(height: 20),
+            ],
 
             // ── 4. SOUS-UNIVERS 3 : DÉFIS CULTURELS & QUIZ ─────────────────────
             if (_selectedFilterIndex == 2) ...[
@@ -287,7 +330,35 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
               ),
               const SizedBox(height: 20),
             ],
-        ],
+
+            // ── 5. SOUS-UNIVERS 4 : PROVERBES & SAGESSES DU MALI ─────────────
+            if (_selectedFilterIndex == 3) ...[
+              _buildProverbsSection(
+                proverbs: filteredProverbs,
+                featuredProverb: featuredProverb,
+                context: context,
+                isDark: isDark,
+                cardBg: cardBg,
+                borderCol: borderCol,
+                titleColor: titleColor,
+                subtitleColor: subtitleColor,
+              ),
+              const SizedBox(height: 20),
+            ],
+
+            // Footer Logo Culture avec "iA" en jaune !
+            const Center(
+              child: Opacity(
+                opacity: 0.5,
+                child: AlterniaLogo(
+                  size: 24,
+                  showText: true,
+                  iaColor: CultureTheme.iaYellow,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
       ),
     );
@@ -535,8 +606,8 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: CultureTheme.accentOrange,
                           side: BorderSide(
-                            color:
-                                CultureTheme.accentOrange.withValues(alpha: 0.5),
+                            color: CultureTheme.accentOrange
+                                .withValues(alpha: 0.5),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -626,8 +697,8 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                         story.photoUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
-                          color: CultureTheme.accentOrange
-                              .withValues(alpha: 0.15),
+                          color:
+                              CultureTheme.accentOrange.withValues(alpha: 0.15),
                           child: const Icon(Icons.auto_stories_rounded,
                               size: 24, color: CultureTheme.accentOrange),
                         ),
@@ -837,8 +908,8 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 3.5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
                   decoration: BoxDecoration(
                     color: CultureTheme.accentOrange.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(6),
@@ -863,8 +934,8 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 7),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                   decoration: BoxDecoration(
                     color: CultureTheme.primaryBlue,
                     borderRadius: BorderRadius.circular(10),
@@ -1054,7 +1125,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     );
   }
 
-  // ── 4. LISTE DES DEVINETTES N'DA (INTERACTIF) ───────────────────────────────
+  // ── 4. LISTE DES DEVINETTES (INTERACTIF & PARTAGEABLE) ──────────────────────
   Widget _buildRiddlesList({
     required List<TraditionalRiddle> riddles,
     required BuildContext context,
@@ -1099,7 +1170,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                           ),
                         ),
                         child: Text(
-                          'FORMULE N\'DA',
+                          'FORMULE TRADITIONNELLE',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 9.5,
                             fontWeight: FontWeight.w800,
@@ -1108,22 +1179,55 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                           ),
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: CultureTheme.cyanTurquoise
-                              .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          '+${riddle.xpReward} XP',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: CultureTheme.cyanTurquoise,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: CultureTheme.cyanTurquoise
+                                  .withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '+${riddle.xpReward} XP',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: CultureTheme.cyanTurquoise,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 6),
+                          // Bouton Partager dans l'en-tête de la devinette
+                          GestureDetector(
+                            onTap: () {
+                              CultureShareSheet.show(
+                                context: context,
+                                riddle: riddle,
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: CultureTheme.accentOrange
+                                    .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: CultureTheme.accentOrange
+                                      .withValues(alpha: 0.3),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.share_rounded,
+                                size: 14,
+                                color: CultureTheme.accentOrange,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -1151,8 +1255,37 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                       ),
                       Row(
                         children: [
+                          // Bouton Partager interactif
+                          TextButton.icon(
+                            onPressed: () {
+                              CultureShareSheet.show(
+                                context: context,
+                                riddle: riddle,
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.share_rounded,
+                              size: 13,
+                              color: CultureTheme.accentOrange,
+                            ),
+                            label: Text(
+                              'Partager',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: CultureTheme.accentOrange,
+                              ),
+                            ),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
                           Text(
-                            'Trouver la réponse (N\'Gana)',
+                            'Trouver la réponse',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w700,
@@ -1177,120 +1310,656 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
       }).toList(),
     );
   }
+
+  // ── 5. SECTION PROVERBES & SAGESSES DU MALI ─────────────────────────────────
+  Widget _buildProverbsSection({
+    required List<CultureProverb> proverbs,
+    required CultureProverb featuredProverb,
+    required BuildContext context,
+    required bool isDark,
+    required Color cardBg,
+    required Color borderCol,
+    required Color titleColor,
+    required Color subtitleColor,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Grand Proverbe en Vedette (La Parole du Jour)
+        AnimatedCulturalReveal(
+          delay: const Duration(milliseconds: 60),
+          child: _buildHeroProverbCard(
+            proverb: featuredProverb,
+            context: context,
+            isDark: isDark,
+            cardBg: cardBg,
+            borderCol: borderCol,
+            titleColor: titleColor,
+            subtitleColor: subtitleColor,
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Section Tous les Proverbes
+        _buildSectionHeader(
+          title: 'PAROLES DES ANCIENS & SAGESSES',
+          icon: Icons.format_quote_rounded,
+          color: CultureTheme.accentOrange,
+          borderCol: borderCol,
+          count: proverbs.length,
+        ),
+        const SizedBox(height: 14),
+
+        ...proverbs.map((proverb) {
+          final index = proverbs.indexOf(proverb);
+          return AnimatedCulturalReveal(
+            delay: Duration(milliseconds: 50 * index),
+            child: _buildProverbRowItem(
+              proverb: proverb,
+              context: context,
+              isDark: isDark,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              titleColor: titleColor,
+              subtitleColor: subtitleColor,
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  // ── 6. CARTE DU GRAND PROVERBE EN VEDETTE (PAROLE DU JOUR) ──────────────────
+  Widget _buildHeroProverbCard({
+    required CultureProverb proverb,
+    required BuildContext context,
+    required bool isDark,
+    required Color cardBg,
+    required Color borderCol,
+    required Color titleColor,
+    required Color subtitleColor,
+  }) {
+    final isSpeaking = _currentlySpeakingProverbId == proverb.id;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isDark ? CultureTheme.darkSurface : Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: CultureTheme.accentOrange.withValues(alpha: 0.35),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── SCÈNE THÉÂTRALE PANORAMIQUE 16:9 AVEC ACTEUR & FOND ────────────
+          SizedBox(
+            width: double.infinity,
+            height: 190,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(21)),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(
+                    proverb.stageImagePath,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: const Color(0xFF131B2A),
+                    ),
+                  ),
+                  Container(
+                    color: Colors.black.withValues(alpha: 0.50),
+                  ),
+
+                  // Crochets d'angles soudano-sahéliens
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: _LocalCornerPainter(
+                        color: CultureTheme.accentOrange,
+                        strokeWidth: 2.0,
+                        cornerSize: 14.0,
+                      ),
+                    ),
+                  ),
+
+                  // Badges supérieurs
+                  Positioned(
+                    top: 12,
+                    left: 14,
+                    right: 14,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 9, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: CultureTheme.accentOrange
+                                  .withValues(alpha: 0.7),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.fireplace_rounded,
+                                size: 12,
+                                color: CultureTheme.accentOrange,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                'PAROLE DU JOUR',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: CultureTheme.accentOrange,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3.5),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: CultureTheme.cyanTurquoise
+                                  .withValues(alpha: 0.6),
+                            ),
+                          ),
+                          child: Text(
+                            proverb.regionName,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w700,
+                              color: CultureTheme.cyanTurquoise,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Texte Bambara original au centre de la scène
+                  if (proverb.originalText != null &&
+                      proverb.originalText!.isNotEmpty)
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Text(
+                          '« ${proverb.originalText} »',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 16,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFFFFB347),
+                            shadows: const [
+                              Shadow(
+                                color: Colors.black,
+                                blurRadius: 10,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+
+                  // Orateur au bas de la scène
+                  Positioned(
+                    bottom: 10,
+                    left: 14,
+                    right: 14,
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: CultureTheme.accentOrange,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: ClipOval(
+                            child: Image.asset(
+                              proverb.speakerAvatar,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Icon(
+                                Icons.person_rounded,
+                                size: 18,
+                                color: CultureTheme.accentOrange,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${proverb.speakerName} • ${proverb.speakerRole}',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ── DÉTAILS & ACTIONS DU GRAND PROVERBE ───────────────────────────
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '« ${proverb.text} »',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    height: 1.35,
+                    color: titleColor,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  proverb.meaning,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12.5,
+                    height: 1.45,
+                    color: subtitleColor,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    // Bouton Écouter (TTS)
+                    Expanded(
+                      flex: 2,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _toggleSpeakProverb(proverb),
+                        icon: Icon(
+                          isSpeaking
+                              ? Icons.volume_up_rounded
+                              : Icons.headphones_rounded,
+                          size: 16,
+                        ),
+                        label: Text(
+                          isSpeaking ? 'Arrêter' : 'Écouter',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: CultureTheme.accentOrange,
+                          side: BorderSide(
+                            color: CultureTheme.accentOrange
+                                .withValues(alpha: 0.5),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+
+                    // Bouton Partager Carte 16:9
+                    Expanded(
+                      flex: 3,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          CultureShareSheet.show(
+                            context: context,
+                            proverb: proverb,
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.share_rounded,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          'Partager la carte',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: CultureTheme.accentOrange,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── 7. ÉLÉMENT LISTE PROVERBE (INTERACTIF & PARTAGEABLE) ───────────────────
+  Widget _buildProverbRowItem({
+    required CultureProverb proverb,
+    required BuildContext context,
+    required bool isDark,
+    required Color cardBg,
+    required Color borderCol,
+    required Color titleColor,
+    required Color subtitleColor,
+  }) {
+    final isSpeaking = _currentlySpeakingProverbId == proverb.id;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: CulturalInteractiveCard(
+        padding: const EdgeInsets.all(16),
+        showSudaneseCorners: true,
+        activeAccentColor: CultureTheme.accentOrange,
+        backgroundColor: cardBg,
+        borderRadius: 18,
+        onTap: () {
+          CultureShareSheet.show(
+            context: context,
+            proverb: proverb,
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Ligne En-tête : Thème, Région, XP et bouton Partager
+            Row(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Text(
+                    proverb.theme.toUpperCase(),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      color: CultureTheme.accentOrange,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+                  decoration: BoxDecoration(
+                    color: CultureTheme.cyanTurquoise.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    proverb.regionName,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      color: CultureTheme.cyanTurquoise,
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+                  decoration: BoxDecoration(
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '+${proverb.xpReward} XP',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w800,
+                      color: CultureTheme.accentOrange,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Bouton Partage direct
+                GestureDetector(
+                  onTap: () {
+                    CultureShareSheet.show(
+                      context: context,
+                      proverb: proverb,
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: CultureTheme.accentOrange.withValues(alpha: 0.3),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.share_rounded,
+                      size: 14,
+                      color: CultureTheme.accentOrange,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // Citation en langue originale (Bambara...)
+            if (proverb.originalText != null &&
+                proverb.originalText!.isNotEmpty) ...[
+              Text(
+                '« ${proverb.originalText} »',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12.5,
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFFD97706),
+                ),
+              ),
+              const SizedBox(height: 4),
+            ],
+
+            // Proverbe en français
+            Text(
+              '« ${proverb.text} »',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                height: 1.35,
+                color: titleColor,
+              ),
+            ),
+            const SizedBox(height: 6),
+
+            // Signification & Enseignement
+            Text(
+              proverb.meaning,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11.5,
+                height: 1.4,
+                color: subtitleColor,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 12),
+
+            // Pied de carte : Orateur & Boutons d'Action
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 10,
+                      backgroundImage: AssetImage(proverb.speakerAvatar),
+                      backgroundColor: CultureTheme.accentOrange,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      proverb.speakerName,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                        color: subtitleColor,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    // Bouton Écouter
+                    IconButton(
+                      onPressed: () => _toggleSpeakProverb(proverb),
+                      icon: Icon(
+                        isSpeaking
+                            ? Icons.volume_up_rounded
+                            : Icons.volume_mute_rounded,
+                        size: 18,
+                        color: isSpeaking
+                            ? CultureTheme.cyanTurquoise
+                            : CultureTheme.accentOrange,
+                      ),
+                      tooltip: 'Écouter la parole',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // Bouton Partager la carte
+                    TextButton.icon(
+                      onPressed: () {
+                        CultureShareSheet.show(
+                          context: context,
+                          proverb: proverb,
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.share_rounded,
+                        size: 13,
+                        color: CultureTheme.accentOrange,
+                      ),
+                      label: Text(
+                        'Partager la carte',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: CultureTheme.accentOrange,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-/// Modèle pour les proverbes traditionnels du Mali
-class _MalianProverb {
-  final String id;
-  final String text;
-  final String? originalText;
-  final String meaning;
-  final String origin;
-  final String theme;
-  final String? regionId;
-  final String regionName;
+/// Peintre de crochets d'angles soudano-sahéliens pour la carte vedette
+class _LocalCornerPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+  final double cornerSize;
 
-  const _MalianProverb({
-    required this.id,
-    required this.text,
-    this.originalText,
-    required this.meaning,
-    required this.origin,
-    required this.theme,
-    this.regionId,
-    required this.regionName,
+  _LocalCornerPainter({
+    required this.color,
+    required this.strokeWidth,
+    required this.cornerSize,
   });
-}
 
-/// Données authentiques de proverbes et sagesses du Mali
-const List<_MalianProverb> _malianProverbs = [
-  _MalianProverb(
-    id: 'prov_humilite',
-    text: "L'eau chaude n'oublie jamais qu'elle a été froide.",
-    originalText: "Ji kalan tɛ ɲina a nɛnɛ kɔ.",
-    meaning:
-        "Peu importe ton ascension ou ta réussite, n'oublie jamais d'où tu viens et garde l'humilité.",
-    origin: "Tradition Bamanan (Manden)",
-    theme: "Humilité",
-    regionId: "koulikoro",
-    regionName: "Koulikoro / Manden",
-  ),
-  _MalianProverb(
-    id: 'prov_sagesse_vieillesse',
-    text: "Ce qu'un vieillard voit assis, un jeune homme debout ne peut l'apercevoir.",
-    originalText: "Kɔrɔkɛ sigilen fɛn min ye, kamalen lɔnin t'o ye.",
-    meaning:
-        "L'expérience et la sagesse acquises avec le temps surpassent la seule vivacité ou la fougue de la jeunesse.",
-    origin: "Tradition Bamanan (Ségou)",
-    theme: "Sagesse & Respect",
-    regionId: "segou",
-    regionName: "Ségou",
-  ),
-  _MalianProverb(
-    id: 'prov_solidarite',
-    text: "Une seule main ne peut pas ramasser la farine.",
-    originalText: "Bolo kelen tɛ mugu ta.",
-    meaning:
-        "L'union et l'entraide communautaire sont indispensables pour accomplir de grandes œuvres.",
-    origin: "Sagesse Populaire & Dogon",
-    theme: "Solidarité",
-    regionId: "mopti",
-    regionName: "Mopti / Pays Dogon",
-  ),
-  _MalianProverb(
-    id: 'prov_savoir_tombouctou',
-    text: "L'encre de l'écolier est plus précieuse que le sang du martyr.",
-    originalText: "Al-’ilmu nūr (Le savoir est lumière)",
-    meaning:
-        "La quête du savoir, la préservation des manuscrits et la tolérance sont les plus hautes vertus de la cité savante.",
-    origin: "Tradition des Sages de Tombouctou",
-    theme: "Savoir & Éducation",
-    regionId: "tombouctou",
-    regionName: "Tombouctou",
-  ),
-  _MalianProverb(
-    id: 'prov_verite_nature',
-    text: "Même si la bûche séjourne cent ans dans l'eau, elle ne deviendra jamais un crocodile.",
-    originalText: "Jiri koro men ji la cogo o cogo, a tɛ kɛ bama ye.",
-    meaning:
-        "Chacun doit assumer sa vraie nature et ses racines, nul ne peut masquer son identité profonde.",
-    origin: "Tradition Sénoufo / Kénédougou",
-    theme: "Vérité & Identité",
-    regionId: "sikasso",
-    regionName: "Sikasso",
-  ),
-  _MalianProverb(
-    id: 'prov_racines',
-    text: "L'arbre qui s'élève vers le ciel doit la vigueur de ses branches à la profondeur de ses racines.",
-    originalText: "Yiri janya be bɔ a dugukolo jukɔrɔ.",
-    meaning:
-        "La prospérité d'un être humain repose sur son attachement à son terroir, à sa mémoire et à ses aïeux.",
-    origin: "Tradition Khassonké / Soninké",
-    theme: "Racines",
-    regionId: "kayes",
-    regionName: "Kayes",
-  ),
-  _MalianProverb(
-    id: 'prov_patience_unite',
-    text: "Si tu veux aller vite, marche seul ; mais si tu veux aller loin, marchons ensemble.",
-    originalText: "A borey kulu ga bindi (Ensemble nous avançons)",
-    meaning:
-        "La concertation et le cheminement collectif garantissent un avenir stable et pérenne pour la communauté.",
-    origin: "Tradition Songhaï & Sahélienne",
-    theme: "Patience & Unité",
-    regionId: "gao",
-    regionName: "Gao",
-  ),
-  _MalianProverb(
-    id: 'prov_parole_donnee',
-    text: "La parole est comme l'eau : une fois versée à terre, nul ne peut la ramasser.",
-    originalText: "Kuma ye ji ye, n'a bɔra a tɛ se ka sɔrɔ tuguni.",
-    meaning:
-        "La parole donnée engage l'honneur et la dignité humaine ; il convient de mesurer chaque parole prononcée.",
-    origin: "Parole des Griots & Anciens",
-    theme: "Honneur & Tempérance",
-    regionId: null,
-    regionName: "Tout le Mali",
-  ),
-];
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.square;
+
+    const pad = 8.0;
+
+    // Haut-Gauche
+    canvas.drawLine(
+        Offset(pad, pad + cornerSize), const Offset(pad, pad), paint);
+    canvas.drawLine(
+        const Offset(pad, pad), Offset(pad + cornerSize, pad), paint);
+
+    // Haut-Droite
+    canvas.drawLine(Offset(size.width - pad - cornerSize, pad),
+        Offset(size.width - pad, pad), paint);
+    canvas.drawLine(Offset(size.width - pad, pad),
+        Offset(size.width - pad, pad + cornerSize), paint);
+
+    // Bas-Gauche
+    canvas.drawLine(Offset(pad, size.height - pad - cornerSize),
+        Offset(pad, size.height - pad), paint);
+    canvas.drawLine(Offset(pad, size.height - pad),
+        Offset(pad + cornerSize, size.height - pad), paint);
+
+    // Bas-Droite
+    canvas.drawLine(Offset(size.width - pad - cornerSize, size.height - pad),
+        Offset(size.width - pad, size.height - pad), paint);
+    canvas.drawLine(Offset(size.width - pad, size.height - pad),
+        Offset(size.width - pad, size.height - pad - cornerSize), paint);
+  }
+
+  @override
+  bool shouldRepaint(_LocalCornerPainter oldDelegate) =>
+      color != oldDelegate.color ||
+      strokeWidth != oldDelegate.strokeWidth ||
+      cornerSize != oldDelegate.cornerSize;
+}
 

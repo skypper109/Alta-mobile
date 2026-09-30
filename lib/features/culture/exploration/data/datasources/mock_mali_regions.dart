@@ -12,7 +12,8 @@ abstract final class MockMaliRegions {
       code: 'R1',
       surnom: 'La Cité des Rails & Terre des Cascades',
       chefLieu: 'Kayes',
-      descriptionCourte: 'Région historique marquée par les grands fleuves, le Fort de Médine et le Royaume du Khasso.',
+      descriptionCourte:
+          'Région historique marquée par les grands fleuves, le Fort de Médine et le Royaume du Khasso.',
       descriptionComplete:
           'Kayes est le carrefour de l\'histoire coloniale et des grands royaumes d\'Afrique de l\'Ouest. Traversée par le fleuve Sénégal, la région abrite le célèbre Fort de Médine, les spectaculaires chutes de Félou et de Gouina, ainsi que la mythique histoire du Royaume du Khasso et de l\'épopée ferroviaire.',
       pointsForts: [
@@ -40,7 +41,8 @@ abstract final class MockMaliRegions {
       code: 'R2',
       surnom: 'Le Berceau du Manden & Terminus Fluvial',
       chefLieu: 'Koulikoro',
-      descriptionCourte: 'Haut lieu de l\'Empire du Mali, sanctuaire de Soundiata Keïta et des Monts Mandingues.',
+      descriptionCourte:
+          'Haut lieu de l\'Empire du Mali, sanctuaire de Soundiata Keïta et des Monts Mandingues.',
       descriptionComplete:
           'Koulikoro est le cœur battant de l\'histoire Mandingue. C\'est ici que s\'est déroulée la célèbre bataille de Kirina en 1235 où Soundiata Keïta triompha de Soumaoro Kanté. La région s\'étend le long des monts Mandingues et marque le terminus de la navigation fluviale sur le Djoliba.',
       pointsForts: [
@@ -68,7 +70,8 @@ abstract final class MockMaliRegions {
       code: 'R3',
       surnom: 'Le Royaume du Kénédougou & Le Jardin du Mali',
       chefLieu: 'Sikasso',
-      descriptionCourte: 'Terre fertile de résistance héroïque avec le Tata de Tiéba et Babemba Traoré.',
+      descriptionCourte:
+          'Terre fertile de résistance héroïque avec le Tata de Tiéba et Babemba Traoré.',
       descriptionComplete:
           'Sikasso est la région la plus verte et généreuse du Mali, réputée pour sa production agricole florissante. Elle est immortalisée par la résistance héroïque de Babemba Traoré face aux troupes coloniales derrière les murailles imprenables du Tata de Sikasso.',
       pointsForts: [
@@ -96,7 +99,8 @@ abstract final class MockMaliRegions {
       code: 'R4',
       surnom: 'La Cité des Balanzans & Royaume Bambara',
       chefLieu: 'Ségou',
-      descriptionCourte: 'Capitale du Royaume Bambara de Biton Coulibaly, berceau de l\'art du Bogolan.',
+      descriptionCourte:
+          'Capitale du Royaume Bambara de Biton Coulibaly, berceau de l\'art du Bogolan.',
       descriptionComplete:
           'Ségou est la majestueuse cité aux 4 444 balanzans (arbres sacrés). Fondée comme capitale du puissant Royaume Bambara par Biton Coulibaly puis Dah Monzon Diarra, la région est un épicentre artistique et artisanal mondialement réputé pour son textile Bogolan et sa poterie de Kalabougou.',
       pointsForts: [
@@ -124,7 +128,8 @@ abstract final class MockMaliRegions {
       code: 'R5',
       surnom: 'La Venise Malienne & Le Pays Dogon',
       chefLieu: 'Mopti',
-      descriptionCourte: 'Carrefour fluvial du Delta intérieur, falaises de Bandiagara et Grande Mosquée de Djenné.',
+      descriptionCourte:
+          'Carrefour fluvial du Delta intérieur, falaises de Bandiagara et Grande Mosquée de Djenné.',
       descriptionComplete:
           'Mopti est le carrefour magique où se rencontrent le fleuve Niger et le Bani. La région abrite des trésors classés au patrimoine mondial de l\'UNESCO : la grandiose Mosquée en banco de Djenné et la spectaculaire falaise de Bandiagara, sanctuaire millénaire du peuple Dogon.',
       pointsForts: [
@@ -152,7 +157,8 @@ abstract final class MockMaliRegions {
       code: 'R6',
       surnom: 'La Cité des 333 Saints & Perle du Désert',
       chefLieu: 'Tombouctou',
-      descriptionCourte: 'Centre intellectuel et spirituel médiéval de l\'Islam, université de Sankoré et manuscrits anciens.',
+      descriptionCourte:
+          'Centre intellectuel et spirituel médiéval de l\'Islam, université de Sankoré et manuscrits anciens.',
       descriptionComplete:
           'Tombouctou est une légende universelle. Porte du Sahara et point de rencontre des caravaniers de l\'or et du sel, elle rayonna mondialement aux XIVe-XVIe siècles avec son université de Sankoré et ses centaines de milliers de manuscrits scientifiques, philosophiques et juridiques.',
       pointsForts: [
@@ -180,7 +186,8 @@ abstract final class MockMaliRegions {
       code: 'R7',
       surnom: 'La Capitale de l\'Empire Songhaï',
       chefLieu: 'Gao',
-      descriptionCourte: 'Siège des grands empereurs Sonni Ali Ber et Askia Mohamed, Tombeau des Askia.',
+      descriptionCourte:
+          'Siège des grands empereurs Sonni Ali Ber et Askia Mohamed, Tombeau des Askia.',
       descriptionComplete:
           'Gao fut la capitale de l\'un des plus vastes empires de l\'histoire africaine : l\'Empire Songhaï. Baignée par le fleuve Niger, la cité abrite le pyramidal Tombeau des Askia érigé en 1495 et la fascinante Dune rose de Koïma dominant les flots.',
       pointsForts: [
@@ -208,7 +215,8 @@ abstract final class MockMaliRegions {
       code: 'R8',
       surnom: 'Le Sanctuaire de l\'Adrar des Ifoghas',
       chefLieu: 'Kidal',
-      descriptionCourte: 'Massif granitique saharien majestueux, berceau de la culture nomade et touarègue.',
+      descriptionCourte:
+          'Massif granitique saharien majestueux, berceau de la culture nomade et touarègue.',
       descriptionComplete:
           'Kidal est un univers minéral d\'une beauté saisissante sculpté par l\'Adrar des Ifoghas. Région de poésie millénaire et de liberté, elle perpétue avec fierté les coutumes pastorales sahariennes, les gravures rupestres préhistoriques et la musique du désert.',
       pointsForts: [
@@ -236,7 +244,8 @@ abstract final class MockMaliRegions {
       code: 'R9',
       surnom: 'L\'Immensité du Bassin Saharien & Mines d\'Or Blanc',
       chefLieu: 'Taoudénit',
-      descriptionCourte: 'Cœur du Tanezrouft, mines ancestrales de sel gemme et route mythique de l\'Azalaï.',
+      descriptionCourte:
+          'Cœur du Tanezrouft, mines ancestrales de sel gemme et route mythique de l\'Azalaï.',
       descriptionComplete:
           'Taoudénit s\'étend sur le grand erg désertique du Nord malien. Connue depuis des siècles pour ses mines de sel gemme exploitées à ciel ouvert, elle est le point de départ des grandes caravanes chamelières traversant le désert infini vers Tombouctou.',
       pointsForts: [
@@ -264,7 +273,8 @@ abstract final class MockMaliRegions {
       code: 'R10',
       surnom: 'La Vallée de l\'Iullemmeden & Terre Pastorale',
       chefLieu: 'Ménaka',
-      descriptionCourte: 'Région aux confins du Sahel et du Sahara, riche en traditions d\'élevage et d\'orfèvrerie.',
+      descriptionCourte:
+          'Région aux confins du Sahel et du Sahara, riche en traditions d\'élevage et d\'orfèvrerie.',
       descriptionComplete:
           'Ménaka est une région pastorale stratégique située au Sud-Est du Mali. Ses vallées abritent une mosaïque de peuples fiers (Touaregs, Peuls, Songhaïs, Daoussahak) unis par une tradition millénaire d\'artisanat fin, d\'élevage et de solidarité communautaire.',
       pointsForts: [
@@ -292,7 +302,8 @@ abstract final class MockMaliRegions {
       code: 'DB',
       surnom: 'La Cité des Trois Caïmans & Cœur Vibrant',
       chefLieu: 'Bamako',
-      descriptionCourte: 'Capitale dynamique au bord du Djoliba, carrefour culturel et artistique contemporain de l\'Afrique.',
+      descriptionCourte:
+          'Capitale dynamique au bord du Djoliba, carrefour culturel et artistique contemporain de l\'Afrique.',
       descriptionComplete:
           'Fondée sur les berges du fleuve Niger au pied de la colline du Point G, Bamako est la capitale vibrante du Mali. Métropole cosmopolite, elle accueille le Musée National du Mali, le Monument de l\'Indépendance et rayonne mondialement à travers la musique, la mode et la photographie africaine.',
       pointsForts: [
@@ -304,7 +315,7 @@ abstract final class MockMaliRegions {
       symbolesEtTraditions: [
         'Rencontres de Bamako (Biennale photo)',
         'Musique live mandingue & afrobeat',
-        'Marché d\'artisanat de N\'Golonina',
+        'Marché d\'artisanat de  Golonina',
       ],
       couleurAccent: CultureTheme.primaryBlue,
       icone: Icons.location_city_rounded,

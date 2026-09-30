@@ -56,8 +56,8 @@ abstract class DeviceEntity with _$DeviceEntity {
 extension DeviceEntityX on DeviceEntity {
   /// URL WebSocket complète.
   String get wsUrl {
-    if (ipAddress.startsWith('https://') || ipAddress.contains('trycloudflare.com')) {
-      final cleanHost = ipAddress.replaceAll('https://', '').replaceAll('http://', '');
+    if (ipAddress.startsWith('https://') || ipAddress.contains('trycloudflare.com') || ipAddress.contains('alterniamali.com')) {
+      final cleanHost = ipAddress.replaceAll('https://', '').replaceAll('http://', '').replaceAll('/', '');
       return 'wss://$cleanHost/ws';
     }
     return 'ws://$ipAddress:$port/ws';
@@ -68,7 +68,7 @@ extension DeviceEntityX on DeviceEntity {
     if (ipAddress.startsWith('http://') || ipAddress.startsWith('https://')) {
       return ipAddress;
     }
-    if (ipAddress.contains('trycloudflare.com')) {
+    if (ipAddress.contains('trycloudflare.com') || ipAddress.contains('alterniamali.com')) {
       return 'https://$ipAddress';
     }
     return 'http://$ipAddress:$port';

@@ -28,7 +28,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
       0; // 0: Avatar Live, 1: Histoire, 2: Inventions, 3: Sagesse
   AvatarState _avatarState = AvatarState.speaking;
   String _liveSpeechText =
-      'Bonjour ! Je suis ton Avatar Interactif AlterniA. Pose-moi n\'importe quelle question sur l\'Histoire et les Inventions du Mali !';
+      'Bonjour ! Je suis ton Avatar Interactif AlterniA. Pose-moi  importe quelle question sur l\'Histoire et les Inventions du Mali !';
 
   void _enterProtagonistMode(String title) {
     HapticFeedback.heavyImpact();
@@ -572,7 +572,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
           onTap: () => _showStoryModal(
             'La Sagesse des Proverbes Bambaras',
             'Philosophie',
-            'Dans la culture orale malienne, les proverbes sont les clés de la réflexion. Ce proverbe enseigne que la véritable richesse d\'un jeune n\'est ni l\'argent ni les possessions matérielles, mais les connaissances acquises et la bienveillance.',
+            'Dans la culture orale malienne, les proverbes sont les clés de la réflexion. Ce proverbe enseigne que la véritable richesse d\'un jeune  est ni l\'argent ni les possessions matérielles, mais les connaissances acquises et la bienveillance.',
             Icons.psychology_alt_rounded,
             AppColors.accentViolet,
           ),

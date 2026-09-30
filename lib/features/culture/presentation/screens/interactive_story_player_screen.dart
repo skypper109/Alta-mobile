@@ -12,6 +12,7 @@ import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/connected_contents_section.dart';
+import 'culture_main_screen.dart';
 
 /// Moteur immersif de Narration Interactive Scène par Scène
 /// Refactorisation cinématique avec transitions de scènes fluides, bandeau d'atmosphère,
@@ -712,7 +713,8 @@ class _InteractiveStoryPlayerScreenState
                 ),
                 onPressed: () {
                   HapticFeedback.mediumImpact();
-                  context.push('/culture/passport');
+                  ref.read(cultureActiveTabProvider.notifier).state = 3;
+                  context.go('/culture');
                 },
                 icon: const Icon(
                   Icons.badge_rounded,

@@ -1,3 +1,4 @@
+import 'package:alternia/presentation/common/widgets/alternia_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -121,8 +122,7 @@ class CultureContesView extends ConsumerWidget {
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: CultureTheme.accentOrange.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
@@ -171,8 +171,7 @@ class CultureContesView extends ConsumerWidget {
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: CultureTheme.accentOrange.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
@@ -261,6 +260,18 @@ class CultureContesView extends ConsumerWidget {
                 );
               },
             ),
+          // Footer Logo Culture avec "iA" en jaune !
+          const Center(
+            child: Opacity(
+              opacity: 0.5,
+              child: AlterniaLogo(
+                size: 24,
+                showText: true,
+                iaColor: CultureTheme.iaYellow,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -766,8 +777,8 @@ class CultureContesView extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 7, vertical: 2.5),
                         decoration: BoxDecoration(
-                          color: CultureTheme.accentOrange
-                              .withValues(alpha: 0.12),
+                          color:
+                              CultureTheme.accentOrange.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(5),
                         ),
                         child: Text(
@@ -841,8 +852,7 @@ class CultureContesView extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(Icons.headphones_rounded,
-                                  size: 12,
-                                  color: CultureTheme.accentOrange),
+                                  size: 12, color: CultureTheme.accentOrange),
                               const SizedBox(width: 4),
                               Text(
                                 story.audioDuration,

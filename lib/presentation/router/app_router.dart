@@ -17,6 +17,7 @@ import '../../features/culture/core/models/cultural_guide_models.dart';
 import '../../features/culture/immersive/immersive.dart';
 import '../../features/culture/presentation/screens/culture_monuments_screen.dart';
 import '../../features/culture/presentation/screens/culture_personnages_screen.dart';
+import '../../features/culture/core/theme/culture_theme.dart';
 import '../../features/culture/presentation/screens/culture_villes_screen.dart';
 import '../../features/culture/presentation/screens/historical_figure_detail_screen.dart';
 import '../../features/culture/presentation/screens/interactive_story_player_screen.dart';
@@ -24,7 +25,7 @@ import '../../features/culture/presentation/screens/monument_detail_screen.dart'
 import '../../features/culture/presentation/screens/place_detail_screen.dart';
 import '../../features/culture/presentation/screens/quiz_culture_screen.dart';
 import '../../features/culture/presentation/screens/riddle_screen.dart';
-import '../../features/culture/presentation/screens/passport_screen.dart';
+import '../../features/culture/presentation/views/culture_passport_view.dart';
 import '../../features/culture/presentation/screens/story_detail_screen.dart';
 import '../../features/culture/presentation/screens/story_reader_screen.dart';
 import '../../features/discussions/holographic_salon_page.dart';
@@ -374,7 +375,14 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/culture/passport',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const PassportScreen(),
+        builder: (context, state) => Scaffold(
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? CultureTheme.darkBackground
+              : CultureTheme.lightBackground,
+          body: const SafeArea(
+            child: CulturePassportView(showBackButton: true),
+          ),
+        ),
       ),
       GoRoute(
         path: '/holo-salon',

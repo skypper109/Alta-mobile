@@ -62,7 +62,8 @@ class RegionDetailScreen extends ConsumerWidget {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+            const Icon(Icons.check_circle_rounded,
+                color: Colors.white, size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -87,12 +88,16 @@ class RegionDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final subtitleColor =
+        isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
-    final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
-    final bgColor = isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground;
+    final borderCol =
+        isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
+    final bgColor =
+        isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground;
 
-    final activeGlobalRegion = ref.watch(activeCultureRegionProvider).activeRegion;
+    final activeGlobalRegion =
+        ref.watch(activeCultureRegionProvider).activeRegion;
     final isFilterActive = activeGlobalRegion?.id == region.id;
 
     final photoUrl = _resolveRegionPhoto(region.id);
@@ -190,13 +195,18 @@ class RegionDetailScreen extends ConsumerWidget {
                     GestureDetector(
                       onTap: () => _applyGlobalFilter(context, ref),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: isFilterActive ? Colors.green : CultureTheme.primaryBlue,
+                          color: isFilterActive
+                              ? Colors.green
+                              : CultureTheme.primaryBlue,
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: (isFilterActive ? Colors.green : CultureTheme.primaryBlue)
+                              color: (isFilterActive
+                                      ? Colors.green
+                                      : CultureTheme.primaryBlue)
                                   .withValues(alpha: 0.3),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
@@ -207,13 +217,17 @@ class RegionDetailScreen extends ConsumerWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              isFilterActive ? Icons.check_circle_rounded : Icons.filter_alt_rounded,
+                              isFilterActive
+                                  ? Icons.check_circle_rounded
+                                  : Icons.filter_alt_rounded,
                               color: Colors.white,
                               size: 16,
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              isFilterActive ? 'Filtre Actif' : 'Filtrer Culture',
+                              isFilterActive
+                                  ? 'Filtre Actif'
+                                  : 'Filtrer Culture',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w800,
@@ -306,7 +320,8 @@ class RegionDetailScreen extends ConsumerWidget {
 
                 // ── 3. MONUMENTS DU TERROIR ─────────────────────────────────
                 if (monuments.isNotEmpty) ...[
-                  _buildSectionHeader('MONUMENTS HISTORIQUES', CultureTheme.rougeKoulikoro),
+                  _buildSectionHeader(
+                      'MONUMENTS HISTORIQUES', CultureTheme.rougeKoulikoro),
                   const SizedBox(height: 10),
                   ...monuments.map((m) => _buildCultureItemTile(
                         item: m,
@@ -324,7 +339,8 @@ class RegionDetailScreen extends ConsumerWidget {
 
                 // ── 4. PERSONNAGES HISTORIQUES ──────────────────────────────
                 if (figures.isNotEmpty) ...[
-                  _buildSectionHeader('FIGURES HISTORIQUES & SOUVERAINS', CultureTheme.accentOrange),
+                  _buildSectionHeader('FIGURES HISTORIQUES & SOUVERAINS',
+                      CultureTheme.accentOrange),
                   const SizedBox(height: 10),
                   ...figures.map((p) => _buildCultureItemTile(
                         item: p,
@@ -342,7 +358,8 @@ class RegionDetailScreen extends ConsumerWidget {
 
                 // ── 5. CONTES & TRADITIONS ORALES ───────────────────────────
                 if (stories.isNotEmpty) ...[
-                  _buildSectionHeader('CONTES & TRADITIONS ORALES', CultureTheme.primaryBlue),
+                  _buildSectionHeader(
+                      'CONTES & TRADITIONS ORALES', CultureTheme.primaryBlue),
                   const SizedBox(height: 10),
                   ...stories.map((s) => _buildStoryTile(
                         story: s,
@@ -356,9 +373,10 @@ class RegionDetailScreen extends ConsumerWidget {
                   const SizedBox(height: 20),
                 ],
 
-                // ── 6. DÉFIS & DEVINETTES N'DA ──────────────────────────────
+                // ── 6. DÉFIS & DEVINETTES   ──────────────────────────────
                 if (riddles.isNotEmpty) ...[
-                  _buildSectionHeader('DÉFIS & DEVINETTES DU TERROIR', CultureTheme.cyanTurquoise),
+                  _buildSectionHeader('DÉFIS & DEVINETTES DU TERROIR',
+                      CultureTheme.cyanTurquoise),
                   const SizedBox(height: 10),
                   ...riddles.map((r) => _buildRiddleTile(
                         riddle: r,
@@ -374,7 +392,8 @@ class RegionDetailScreen extends ConsumerWidget {
 
                 // ── 7. VILLES & VILLAGES ────────────────────────────────────
                 if (villes.isNotEmpty) ...[
-                  _buildSectionHeader('VILLES & CITÉS HISTORIQUES', CultureTheme.orPatrimoine),
+                  _buildSectionHeader(
+                      'VILLES & CITÉS HISTORIQUES', CultureTheme.orPatrimoine),
                   const SizedBox(height: 10),
                   ...villes.map((v) => _buildCultureItemTile(
                         item: v,
@@ -391,14 +410,17 @@ class RegionDetailScreen extends ConsumerWidget {
                 ],
 
                 // ── 8. SYMBOLES & TRADITIONS DU TERROIR ─────────────────────
-                _buildSectionHeader('POINTS FORTS & TRADITIONS', CultureTheme.vertNaturel),
+                _buildSectionHeader(
+                    'POINTS FORTS & TRADITIONS', CultureTheme.vertNaturel),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    ...region.pointsForts.map((pt) => _buildTag(pt, CultureTheme.primaryBlue, isDark, cardBg, borderCol)),
-                    ...region.symbolesEtTraditions.map((sy) => _buildTag(sy, CultureTheme.accentOrange, isDark, cardBg, borderCol)),
+                    ...region.pointsForts.map((pt) => _buildTag(pt,
+                        CultureTheme.primaryBlue, isDark, cardBg, borderCol)),
+                    ...region.symbolesEtTraditions.map((sy) => _buildTag(sy,
+                        CultureTheme.accentOrange, isDark, cardBg, borderCol)),
                   ],
                 ),
               ]),
@@ -560,7 +582,8 @@ class RegionDetailScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios_rounded, size: 13, color: CultureTheme.primaryBlue),
+              Icon(Icons.arrow_forward_ios_rounded,
+                  size: 13, color: CultureTheme.primaryBlue),
             ],
           ),
         ),
@@ -631,7 +654,8 @@ class RegionDetailScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios_rounded, size: 13, color: CultureTheme.primaryBlue),
+              Icon(Icons.arrow_forward_ios_rounded,
+                  size: 13, color: CultureTheme.primaryBlue),
             ],
           ),
         ),
@@ -672,14 +696,15 @@ class RegionDetailScreen extends ConsumerWidget {
                   color: CultureTheme.cyanTurquoise.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.psychology_rounded, color: CultureTheme.cyanTurquoise, size: 22),
+                child: const Icon(Icons.psychology_rounded,
+                    color: CultureTheme.cyanTurquoise, size: 22),
               ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Devinette N\'Da • ${riddle.category}',
+                      'Devinette   • ${riddle.category}',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w800,
@@ -699,7 +724,8 @@ class RegionDetailScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios_rounded, size: 13, color: CultureTheme.cyanTurquoise),
+              Icon(Icons.arrow_forward_ios_rounded,
+                  size: 13, color: CultureTheme.cyanTurquoise),
             ],
           ),
         ),
@@ -707,7 +733,8 @@ class RegionDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTag(String text, Color accentColor, bool isDark, Color cardBg, Color borderCol) {
+  Widget _buildTag(String text, Color accentColor, bool isDark, Color cardBg,
+      Color borderCol) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(

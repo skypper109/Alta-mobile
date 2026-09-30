@@ -1,3 +1,4 @@
+import 'package:alternia/presentation/common/widgets/alternia_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -226,6 +227,18 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                 subtitleColor: subtitleColor,
               ),
             ],
+            // Footer Logo Culture avec "iA" en jaune !
+            const Center(
+              child: Opacity(
+                opacity: 0.5,
+                child: AlterniaLogo(
+                  size: 24,
+                  showText: true,
+                  iaColor: CultureTheme.iaYellow,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -495,8 +508,8 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-        final isPlayingItem = narration.isSpeaking &&
-            narration.activeContentId == item.id;
+        final isPlayingItem =
+            narration.isSpeaking && narration.activeContentId == item.id;
         final speechText =
             '${item.title}. ${item.subtitle}. Région de ${item.regionName}. ${item.description}';
 
@@ -512,7 +525,8 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
             backgroundColor: cardBg,
             borderRadius: 18,
             onTap: () {
-              context.push('/culture/$categoryRoute/${item.id}', extra: itemHeroTag);
+              context.push('/culture/$categoryRoute/${item.id}',
+                  extra: itemHeroTag);
             },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -599,9 +613,8 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
-                                color: isPlayingItem
-                                    ? categoryColor
-                                    : titleColor,
+                                color:
+                                    isPlayingItem ? categoryColor : titleColor,
                                 height: 1.2,
                               ),
                               maxLines: 1,

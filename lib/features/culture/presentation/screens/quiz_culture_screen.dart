@@ -10,6 +10,7 @@ import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
 import '../widgets/passport_stamp_toast.dart';
+import 'culture_main_screen.dart';
 
 /// Écran d'Expérience de Défi & Quiz Culturel Haute Fidélité
 /// Architecture 100% conforme à la charte : Orange Culture (#F1851F), Bleu Marine (#314999), Cyan (#40BBCC)
@@ -971,7 +972,8 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
             child: TextButton.icon(
               onPressed: () {
                 CulturalHaptics.cardPress();
-                context.push('/culture/passport');
+                ref.read(cultureActiveTabProvider.notifier).state = 3;
+                context.go('/culture');
               },
               icon: const Icon(Icons.auto_awesome_rounded,
                   color: CultureTheme.accentOrange, size: 16),

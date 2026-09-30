@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Devinette traditionnelle malienne (« N'Da ! »)
+/// Devinette traditionnelle malienne («   ! »)
 class TraditionalRiddle {
   final String id;
-  final String formulaIntro; // Ex: "« N'Da ! » — « N'Da n'sira ! »"
+  final String formulaIntro; // Ex: "«   ! » — «   n'sira ! »"
   final String riddleText; // L'énigme posée
   final List<String> hints; // 3 indices progressifs
   final List<String> options; // Choix possibles
@@ -19,7 +19,7 @@ class TraditionalRiddle {
 
   const TraditionalRiddle({
     required this.id,
-    this.formulaIntro = "« N'Da ! » — « N'Da n'sira ! »",
+    this.formulaIntro = "«   ! » — «   n'sira ! »",
     required this.riddleText,
     required this.hints,
     required this.options,

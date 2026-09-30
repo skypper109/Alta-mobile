@@ -10,7 +10,8 @@ abstract final class MockCultureStage1Data {
     subtitle: 'Le fondateur de l\'Empire du Mali et la proclamation de 1236',
     category: 'accueil',
     subCategory: 'personnages',
-    description: 'Découvrez l\'épopée du Lion du Manden, sa victoire décisive à Kirina en 1235 et la proclamation de l\'une des premières déclarations des droits humains à Kouroukan Fouga.',
+    description:
+        'Découvrez l\'épopée du Lion du Manden, sa victoire décisive à Kirina en 1235 et la proclamation de l\'une des premières déclarations des droits humains à Kouroukan Fouga.',
     regionId: 'koulikoro',
     regionName: 'Koulikoro',
     tag: 'Épopée Majeure',
@@ -28,7 +29,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'Le Lion du Manden & Fondateur de l\'Empire',
       category: 'decouvrir',
       subCategory: 'personnages',
-      description: 'Bâtisseur de l\'Empire du Mali et instigateur de la Charte de Kouroukan Fouga en 1236.',
+      description:
+          'Bâtisseur de l\'Empire du Mali et instigateur de la Charte de Kouroukan Fouga en 1236.',
       regionId: 'koulikoro',
       regionName: 'Koulikoro',
       tag: 'Mansa',
@@ -42,7 +44,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'L\'Empereur d\'Or & Mécène du Savoir',
       category: 'decouvrir',
       subCategory: 'personnages',
-      description: 'Souverain célèbre pour son pèlerinage de 1324 et l\'essor universel de Tombouctou et Gao.',
+      description:
+          'Souverain célèbre pour son pèlerinage de 1324 et l\'essor universel de Tombouctou et Gao.',
       regionId: 'tombouctou',
       regionName: 'Tombouctou',
       tag: 'Âge d\'Or',
@@ -56,7 +59,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'Roi du Kénédougou & Héros de Sikasso',
       category: 'decouvrir',
       subCategory: 'personnages',
-      description: 'Défenseur héroïque du Tata de Sikasso, symbole absolu de dignité patriotique.',
+      description:
+          'Défenseur héroïque du Tata de Sikasso, symbole absolu de dignité patriotique.',
       regionId: 'sikasso',
       regionName: 'Sikasso',
       tag: 'Résistance',
@@ -70,7 +74,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'Grand Réformateur de l\'Empire Songhoï',
       category: 'decouvrir',
       subCategory: 'personnages',
-      description: 'Bâtisseur d\'une administration brillante et mécène de l\'Université de Sankoré.',
+      description:
+          'Bâtisseur d\'une administration brillante et mécène de l\'Université de Sankoré.',
       regionId: 'gao',
       regionName: 'Gao',
       tag: 'Empire Songhoï',
@@ -84,7 +89,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'Fondateur du Royaume Bambara de Ségou',
       category: 'decouvrir',
       subCategory: 'personnages',
-      description: 'Créateur de l\'organisation militaire des Tônjons et de la puissance de Ségou.',
+      description:
+          'Créateur de l\'organisation militaire des Tônjons et de la puissance de Ségou.',
       regionId: 'segou',
       regionName: 'Ségou',
       tag: 'Royaume de Ségou',
@@ -102,7 +108,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'La Cité Millénaire en Banco',
       category: 'decouvrir',
       subCategory: 'villes',
-      description: 'Joyau de la vallée du Bani, réputé pour sa prestigieuse architecture soudano-sahélienne.',
+      description:
+          'Joyau de la vallée du Bani, réputé pour sa prestigieuse architecture soudano-sahélienne.',
       regionId: 'mopti',
       regionName: 'Mopti',
       tag: 'UNESCO',
@@ -116,7 +123,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'Le Berceau des 4 444 Balanzans',
       category: 'decouvrir',
       subCategory: 'villes',
-      description: 'L\'ancienne capitale royale où repose le roi Biton Coulibaly au bord du Djoliba.',
+      description:
+          'L\'ancienne capitale royale où repose le roi Biton Coulibaly au bord du Djoliba.',
       regionId: 'segou',
       regionName: 'Ségou',
       tag: 'Cité Royale',
@@ -130,7 +138,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'Les Villages Suspendus du Pays Dogon',
       category: 'decouvrir',
       subCategory: 'villes',
-      description: 'Villages séculaires accrochés au grès rouge, avec leurs Togunas et greniers ancestraux.',
+      description:
+          'Villages séculaires accrochés au grès rouge, avec leurs Togunas et greniers ancestraux.',
       regionId: 'mopti',
       regionName: 'Mopti',
       tag: 'Pays Dogon',
@@ -144,7 +153,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'La Cité des 333 Saints & des Manuscrits',
       category: 'decouvrir',
       subCategory: 'villes',
-      description: 'Carrefour transsaharien mythique ayant abrité les plus grands savants d\'Afrique.',
+      description:
+          'Carrefour transsaharien mythique ayant abrité les plus grands savants d\'Afrique.',
       regionId: 'tombouctou',
       regionName: 'Tombouctou',
       tag: 'Savoirs Sahéliens',
@@ -158,7 +168,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'Le Verger du Mali & la Cité du Kénédougou',
       category: 'decouvrir',
       subCategory: 'villes',
-      description: 'Capitale verdoyante et généreuse, gardienne des mémoires du roi Tiéba et Babemba.',
+      description:
+          'Capitale verdoyante et généreuse, gardienne des mémoires du roi Tiéba et Babemba.',
       regionId: 'sikasso',
       regionName: 'Sikasso',
       tag: 'Kénédougou',
@@ -176,7 +187,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'Le plus grand édifice en terre crue au monde',
       category: 'decouvrir',
       subCategory: 'monuments',
-      description: 'Chef-d\'œuvre du style soudanais, entretenu chaque année lors de la fête du crépissage.',
+      description:
+          'Chef-d\'œuvre du style soudanais, entretenu chaque année lors de la fête du crépissage.',
       regionId: 'mopti',
       regionName: 'Mopti',
       tag: 'Monument UNESCO',
@@ -190,7 +202,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'La Muraille de Résistance du Kénédougou',
       category: 'decouvrir',
       subCategory: 'monuments',
-      description: 'Imposante forteresse de terre et de pierres ayant défendu la ville contre les sièges.',
+      description:
+          'Imposante forteresse de terre et de pierres ayant défendu la ville contre les sièges.',
       regionId: 'sikasso',
       regionName: 'Sikasso',
       tag: 'Fortification',
@@ -204,7 +217,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'Symbole de la puissance de l\'Empire Songhoï',
       category: 'decouvrir',
       subCategory: 'monuments',
-      description: 'Structure pyramidale majestueuse en banco édifiée à Gao par l\'empereur Askia Mohammed.',
+      description:
+          'Structure pyramidale majestueuse en banco édifiée à Gao par l\'empereur Askia Mohammed.',
       regionId: 'gao',
       regionName: 'Gao',
       tag: 'Gao Impérial',
@@ -218,7 +232,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'L\'œuvre commandée par Mansa Moussa en 1327',
       category: 'decouvrir',
       subCategory: 'monuments',
-      description: 'Sanctuaire séculaire dessiné par le poète et architecte andalou Abou Ishaq es-Sahéli.',
+      description:
+          'Sanctuaire séculaire dessiné par le poète et architecte andalou Abou Ishaq es-Sahéli.',
       regionId: 'tombouctou',
       regionName: 'Tombouctou',
       tag: 'Patrimoine Majeur',
@@ -232,7 +247,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'Témoin des grandes batailles du Haut-Sénégal',
       category: 'decouvrir',
       subCategory: 'monuments',
-      description: 'Site historique situé près de Kayes, au cœur des récits d\'El Hadj Oumar Tall.',
+      description:
+          'Site historique situé près de Kayes, au cœur des récits d\'El Hadj Oumar Tall.',
       regionId: 'kayes',
       regionName: 'Kayes',
       tag: 'Haut-Sénégal',
@@ -250,7 +266,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'La ruse de l\'esprit face à la force brute',
       category: 'contes',
       subCategory: 'contes_interactifs',
-      description: 'Une grande fable des veillées mandingues où la réflexion triomphe de la gourmandise.',
+      description:
+          'Une grande fable des veillées mandingues où la réflexion triomphe de la gourmandise.',
       regionId: null,
       regionName: 'Tout le Mali',
       tag: 'Conte Interactif',
@@ -263,7 +280,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'Le mythe fondateur de l\'Empire du Ghana',
       category: 'contes',
       subCategory: 'contes_interactifs',
-      description: 'L\'histoire du pacte sacré de Koumbi Saleh et de la pluie d\'or sur l\'ancien empire.',
+      description:
+          'L\'histoire du pacte sacré de Koumbi Saleh et de la pluie d\'or sur l\'ancien empire.',
       regionId: 'kayes',
       regionName: 'Kayes',
       tag: 'Récit Mythique',
@@ -276,7 +294,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'Secret de la forge et respect des éléments',
       category: 'contes',
       subCategory: 'contes_interactifs',
-      description: 'Conte initiatique sur l\'alliance sacrée entre les maîtres du feu et la nature.',
+      description:
+          'Conte initiatique sur l\'alliance sacrée entre les maîtres du feu et la nature.',
       regionId: 'segou',
       regionName: 'Ségou',
       tag: 'Conte Initiatique',
@@ -289,11 +308,12 @@ abstract final class MockCultureStage1Data {
   static const List<CultureItem> defis = [
     CultureItem(
       id: 'defi_nda_baobab',
-      title: '« N\'Da ! » — Les Énigmes du Baobab',
+      title: '«   ! » — Les Énigmes du Baobab',
       subtitle: 'Devinettes traditionnelles Bambara',
       category: 'defis',
       subCategory: 'devinettes',
-      description: 'Répondez par « N\'Da n\'sira » et élucidez les énigmes poétiques posées par nos aïeux.',
+      description:
+          'Répondez par «    sira » et élucidez les énigmes poétiques posées par nos aïeux.',
       regionId: null,
       regionName: 'Tout le Mali',
       tag: 'Jeu de Devinettes',
@@ -306,7 +326,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'Ghana, Mali et Songhoï',
       category: 'defis',
       subCategory: 'devinettes',
-      description: 'Mesurez vos connaissances sur les dates clés, les dynasties et les grands héros du Mali.',
+      description:
+          'Mesurez vos connaissances sur les dates clés, les dynasties et les grands héros du Mali.',
       regionId: null,
       regionName: 'Tout le Mali',
       tag: 'Quiz Culturel',
@@ -319,7 +340,8 @@ abstract final class MockCultureStage1Data {
       subtitle: 'La sagesse de la confrérie des Dozo',
       category: 'defis',
       subCategory: 'devinettes',
-      description: 'Devinez le sens caché des proverbes et enseignements de la forêt sacrée.',
+      description:
+          'Devinez le sens caché des proverbes et enseignements de la forêt sacrée.',
       regionId: 'koulikoro',
       regionName: 'Koulikoro',
       tag: 'Sagesse Dozo',

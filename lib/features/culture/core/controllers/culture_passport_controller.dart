@@ -12,7 +12,12 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
             passportNumber: 'ML-ALT-2026-08',
             issuedAt: DateTime.now().subtract(const Duration(days: 14)),
             entries: _initialDiscoveries,
-            exploredRegionIds: const ['koulikoro', 'tombouctou', 'sikasso', 'mopti'],
+            exploredRegionIds: const [
+              'koulikoro',
+              'tombouctou',
+              'sikasso',
+              'mopti'
+            ],
             featuredDiscoveryOfTheDay: _defaultFeaturedDiscovery,
           ),
         );
@@ -27,7 +32,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
     photoUrl: 'assets/images/culture/personnages/soundiata.jpg',
     tag: 'Mansa Bâtisseur',
     discoveredAt: DateTime.now().subtract(const Duration(hours: 18)),
-    culturalQuote: '« Toute vie humaine est une vie. Un tort causé à une vie exige réparation. »',
+    culturalQuote:
+        '« Toute vie humaine est une vie. Un tort causé à une vie exige réparation. »',
     isMilestone: true,
     milestoneLabel: 'Première figure historique découverte',
     targetRoute: '/culture/personnage/perso_soundiata',
@@ -46,7 +52,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
       photoUrl: 'assets/images/culture/personnages/soundiata.jpg',
       tag: 'Mansa Bâtisseur',
       discoveredAt: DateTime.now().subtract(const Duration(days: 12)),
-      culturalQuote: '« Toute vie humaine est une vie. Un tort causé à une vie exige réparation. »',
+      culturalQuote:
+          '« Toute vie humaine est une vie. Un tort causé à une vie exige réparation. »',
       isMilestone: true,
       milestoneLabel: 'Première figure historique découverte',
       targetRoute: '/culture/personnage/perso_soundiata',
@@ -62,7 +69,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
       photoUrl: 'assets/images/culture/personnages/mansa_moussa.jpg',
       tag: 'Âge d\'Or',
       discoveredAt: DateTime.now().subtract(const Duration(days: 9)),
-      culturalQuote: '« Il fit rayonner les universités du Mali jusqu\'aux confins du monde méditerranéen. »',
+      culturalQuote:
+          '« Il fit rayonner les universités du Mali jusqu\'aux confins du monde méditerranéen. »',
       targetRoute: '/culture/personnage/perso_mansa_moussa',
       xpEarned: 50,
     ),
@@ -92,7 +100,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
       photoUrl: 'assets/images/culture/monuments/mosquee_djingareyber.jpg',
       tag: 'Joyau UNESCO',
       discoveredAt: DateTime.now().subtract(const Duration(days: 10)),
-      culturalQuote: '« Un lieu où la prière et la science se rencontrent depuis sept siècles. »',
+      culturalQuote:
+          '« Un lieu où la prière et la science se rencontrent depuis sept siècles. »',
       isMilestone: true,
       milestoneLabel: 'Premier monument historique exploré',
       targetRoute: '/culture/monument/monument_djingareyber',
@@ -108,7 +117,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
       photoUrl: 'assets/images/culture/monuments/mosquee_djenne.jpg',
       tag: 'Architecture Banco',
       discoveredAt: DateTime.now().subtract(const Duration(days: 4)),
-      culturalQuote: '« Chaque année, la fête du Crépissage rassemble toute la communauté du Djoliba. »',
+      culturalQuote:
+          '« Chaque année, la fête du Crépissage rassemble toute la communauté du Djoliba. »',
       targetRoute: '/culture/monument/monument_djenne',
       xpEarned: 40,
     ),
@@ -124,7 +134,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
       photoUrl: 'assets/images/culture/villes/djenne_ville.jpg',
       tag: 'Cité d\'Art',
       discoveredAt: DateTime.now().subtract(const Duration(days: 8)),
-      culturalQuote: '« Berceau des bâtisseurs maçons Barey et du carrefour fluvial du Bani. »',
+      culturalQuote:
+          '« Berceau des bâtisseurs maçons Barey et du carrefour fluvial du Bani. »',
       targetRoute: '/culture/ville/ville_djenne',
       xpEarned: 30,
     ),
@@ -138,7 +149,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
       photoUrl: 'assets/images/culture/villes/sikasso_ville.jpg',
       tag: 'Capitale du Sud',
       discoveredAt: DateTime.now().subtract(const Duration(days: 5)),
-      culturalQuote: '« Terre fertile, remparts de mémoire et carrefour des rythmes Balafon. »',
+      culturalQuote:
+          '« Terre fertile, remparts de mémoire et carrefour des rythmes Balafon. »',
       targetRoute: '/culture/ville/ville_sikasso',
       xpEarned: 30,
     ),
@@ -154,7 +166,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
       photoUrl: 'assets/images/culture/villes/djenne_ville.jpg',
       tag: 'Fable Mandingue',
       discoveredAt: DateTime.now().subtract(const Duration(days: 7)),
-      culturalQuote: '« La sagesse et la mesure triomphent toujours de la force aveugle. »',
+      culturalQuote:
+          '« La sagesse et la mesure triomphent toujours de la force aveugle. »',
       isMilestone: true,
       milestoneLabel: 'Premier conte et sagesse achevés',
       targetRoute: '/culture/conte/conte_lievre_hyene',
@@ -165,14 +178,15 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
     PassportEntry(
       id: 'riddle_vent',
       type: PassportItemType.defi,
-      title: 'Devinette N\'Da : Le Vent (Fonyo)',
+      title: 'Devinette   : Le Vent (Fonyo)',
       subtitle: 'Je voyage sans jambes et parle sans bouche...',
       regionId: null,
       regionName: 'Tout le Mali',
       photoUrl: 'assets/images/culture/villes/bandiagara_falaise.jpg',
-      tag: 'Devinette N\'Da',
+      tag: 'Devinette  ',
       discoveredAt: DateTime.now().subtract(const Duration(days: 3)),
-      culturalQuote: '« Le vent ne brise jamais l\'herbe qui sait se courber avec humilité. »',
+      culturalQuote:
+          '« Le vent ne brise jamais l\'herbe qui sait se courber avec humilité. »',
       isMilestone: true,
       milestoneLabel: 'Première énigme traditionnelle résolue',
       targetRoute: '/culture/defis/devinettes',
@@ -196,7 +210,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
     String? milestoneLabel,
     int xpEarned = 50,
   }) {
-    final existingIndex = state.entries.indexWhere((e) => e.type == type && e.id == id);
+    final existingIndex =
+        state.entries.indexWhere((e) => e.type == type && e.id == id);
     if (existingIndex != -1) {
       // Déjà découvert
       return false;
@@ -205,7 +220,9 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
     // Détection automatique de milestone si premier élément du genre
     final bool firstOfType = !state.entries.any((e) => e.type == type);
     final String? resolvedMilestone = milestoneLabel ??
-        (firstOfType ? 'Premier(ère) ${type.label.toLowerCase()} découvert(e)' : null);
+        (firstOfType
+            ? 'Premier(ère) ${type.label.toLowerCase()} découvert(e)'
+            : null);
 
     final newEntry = PassportEntry(
       id: id,
@@ -258,12 +275,15 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
         id: 'explorateur_monuments',
         title: 'Gardien des Pierres & du Banco',
         subtitle: 'Explorateur des édifices sacrés du Mali',
-        description: 'A foulé et contemplé au moins 2 monuments historiques séculaires.',
+        description:
+            'A foulé et contemplé au moins 2 monuments historiques séculaires.',
         icon: Icons.account_balance_rounded,
         sealColor: CultureTheme.primaryBlue,
         isUnlocked: monumentCount >= 2,
         requirementText: '$monumentCount/2 monuments explorés',
-        unlockedAt: monumentCount >= 2 ? state.issuedAt.add(const Duration(days: 4)) : null,
+        unlockedAt: monumentCount >= 2
+            ? state.issuedAt.add(const Duration(days: 4))
+            : null,
       ),
       CulturalDistinction(
         id: 'conteur_veillees',
@@ -274,40 +294,51 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
         sealColor: CultureTheme.accentOrange,
         isUnlocked: conteCount >= 1,
         requirementText: '$conteCount/1 conte achevé',
-        unlockedAt: conteCount >= 1 ? state.issuedAt.add(const Duration(days: 7)) : null,
+        unlockedAt: conteCount >= 1
+            ? state.issuedAt.add(const Duration(days: 7))
+            : null,
       ),
       CulturalDistinction(
         id: 'historien_manden',
         title: 'Chroniqueur des Mansa',
         subtitle: 'Connaisseur des grandes dynasties',
-        description: 'A exploré les récits des bâtisseurs et héros de la nation malienne.',
+        description:
+            'A exploré les récits des bâtisseurs et héros de la nation malienne.',
         icon: Icons.history_edu_rounded,
         sealColor: CultureTheme.primaryBlue,
         isUnlocked: figureCount >= 3,
         requirementText: '$figureCount/3 grandes figures inscrites',
-        unlockedAt: figureCount >= 3 ? state.issuedAt.add(const Duration(days: 8)) : null,
+        unlockedAt: figureCount >= 3
+            ? state.issuedAt.add(const Duration(days: 8))
+            : null,
       ),
       CulturalDistinction(
         id: 'sage_enigmes',
-        title: 'Initié aux Devinettes N\'Da',
+        title: 'Initié aux Devinettes  ',
         subtitle: 'Maître des énigmes de la sagesse populaire',
-        description: 'A résolu avec sagacité les énigmes ancestrales du Djoliba.',
+        description:
+            'A résolu avec sagacité les énigmes ancestrales du Djoliba.',
         icon: Icons.psychology_rounded,
         sealColor: CultureTheme.accentOrange,
         isUnlocked: defiCount >= 1,
         requirementText: '$defiCount/1 défi relevé',
-        unlockedAt: defiCount >= 1 ? state.issuedAt.add(const Duration(days: 11)) : null,
+        unlockedAt: defiCount >= 1
+            ? state.issuedAt.add(const Duration(days: 11))
+            : null,
       ),
       CulturalDistinction(
         id: 'decouvreur_mali',
         title: 'Grand Voyageur du Sahel',
         subtitle: 'Explorateur des terres et cités du Mali',
-        description: 'A parcouru au moins 4 grandes régions culturelles du pays.',
+        description:
+            'A parcouru au moins 4 grandes régions culturelles du pays.',
         icon: Icons.explore_rounded,
         sealColor: CultureTheme.cyanTurquoise,
         isUnlocked: regionCount >= 4,
         requirementText: '$regionCount/4 régions explorées',
-        unlockedAt: regionCount >= 4 ? state.issuedAt.add(const Duration(days: 12)) : null,
+        unlockedAt: regionCount >= 4
+            ? state.issuedAt.add(const Duration(days: 12))
+            : null,
       ),
     ];
   }

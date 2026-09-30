@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import '../models/culture_challenge_models.dart';
 import '../theme/culture_theme.dart';
 
-/// Banques de données authentiques des Devinettes « N'Da ! », Quiz et Missions
+/// Banques de données authentiques des Devinettes «   ! », Quiz et Missions
 abstract final class MockCultureChallengesData {
-  // ── 1. DEVINETTES TRADITIONNELLES (« N'DA ! ») ─────────────────────────────
+  // ── 1. DEVINETTES TRADITIONNELLES («   ! ») ─────────────────────────────
   static const List<TraditionalRiddle> riddles = [
     // Devinette 1 : Le Vent (Fonyo)
     TraditionalRiddle(
       id: 'riddle_vent',
-      formulaIntro: "« N'Da ! » — « N'Da n'sira ! »",
+      formulaIntro: "«   ! » — «   n'sira ! »",
       riddleText:
           'Je voyage sans jambes et je parle sans bouche.\nJe caresse la tête du roi comme celle du mendiant.\nNul ne peut me voir, mais chacun entend mon passage.\n\nQui suis-je ?',
       hints: [
@@ -26,7 +26,8 @@ abstract final class MockCultureChallengesData {
       correctAnswer: 'Le Vent (Fonyo)',
       culturalExplanation:
           'Dans les veillées mandingues et sahéliennes, le vent (Fonyo) est perçu comme le messager invisible des esprits et le souffle de vie. Il rappelle que ce qui est invisible peut être plus puissant que ce qui se voit.',
-      proverb: '« Le vent ne brise jamais l\'herbe qui sait se courber avec humilité. »',
+      proverb:
+          '« Le vent ne brise jamais l\'herbe qui sait se courber avec humilité. »',
       regionId: null,
       regionName: 'Tout le Mali',
       category: 'Éléments de la Nature',
@@ -38,7 +39,7 @@ abstract final class MockCultureChallengesData {
     // Devinette 2 : L'Ombre
     TraditionalRiddle(
       id: 'riddle_ombre',
-      formulaIntro: "« N'Da ! » — « N'Da n'sira ! »",
+      formulaIntro: "«   ! » — «   n'sira ! »",
       riddleText:
           'Si tu marches, il marche avec toi.\nSi tu cours à perdre haleine, il court à tes côtés.\nMais dès que la nuit noire tombe, il s\'évanouit sans bruit.\n\nQui suis-je ?',
       hints: [
@@ -55,7 +56,8 @@ abstract final class MockCultureChallengesData {
       correctAnswer: 'L\'Ombre (Dounou)',
       culturalExplanation:
           'L\'ombre symbolise le double spirituel (Ni ou Dya) dans la cosmogonie bambara et mandingue. Elle est le compagnon inséparable de l\'homme sur terre, témoin silencieux de ses actes.',
-      proverb: '« L\'homme peut fuir son village, mais il ne peut fuir son ombre. »',
+      proverb:
+          '« L\'homme peut fuir son village, mais il ne peut fuir son ombre. »',
       regionId: 'segou',
       regionName: 'Ségou',
       category: 'Sagesse & Esprit',
@@ -67,7 +69,7 @@ abstract final class MockCultureChallengesData {
     // Devinette 3 : Le Tam-tam / Djembé
     TraditionalRiddle(
       id: 'riddle_tamtam',
-      formulaIntro: "« N'Da ! » — « N'Da n'sira ! »",
+      formulaIntro: "«   ! » — «   n'sira ! »",
       riddleText:
           'Un tronc d\'arbre mort, coiffé de la peau d\'une chèvre.\nOn le frappe avec les mains, et pourtant tout le village se met à danser de joie.\n\nQui suis-je ?',
       hints: [
@@ -84,7 +86,8 @@ abstract final class MockCultureChallengesData {
       correctAnswer: 'Le Djembé / Tam-tam',
       culturalExplanation:
           'Le djembé, né sous l\'Empire du Mali au XIIIe siècle, est l\'instrument de rassemblement par excellence. « Djembe » vient du proverbe « Anke djé, anke bé » qui signifie « Rassemblons-nous tous ensemble dans la paix ».',
-      proverb: '« Le son du tambour ne dépasse pas le village qui sait l\'écouter. »',
+      proverb:
+          '« Le son du tambour ne dépasse pas le village qui sait l\'écouter. »',
       regionId: 'koulikoro',
       regionName: 'Koulikoro',
       category: 'Objets Sacrés & Musique',
@@ -96,7 +99,7 @@ abstract final class MockCultureChallengesData {
     // Devinette 4 : La Pirogue sur le Djoliba
     TraditionalRiddle(
       id: 'riddle_pirogue',
-      formulaIntro: "« N'Da ! » — « N'Da n'sira ! »",
+      formulaIntro: "«   ! » — «   n'sira ! »",
       riddleText:
           'Un grand arbre couché qui glisse sur l\'eau sans jamais boire.\nIl porte cent sacs de mil et cinquante hommes sans couler,\nmais une simple goutte d\'eau au fond peut le faire pleurer.\n\nQui suis-je ?',
       hints: [
@@ -113,7 +116,8 @@ abstract final class MockCultureChallengesData {
       correctAnswer: 'La Pirogue (Kounkoro)',
       culturalExplanation:
           'La pirogue est le symbole de la civilisation du fleuve Niger. Les Bozos, « maîtres des eaux », transmettent l\'art de sculpter ces embarcations et de négocier avec Faro, le génie du fleuve.',
-      proverb: '« Si tu voyages dans la pirogue d\'autrui, ne critique pas la direction de la pagaie. »',
+      proverb:
+          '« Si tu voyages dans la pirogue d\'autrui, ne critique pas la direction de la pagaie. »',
       regionId: 'mopti',
       regionName: 'Mopti',
       category: 'Objets & Métiers',
@@ -125,7 +129,7 @@ abstract final class MockCultureChallengesData {
     // Devinette 5 : Le Feu et la Cendre
     TraditionalRiddle(
       id: 'riddle_feu',
-      formulaIntro: "« N'Da ! » — « N'Da n'sira ! »",
+      formulaIntro: "«   ! » — «   n'sira ! »",
       riddleText:
           'La mère donne naissance à son fils dans la rougeur.\nMais quand le fils grandit et devient tout blanc,\nil étouffe et enterre sa propre mère.\n\nQui sommes-nous ?',
       hints: [
@@ -142,7 +146,8 @@ abstract final class MockCultureChallengesData {
       correctAnswer: 'Le Feu et la Cendre (Tasuma & Bugun)',
       culturalExplanation:
           'Cette énigme philosophique enseigne la métamorphose et le cycle de la vie. Elle rappelle aux jeunes initiés que tout ce qui brille avec éclat finit par s\'apaiser dans le silence de la sagesse.',
-      proverb: '« Même la plus grande flamme finit par dormir dans un lit de cendre. »',
+      proverb:
+          '« Même la plus grande flamme finit par dormir dans un lit de cendre. »',
       regionId: 'kayes',
       regionName: 'Kayes',
       category: 'Sagesse des Aînés',
@@ -154,7 +159,7 @@ abstract final class MockCultureChallengesData {
     // Devinette 6 : L'Aiguille et le Fil
     TraditionalRiddle(
       id: 'riddle_aiguille',
-      formulaIntro: "« N'Da ! » — « N'Da n'sira ! »",
+      formulaIntro: "«   ! » — «   n'sira ! »",
       riddleText:
           'J\'ai un seul œil percé dans la tête.\nJe traverse sans crainte les étoffes les plus denses,\nen traînant derrière moi une longue queue qui ne me quitte jamais.\n\nQui suis-je ?',
       hints: [
@@ -171,7 +176,8 @@ abstract final class MockCultureChallengesData {
       correctAnswer: 'L\'Aiguille et le Fil (Miseli)',
       culturalExplanation:
           'L\'aiguille symbolise le lien social et la médiation dans la société malienne. Celui qui sait réconcilier deux clans rivaux est surnommé « l\'aiguille qui recoud le tissu de la paix ».',
-      proverb: '« L\'aiguille perce le tissu, mais c\'est le fil qui le maintient uni. »',
+      proverb:
+          '« L\'aiguille perce le tissu, mais c\'est le fil qui le maintient uni. »',
       regionId: 'tombouctou',
       regionName: 'Tombouctou',
       category: 'Objets Sacrés & Métiers',
@@ -202,7 +208,8 @@ abstract final class MockCultureChallengesData {
       questions: [
         CultureQuizQuestion(
           id: 'q_soundiata_charte',
-          question: 'Quel texte fondamental a été solennellement proclamé par Soundiata Keïta en 1236 ?',
+          question:
+              'Quel texte fondamental a été solennellement proclamé par Soundiata Keïta en 1236 ?',
           options: [
             'La Charte de Kouroukan Fouga',
             'Le Traité de Tombouctou',
@@ -219,7 +226,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_mansa_moussa_pelerinage',
-          question: 'En quelle année Mansa Moussa a-t-il réalisé son pèlerinage historique vers La Mecque ?',
+          question:
+              'En quelle année Mansa Moussa a-t-il réalisé son pèlerinage historique vers La Mecque ?',
           options: [
             '1324',
             '1235',
@@ -236,7 +244,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_kirina_bataille',
-          question: 'Quelle bataille décisive de 1235 permit à Soundiata de vaincre le roi sorcier Soumaoro Kanté ?',
+          question:
+              'Quelle bataille décisive de 1235 permit à Soundiata de vaincre le roi sorcier Soumaoro Kanté ?',
           options: [
             'La Bataille de Kirina',
             'La Bataille de Tondibi',
@@ -253,7 +262,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_titre_mansa',
-          question: 'Que signifie exactement le titre impérial « Mansa » porté par les empereurs du Mali ?',
+          question:
+              'Que signifie exactement le titre impérial « Mansa » porté par les empereurs du Mali ?',
           options: [
             'Roi des Rois / Souverain Suprême',
             'Maître de l\'Or pur',
@@ -270,7 +280,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_ghana_capitale',
-          question: 'Quelle cité antique était la prestigieuse capitale de l\'Empire du Ghana (Wagadou) ?',
+          question:
+              'Quelle cité antique était la prestigieuse capitale de l\'Empire du Ghana (Wagadou) ?',
           options: [
             'Koumbi Saleh',
             'Gao',
@@ -287,7 +298,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_songhai_askia',
-          question: 'Quel grand réformateur de l\'Empire Songhaï a fondé la dynastie des Askia en 1493 ?',
+          question:
+              'Quel grand réformateur de l\'Empire Songhaï a fondé la dynastie des Askia en 1493 ?',
           options: [
             'Askia Mohammed',
             'Sonni Ali Ber',
@@ -324,7 +336,8 @@ abstract final class MockCultureChallengesData {
       questions: [
         CultureQuizQuestion(
           id: 'q_djenne_architecture',
-          question: 'En quel matériau traditionnel la Grande Mosquée de Djenné est-elle entièrement bâtie ?',
+          question:
+              'En quel matériau traditionnel la Grande Mosquée de Djenné est-elle entièrement bâtie ?',
           options: [
             'En banco (argile crue mêlée de son et paille)',
             'En pierre calcaire taillée',
@@ -341,7 +354,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_djenne_bere',
-          question: 'Comment s\'appelle la grande fête annuelle collective de restauration de la mosquée de Djenné ?',
+          question:
+              'Comment s\'appelle la grande fête annuelle collective de restauration de la mosquée de Djenné ?',
           options: [
             'Le Crépissage (Le Béré)',
             'La Fête du Sanké Mon',
@@ -358,7 +372,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_tombeau_askia',
-          question: 'Quelle forme architecturale unique caractérise le célèbre Tombeau des Askia à Gao ?',
+          question:
+              'Quelle forme architecturale unique caractérise le célèbre Tombeau des Askia à Gao ?',
           options: [
             'Une pyramide sahélienne à degrés en terre crue',
             'Un dôme circulaire en pierre',
@@ -375,7 +390,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_sankore_mosquee',
-          question: 'À quelle célèbre université médiévale de Tombouctou la mosquée de Sankoré est-elle associée ?',
+          question:
+              'À quelle célèbre université médiévale de Tombouctou la mosquée de Sankoré est-elle associée ?',
           options: [
             'L\'Université de Sankoré',
             'L\'Académie de Djenné',
@@ -392,7 +408,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_fort_medine',
-          question: 'Près de quelle grande ville fluviale se dresse le Fort historique de Médine ?',
+          question:
+              'Près de quelle grande ville fluviale se dresse le Fort historique de Médine ?',
           options: [
             'Kayes',
             'Koulikoro',
@@ -429,7 +446,8 @@ abstract final class MockCultureChallengesData {
       questions: [
         CultureQuizQuestion(
           id: 'q_tombouctou_saints',
-          question: 'Combien de saints patrons veillent traditionnellement sur la cité mystique de Tombouctou ?',
+          question:
+              'Combien de saints patrons veillent traditionnellement sur la cité mystique de Tombouctou ?',
           options: [
             '333 Saints',
             '99 Saints',
@@ -446,7 +464,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_segou_arbres',
-          question: 'Quel arbre sacré a donné à Ségou son surnom de « Cité des 4 444... » ?',
+          question:
+              'Quel arbre sacré a donné à Ségou son surnom de « Cité des 4 444... » ?',
           options: [
             'Les Balanzans (acacias sacrés)',
             'Les Baobabs millénaires',
@@ -463,7 +482,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_mopti_surnom',
-          question: 'En raison de ses canaux et de sa flotte de pirogues, quel surnom donne-t-on souvent à Mopti ?',
+          question:
+              'En raison de ses canaux et de sa flotte de pirogues, quel surnom donne-t-on souvent à Mopti ?',
           options: [
             'La Venise du Mali',
             'Le Phare du Sahel',
@@ -480,7 +500,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_sikasso_tata',
-          question: 'Quelle formidable muraille défensive en terre crue protégeait autrefois la ville de Sikasso ?',
+          question:
+              'Quelle formidable muraille défensive en terre crue protégeait autrefois la ville de Sikasso ?',
           options: [
             'Le Tata de Sikasso',
             'Les Remparts de Bandiagara',
@@ -497,7 +518,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_bamako_caimans',
-          question: 'Quel fleuve majestueux traverse la capitale Bamako et irrigue tout le Mali ?',
+          question:
+              'Quel fleuve majestueux traverse la capitale Bamako et irrigue tout le Mali ?',
           options: [
             'Le Djoliba (Fleuve Niger)',
             'Le Fleuve Sénégal',
@@ -534,7 +556,8 @@ abstract final class MockCultureChallengesData {
       questions: [
         CultureQuizQuestion(
           id: 'q_kora_cordes',
-          question: 'Combien de cordes comporte traditionnellement la Kora mandingue classique ?',
+          question:
+              'Combien de cordes comporte traditionnellement la Kora mandingue classique ?',
           options: [
             '21 cordes',
             '12 cordes',
@@ -551,7 +574,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_bogolan_teinture',
-          question: 'Quels ingrédients naturels sont indispensables pour teindre le tissu traditionnel Bogolan ?',
+          question:
+              'Quels ingrédients naturels sont indispensables pour teindre le tissu traditionnel Bogolan ?',
           options: [
             'De la boue fermentée et des décoctions de feuilles',
             'De la cire d\'abeille et de l\'encre de Chine',
@@ -568,7 +592,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_balafon_sosso',
-          question: 'Quel instrument sacré légendaire, conservé depuis le XIIIe siècle, est inscrit au patrimoine immatériel de l\'UNESCO ?',
+          question:
+              'Quel instrument sacré légendaire, conservé depuis le XIIIe siècle, est inscrit au patrimoine immatériel de l\'UNESCO ?',
           options: [
             'Le Sosso-Bala',
             'La Kora de Soundiata',
@@ -585,7 +610,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_masque_kanaga',
-          question: 'Quel masque dogon célèbre représente la liaison entre la Terre et le Ciel dans la cosmogonie ?',
+          question:
+              'Quel masque dogon célèbre représente la liaison entre la Terre et le Ciel dans la cosmogonie ?',
           options: [
             'Le Masque Kanaga (croix à double traverse)',
             'Le Masque Sirige (très haute échelle)',
@@ -602,7 +628,8 @@ abstract final class MockCultureChallengesData {
         ),
         CultureQuizQuestion(
           id: 'q_confrerie_dozo',
-          question: 'Quelle est la valeur centrale transmise par les confréries initiatiques de chasseurs Dozos ?',
+          question:
+              'Quelle est la valeur centrale transmise par les confréries initiatiques de chasseurs Dozos ?',
           options: [
             'L\'humilité, la protection de la nature et la justice',
             'La conquête de nouveaux territoires',
@@ -630,7 +657,8 @@ abstract final class MockCultureChallengesData {
     DiscoveryMission(
       id: 'm_mosquee_djenne',
       title: 'Explorer la Mosquée de Djenné',
-      description: 'Découvrez les secrets d\'architecture du plus grand monument en terre crue au monde.',
+      description:
+          'Découvrez les secrets d\'architecture du plus grand monument en terre crue au monde.',
       actionRoute: '/culture/monument/monument_mosquee_djenne',
       category: 'Monument',
       xp: 50,
@@ -640,7 +668,8 @@ abstract final class MockCultureChallengesData {
     DiscoveryMission(
       id: 'm_conte_lievre',
       title: 'Vivre le conte de Zoumana et Namori',
-      description: 'Faites des choix interactifs pour déjouer les plans de l\'hyène gourmande.',
+      description:
+          'Faites des choix interactifs pour déjouer les plans de l\'hyène gourmande.',
       actionRoute: '/culture/conte/conte_lievre_hyene',
       category: 'Conte Interactif',
       xp: 60,
@@ -650,7 +679,8 @@ abstract final class MockCultureChallengesData {
     DiscoveryMission(
       id: 'm_perso_soundiata',
       title: 'Consulter la fiche de Soundiata Keïta',
-      description: 'Apprenez les 44 articles de la Charte du Manden et la fondation de l\'empire.',
+      description:
+          'Apprenez les 44 articles de la Charte du Manden et la fondation de l\'empire.',
       actionRoute: '/culture/personnage/perso_soundiata',
       category: 'Personnage Illustre',
       xp: 40,
@@ -660,7 +690,8 @@ abstract final class MockCultureChallengesData {
     DiscoveryMission(
       id: 'm_ville_tombouctou',
       title: 'Visiter Tombouctou la Mystérieuse',
-      description: 'Parcourez la cité des 333 saints et l\'Université historique de Sankoré.',
+      description:
+          'Parcourez la cité des 333 saints et l\'Université historique de Sankoré.',
       actionRoute: '/culture/ville/ville_tombouctou',
       category: 'Cité Historique',
       xp: 45,
@@ -672,7 +703,7 @@ abstract final class MockCultureChallengesData {
   // ── 4. DÉFI DU JOUR ────────────────────────────────────────────────────────
   static const TraditionalRiddle dailyChallenge = TraditionalRiddle(
     id: 'riddle_daily',
-    formulaIntro: "« N'Da ! » — Défi du Jour des Anciens",
+    formulaIntro: "«   ! » — Défi du Jour des Anciens",
     riddleText:
         'Je suis petite comme une perle, mais je traverse les siècles.\nLes reines du Manden m\'arboraient dans leurs tresses, et j\'achetais des chevaux au temps de Kankan Moussa.\n\nQui suis-je ?',
     hints: [
@@ -689,7 +720,8 @@ abstract final class MockCultureChallengesData {
     correctAnswer: 'Le Cauri (Koni)',
     culturalExplanation:
         'Le cauri est le symbole millénaire de la prospérité, de la divination et du commerce au Mali. Il servait à la fois de monnaie et de parure protectrice chez les Dozos et les souverains.',
-    proverb: '« Celui qui possède le cauri du savoir est plus riche que celui qui possède le coffre d\'or. »',
+    proverb:
+        '« Celui qui possède le cauri du savoir est plus riche que celui qui possède le coffre d\'or. »',
     regionId: null,
     regionName: 'Tout le Mali',
     category: 'Symbole Sacré du Jour',

@@ -145,7 +145,7 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
     }
 
     _logger
-        .w('[AlterniA] Aucun serveur n\'a pu répondre parmi les URLs testées.');
+        .w('[AlterniA] Aucun serveur  a pu répondre parmi les URLs testées.');
     return "Je n'ai pas pu me connecter au moteur pédagogique AlterniA. Vérifiez la connexion de votre boîtier ou serveur.";
   }
 

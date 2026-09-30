@@ -40,13 +40,13 @@ class CultureSearchResult {
 
 /// Types de résultats culturels reconnus
 enum CultureResultType {
-  figure,     // Personnage historique
-  monument,   // Monument
-  ville,      // Ville / Terroir
-  conte,      // Conte interactif
-  devinette,  // Devinette N'Da / quiz
-  region,     // Région du Mali
-  general,    // Réponse générale
+  figure, // Personnage historique
+  monument, // Monument
+  ville, // Ville / Terroir
+  conte, // Conte interactif
+  devinette, // Devinette   / quiz
+  region, // Région du Mali
+  general, // Réponse générale
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -62,7 +62,7 @@ Tu réponds UNIQUEMENT en français, avec précision et poésie sur les sujets s
 - Villes et terroirs (Tombouctou, Djenné, Ségou, Bandiagara, Gao, Sikasso, Kayes…)
 - Monuments et patrimoine UNESCO du Mali
 - Contes et fables mandingues, bambara, peul, dogon, touareg
-- Devinettes traditionnelles (N'Da malien)
+- Devinettes traditionnelles (  malien)
 - Traditions orales, griots, musique et artisanat
 - Les 19 régions du Mali et leurs cultures spécifiques
 
@@ -89,7 +89,8 @@ class CultureAiService {
     final cleanQuery = query.trim();
     if (cleanQuery.isEmpty) {
       return CultureSearchResult(
-        aiNarrative: 'Entrez un mot ou une question pour explorer la culture malienne.',
+        aiNarrative:
+            'Entrez un mot ou une question pour explorer la culture malienne.',
         resultType: CultureResultType.general,
         keywords: [],
         isFromAi: false,
@@ -192,8 +193,12 @@ class CultureAiService {
 
     final kwMatch = RegExp(r'\[KEYWORDS:([^\]]+)\]').firstMatch(raw);
     if (kwMatch != null) {
-      keywords = kwMatch.group(1)?.split(',').map((k) => k.trim().toLowerCase()).toList()
-          ?? keywords;
+      keywords = kwMatch
+              .group(1)
+              ?.split(',')
+              .map((k) => k.trim().toLowerCase())
+              .toList() ??
+          keywords;
     }
 
     String narrative = raw
@@ -215,13 +220,20 @@ class CultureAiService {
 
   CultureResultType _parseType(String raw) {
     switch (raw.toLowerCase()) {
-      case 'figure':   return CultureResultType.figure;
-      case 'monument': return CultureResultType.monument;
-      case 'ville':    return CultureResultType.ville;
-      case 'conte':    return CultureResultType.conte;
-      case 'devinette':return CultureResultType.devinette;
-      case 'region':   return CultureResultType.region;
-      default:         return CultureResultType.general;
+      case 'figure':
+        return CultureResultType.figure;
+      case 'monument':
+        return CultureResultType.monument;
+      case 'ville':
+        return CultureResultType.ville;
+      case 'conte':
+        return CultureResultType.conte;
+      case 'devinette':
+        return CultureResultType.devinette;
+      case 'region':
+        return CultureResultType.region;
+      default:
+        return CultureResultType.general;
     }
   }
 

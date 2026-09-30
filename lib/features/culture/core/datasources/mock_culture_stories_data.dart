@@ -15,7 +15,8 @@ abstract final class MockCultureStoriesData {
       regionName: 'Tout le Mali',
       tag: 'Fable Mandingue',
       photoUrl: 'assets/images/culture/contes/savane_crepuscule_stage.jpg',
-      photoCredits: 'Contes des Veillées Sahéliennes • Archives Nationales du Mali',
+      photoCredits:
+          'Contes des Veillées Sahéliennes • Archives Nationales du Mali',
       summary:
           'Lors d\'une grande sécheresse sur la savane, les animaux décident de creuser un puits commun. Tandis que Namori l\'hyène cherche à s\'accaparer les réserves par la force, le lièvre Zoumana use d\'intelligence et de ruse pour préserver la justice du village.',
       narrator: 'Griot Mamadou Kouyaté (Kangaba)',
@@ -50,7 +51,8 @@ abstract final class MockCultureStoriesData {
           id: 'scene_1',
           sceneNumber: 1,
           title: 'La Grande Soif de la Savane',
-          atmosphere: 'Crépuscule rougeoyant • Bruit du vent dans les herbes dorées',
+          atmosphere:
+              'Crépuscule rougeoyant • Bruit du vent dans les herbes dorées',
           narrativeText:
               'Le soleil s\'enfonce à l\'horizon du Manden. La poussière ocre flotte dans l\'air chaud et l\'harmattan souffle sur la terre aride. Les animaux du village se rassemblent autour du sage patriarche. L\'eau vient à manquer.\n\nZoumana le Lièvre s\'avance au milieu du cercle. Namori l\'Hyène, la gueule béante et l\'œil avide, grogne déjà dans l\'ombre en réclamant la part du lion.',
           culturalInsight:
@@ -58,8 +60,10 @@ abstract final class MockCultureStoriesData {
           choices: [
             StoryChoice(
               id: 'c1_a',
-              label: 'A — Proposer d\'unir les forces pour creuser un grand puits',
-              description: 'La voie du travail solidaire et de la fraternité villageoise.',
+              label:
+                  'A — Proposer d\'unir les forces pour creuser un grand puits',
+              description:
+                  'La voie du travail solidaire et de la fraternité villageoise.',
               nextSceneId: 'scene_2_puits',
               trait: 'Voie de l\'Entraide',
               icon: Icons.handshake_rounded,
@@ -67,7 +71,8 @@ abstract final class MockCultureStoriesData {
             StoryChoice(
               id: 'c1_b',
               label: 'B — Observer Namori en silence pour déjouer ses plans',
-              description: 'La voie de la prudence et de l\'analyse stratégique.',
+              description:
+                  'La voie de la prudence et de l\'analyse stratégique.',
               nextSceneId: 'scene_2_ruse',
               trait: 'Voie de la Prudence',
               icon: Icons.visibility_rounded,
@@ -78,7 +83,8 @@ abstract final class MockCultureStoriesData {
           id: 'scene_2_puits',
           sceneNumber: 2,
           title: 'L\'Effort Commun et la Trahison de la Nuit',
-          atmosphere: 'Nuit noire éclairée par la pleine lune • Murmure de l\'eau fraîche',
+          atmosphere:
+              'Nuit noire éclairée par la pleine lune • Murmure de l\'eau fraîche',
           narrativeText:
               'Après des heures d\'effort où chacun a sué sur la terre dure, l\'eau jaillit enfin, claire et pure comme un miroir d\'argent.\n\nMais la nuit venue, alors que tous dorment, des pas lourds s\'approchent. Namori s\'est faufilée pour voler la réserve d\'eau et tromper ses frères. Zoumana, posté derrière un buisson d\'épineux, la voit approcher.',
           culturalInsight:
@@ -86,16 +92,20 @@ abstract final class MockCultureStoriesData {
           choices: [
             StoryChoice(
               id: 'c2_a',
-              label: 'A — Enduire une calebasse de miel doré pour piéger Namori',
-              description: 'Attirer l\'hyène par sa propre gourmandise insatiable.',
+              label:
+                  'A — Enduire une calebasse de miel doré pour piéger Namori',
+              description:
+                  'Attirer l\'hyène par sa propre gourmandise insatiable.',
               nextSceneId: 'scene_3_piege_miel',
               trait: 'Ruse Mandingue',
               icon: Icons.emoji_objects_rounded,
             ),
             StoryChoice(
               id: 'c2_b',
-              label: 'B — Imiter la voix redoutable du génie gardien de la nuit',
-              description: 'Utiliser la terreur sacrée pour faire fuir l\'intruse.',
+              label:
+                  'B — Imiter la voix redoutable du génie gardien de la nuit',
+              description:
+                  'Utiliser la terreur sacrée pour faire fuir l\'intruse.',
               nextSceneId: 'scene_3_voix_genie',
               trait: 'Audace & Esprit',
               icon: Icons.record_voice_over_rounded,
@@ -106,7 +116,8 @@ abstract final class MockCultureStoriesData {
           id: 'scene_2_ruse',
           sceneNumber: 2,
           title: 'La Traque dans l\'Ombre',
-          atmosphere: 'Silence pesant de la brousse • Cri lointain d\'un oiseau nocturne',
+          atmosphere:
+              'Silence pesant de la brousse • Cri lointain d\'un oiseau nocturne',
           narrativeText:
               'En restant dissimulé, Zoumana découvre la cachette où Namori dissimule la calebasse sacrée du village. L\'hyène compte s\'enfuir avant l\'aube vers les collines de grès.\n\nZoumana doit agir avec promptitude avant que la caravane des chasseurs ne passe.',
           culturalInsight:
@@ -122,7 +133,8 @@ abstract final class MockCultureStoriesData {
             ),
             StoryChoice(
               id: 'c2_d',
-              label: 'B — Alerter le chef des chasseurs Dozo avec le cor de guerre',
+              label:
+                  'B — Alerter le chef des chasseurs Dozo avec le cor de guerre',
               description: 'Faire appel à l\'autorité morale et coutumière.',
               nextSceneId: 'scene_3_voix_genie',
               trait: 'Voie Coutumière',
@@ -134,7 +146,8 @@ abstract final class MockCultureStoriesData {
           id: 'scene_3_piege_miel',
           sceneNumber: 3,
           title: 'Le Piège de la Gourmandise',
-          atmosphere: 'Clarté de l\'aube naissante • Éclats de rire des oiseaux du fleuve',
+          atmosphere:
+              'Clarté de l\'aube naissante • Éclats de rire des oiseaux du fleuve',
           narrativeText:
               'Attirée par l\'odeur du miel, Namori plonge la tête la première dans le piège ! Ses pattes restent collées, et ses grognements ridicules réveillent tout le village assemblé.\n\nLe sage du village s\'avance sous les acclamations. Devant la honte de l\'hyène et le sourire calme de Zoumana, la vérité éclate au grand jour.',
           culturalInsight:
@@ -200,7 +213,8 @@ abstract final class MockCultureStoriesData {
           id: 'wb_scene_1',
           sceneNumber: 1,
           title: 'L\'Ombre sur Koumbi Saleh',
-          atmosphere: 'Ciel d\'orage grondant sur les remparts de pierre de Koumbi Saleh',
+          atmosphere:
+              'Ciel d\'orage grondant sur les remparts de pierre de Koumbi Saleh',
           narrativeText:
               'Chaque année, le serpent géant Wagadou Bida exigeait un tribut sacré pour faire pleuvoir des pépites d\'or sur le royaume du Wagadou. Mais cette année, la jeune Sia, renommée pour sa pureté et sa bravoure, est désignée.\n\nSon fiancé, le preux cavalier Mamadou Lamine, refuse de courber l\'échine devant la fatalité.',
           culturalInsight:
@@ -209,15 +223,18 @@ abstract final class MockCultureStoriesData {
             StoryChoice(
               id: 'wb_c1_a',
               label: 'A — Forger une lame sacrée auprès du grand maître du fer',
-              description: 'Chercher la puissance des forgerons gardiens du secret des métaux.',
+              description:
+                  'Chercher la puissance des forgerons gardiens du secret des métaux.',
               nextSceneId: 'wb_scene_2_forge',
               trait: 'Voie du Fer',
               icon: Icons.shield_rounded,
             ),
             StoryChoice(
               id: 'wb_c1_b',
-              label: 'B — Consulter les devins au sanctuaire de la source sacrée',
-              description: 'Comprendre la faiblesse secrète du monstre légendaire.',
+              label:
+                  'B — Consulter les devins au sanctuaire de la source sacrée',
+              description:
+                  'Comprendre la faiblesse secrète du monstre légendaire.',
               nextSceneId: 'wb_scene_2_oracle',
               trait: 'Voie des Savoirs',
               icon: Icons.psychology_alt_rounded,
@@ -228,7 +245,8 @@ abstract final class MockCultureStoriesData {
           id: 'wb_scene_2_forge',
           sceneNumber: 2,
           title: 'Le Sabre aux Sept Trempes',
-          atmosphere: 'Fournaise rougeoyante • Sons cadencés de l\'enclume ancestrale',
+          atmosphere:
+              'Fournaise rougeoyante • Sons cadencés de l\'enclume ancestrale',
           narrativeText:
               'Le chef des forgerons forge un sabre étincelant trempé dans les eaux mystiques du fleuve Sénégal. « Cette lame tranchera l\'illusion de la peur, Mamadou. Mais sois prêt à affronter la colère des éléments ! »\n\nMamadou monte son étalon blanc et galope jusqu\'au puits sacré.',
           culturalInsight:
@@ -245,7 +263,8 @@ abstract final class MockCultureStoriesData {
             StoryChoice(
               id: 'wb_c2_b',
               label: 'B — Rompre la chaîne magique qui lie le peuple au pacte',
-              description: 'Délivrer d\'abord les esprits avant d\'abattre l\'idole.',
+              description:
+                  'Délivrer d\'abord les esprits avant d\'abattre l\'idole.',
               nextSceneId: 'wb_scene_3_victoire',
               trait: 'Libérateur',
               icon: Icons.lock_open_rounded,
@@ -256,16 +275,19 @@ abstract final class MockCultureStoriesData {
           id: 'wb_scene_2_oracle',
           sceneNumber: 2,
           title: 'La Prophétie des Sept Têtes',
-          atmosphere: 'Vapeurs d\'encens • Murmures rituels des devins du Wagadou',
+          atmosphere:
+              'Vapeurs d\'encens • Murmures rituels des devins du Wagadou',
           narrativeText:
-              'Les anciens devins révèlent : « Le serpent n\'a de pouvoir que par la crainte qu\'il inspire. Tranche ses têtes sans hésitation, et le peuple découvrira que sa vraie richesse n\'est pas dans l\'or, mais dans sa volonté ! »',
+              'Les anciens devins révèlent : « Le serpent  a de pouvoir que par la crainte qu\'il inspire. Tranche ses têtes sans hésitation, et le peuple découvrira que sa vraie richesse  est pas dans l\'or, mais dans sa volonté ! »',
           culturalInsight:
               'Le mythe de Wagadou Bida symbolise la fin de l\'ère des tributs archaïques et l\'essor des grands empires marchands.',
           choices: [
             StoryChoice(
               id: 'wb_c2_c',
-              label: 'A — Galoper vers le puits et trancher les têtes du monstre',
-              description: 'L\'action décisive guidée par la sagesse des devins.',
+              label:
+                  'A — Galoper vers le puits et trancher les têtes du monstre',
+              description:
+                  'L\'action décisive guidée par la sagesse des devins.',
               nextSceneId: 'wb_scene_3_victoire',
               trait: 'Accomplissement',
               icon: Icons.stars_rounded,
@@ -276,7 +298,8 @@ abstract final class MockCultureStoriesData {
           id: 'wb_scene_3_victoire',
           sceneNumber: 3,
           title: 'La Libération du Wagadou',
-          atmosphere: 'Soleil éclatant dissipant les ténèbres • Chants de délivrance',
+          atmosphere:
+              'Soleil éclatant dissipant les ténèbres • Chants de délivrance',
           narrativeText:
               'D\'un geste magistral, Mamadou abat le monstre et sauve Sia sous les clameurs de joie du peuple de Koumbi Saleh !\n\nBien que la pluie d\'or cesse, les Soninkés se tournent vers le commerce, l\'agriculture et la sagesse, bâtissant une réputation de bâtisseurs qui traversera les siècles.',
           culturalInsight:
@@ -296,7 +319,8 @@ abstract final class MockCultureStoriesData {
       regionName: 'Ségou',
       tag: 'Conte Initiatique',
       photoUrl: 'assets/images/culture/contes/segou_djoliba_stage.jpg',
-      photoCredits: 'Contes des 4 444 Balanzans • Archives Culturelles de Ségou',
+      photoCredits:
+          'Contes des 4 444 Balanzans • Archives Culturelles de Ségou',
       summary:
           'Sur les rives du fleuve Niger à Ségou-Koro, le jeune apprenti forgeron Fodé entend le chant envoûtant d\'un oiseau aux plumes d\'argent. Pour percer le secret du métal indestructible, il doit choisir entre la soif de puissance et l\'harmonie avec les esprits de l\'eau.',
       narrator: 'Balla Fasséké Diabaté',
@@ -331,7 +355,8 @@ abstract final class MockCultureStoriesData {
           id: 'fo_scene_1',
           sceneNumber: 1,
           title: 'Le Chant au Coucher du Soleil',
-          atmosphere: 'Reflets d\'or sur les eaux calmes du fleuve Djoliba • Brise tiède',
+          atmosphere:
+              'Reflets d\'or sur les eaux calmes du fleuve Djoliba • Brise tiède',
           narrativeText:
               'Assis au bord de l\'eau après une longue journée à souffler sur les braises, Fodé contemple le Djoliba. Soudain, perché sur la branche d\'un balanzan centenaire, un oiseau étincelant entonne une mélodie qui fait vibrer le métal de ses outils.\n\n« Forgeron, dit l\'oiseau, cherches-tu le secret qui rend le fer aussi souple que l\'eau et aussi dur que le diamant ? »',
           culturalInsight:
@@ -339,16 +364,20 @@ abstract final class MockCultureStoriesData {
           choices: [
             StoryChoice(
               id: 'fo_c1_a',
-              label: 'A — Répondre avec humilité et offrir une calebasse de lait frais',
-              description: 'Montrer le respect des lois de l\'hospitalité et de la courtoisie.',
+              label:
+                  'A — Répondre avec humilité et offrir une calebasse de lait frais',
+              description:
+                  'Montrer le respect des lois de l\'hospitalité et de la courtoisie.',
               nextSceneId: 'fo_scene_2_secret',
               trait: 'Voie de l\'Humilité',
               icon: Icons.favorite_rounded,
             ),
             StoryChoice(
               id: 'fo_c1_b',
-              label: 'B — Demander immédiatement la formule secrète du métal royal',
-              description: 'Poursuivre la quête de gloire pour impressionner la cour de Ségou.',
+              label:
+                  'B — Demander immédiatement la formule secrète du métal royal',
+              description:
+                  'Poursuivre la quête de gloire pour impressionner la cour de Ségou.',
               nextSceneId: 'fo_scene_2_epreuve',
               trait: 'Voie de l\'Ambition',
               icon: Icons.auto_awesome_rounded,
@@ -359,7 +388,8 @@ abstract final class MockCultureStoriesData {
           id: 'fo_scene_2_secret',
           sceneNumber: 2,
           title: 'L\'Alliance du Feu et de l\'Eau',
-          atmosphere: 'Clarté lunaire scintillante sur le fleuve • Flamme bleue apaisante',
+          atmosphere:
+              'Clarté lunaire scintillante sur le fleuve • Flamme bleue apaisante',
           narrativeText:
               'Touché par la bienveillance de Fodé, l\'oiseau plonge dans les flots et en ressort tenant une braise aquatique. « Ne frappe jamais le fer avec colère. Tempère-le avec patience, en pensant à la vie qu\'il protégera. »\n\nFodé regagne l\'atelier pour forger son premier chef-d\'œuvre.',
           culturalInsight:
@@ -367,7 +397,8 @@ abstract final class MockCultureStoriesData {
           choices: [
             StoryChoice(
               id: 'fo_c2_a',
-              label: 'A — Forger une houe sacrée pour féconder la terre des paysans',
+              label:
+                  'A — Forger une houe sacrée pour féconder la terre des paysans',
               description: 'Consacrer son art au bien-être de la communauté.',
               nextSceneId: 'fo_scene_3_epilogue_paix',
               trait: 'Bâtisseur de Paix',
@@ -387,8 +418,10 @@ abstract final class MockCultureStoriesData {
           choices: [
             StoryChoice(
               id: 'fo_c2_b',
-              label: 'A — S\'agenouiller et reconnaître ses limites devant les esprits',
-              description: 'La sagesse du repentir qui ouvre les portes du savoir.',
+              label:
+                  'A — S\'agenouiller et reconnaître ses limites devant les esprits',
+              description:
+                  'La sagesse du repentir qui ouvre les portes du savoir.',
               nextSceneId: 'fo_scene_3_epilogue_paix',
               trait: 'Sagesse Retrouvée',
               icon: Icons.psychology_rounded,
@@ -413,7 +446,8 @@ abstract final class MockCultureStoriesData {
     InteractiveStory(
       id: 'conte_baobab_chasseur',
       title: 'Le Chasseur Dozo et le Secret du Baobab Sacré',
-      subtitle: 'La sagesse de la confrérie des chasseurs et le respect de la faune',
+      subtitle:
+          'La sagesse de la confrérie des chasseurs et le respect de la faune',
       origin: 'Tradition des Maîtres Chasseurs Dozo',
       regionId: 'koulikoro',
       regionName: 'Koulikoro',
@@ -445,7 +479,8 @@ abstract final class MockCultureStoriesData {
           id: 'bd_scene_1',
           sceneNumber: 1,
           title: 'L\'Étoile Perdue dans la Forêt',
-          atmosphere: 'Crépuscule sous les grands arbres • Bruissement des feuilles de baobab',
+          atmosphere:
+              'Crépuscule sous les grands arbres • Bruissement des feuilles de baobab',
           narrativeText:
               'Le jeune Moussa porte l\'habit de toile ocre des chasseurs Dozo orné de cauris. La nuit tombe vite sur la falaise de Siby. Face à lui se dresse le tronc colossal d\'un baobab creux où brille une petite lueur chaleureuse.',
           culturalInsight:
@@ -453,8 +488,10 @@ abstract final class MockCultureStoriesData {
           choices: [
             StoryChoice(
               id: 'bd_c1_a',
-              label: 'A — Saluer respectueusement selon le code sacré des Dozos',
-              description: '« I ni sogoma, mon père, que la bénédiction soit sur ce seuil. »',
+              label:
+                  'A — Saluer respectueusement selon le code sacré des Dozos',
+              description:
+                  '« I ni sogoma, mon père, que la bénédiction soit sur ce seuil. »',
               nextSceneId: 'bd_scene_2_sage',
               trait: 'Code d\'Honneur Dozo',
               icon: Icons.stars_rounded,
@@ -465,7 +502,8 @@ abstract final class MockCultureStoriesData {
           id: 'bd_scene_2_sage',
           sceneNumber: 2,
           title: 'L\'Enseignement des Trois Racines',
-          atmosphere: 'Lueur douce du foyer intérieur • Parfum d\'écorces aromatiques',
+          atmosphere:
+              'Lueur douce du foyer intérieur • Parfum d\'écorces aromatiques',
           narrativeText:
               'Le sage aveugle sourit dans la pénombre : « Tu as su saluer avant de demander. Choisis maintenant l\'offrande que tu porteras à ton village à ton retour. »',
           culturalInsight:
@@ -499,13 +537,15 @@ abstract final class MockCultureStoriesData {
     InteractiveStory(
       id: 'conte_caravane_sable',
       title: 'Le Génie des Sables et la Caravane Perdue',
-      subtitle: 'L\'hospitalité saharienne et les secrets des manuscrits de Tombouctou',
+      subtitle:
+          'L\'hospitalité saharienne et les secrets des manuscrits de Tombouctou',
       origin: 'Légende des Caravanes du Sahara',
       regionId: 'tombouctou',
       regionName: 'Tombouctou',
       tag: 'Légende Sahélienne',
       photoUrl: 'assets/images/culture/contes/tombouctou_dunes_stage.jpg',
-      photoCredits: 'Récits des Caravanes Transsahariennes • Bibliothèque Ahmed Baba',
+      photoCredits:
+          'Récits des Caravanes Transsahariennes • Bibliothèque Ahmed Baba',
       summary:
           'Au cœur du désert au nord de Tombouctou, une tempête de sable sépare le jeune chamelier Bilal de sa caravane de sel. Il découvre dans les dunes une mystérieuse tente bleue où réside le gardien des étoiles.',
       narrator: 'Sidi Baba Cissé (Tombouctou)',
@@ -540,7 +580,8 @@ abstract final class MockCultureStoriesData {
           id: 'cs_scene_1',
           sceneNumber: 1,
           title: 'La Nuit du Grand Vent de Sable',
-          atmosphere: 'Dunes mouvantes sous la voûte céleste piquée de mille étoiles',
+          atmosphere:
+              'Dunes mouvantes sous la voûte céleste piquée de mille étoiles',
           narrativeText:
               'Le vent s\'est tu subitement sur l\'Erg. Bilal aperçoit des lanternes suspendues à l\'entrée d\'une tente en peau de chameau. Un thé fumant à la menthe l\'attend sur un tapis d\'indigo.',
           culturalInsight:
@@ -548,8 +589,10 @@ abstract final class MockCultureStoriesData {
           choices: [
             StoryChoice(
               id: 'cs_c1_a',
-              label: 'A — Accepter le thé des trois verres et partager son histoire',
-              description: 'Le premier amer comme la vie, le deuxième doux comme l\'amour, le troisième suave comme la mort.',
+              label:
+                  'A — Accepter le thé des trois verres et partager son histoire',
+              description:
+                  'Le premier amer comme la vie, le deuxième doux comme l\'amour, le troisième suave comme la mort.',
               nextSceneId: 'cs_scene_2_etoiles',
               trait: 'Respect du Rituel',
               icon: Icons.coffee_rounded,
@@ -560,7 +603,8 @@ abstract final class MockCultureStoriesData {
           id: 'cs_scene_2_etoiles',
           sceneNumber: 2,
           title: 'La Carte Céleste des Savants',
-          atmosphere: 'Ciel bleu nuit immaculé • Tracé lumineux des constellations',
+          atmosphere:
+              'Ciel bleu nuit immaculé • Tracé lumineux des constellations',
           narrativeText:
               'Le gardien déroule un vieux parchemin calligraphié à l\'encre de suie et d\'or. « Voici la carte que les astronomes de Sankoré ont dessinée il y a six cents ans. Regarde la constellation du Scorpion, elle t\'indique la porte de Tombouctou. »',
           culturalInsight:
@@ -568,7 +612,8 @@ abstract final class MockCultureStoriesData {
           choices: [
             StoryChoice(
               id: 'cs_c2_a',
-              label: 'A — Mémoriser le tracé des étoiles pour guider la caravane',
+              label:
+                  'A — Mémoriser le tracé des étoiles pour guider la caravane',
               description: 'La science mise au service de la vie humaine.',
               nextSceneId: 'cs_scene_3_fin',
               trait: 'Transmission du Savoir',
@@ -580,7 +625,8 @@ abstract final class MockCultureStoriesData {
           id: 'cs_scene_3_fin',
           sceneNumber: 3,
           title: 'Les Portes de la Cité aux 333 Saints',
-          atmosphere: 'Matin radieux • Silhouette majestueuse de la mosquée Djingareyber',
+          atmosphere:
+              'Matin radieux • Silhouette majestueuse de la mosquée Djingareyber',
           narrativeText:
               'À l\'aube, Bilal conduit sa caravane saine et sauve jusqu\'aux marchés parfumés de Tombouctou. Il remet le parchemin aux maîtres de la bibliothèque de Sankoré, perpétuant ainsi la chaîne sacrée de la mémoire.',
           culturalInsight:

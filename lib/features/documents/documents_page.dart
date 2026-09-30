@@ -210,7 +210,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-                'Le serveur AlternIA n\'a pas répondu. Vérifiez que vous etes bien connectés à internet.'),
+                'Le serveur AlternIA  a pas répondu. Vérifiez que vous etes bien connectés à internet.'),
             backgroundColor: Colors.redAccent,
           ),
         );

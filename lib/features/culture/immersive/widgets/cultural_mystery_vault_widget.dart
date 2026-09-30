@@ -34,7 +34,7 @@ class _CulturalMysteryVaultWidgetState
   static const String _proverbBamana =
       '« Banna tɛ mɔgɔ faga, jatigi tè mɔgɔ faga. »';
   static const String _proverbFrench =
-      '« Ce n\'est pas la maladie qui tue l\'homme, c\'est le destin. La patience et l\'honneur soutiennent toujours le voyageur du Sahel. »';
+      '« Ce  est pas la maladie qui tue l\'homme, c\'est le destin. La patience et l\'honneur soutiennent toujours le voyageur du Sahel. »';
   static const String _proverbMoral =
       'Sagesse des Anciens du Mandé • La persévérance triomphe des épreuves.';
 
@@ -122,12 +122,15 @@ class _CulturalMysteryVaultWidgetState
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
-    final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
+    final borderCol =
+        isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final subtitleColor =
+        isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
     final narration = ref.watch(narrationCoordinatorProvider);
-    final isSpeaking = narration.isSpeaking && narration.activeContentId == 'sagesse_jour';
+    final isSpeaking =
+        narration.isSpeaking && narration.activeContentId == 'sagesse_jour';
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -139,15 +142,14 @@ class _CulturalMysteryVaultWidgetState
             : cardBg,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: _isUnlocked
-              ? CultureTheme.accentOrange
-              : borderCol,
+          color: _isUnlocked ? CultureTheme.accentOrange : borderCol,
           width: _isUnlocked ? 1.6 : 1.2,
         ),
         boxShadow: [
           BoxShadow(
             color: _isUnlocked
-                ? CultureTheme.accentOrange.withValues(alpha: isDark ? 0.22 : 0.10)
+                ? CultureTheme.accentOrange
+                    .withValues(alpha: isDark ? 0.22 : 0.10)
                 : Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
             blurRadius: 18,
             offset: const Offset(0, 6),
@@ -170,7 +172,8 @@ class _CulturalMysteryVaultWidgetState
                       color: CultureTheme.accentOrange.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: CultureTheme.accentOrange.withValues(alpha: 0.35),
+                        color:
+                            CultureTheme.accentOrange.withValues(alpha: 0.35),
                       ),
                     ),
                     child: const Icon(
@@ -193,7 +196,9 @@ class _CulturalMysteryVaultWidgetState
                         ),
                       ),
                       Text(
-                        _isUnlocked ? 'Sceau Dévoilé • Mandé' : 'Médaillon Mystère des Anciens',
+                        _isUnlocked
+                            ? 'Sceau Dévoilé • Mandé'
+                            : 'Médaillon Mystère des Anciens',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -244,9 +249,12 @@ class _CulturalMysteryVaultWidgetState
               onTap: _unlockSeal,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
+                  color: isDark
+                      ? CultureTheme.darkSurfaceAlt
+                      : const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
                     color: CultureTheme.accentOrange.withValues(alpha: 0.35),
@@ -264,7 +272,8 @@ class _CulturalMysteryVaultWidgetState
                         height: 76,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: CultureTheme.accentOrange.withValues(alpha: 0.12),
+                          color:
+                              CultureTheme.accentOrange.withValues(alpha: 0.12),
                           border: Border.all(
                             color: CultureTheme.accentOrange,
                             width: 2.2,
@@ -281,7 +290,8 @@ class _CulturalMysteryVaultWidgetState
                                 height: 44,
                                 decoration: BoxDecoration(
                                   border: Border.all(
-                                    color: CultureTheme.accentOrange.withValues(alpha: 0.4),
+                                    color: CultureTheme.accentOrange
+                                        .withValues(alpha: 0.4),
                                     width: 1.2,
                                   ),
                                 ),
@@ -336,7 +346,8 @@ class _CulturalMysteryVaultWidgetState
                         ),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: CultureTheme.accentOrange.withValues(alpha: 0.35),
+                          color:
+                              CultureTheme.accentOrange.withValues(alpha: 0.35),
                           width: 1.2,
                         ),
                       ),
@@ -401,11 +412,13 @@ class _CulturalMysteryVaultWidgetState
                           onTap: _speakProverb,
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
                               color: isSpeaking
                                   ? CultureTheme.accentOrange
-                                  : CultureTheme.accentOrange.withValues(alpha: 0.12),
+                                  : CultureTheme.accentOrange
+                                      .withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: CultureTheme.accentOrange,
@@ -416,17 +429,25 @@ class _CulturalMysteryVaultWidgetState
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  isSpeaking ? Icons.volume_up_rounded : Icons.headphones_rounded,
+                                  isSpeaking
+                                      ? Icons.volume_up_rounded
+                                      : Icons.headphones_rounded,
                                   size: 14,
-                                  color: isSpeaking ? Colors.white : CultureTheme.accentOrange,
+                                  color: isSpeaking
+                                      ? Colors.white
+                                      : CultureTheme.accentOrange,
                                 ),
                                 const SizedBox(width: 5),
                                 Text(
-                                  isSpeaking ? 'Griot en voix' : 'Écouter le sage',
+                                  isSpeaking
+                                      ? 'Griot en voix'
+                                      : 'Écouter le sage',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
-                                    color: isSpeaking ? Colors.white : CultureTheme.accentOrange,
+                                    color: isSpeaking
+                                        ? Colors.white
+                                        : CultureTheme.accentOrange,
                                   ),
                                 ),
                               ],

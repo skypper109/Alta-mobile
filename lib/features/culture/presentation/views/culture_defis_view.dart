@@ -1,3 +1,4 @@
+import 'package:alternia/presentation/common/widgets/alternia_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,7 @@ import '../../core/datasources/mock_culture_challenges_data.dart';
 import '../../core/models/culture_challenge_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../widgets/discovery_missions_sheet.dart';
+import '../screens/culture_main_screen.dart';
 
 /// Vue 4 : Défis & Jeux Culturels du Mali
 /// Véritable univers d'apprentissage ludique, moderne et engageant
@@ -22,9 +24,11 @@ class CultureDefisView extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final subtitleColor =
+        isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
-    final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
+    final borderCol =
+        isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
     final filteredRiddles = MockCultureChallengesData.getFilteredRiddles(
       regionId: activeRegion?.id,
@@ -45,10 +49,11 @@ class CultureDefisView extends ConsumerWidget {
               borderRadius: BorderRadius.circular(10),
               onTap: () {
                 HapticFeedback.lightImpact();
-                context.push('/culture/passport');
+                ref.read(cultureActiveTabProvider.notifier).state = 3;
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: CultureTheme.cyanTurquoise.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
@@ -330,6 +335,18 @@ class CultureDefisView extends ConsumerWidget {
               );
             },
           ),
+          // Footer Logo Culture avec "iA" en jaune !
+          const Center(
+            child: Opacity(
+              opacity: 0.5,
+              child: AlterniaLogo(
+                size: 24,
+                showText: true,
+                iaColor: CultureTheme.iaYellow,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -358,7 +375,8 @@ class CultureDefisView extends ConsumerWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.2 : 0.08),
+            color: CultureTheme.accentOrange
+                .withValues(alpha: isDark ? 0.2 : 0.08),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -378,7 +396,8 @@ class CultureDefisView extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.star_rounded, color: Colors.white, size: 13),
+                    const Icon(Icons.star_rounded,
+                        color: Colors.white, size: 13),
                     const SizedBox(width: 4),
                     Text(
                       'DÉFI DU JOUR',
@@ -394,7 +413,8 @@ class CultureDefisView extends ConsumerWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
                 decoration: BoxDecoration(
                   color: isDark ? CultureTheme.darkSurfaceAlt : Colors.white,
                   borderRadius: BorderRadius.circular(8),
@@ -446,7 +466,8 @@ class CultureDefisView extends ConsumerWidget {
                 HapticFeedback.mediumImpact();
                 context.push('/culture/defis/devinettes');
               },
-              icon: const Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 18),
+              icon: const Icon(Icons.play_circle_fill_rounded,
+                  color: Colors.white, size: 18),
               label: Text(
                 'Lancer le défi du jour',
                 style: GoogleFonts.plusJakartaSans(
@@ -513,7 +534,7 @@ class CultureDefisView extends ConsumerWidget {
                   Row(
                     children: [
                       Text(
-                        'SÉRIE N\'DA • 3/6 ÉNIGMES',
+                        'SÉRIE   • 3/6 ÉNIGMES',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 9.5,
                           fontWeight: FontWeight.w800,
@@ -539,7 +560,8 @@ class CultureDefisView extends ConsumerWidget {
                       value: 0.5,
                       minHeight: 4,
                       backgroundColor: Colors.black12,
-                      valueColor: AlwaysStoppedAnimation<Color>(CultureTheme.accentOrange),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          CultureTheme.accentOrange),
                     ),
                   ),
                 ],
@@ -552,7 +574,8 @@ class CultureDefisView extends ConsumerWidget {
                 color: CultureTheme.accentOrange,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 18),
+              child: const Icon(Icons.play_arrow_rounded,
+                  color: Colors.white, size: 18),
             ),
           ],
         ),
@@ -607,7 +630,8 @@ class CultureDefisView extends ConsumerWidget {
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: accentColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(5),
