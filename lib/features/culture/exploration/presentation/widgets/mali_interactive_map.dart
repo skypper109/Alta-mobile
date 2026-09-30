@@ -216,9 +216,9 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
               child: _buildCompassRose(isDark),
             ),
 
-            // ── Boutons Zoom +/- (Bas Droite) ────────────────────────────────
+            // ── Boutons Zoom +/- (Haut Droite) ────────────────────────────────
             Positioned(
-              bottom: 14,
+              top: 14,
               right: 14,
               child: _buildZoomControls(isDark),
             ),

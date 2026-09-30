@@ -7,6 +7,7 @@ import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../immersive/immersive.dart';
 import '../widgets/region_filter_pill.dart';
 
 /// Écran — Villes & Villages du Mali
@@ -144,12 +145,16 @@ class CultureVillesScreen extends ConsumerWidget {
                       itemCount: items.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 14),
                       itemBuilder: (ctx, index) {
-                        return _VilleCard(
-                          item: items[index],
-                          isDark: isDark,
-                          titleColor: titleColor,
-                          subtitleColor: subtitleColor,
-                          index: index,
+                        return AnimatedCulturalReveal(
+                          key: ValueKey('ville_${items[index].id}'),
+                          delay: Duration(milliseconds: 40 * (index % 8)),
+                          child: _VilleCard(
+                            item: items[index],
+                            isDark: isDark,
+                            titleColor: titleColor,
+                            subtitleColor: subtitleColor,
+                            index: index,
+                          ),
                         );
                       },
                     ),
@@ -255,8 +260,6 @@ class _VilleCard extends StatelessWidget {
   static const List<Color> _accentColors = [
     CultureTheme.cyanTurquoise,
     CultureTheme.primaryBlue,
-    CultureTheme.orPatrimoine,
-    CultureTheme.vertNaturel,
     CultureTheme.accentOrange,
   ];
 
@@ -268,11 +271,12 @@ class _VilleCard extends StatelessWidget {
     final borderCol =
         isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
     final hasImage = item.imageUrl != null && item.imageUrl!.isNotEmpty;
+    final heroTag = 'ville_list_${item.id}';
 
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
-        context.push('/culture/ville/${item.id}');
+        context.push('/culture/ville/${item.id}', extra: heroTag);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -293,7 +297,7 @@ class _VilleCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Vignette photographique authentique
+              // Vignette photographique authentique (Hero)
               Container(
                 width: 92,
                 height: 100,
@@ -314,11 +318,14 @@ class _VilleCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(13),
                   child: hasImage
-                      ? Image.asset(
-                          item.imageUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              _buildPlaceholderThumbnail(),
+                      ? Hero(
+                          tag: heroTag,
+                          child: Image.asset(
+                            item.imageUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                _buildPlaceholderThumbnail(),
+                          ),
                         )
                       : _buildPlaceholderThumbnail(),
                 ),

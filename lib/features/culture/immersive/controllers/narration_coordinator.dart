@@ -15,13 +15,17 @@ enum NarrationState {
 class NarrationSnapshot {
   final NarrationState state;
   final String currentText;
+  final String? activeContentId;
   final double progress; // De 0.0 à 1.0 (approximatif ou selon étapes)
+  final double speechRate;
   final String? errorMessage;
 
   const NarrationSnapshot({
     this.state = NarrationState.idle,
     this.currentText = '',
+    this.activeContentId,
     this.progress = 0.0,
+    this.speechRate = 0.48,
     this.errorMessage,
   });
 
@@ -32,13 +36,20 @@ class NarrationSnapshot {
   NarrationSnapshot copyWith({
     NarrationState? state,
     String? currentText,
+    String? activeContentId,
+    bool clearActiveContentId = false,
     double? progress,
+    double? speechRate,
     String? errorMessage,
   }) {
     return NarrationSnapshot(
       state: state ?? this.state,
       currentText: currentText ?? this.currentText,
+      activeContentId: clearActiveContentId
+          ? null
+          : (activeContentId ?? this.activeContentId),
       progress: progress ?? this.progress,
+      speechRate: speechRate ?? this.speechRate,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -57,7 +68,7 @@ class NarrationCoordinator extends StateNotifier<NarrationSnapshot> {
   Future<void> _initTts() async {
     try {
       await _flutterTts.setLanguage('fr-FR');
-      await _flutterTts.setSpeechRate(0.48);
+      await _flutterTts.setSpeechRate(state.speechRate);
       await _flutterTts.setPitch(0.95);
 
       _flutterTts.setStartHandler(() {
@@ -86,8 +97,21 @@ class NarrationCoordinator extends StateNotifier<NarrationSnapshot> {
     }
   }
 
-  /// Démarre ou relance la lecture du texte
-  Future<void> speak(String text, {VoidCallback? onComplete}) async {
+  /// Modifier le débit de lecture du Griot (ex: 0.40 posé, 0.48 normal, 0.58 rapide)
+  Future<void> setSpeechRate(double rate) async {
+    final clamped = rate.clamp(0.35, 0.70);
+    try {
+      await _flutterTts.setSpeechRate(clamped);
+      state = state.copyWith(speechRate: clamped);
+    } catch (_) {}
+  }
+
+  /// Démarre ou relance la lecture du texte avec identifiant de contenu optionnel
+  Future<void> speak(
+    String text, {
+    String? contentId,
+    VoidCallback? onComplete,
+  }) async {
     if (text.trim().isEmpty) return;
 
     if (!_isInitialized) {
@@ -99,6 +123,7 @@ class NarrationCoordinator extends StateNotifier<NarrationSnapshot> {
       state = state.copyWith(
         state: NarrationState.speaking,
         currentText: text,
+        activeContentId: contentId,
         progress: 0.0,
         errorMessage: null,
       );
@@ -119,17 +144,22 @@ class NarrationCoordinator extends StateNotifier<NarrationSnapshot> {
       _currentCompletionCallback = null;
       state = state.copyWith(
         state: NarrationState.idle,
+        clearActiveContentId: true,
         progress: 0.0,
       );
     } catch (_) {}
   }
 
-  /// Bascule entre lecture et arrêt
-  Future<void> toggle(String text, {VoidCallback? onComplete}) async {
-    if (state.isSpeaking) {
+  /// Bascule entre lecture et arrêt pour un texte donné
+  Future<void> toggle(
+    String text, {
+    String? contentId,
+    VoidCallback? onComplete,
+  }) async {
+    if (state.isSpeaking && (contentId == null || state.activeContentId == contentId)) {
       await stop();
     } else {
-      await speak(text, onComplete: onComplete);
+      await speak(text, contentId: contentId, onComplete: onComplete);
     }
   }
 
@@ -142,6 +172,6 @@ class NarrationCoordinator extends StateNotifier<NarrationSnapshot> {
 
 /// Provider Riverpod global du coordinateur de narration
 final narrationCoordinatorProvider =
-    StateNotifierProvider.autoDispose<NarrationCoordinator, NarrationSnapshot>(
+    StateNotifierProvider<NarrationCoordinator, NarrationSnapshot>(
   (ref) => NarrationCoordinator(),
 );

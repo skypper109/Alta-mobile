@@ -8,9 +8,13 @@ import '../views/culture_passport_view.dart';
 import '../widgets/culture_header_bar.dart';
 import '../widgets/culture_navigation_tabs.dart';
 
+/// Provider global de l'onglet actif dans l'espace Culture :
+/// 0: Accueil, 1: Découverte, 2: Explorer+ (Jeux, Contes, Proverbes), 3: Parcours (Passeport Culturel)
+final cultureActiveTabProvider = StateProvider<int>((ref) => 0);
+
 /// Écran maître Culture
 /// Intègre la barre supérieure, le filtre régional transversal et les 4 univers principaux :
-/// Accueil, Découverte, Jeux & Contes, Passeport
+/// Accueil, Découverte, Explorer+, Passeport
 /// STRICTEMENT SANS DÉGRADÉS selon les règles d'architecture UX/UI
 class CultureMainScreen extends ConsumerStatefulWidget {
   final int initialTabIndex;
@@ -31,9 +35,16 @@ class _CultureMainScreenState extends ConsumerState<CultureMainScreen> {
   void initState() {
     super.initState();
     _currentTabIndex = widget.initialTabIndex;
+    if (widget.initialTabIndex != 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(cultureActiveTabProvider.notifier).state =
+            widget.initialTabIndex;
+      });
+    }
   }
 
   void _onTabSelected(int index) {
+    ref.read(cultureActiveTabProvider.notifier).state = index;
     setState(() {
       _currentTabIndex = index;
     });
@@ -41,6 +52,11 @@ class _CultureMainScreenState extends ConsumerState<CultureMainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final activeTab = ref.watch(cultureActiveTabProvider);
+    if (_currentTabIndex != activeTab) {
+      _currentTabIndex = activeTab;
+    }
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(

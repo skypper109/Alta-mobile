@@ -1,5 +1,5 @@
+import 'package:alternia/presentation/common/widgets/alternia_logo.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,11 +8,12 @@ import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
+import '../widgets/culture_audio_listen_badge.dart';
 
-/// Vue 2 : Découverte — Hub Central d'Exploration Culturelle du Mali (Étape 2)
+/// Vue 2 : Découverte — Hub Central d'Exploration Culturelle du Mali
 /// Grandes Figures, Monuments Historiques, Villes & Terroirs
-/// Ambiance culturelle 60 FPS, cartes interactives avec ornementation soudanaise
-/// STRICTEMENT SANS DÉGRADÉS selon la charte UX/UI
+/// Immersion culturelle complète avec écoute audio orale (Griot TTS)
+/// STRICTEMENT SANS DÉGRADÉS selon la charte UX/UI Alta-mobile
 class CultureDecouvrirView extends ConsumerStatefulWidget {
   const CultureDecouvrirView({super.key});
 
@@ -37,16 +38,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
   ];
 
   Color _getCategoryColor(int index) {
-    switch (index) {
-      case 0:
-        return CultureTheme.primaryBlue;
-      case 1:
-        return const Color.fromRGBO(241, 133, 31, 1);
-      case 2:
-        return CultureTheme.cyanTurquoise;
-      default:
-        return CultureTheme.primaryBlue;
-    }
+    return CultureTheme.accentOrange;
   }
 
   @override
@@ -86,25 +78,21 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── 1. BARRE HORIZONTALE DE SÉLECTION DE CATÉGORIE ─────────────────
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                children: List.generate(_categories.length, (index) {
-                  final isSelected = _selectedFilterIndex == index;
-                  final activeCol = _getCategoryColor(index);
-                  final int count = index == 0
-                      ? figures.length
-                      : index == 1
-                          ? monuments.length
-                          : villes.length;
+            // ── 1. BARRE DE SÉLECTION DE CATÉGORIE RESPONSIVE (FIGÉE) ───────────
+            Row(
+              children: List.generate(_categories.length, (index) {
+                final isSelected = _selectedFilterIndex == index;
+                final activeCol = _getCategoryColor(index);
 
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: index == 0 ? 0 : 4,
+                      right: index == _categories.length - 1 ? 0 : 4,
+                    ),
                     child: GestureDetector(
                       onTap: () {
-                        HapticFeedback.selectionClick();
+                        CulturalHaptics.tabSwitch();
                         setState(() {
                           _selectedFilterIndex = index;
                         });
@@ -112,7 +100,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 220),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
+                            horizontal: 6, vertical: 9),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? activeCol
@@ -126,44 +114,28 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                           ),
                         ),
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               _categoryIcons[index],
                               size: 14,
                               color: isSelected ? Colors.white : activeCol,
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _categories[index],
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                fontWeight: isSelected
-                                    ? FontWeight.w800
-                                    : FontWeight.w600,
-                                color: isSelected
-                                    ? Colors.white
-                                    : (isDark
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF64748B)),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 1.5),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Colors.black.withValues(alpha: 0.25)
-                                    : activeCol.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                '$count',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: isSelected ? Colors.white : activeCol,
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  _categories[index],
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w800
+                                        : FontWeight.w600,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : subtitleColor,
+                                  ),
                                 ),
                               ),
                             ),
@@ -171,9 +143,9 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                         ),
                       ),
                     ),
-                  );
-                }),
-              ),
+                  ),
+                );
+              }),
             ),
 
             const SizedBox(height: 18),
@@ -201,7 +173,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
               _buildSectionHeader(
                 title: 'TOUS LES HÉROS & FIGURES',
                 icon: Icons.shield_rounded,
-                color: CultureTheme.primaryBlue,
+                color: CultureTheme.accentOrange,
                 borderCol: borderCol,
                 count: figures.length,
               ),
@@ -209,7 +181,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
               _buildItemsGrid(
                 items: figures,
                 categoryRoute: 'personnage',
-                categoryColor: CultureTheme.primaryBlue,
+                categoryColor: CultureTheme.accentOrange,
                 isDark: isDark,
                 cardBg: cardBg,
                 borderCol: borderCol,
@@ -239,7 +211,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
               _buildSectionHeader(
                 title: 'CITÉS MILLÉNAIRES & TERROIRS',
                 icon: Icons.location_city_rounded,
-                color: CultureTheme.cyanTurquoise,
+                color: CultureTheme.accentOrange,
                 borderCol: borderCol,
                 count: villes.length,
               ),
@@ -247,7 +219,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
               _buildItemsGrid(
                 items: villes,
                 categoryRoute: 'ville',
-                categoryColor: CultureTheme.cyanTurquoise,
+                categoryColor: CultureTheme.accentOrange,
                 isDark: isDark,
                 cardBg: cardBg,
                 borderCol: borderCol,
@@ -255,13 +227,25 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                 subtitleColor: subtitleColor,
               ),
             ],
+            // Footer Logo Culture avec "iA" en jaune !
+            const Center(
+              child: Opacity(
+                opacity: 0.5,
+                child: AlterniaLogo(
+                  size: 24,
+                  showText: true,
+                  iaColor: CultureTheme.iaYellow,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 
-  // ── CARTE VEDETTE D'EN-TÊTE DE CATÉGORIE ────────────────────────────────────
+  // ── 1. CARTE VEDETTE D'EN-TÊTE DE CATÉGORIE ────────────────────────────────
   Widget _buildCategoryHeroCard({
     required BuildContext context,
     required int categoryIndex,
@@ -510,6 +494,8 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
       );
     }
 
+    final narration = ref.watch(narrationCoordinatorProvider);
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -517,13 +503,21 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 0.72,
+        childAspectRatio: 0.66,
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
+        final isPlayingItem =
+            narration.isSpeaking && narration.activeContentId == item.id;
+        final speechText =
+            '${item.title}. ${item.subtitle}. Région de ${item.regionName}. ${item.description}';
+
+        final itemHeroTag = 'decouvrir_grid_${categoryRoute}_${item.id}';
+
         return AnimatedCulturalReveal(
-          delay: Duration(milliseconds: 60 * index),
+          key: ValueKey('grid_${categoryRoute}_${item.id}'),
+          delay: Duration(milliseconds: 35 * (index % 8)),
           child: CulturalInteractiveCard(
             padding: EdgeInsets.zero,
             showSudaneseCorners: true,
@@ -531,25 +525,29 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
             backgroundColor: cardBg,
             borderRadius: 18,
             onTap: () {
-              context.push('/culture/$categoryRoute/${item.id}');
+              context.push('/culture/$categoryRoute/${item.id}',
+                  extra: itemHeroTag);
             },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Photographie réelle avec badge
+                // Image réelle avec Hero transition fluide
                 Expanded(
                   flex: 5,
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
                       if (item.imageUrl != null && item.imageUrl!.isNotEmpty)
-                        Image.asset(
-                          item.imageUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: categoryColor.withValues(alpha: 0.12),
-                            child:
-                                Icon(item.icon, color: categoryColor, size: 28),
+                        Hero(
+                          tag: itemHeroTag,
+                          child: Image.asset(
+                            item.imageUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: categoryColor.withValues(alpha: 0.12),
+                              child: Icon(item.icon,
+                                  color: categoryColor, size: 28),
+                            ),
                           ),
                         )
                       else
@@ -582,6 +580,18 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                           ),
                         ),
                       ),
+                      // Badge Écouter en bas à gauche de la photo
+                      Positioned(
+                        bottom: 6,
+                        left: 6,
+                        child: CultureAudioListenBadge(
+                          contentId: item.id,
+                          speechText: speechText,
+                          label: 'Écouter',
+                          compact: true,
+                          activeColor: categoryColor,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -603,7 +613,8 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
-                                color: titleColor,
+                                color:
+                                    isPlayingItem ? categoryColor : titleColor,
                                 height: 1.2,
                               ),
                               maxLines: 1,

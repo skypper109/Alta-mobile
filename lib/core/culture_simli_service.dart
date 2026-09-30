@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'constants.dart';
 
-class CultureSimliService {
-  CultureSimliService({Dio? dio}) : _dio = dio ?? Dio();
+class CultureAlternIAService {
+  CultureAlternIAService({Dio? dio}) : _dio = dio ?? Dio();
 
   final Dio _dio;
   final _logger = Logger();
@@ -12,6 +12,7 @@ class CultureSimliService {
 
   /// Face ID du Vieux Sage par défaut
   final String defaultFaceId = 'c295e3a2-ed11-48d5-a1bd-ff42ac7eac73';
+
   /// Voix académique/sage par défaut
   final String defaultVoice = 'henri';
 
@@ -22,7 +23,7 @@ class CultureSimliService {
   }) async {
     for (final baseUrl in _candidateUrls) {
       try {
-        _logger.i('[CultureSimli] Génération vidéo pour "$text"');
+        _logger.i('[AlternIA] Génération vidéo pour "$text"');
         final response = await _dio.post(
           '$baseUrl/api/avatars/generate-video',
           data: {
@@ -45,7 +46,7 @@ class CultureSimliService {
           }
         }
       } catch (e) {
-        _logger.w('[CultureSimli] Échec sur \$baseUrl : \$e');
+        _logger.w('[CultureAlternIA] Échec sur \$baseUrl : \$e');
       }
     }
     return null;

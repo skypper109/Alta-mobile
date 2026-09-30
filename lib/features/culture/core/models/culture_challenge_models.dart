@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Devinette traditionnelle malienne (« N'Da ! »)
+/// Devinette traditionnelle malienne («   ! »)
 class TraditionalRiddle {
   final String id;
-  final String formulaIntro; // Ex: "« N'Da ! » — « N'Da n'sira ! »"
+  final String formulaIntro; // Ex: "«   ! » — «   n'sira ! »"
   final String riddleText; // L'énigme posée
   final List<String> hints; // 3 indices progressifs
   final List<String> options; // Choix possibles
@@ -19,7 +19,7 @@ class TraditionalRiddle {
 
   const TraditionalRiddle({
     required this.id,
-    this.formulaIntro = "« N'Da ! » — « N'Da n'sira ! »",
+    this.formulaIntro = "«   ! » — «   n'sira ! »",
     required this.riddleText,
     required this.hints,
     required this.options,
@@ -82,6 +82,43 @@ class CultureQuizQuestion {
     }
     return regionId == selectedRegionId;
   }
+}
+
+/// Thématique / Pack complet de quiz culturel
+class CultureQuizPack {
+  final String id;
+  final String title;
+  final String subtitle;
+  final String description;
+  final String category;
+  final String? regionId;
+  final String regionName;
+  final int xpReward;
+  final int timeMinutes;
+  final IconData icon;
+  final Color themeColor;
+  final String photoUrl;
+  final String stampBadgeTitle;
+  final List<CultureQuizQuestion> questions;
+
+  const CultureQuizPack({
+    required this.id,
+    required this.title,
+    required this.subtitle,
+    required this.description,
+    required this.category,
+    this.regionId,
+    required this.regionName,
+    required this.xpReward,
+    this.timeMinutes = 5,
+    required this.icon,
+    required this.themeColor,
+    required this.photoUrl,
+    required this.stampBadgeTitle,
+    required this.questions,
+  });
+
+  int get questionsCount => questions.length;
 }
 
 /// Quête / Mission découverte du patrimoine

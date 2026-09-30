@@ -11,11 +11,14 @@ import '../../shared/widgets.dart';
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
-  void _showClassSelectorDialog(BuildContext context, WidgetRef ref, String currentClassId) {
+  void _showClassSelectorDialog(
+      BuildContext context, WidgetRef ref, String currentClassId) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.surface
+          : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -55,7 +58,9 @@ class ProfileScreen extends ConsumerWidget {
                 'AlterniA adaptera ses explications et questions au programme officiel malien.',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
-                  color: isDark ? AppColors.textSecondary : const Color(0xFF475569),
+                  color: isDark
+                      ? AppColors.textSecondary
+                      : const Color(0xFF475569),
                 ),
               ),
               const SizedBox(height: 16),
@@ -79,14 +84,21 @@ class ProfileScreen extends ConsumerWidget {
                         );
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? AppColors.primary.withValues(alpha: 0.15)
-                              : (isDark ? AppColors.surfaceAlt : const Color(0xFFF1F5F9)),
+                              : (isDark
+                                  ? AppColors.surfaceAlt
+                                  : const Color(0xFFF1F5F9)),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: isSelected ? AppColors.primary : (isDark ? AppColors.border : const Color(0xFFE2E8F0)),
+                            color: isSelected
+                                ? AppColors.primary
+                                : (isDark
+                                    ? AppColors.border
+                                    : const Color(0xFFE2E8F0)),
                             width: isSelected ? 2 : 1,
                           ),
                         ),
@@ -95,13 +107,19 @@ class ProfileScreen extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: isSelected ? AppColors.primary : Colors.transparent,
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : Colors.transparent,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
                                 Icons.school_rounded,
                                 size: 16,
-                                color: isSelected ? Colors.white : (isDark ? AppColors.textMuted : const Color(0xFF64748B)),
+                                color: isSelected
+                                    ? Colors.white
+                                    : (isDark
+                                        ? AppColors.textMuted
+                                        : const Color(0xFF64748B)),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -114,21 +132,26 @@ class ProfileScreen extends ConsumerWidget {
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
-                                      color: isSelected ? AppColors.primary : textPri,
+                                      color: isSelected
+                                          ? AppColors.primary
+                                          : textPri,
                                     ),
                                   ),
                                   Text(
                                     '${c.level} • ${c.subjects.length} matières',
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 11,
-                                      color: isDark ? AppColors.textSecondary : const Color(0xFF475569),
+                                      color: isDark
+                                          ? AppColors.textSecondary
+                                          : const Color(0xFF475569),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                             if (isSelected)
-                              const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 20),
+                              const Icon(Icons.check_circle_rounded,
+                                  color: AppColors.primary, size: 20),
                           ],
                         ),
                       ),
@@ -143,12 +166,15 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditNameDialog(BuildContext context, WidgetRef ref, String currentName) {
-    final textController = TextEditingController(text: currentName == 'Élève AlterniA' ? '' : currentName);
+  void _showEditNameDialog(
+      BuildContext context, WidgetRef ref, String currentName) {
+    final textController = TextEditingController(
+        text: currentName == 'Élève AlterniA' ? '' : currentName);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
     final textSec = isDark ? AppColors.textSecondary : const Color(0xFF475569);
-    final surfaceColor = isDark ? AppColors.surfaceAlt : const Color(0xFFF8FAFC);
+    final surfaceColor =
+        isDark ? AppColors.surfaceAlt : const Color(0xFFF8FAFC);
     final borderColor = isDark ? AppColors.border : const Color(0xFFE2E8F0);
 
     showModalBottomSheet(
@@ -225,7 +251,8 @@ class ProfileScreen extends ConsumerWidget {
                       size: 22,
                     ),
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
                   ),
                   onSubmitted: (val) {
                     final trimmed = val.trim();
@@ -250,7 +277,8 @@ class ProfileScreen extends ConsumerWidget {
                       onPressed: () => Navigator.pop(ctx),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
                         side: BorderSide(color: borderColor),
                       ),
                       child: Text(
@@ -268,7 +296,9 @@ class ProfileScreen extends ConsumerWidget {
                       onPressed: () {
                         final trimmed = textController.text.trim();
                         if (trimmed.isNotEmpty) {
-                          ref.read(userPrefsProvider.notifier).updateName(trimmed);
+                          ref
+                              .read(userPrefsProvider.notifier)
+                              .updateName(trimmed);
                           Navigator.pop(ctx);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -282,7 +312,8 @@ class ProfileScreen extends ConsumerWidget {
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
                         elevation: 0,
                       ),
                       child: Text(
@@ -317,203 +348,200 @@ class ProfileScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 125),
         children: [
-          Text(
-              'Mon Profil',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: textPri,
-                letterSpacing: -0.4,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // ── PROFILE CARD ────────────────────────────────────────────────
-            CustomCard(
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.secondary, width: 2),
-                        ),
-                        child: Center(
-                          child: Text(
-                            name[0].toUpperCase(),
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+          // ── PROFILE CARD ────────────────────────────────────────────────
+          CustomCard(
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        shape: BoxShape.circle,
+                        border:
+                            Border.all(color: AppColors.secondary, width: 2),
+                      ),
+                      child: Center(
+                        child: Text(
+                          name[0].toUpperCase(),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    name,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: textPri,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  name,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: textPri,
                                   ),
-                                ),
-                                GestureDetector(
-                                  onTap: () => _showEditNameDialog(context, ref, rawName),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary.withValues(alpha: 0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.edit_rounded,
-                                      size: 16,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
-                              ),
-                              child: Text(
-                                userState.classFullLabel,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              GestureDetector(
+                                onTap: () =>
+                                    _showEditNameDialog(context, ref, rawName),
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.edit_rounded,
+                                    size: 16,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                  color:
+                                      AppColors.primary.withValues(alpha: 0.4)),
                             ),
-                          ],
-                        ),
+                            child: Text(
+                              userState.classFullLabel,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Divider(color: borderCol, height: 1),
-                  const SizedBox(height: 14),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Divider(color: borderCol, height: 1),
+                const SizedBox(height: 14),
 
-                  // Actions : Modifier nom & Changer de classe
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomButton(
-                          label: 'Modifier nom',
-                          icon: Icons.edit_rounded,
-                          variant: CustomButtonVariant.secondary,
-                          onPressed: () => _showEditNameDialog(context, ref, rawName),
-                        ),
+                // Actions : Modifier nom & Changer de classe
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomButton(
+                        label: 'Modifier nom',
+                        icon: Icons.edit_rounded,
+                        variant: CustomButtonVariant.secondary,
+                        onPressed: () =>
+                            _showEditNameDialog(context, ref, rawName),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: CustomButton(
-                          label: 'Changer classe',
-                          icon: Icons.tune_rounded,
-                          variant: CustomButtonVariant.secondary,
-                          onPressed: () => _showClassSelectorDialog(context, ref, userState.studentClassId),
-                        ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: CustomButton(
+                        label: 'Changer classe',
+                        icon: Icons.tune_rounded,
+                        variant: CustomButtonVariant.secondary,
+                        onPressed: () => _showClassSelectorDialog(
+                            context, ref, userState.studentClassId),
                       ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // ── STATS CARDS ─────────────────────────────────────────────────
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.4,
-              children: const [
-                _ProfileStatTile(
-                  title: 'SÉRIE DE RÉVISION',
-                  subtitle: 'Streak actif',
-                  icon: Icons.local_fire_department_rounded,
-                  color: AppColors.accent,
-                ),
-                _ProfileStatTile(
-                  title: 'POINTS MAÎTRISE',
-                  subtitle: 'Niveau 14',
-                  icon: Icons.military_tech_rounded,
-                  color: AppColors.secondary,
-                ),
-                _ProfileStatTile(
-                  title: 'TEMPS ÉTUDE TOTAL',
-                  subtitle: '+4h cette semaine',
-                  icon: Icons.timer_rounded,
-                  color: AppColors.success,
-                ),
-                _ProfileStatTile(
-                  title: 'SESSIONS BOÎTIER',
-                  subtitle: 'Synchronisés',
-                  icon: Icons.memory_rounded,
-                  color: AppColors.accentViolet,
+                    ),
+                  ],
                 ),
               ],
             ),
+          ),
 
-            const SizedBox(height: 32),
+          const SizedBox(height: 20),
 
-            // Reset Onboarding Button
-            Center(
-              child: TextButton.icon(
-                icon: const Icon(Icons.restart_alt_rounded, size: 16, color: AppColors.error),
-                label: Text(
-                  'Réinitialiser l\'Enregistrement / Onboarding',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.error,
-                  ),
+          // ── STATS CARDS ─────────────────────────────────────────────────
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.4,
+            children: const [
+              _ProfileStatTile(
+                title: 'SÉRIE DE RÉVISION',
+                subtitle: 'Streak actif',
+                icon: Icons.local_fire_department_rounded,
+                color: AppColors.accent,
+              ),
+              _ProfileStatTile(
+                title: 'POINTS MAÎTRISE',
+                subtitle: 'Niveau 14',
+                icon: Icons.military_tech_rounded,
+                color: AppColors.secondary,
+              ),
+              _ProfileStatTile(
+                title: 'TEMPS ÉTUDE TOTAL',
+                subtitle: '+4h cette semaine',
+                icon: Icons.timer_rounded,
+                color: AppColors.success,
+              ),
+              _ProfileStatTile(
+                title: 'SESSIONS BOÎTIER',
+                subtitle: 'Synchronisés',
+                icon: Icons.memory_rounded,
+                color: AppColors.accentViolet,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 32),
+
+          // Reset Onboarding Button
+          Center(
+            child: TextButton.icon(
+              icon: const Icon(Icons.restart_alt_rounded,
+                  size: 16, color: AppColors.error),
+              label: Text(
+                'Réinitialiser l\'Enregistrement / Onboarding',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.error,
                 ),
-                onPressed: () async {
-                  await ref.read(userPrefsProvider.notifier).resetOnboarding();
-                  if (context.mounted) {
-                    context.go('/onboarding');
-                  }
-                },
               ),
+              onPressed: () async {
+                await ref.read(userPrefsProvider.notifier).resetOnboarding();
+                if (context.mounted) {
+                  context.go('/onboarding');
+                }
+              },
             ),
+          ),
 
-            const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-            // Footer Logo
-            const Center(
-              child: Opacity(
-                opacity: 0.5,
-                child: AlterniaLogo(size: 24, showText: true),
-              ),
+          // Footer Logo
+          const Center(
+            child: Opacity(
+              opacity: 0.5,
+              child: AlterniaLogo(size: 24, showText: true),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }

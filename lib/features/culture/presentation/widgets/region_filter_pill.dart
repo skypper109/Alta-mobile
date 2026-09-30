@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../immersive/immersive.dart';
 import 'culture_region_bottom_sheet.dart';
 
 /// Pilule de filtre régional réutilisable dans tous les écrans Culture.
@@ -37,7 +37,10 @@ class RegionFilterPill extends ConsumerWidget {
     final iconSize = compact ? 13.0 : 15.0;
 
     return GestureDetector(
-      onTap: () => CultureRegionBottomSheet.show(context),
+      onTap: () {
+        CulturalHaptics.tabSwitch();
+        CultureRegionBottomSheet.show(context);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding:
@@ -77,7 +80,7 @@ class RegionFilterPill extends ConsumerWidget {
               const SizedBox(width: 6),
               GestureDetector(
                 onTap: () {
-                  HapticFeedback.lightImpact();
+                  CulturalHaptics.tabSwitch();
                   notifier.clearFilter();
                 },
                 child: Container(

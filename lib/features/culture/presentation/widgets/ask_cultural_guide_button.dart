@@ -48,15 +48,18 @@ class AskCulturalGuideButton extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              width: 38,
+              height: 38,
               decoration: BoxDecoration(
                 color: CultureTheme.accentOrange.withValues(alpha: 0.18),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.smart_toy_rounded,
-                size: 18,
-                color: CultureTheme.accentOrange,
+              child: const Center(
+                child: Icon(
+                  Icons.smart_toy_rounded,
+                  size: 19,
+                  color: CultureTheme.accentOrange,
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -90,11 +93,12 @@ class AskCulturalGuideButton extends StatelessWidget {
                   Text(
                     'Une question sur ${contextData.contentTitle} ?',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
+                      fontSize: 12.5,
                       fontWeight: FontWeight.w700,
                       color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      height: 1.25,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],

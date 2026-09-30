@@ -7,6 +7,7 @@ import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../immersive/immersive.dart';
 import '../widgets/region_filter_pill.dart';
 
 /// Écran — Monuments & Sites Historiques du Mali
@@ -139,12 +140,16 @@ class CultureMonumentsScreen extends ConsumerWidget {
                       itemCount: items.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 16),
                       itemBuilder: (ctx, index) {
-                        return _MonumentCard(
-                          item: items[index],
-                          isDark: isDark,
-                          titleColor: titleColor,
-                          subtitleColor: subtitleColor,
-                          index: index,
+                        return AnimatedCulturalReveal(
+                          key: ValueKey('monument_${items[index].id}'),
+                          delay: Duration(milliseconds: 40 * (index % 8)),
+                          child: _MonumentCard(
+                            item: items[index],
+                            isDark: isDark,
+                            titleColor: titleColor,
+                            subtitleColor: subtitleColor,
+                            index: index,
+                          ),
                         );
                       },
                     ),
@@ -249,10 +254,8 @@ class _MonumentCard extends StatelessWidget {
 
   static const List<Color> _accentColors = [
     CultureTheme.accentOrange,
-    CultureTheme.orPatrimoine,
     CultureTheme.primaryBlue,
-    CultureTheme.rougeKoulikoro,
-    CultureTheme.ocreTerre,
+    CultureTheme.cyanTurquoise,
   ];
 
   Color get _accent => _accentColors[index % _accentColors.length];
@@ -264,11 +267,12 @@ class _MonumentCard extends StatelessWidget {
         isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
     final hasImage = item.imageUrl != null && item.imageUrl!.isNotEmpty;
+    final heroTag = 'monument_list_${item.id}';
 
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
-        context.push('/culture/monument/${item.id}');
+        context.push('/culture/monument/${item.id}', extra: heroTag);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -287,7 +291,7 @@ class _MonumentCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Bandeau Visuel Photographique Réel ─────────────────────────────
+            // ── Bandeau Visuel Photographique Réel (Hero) ─────────────────────
             SizedBox(
               height: 165,
               width: double.infinity,
@@ -296,30 +300,22 @@ class _MonumentCard extends StatelessWidget {
                 children: [
                   // Photo ou fallback élégant
                   if (hasImage)
-                    Image.asset(
-                      item.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildPlaceholderBanner(isDark),
+                    Hero(
+                      tag: heroTag,
+                      child: Image.asset(
+                        item.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildPlaceholderBanner(isDark),
+                      ),
                     )
                   else
                     _buildPlaceholderBanner(isDark),
 
-                  // Dégradé assombrissant pour lisibilité parfaite des badges
+                  // Voile sombre uni sans dégradé
                   Positioned.fill(
                     child: Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0x99000000),
-                            Colors.transparent,
-                            Color(0x66000000),
-                          ],
-                          stops: [0.0, 0.45, 1.0],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                      ),
+                      color: Colors.black.withValues(alpha: 0.35),
                     ),
                   ),
 

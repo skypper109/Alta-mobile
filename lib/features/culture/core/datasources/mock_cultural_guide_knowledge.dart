@@ -4,7 +4,8 @@ import '../models/cultural_guide_models.dart';
 /// Base de connaissances et moteur de dialogue contextuel du Guide Culturel IA
 abstract final class MockCulturalGuideKnowledge {
   /// Génère les suggestions automatiques adaptées au contexte
-  static List<GuideSuggestion> getSuggestionsForContext(CulturalGuideContext context) {
+  static List<GuideSuggestion> getSuggestionsForContext(
+      CulturalGuideContext context) {
     switch (context.contentType) {
       case CulturalContentType.monument:
         return [
@@ -39,7 +40,8 @@ abstract final class MockCulturalGuideKnowledge {
           ),
           GuideSuggestion(
             id: 'perso_legacy',
-            questionText: 'Quel est son héritage dans le Mali d\'aujourd\'hui ?',
+            questionText:
+                'Quel est son héritage dans le Mali d\'aujourd\'hui ?',
             icon: Icons.auto_awesome_rounded,
           ),
           GuideSuggestion(
@@ -63,7 +65,8 @@ abstract final class MockCulturalGuideKnowledge {
           ),
           GuideSuggestion(
             id: 'ville_traditions',
-            questionText: 'Quelles sont les traditions vivantes de cette ville ?',
+            questionText:
+                'Quelles sont les traditions vivantes de cette ville ?',
             icon: Icons.festival_rounded,
           ),
           GuideSuggestion(
@@ -77,7 +80,8 @@ abstract final class MockCulturalGuideKnowledge {
         return [
           GuideSuggestion(
             id: 'conte_moral',
-            questionText: 'Quelle est la leçon de sagesse profonde de ce conte ?',
+            questionText:
+                'Quelle est la leçon de sagesse profonde de ce conte ?',
             icon: Icons.psychology_rounded,
           ),
           GuideSuggestion(
@@ -87,7 +91,8 @@ abstract final class MockCulturalGuideKnowledge {
           ),
           GuideSuggestion(
             id: 'conte_variants',
-            questionText: 'Existe-t-il d\'autres fables similaires dans le Sahel ?',
+            questionText:
+                'Existe-t-il d\'autres fables similaires dans le Sahel ?',
             icon: Icons.library_books_rounded,
           ),
         ];
@@ -101,7 +106,7 @@ abstract final class MockCulturalGuideKnowledge {
           ),
           GuideSuggestion(
             id: 'defi_nda_origin',
-            questionText: 'Pourquoi dit-on « N\'Da ! » avant une devinette ?',
+            questionText: 'Pourquoi dit-on «   ! » avant une devinette ?',
             icon: Icons.chat_bubble_outline_rounded,
           ),
           GuideSuggestion(
@@ -115,7 +120,8 @@ abstract final class MockCulturalGuideKnowledge {
         return [
           GuideSuggestion(
             id: 'region_must_see',
-            questionText: 'Que dois-je absolument découvrir dans cette région ?',
+            questionText:
+                'Que dois-je absolument découvrir dans cette région ?',
             icon: Icons.explore_rounded,
           ),
           GuideSuggestion(
@@ -139,22 +145,26 @@ abstract final class MockCulturalGuideKnowledge {
         return [
           GuideSuggestion(
             id: 'pass_next_step',
-            questionText: 'Que me conseillez-vous d\'explorer pour enrichir mon Passeport ?',
+            questionText:
+                'Que me conseillez-vous d\'explorer pour enrichir mon Passeport ?',
             icon: Icons.explore_rounded,
           ),
           GuideSuggestion(
             id: 'pass_tombouctou_gao',
-            questionText: 'J\'ai exploré Tombouctou. Que visiter ensuite à Gao ?',
+            questionText:
+                'J\'ai exploré Tombouctou. Que visiter ensuite à Gao ?',
             icon: Icons.account_balance_rounded,
           ),
           GuideSuggestion(
             id: 'pass_missing_contes',
-            questionText: 'Quels contes et veillées me conseillez-vous d\'écouter ?',
+            questionText:
+                'Quels contes et veillées me conseillez-vous d\'écouter ?',
             icon: Icons.auto_stories_rounded,
           ),
           GuideSuggestion(
             id: 'pass_seals',
-            questionText: 'Comment débloquer les prochains Sceaux d\'Ambassadeur ?',
+            questionText:
+                'Comment débloquer les prochains Sceaux d\'Ambassadeur ?',
             icon: Icons.workspace_premium_rounded,
           ),
         ];
@@ -173,7 +183,8 @@ abstract final class MockCulturalGuideKnowledge {
           ),
           GuideSuggestion(
             id: 'gen_charte',
-            questionText: 'Qu\'est-ce que la Charte de Kouroukan Fouga (1236) ?',
+            questionText:
+                'Qu\'est-ce que la Charte de Kouroukan Fouga (1236) ?',
             icon: Icons.menu_book_rounded,
           ),
           GuideSuggestion(
@@ -190,8 +201,7 @@ abstract final class MockCulturalGuideKnowledge {
     String welcomeText;
     switch (context.contentType) {
       case CulturalContentType.passeport:
-        welcomeText =
-            'I ni ce ! J\'ai sous les yeux votre Passeport Culturel. '
+        welcomeText = 'I ni ce ! J\'ai sous les yeux votre Passeport Culturel. '
             'Vous avez déjà gravé de magnifiques découvertes entre Koulikoro, Tombouctou, Mopti et Sikasso. '
             'Je peux analyser vos étapes et vous orienter vers vos prochaines aventures au Mali !';
         break;
@@ -209,8 +219,7 @@ abstract final class MockCulturalGuideKnowledge {
         break;
 
       case CulturalContentType.ville:
-        welcomeText =
-            'Bienvenue à « ${context.contentTitle} ». '
+        welcomeText = 'Bienvenue à « ${context.contentTitle} ». '
             'Cette cité regorge de légendes fluviales, de savoirs ancestraux et d\'édifices historiques. Que souhaitez-vous percer comme mystère ?';
         break;
 
@@ -222,7 +231,7 @@ abstract final class MockCulturalGuideKnowledge {
 
       case CulturalContentType.defi:
         welcomeText =
-            '« N\'Da ! » Les devinettes et énigmes traditionnelles sont l\'école de la vivacité d\'esprit au Mali. '
+            '«   ! » Les devinettes et énigmes traditionnelles sont l\'école de la vivacité d\'esprit au Mali. '
             'Que voulez-vous savoir sur les symboles et maximes de ce défi ?';
         break;
 
@@ -233,8 +242,7 @@ abstract final class MockCulturalGuideKnowledge {
         break;
 
       case CulturalContentType.general:
-        welcomeText =
-            'I ni ce ! Je suis votre Guide Culturel Alternia. '
+        welcomeText = 'I ni ce ! Je suis votre Guide Culturel Alternia. '
             'Je vous accompagne à travers l\'histoire, les monuments, les souverains, les contes et les mystères du Mali. Que souhaitez-vous découvrir ?';
         break;
     }
@@ -270,7 +278,9 @@ abstract final class MockCulturalGuideKnowledge {
             targetRoute: '/culture/monument/monument_tombeau_askia',
           ),
         );
-      } else if (q.contains('sceau') || q.contains('distinction') || q.contains('ambassadeur')) {
+      } else if (q.contains('sceau') ||
+          q.contains('distinction') ||
+          q.contains('ambassadeur')) {
         return GuideMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           text:
@@ -283,7 +293,9 @@ abstract final class MockCulturalGuideKnowledge {
             targetRoute: '/culture/map',
           ),
         );
-      } else if (q.contains('conte') || q.contains('veillée') || q.contains('manqu')) {
+      } else if (q.contains('conte') ||
+          q.contains('veillée') ||
+          q.contains('manqu')) {
         return GuideMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           text:
@@ -298,14 +310,13 @@ abstract final class MockCulturalGuideKnowledge {
       } else {
         return GuideMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          text:
-              'Votre Passeport Culturel est richement initié ! '
+          text: 'Votre Passeport Culturel est richement initié ! '
               'Pour aller plus loin, je vous suggère d\'explorer les Monts Mandingues de Koulikoro, '
-              'ou de relever les devinettes traditionnelles « N\'Da ! » pour affûter votre esprit.',
+              'ou de relever les devinettes traditionnelles «   ! » pour affûter votre esprit.',
           isUser: false,
           timestamp: DateTime.now(),
           action: const GuideConnectedAction(
-            label: 'Relever un Défi N\'Da',
+            label: 'Relever un Défi  ',
             targetRoute: '/culture/defis/devinettes',
           ),
         );
@@ -314,7 +325,9 @@ abstract final class MockCulturalGuideKnowledge {
 
     // ── MONUMENTS ───────────────────────────────────────────────────────────
     if (context.contentType == CulturalContentType.monument) {
-      if (q.contains('pourquoi') || q.contains('emblématique') || q.contains('célèbre')) {
+      if (q.contains('pourquoi') ||
+          q.contains('emblématique') ||
+          q.contains('célèbre')) {
         return GuideMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           text:
@@ -329,7 +342,9 @@ abstract final class MockCulturalGuideKnowledge {
             targetRoute: '/culture/monuments',
           ),
         );
-      } else if (q.contains('qui') || q.contains('époque') || q.contains('histoire')) {
+      } else if (q.contains('qui') ||
+          q.contains('époque') ||
+          q.contains('histoire')) {
         return GuideMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           text:
@@ -344,7 +359,9 @@ abstract final class MockCulturalGuideKnowledge {
 
     // ── PERSONNAGES ─────────────────────────────────────────────────────────
     if (context.contentType == CulturalContentType.personnage) {
-      if (q.contains('accomplissement') || q.contains('exploits') || q.contains('qui')) {
+      if (q.contains('accomplissement') ||
+          q.contains('exploits') ||
+          q.contains('qui')) {
         return GuideMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           text:
@@ -381,7 +398,9 @@ abstract final class MockCulturalGuideKnowledge {
 
     // ── CONTES ──────────────────────────────────────────────────────────────
     if (context.contentType == CulturalContentType.conte) {
-      if (q.contains('morale') || q.contains('sagesse') || q.contains('message')) {
+      if (q.contains('morale') ||
+          q.contains('sagesse') ||
+          q.contains('message')) {
         return GuideMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           text:
@@ -396,11 +415,11 @@ abstract final class MockCulturalGuideKnowledge {
 
     // ── DÉFIS ───────────────────────────────────────────────────────────────
     if (context.contentType == CulturalContentType.defi) {
-      if (q.contains("n'da") || q.contains('pourquoi') || q.contains('formule')) {
+      if (q.contains(" ") || q.contains('pourquoi') || q.contains('formule')) {
         return GuideMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           text:
-              'La formule rituelle « N\'Da ! » (qui signifie littéralement « J\'ai posé mon énigme ») appelle la réponse de l\'assemblée : « N\'Da n\'sira ! » (« Que ta parole trouve son chemin ! »). '
+              'La formule rituelle «   ! » (qui signifie littéralement « J\'ai posé mon énigme ») appelle la réponse de l\'assemblée : «    sira ! » (« Que ta parole trouve son chemin ! »). '
               'C\'est le signal d\'ouverture de la joute intellectuelle entre les jeunes et les aînés.',
           isUser: false,
           timestamp: DateTime.now(),
@@ -411,8 +430,7 @@ abstract final class MockCulturalGuideKnowledge {
     // ── RÉPONSE UNIVERSELLE AVEC MAILLAGE PATRIMONIAL ───────────────────────
     return GuideMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      text:
-          'Excellente question sur « ${context.contentTitle} » ! '
+      text: 'Excellente question sur « ${context.contentTitle} » ! '
           'Dans la tradition culturelle du Mali, cet élément est intimement lié à l\'histoire de ${context.regionName}, '
           'où l\'harmonie entre les peuples, les fleuves et les bâtisseurs de mémoire constitue le socle de l\'identité nationale.',
       isUser: false,

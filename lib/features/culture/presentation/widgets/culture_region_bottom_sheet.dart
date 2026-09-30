@@ -214,10 +214,10 @@ class CultureRegionBottomSheet extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: CultureTheme.vertNaturel.withValues(alpha: 0.1),
+                color: CultureTheme.accentOrange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: CultureTheme.vertNaturel.withValues(alpha: 0.35),
+                  color: CultureTheme.accentOrange.withValues(alpha: 0.35),
                   width: 1,
                 ),
               ),
@@ -227,13 +227,13 @@ class CultureRegionBottomSheet extends ConsumerWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: CultureTheme.vertNaturel.withValues(alpha: 0.2),
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.map_rounded,
                       size: 20,
-                      color: CultureTheme.vertNaturel,
+                      color: CultureTheme.accentOrange,
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -246,7 +246,7 @@ class CultureRegionBottomSheet extends ConsumerWidget {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? Colors.white : CultureTheme.vertNaturel,
+                            color: isDark ? Colors.white : CultureTheme.accentOrange,
                           ),
                         ),
                         Text(
@@ -262,7 +262,7 @@ class CultureRegionBottomSheet extends ConsumerWidget {
                   const Icon(
                     Icons.arrow_forward_ios_rounded,
                     size: 13,
-                    color: CultureTheme.vertNaturel,
+                    color: CultureTheme.accentOrange,
                   ),
                 ],
               ),

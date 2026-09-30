@@ -7,6 +7,7 @@ import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../immersive/immersive.dart';
 import '../widgets/region_filter_pill.dart';
 
 /// Écran immersif — Grands Personnages Historiques du Mali
@@ -119,12 +120,16 @@ class CulturePersonnagesScreen extends ConsumerWidget {
                       itemCount: items.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 16),
                       itemBuilder: (ctx, index) {
-                        return _PersonnageCard(
-                          item: items[index],
-                          isDark: isDark,
-                          titleColor: titleColor,
-                          subtitleColor: subtitleColor,
-                          index: index,
+                        return AnimatedCulturalReveal(
+                          key: ValueKey('perso_${items[index].id}'),
+                          delay: Duration(milliseconds: 40 * (index % 8)),
+                          child: _PersonnageCard(
+                            item: items[index],
+                            isDark: isDark,
+                            titleColor: titleColor,
+                            subtitleColor: subtitleColor,
+                            index: index,
+                          ),
                         );
                       },
                     ),
@@ -226,13 +231,11 @@ class _PersonnageCard extends StatelessWidget {
   final Color subtitleColor;
   final int index;
 
-  // Couleurs tournantes pour la variété visuelle
+  // Couleurs de la charte Alta-mobile (strictement sans vert/rouge/violet)
   static const List<Color> _accentColors = [
-    CultureTheme.primaryBlue,
     CultureTheme.accentOrange,
+    CultureTheme.primaryBlue,
     CultureTheme.cyanTurquoise,
-    CultureTheme.orPatrimoine,
-    CultureTheme.vertNaturel,
   ];
 
   Color get _accent => _accentColors[index % _accentColors.length];
@@ -242,11 +245,12 @@ class _PersonnageCard extends StatelessWidget {
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
     final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
     final hasImage = item.imageUrl != null && item.imageUrl!.isNotEmpty;
+    final heroTag = 'personnage_list_${item.id}';
 
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
-        context.push('/culture/personnage/${item.id}');
+        context.push('/culture/personnage/${item.id}', extra: heroTag);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -265,7 +269,7 @@ class _PersonnageCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Bandeau supérieur coloré avec Portrait ────────────────────────
+            // ── Bandeau supérieur coloré avec Portrait (Hero) ───────────────────
             Container(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
               decoration: BoxDecoration(
@@ -300,11 +304,14 @@ class _PersonnageCard extends StatelessWidget {
                     ),
                     child: ClipOval(
                       child: hasImage
-                          ? Image.asset(
-                              item.imageUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  _buildInitialAvatar(),
+                          ? Hero(
+                              tag: heroTag,
+                              child: Image.asset(
+                                item.imageUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildInitialAvatar(),
+                              ),
                             )
                           : _buildInitialAvatar(),
                     ),

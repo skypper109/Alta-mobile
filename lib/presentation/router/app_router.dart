@@ -15,9 +15,9 @@ import '../../features/culture/presentation/screens/challenges_home_screen.dart'
 import '../../features/culture/presentation/screens/contes_screen.dart';
 import '../../features/culture/core/models/cultural_guide_models.dart';
 import '../../features/culture/immersive/immersive.dart';
-import '../../features/culture/presentation/screens/culture_intro_screen.dart';
 import '../../features/culture/presentation/screens/culture_monuments_screen.dart';
 import '../../features/culture/presentation/screens/culture_personnages_screen.dart';
+import '../../features/culture/core/theme/culture_theme.dart';
 import '../../features/culture/presentation/screens/culture_villes_screen.dart';
 import '../../features/culture/presentation/screens/historical_figure_detail_screen.dart';
 import '../../features/culture/presentation/screens/interactive_story_player_screen.dart';
@@ -25,7 +25,7 @@ import '../../features/culture/presentation/screens/monument_detail_screen.dart'
 import '../../features/culture/presentation/screens/place_detail_screen.dart';
 import '../../features/culture/presentation/screens/quiz_culture_screen.dart';
 import '../../features/culture/presentation/screens/riddle_screen.dart';
-import '../../features/culture/presentation/screens/passport_screen.dart';
+import '../../features/culture/presentation/views/culture_passport_view.dart';
 import '../../features/culture/presentation/screens/story_detail_screen.dart';
 import '../../features/culture/presentation/screens/story_reader_screen.dart';
 import '../../features/discussions/holographic_salon_page.dart';
@@ -46,9 +46,14 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 GoRouter appRouter(Ref ref) {
   final userPrefs = ref.watch(userPrefsProvider);
 
+  final defaultLocation =
+      (!userPrefs.hasCompletedOnboarding || userPrefs.hasSelectedClass)
+          ? '/home'
+          : '/culture';
+
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/home',
+    initialLocation: defaultLocation,
     debugLogDiagnostics: false,
     redirect: (context, state) {
       if (userPrefs.isLoading) return null;
@@ -56,6 +61,17 @@ GoRouter appRouter(Ref ref) {
       if (!userPrefs.hasCompletedOnboarding && !isOnboarding) {
         return '/onboarding';
       }
+
+      // Verrouillage de l'espace Éducation si aucune classe n'a été sélectionnée
+      if (userPrefs.hasCompletedOnboarding && !userPrefs.hasSelectedClass) {
+        final isEducationRoute = state.matchedLocation == '/home' ||
+            state.matchedLocation == '/discussions' ||
+            state.matchedLocation == '/documents';
+        if (isEducationRoute) {
+          return '/culture';
+        }
+      }
+
       return null;
     },
     routes: [
@@ -180,7 +196,8 @@ GoRouter appRouter(Ref ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return HistoricalFigureDetailScreen(id: id);
+          final heroTag = state.extra is String ? state.extra as String : null;
+          return HistoricalFigureDetailScreen(id: id, heroTag: heroTag);
         },
       ),
       GoRoute(
@@ -188,7 +205,8 @@ GoRouter appRouter(Ref ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return MonumentDetailScreen(id: id);
+          final heroTag = state.extra is String ? state.extra as String : null;
+          return MonumentDetailScreen(id: id, heroTag: heroTag);
         },
       ),
       GoRoute(
@@ -196,7 +214,8 @@ GoRouter appRouter(Ref ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return PlaceDetailScreen(id: id);
+          final heroTag = state.extra is String ? state.extra as String : null;
+          return PlaceDetailScreen(id: id, heroTag: heroTag);
         },
       ),
       GoRoute(
@@ -225,11 +244,20 @@ GoRouter appRouter(Ref ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return StoryDetailScreen(id: id);
+          final heroTag = state.extra is String ? state.extra as String : null;
+          return StoryDetailScreen(id: id, heroTag: heroTag);
         },
       ),
       GoRoute(
         path: '/culture/conte/:id/play',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return InteractiveStoryPlayerScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/conte-interactif/:id',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
@@ -260,9 +288,76 @@ GoRouter appRouter(Ref ref) {
         },
       ),
       GoRoute(
+        path: '/culture/defis/devinettes/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/devinette/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/devinettes/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/devinette',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/devinettes',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return RiddleScreen(riddleId: id);
+        },
+      ),
+      GoRoute(
         path: '/culture/defis/quiz',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const QuizCultureScreen(),
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return QuizCultureScreen(quizId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/defis/quiz/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return QuizCultureScreen(quizId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/quiz',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'];
+          return QuizCultureScreen(quizId: id);
+        },
+      ),
+      GoRoute(
+        path: '/culture/quiz/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return QuizCultureScreen(quizId: id);
+        },
       ),
       GoRoute(
         path: '/culture/guide',
@@ -280,14 +375,13 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/culture/passport',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const PassportScreen(),
-      ),
-      GoRoute(
-        path: '/culture/intro',
-        parentNavigatorKey: _rootNavigatorKey,
-        pageBuilder: (context, state) => CultureModeTransition.buildPage(
-          key: state.pageKey,
-          child: const CultureIntroScreen(),
+        builder: (context, state) => Scaffold(
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? CultureTheme.darkBackground
+              : CultureTheme.lightBackground,
+          body: const SafeArea(
+            child: CulturePassportView(showBackButton: true),
+          ),
         ),
       ),
       GoRoute(

@@ -22,15 +22,25 @@ class UserProfileState {
   final bool hasCompletedOnboarding;
   final bool isLoading;
 
+  /// L'utilisateur a-t-il sélectionné une classe scolaire valide ?
+  bool get hasSelectedClass =>
+      studentClassId.isNotEmpty &&
+      studentClassId != 'none' &&
+      malianClass != null;
+
   /// Accès rapide à l'objet complet MalianClass
-  MalianClass? get malianClass => classById(studentClassId);
+  MalianClass? get malianClass =>
+      studentClassId.isEmpty ? null : classById(studentClassId);
 
   /// Libellé court affiché dans les badges (ex: 'TSE')
   String get classShortLabel =>
-      malianClass?.shortLabel ?? studentClassId.toUpperCase();
+      malianClass?.shortLabel ??
+      (hasSelectedClass ? studentClassId.toUpperCase() : 'Non définie');
 
   /// Libellé complet (ex: 'TSE — Terminale Science Exacte')
-  String get classFullLabel => malianClass?.label ?? studentClassId;
+  String get classFullLabel =>
+      malianClass?.label ??
+      (hasSelectedClass ? studentClassId : 'Classe non configurée');
 
   /// Matières de la classe
   List<String> get subjects => malianClass?.subjects ?? [];
@@ -55,7 +65,7 @@ class UserPrefsNotifier extends StateNotifier<UserProfileState> {
   UserPrefsNotifier()
       : super(const UserProfileState(
           name: '',
-          studentClassId: defaultClassId,
+          studentClassId: '',
           hasCompletedOnboarding: false,
           isLoading: true,
         )) {
@@ -70,7 +80,7 @@ class UserPrefsNotifier extends StateNotifier<UserProfileState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final name = prefs.getString(_keyName) ?? '';
-      final classId = prefs.getString(_keyClassId) ?? defaultClassId;
+      final classId = prefs.getString(_keyClassId) ?? '';
       final hasCompleted = prefs.getBool(_keyOnboarding) ?? false;
 
       state = UserProfileState(

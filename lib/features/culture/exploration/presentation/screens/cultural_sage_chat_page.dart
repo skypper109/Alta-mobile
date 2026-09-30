@@ -65,7 +65,7 @@ const _generalTopics = <_CultureTopic>[
   _CultureTopic(
     label: 'Tout le Mali',
     icon: Icons.public_rounded,
-    promptHint: 'Posez n\'importe quelle question sur le Mali',
+    promptHint: 'Posez  importe quelle question sur le Mali',
   ),
   _CultureTopic(
     label: 'Contes & Légendes',
@@ -78,7 +78,7 @@ const _generalTopics = <_CultureTopic>[
     promptHint: 'Parle-moi des grands empereurs et souverains du Mali',
   ),
   _CultureTopic(
-    label: 'Devinettes (N\'Da)',
+    label: 'Devinettes  ',
     icon: Icons.quiz_rounded,
     promptHint: 'Pose-moi une devinette traditionnelle malienne',
   ),
@@ -153,7 +153,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
 
     if (widget.guideContext != null) {
       _contextualSuggestions =
-          MockCulturalGuideKnowledge.getSuggestionsForContext(widget.guideContext!);
+          MockCulturalGuideKnowledge.getSuggestionsForContext(
+              widget.guideContext!);
     }
 
     _initTts();
@@ -166,20 +167,24 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
 
     final String text;
     if (guide != null) {
-      final regionInfo = guide.regionName.isNotEmpty && guide.regionName != 'Tout le Mali'
-          ? ' de ${guide.regionName}'
-          : '';
-      text = 'I ni ce, noble voyageur ! Parlons de « ${guide.contentTitle} »$regionInfo.\n\n'
+      final regionInfo =
+          guide.regionName.isNotEmpty && guide.regionName != 'Tout le Mali'
+              ? ' de ${guide.regionName}'
+              : '';
+      text =
+          'I ni ce, noble voyageur ! Parlons de « ${guide.contentTitle} »$regionInfo.\n\n'
           'Je suis le Vieux Sage et Griot de la mémoire ancestrale du Mali. '
           'Interrogez-moi sur ses batailles, sa gouvernance, ses légendes ou son héritage. '
           'La sagesse des anciens est à votre écoute.';
     } else if (reg != null) {
-      text = 'I ni sôgôma, noble voyageur ! Je suis le Vieux Sage de la mémoire ancestrale.\n\n'
+      text =
+          'I ni sôgôma, noble voyageur ! Je suis le Vieux Sage de la mémoire ancestrale.\n\n'
           'Vous visitez la terre de ${reg.nom} (« ${reg.surnom} »). '
           'Interrogez-moi sur son histoire, ses légendes, ses coutumes ou ses secrets. '
           'La parole des anciens est un trésor inépuisable.';
     } else {
-      text = 'I ni ce, voyageur de la connaissance ! Je suis le Griot et Sage du Mali.\n\n'
+      text =
+          'I ni ce, voyageur de la connaissance ! Je suis le Griot et Sage du Mali.\n\n'
           'Je garde la mémoire des 3 Empires, les récits de Soundiata et de Mansa Moussa, '
           'les secrets des 19 régions et les contes du clair de lune. '
           'Quelle sagesse souhaitez-vous explorer aujourd\'hui ?';
@@ -298,20 +303,23 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
     final contextParts = <String>[];
     if (widget.guideContext != null) {
       final g = widget.guideContext!;
-      contextParts.add('Sujet étudié : ${g.contentTitle} (type: ${g.contentType.name}, région: ${g.regionName})');
+      contextParts.add(
+          'Sujet étudié : ${g.contentTitle} (type: ${g.contentType.name}, région: ${g.regionName})');
       if (g.subtitle != null && g.subtitle!.isNotEmpty) {
         contextParts.add('Détail : ${g.subtitle}');
       }
     } else if (widget.contextRegion != null) {
       final r = widget.contextRegion!;
-      contextParts.add('Région de focus : ${r.nom} — ${r.surnom} (${r.descriptionCourte})');
+      contextParts.add(
+          'Région de focus : ${r.nom} — ${r.surnom} (${r.descriptionCourte})');
     }
 
     if (widget.guideContext == null && _selectedTopicIndex > 0) {
       contextParts.add('Thème : ${_generalTopics[_selectedTopicIndex].label}');
     }
 
-    final contextStr = contextParts.isNotEmpty ? contextParts.join(' | ') : null;
+    final contextStr =
+        contextParts.isNotEmpty ? contextParts.join(' | ') : null;
 
     try {
       final reply = await _cultureAi.culturalChat(
@@ -342,7 +350,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
       }
     } catch (_) {
       if (mounted) {
-        const fallback = 'Les esprits de la mémoire sont momentanément silencieux. Posez-moi à nouveau votre question dans un instant.';
+        const fallback =
+            'Les esprits de la mémoire sont momentanément silencieux. Posez-moi à nouveau votre question dans un instant.';
         setState(() {
           _isLoading = false;
           _sageState = _SageState.idle;
@@ -405,7 +414,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF080D14) : const Color(0xFFFAF7F2),
+      backgroundColor:
+          isDark ? const Color(0xFF080D14) : const Color(0xFFFAF7F2),
       body: Stack(
         children: [
           _buildBackground(isDark),
@@ -431,7 +441,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
 
   Widget _buildHeader(bool isDark) {
     final titleColor = isDark ? Colors.white : const Color(0xFF1B1208);
-    final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
+    final borderCol =
+        isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
     final String displayTitle;
     final String contextSubtitle;
@@ -497,7 +508,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                     ),
                     const SizedBox(width: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 1.5),
                       decoration: BoxDecoration(
                         color: const Color(0xFF10B981).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6),
@@ -544,7 +556,9 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
-                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
                   ),
                 ),
               ],
@@ -590,7 +604,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
   // ── SUGGESTIONS CONTEXTUELLES OU THÈMES GÉNÉRAUX ───────────────────────────
 
   Widget _buildSuggestionsOrTopicBar(bool isDark) {
-    final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
+    final borderCol =
+        isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
     final surface = isDark ? CultureTheme.darkSurface : Colors.white;
 
     // Si on a un contexte spécifique (ex: Soundiata Keïta, Monument, etc.)
@@ -607,9 +622,11 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
             return GestureDetector(
               onTap: () => _sendMessage(sug.questionText),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.15 : 0.08),
+                  color: CultureTheme.accentOrange
+                      .withValues(alpha: isDark ? 0.15 : 0.08),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: CultureTheme.accentOrange.withValues(alpha: 0.35),
@@ -669,15 +686,24 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                   Icon(
                     t.icon,
                     size: 13,
-                    color: isSelected ? Colors.white : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                    color: isSelected
+                        ? Colors.white
+                        : (isDark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF64748B)),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     t.label,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11.5,
-                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                      color: isSelected ? Colors.white : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                      fontWeight:
+                          isSelected ? FontWeight.w800 : FontWeight.w600,
+                      color: isSelected
+                          ? Colors.white
+                          : (isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B)),
                     ),
                   ),
                 ],
@@ -710,7 +736,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
         break;
       case _SageState.idle:
         statusText = 'Touchez l\'Avatar pour écouter une parole de sagesse';
-        statusColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+        statusColor =
+            isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
         break;
     }
 
@@ -726,7 +753,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
             isDark: isDark,
             onTap: () {
               if (widget.guideContext != null) {
-                _sendMessage('Raconte-moi un récit marquant sur ${widget.guideContext!.contentTitle}.');
+                _sendMessage(
+                    'Raconte-moi un récit marquant sur ${widget.guideContext!.contentTitle}.');
               } else {
                 _sendMessage('Raconte-moi un conte ou une légende du Mali.');
               }
@@ -751,9 +779,13 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       child: Row(
         children: [
-          Expanded(child: Container(height: 1, color: CultureTheme.ocreTerre.withValues(alpha: 0.2))),
+          Expanded(
+              child: Container(
+                  height: 1,
+                  color: CultureTheme.ocreTerre.withValues(alpha: 0.2))),
           const SizedBox(width: 8),
-          Icon(Icons.auto_stories_rounded, size: 12, color: CultureTheme.ocreTerre.withValues(alpha: 0.5)),
+          Icon(Icons.auto_stories_rounded,
+              size: 12, color: CultureTheme.ocreTerre.withValues(alpha: 0.5)),
           const SizedBox(width: 6),
           Text(
             'PAROLES DU GRIOT',
@@ -765,9 +797,13 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
             ),
           ),
           const SizedBox(width: 6),
-          Icon(Icons.auto_stories_rounded, size: 12, color: CultureTheme.ocreTerre.withValues(alpha: 0.5)),
+          Icon(Icons.auto_stories_rounded,
+              size: 12, color: CultureTheme.ocreTerre.withValues(alpha: 0.5)),
           const SizedBox(width: 8),
-          Expanded(child: Container(height: 1, color: CultureTheme.ocreTerre.withValues(alpha: 0.2))),
+          Expanded(
+              child: Container(
+                  height: 1,
+                  color: CultureTheme.ocreTerre.withValues(alpha: 0.2))),
         ],
       ),
     );
@@ -799,7 +835,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF1A1208) : const Color(0xFFFFF8EE),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: CultureTheme.ocreTerre.withValues(alpha: 0.3)),
+            border: Border.all(
+                color: CultureTheme.ocreTerre.withValues(alpha: 0.3)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -843,7 +880,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: isUser
-                ? CultureTheme.primaryBlue.withValues(alpha: isDark ? 0.35 : 0.12)
+                ? CultureTheme.primaryBlue
+                    .withValues(alpha: isDark ? 0.35 : 0.12)
                 : (isDark ? const Color(0xFF161007) : Colors.white),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(isUser ? 18 : 4),
@@ -876,7 +914,9 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                   Icon(
                     isUser ? Icons.person_rounded : Icons.auto_stories_rounded,
                     size: 13,
-                    color: isUser ? CultureTheme.primaryBlue : CultureTheme.accentOrange,
+                    color: isUser
+                        ? CultureTheme.primaryBlue
+                        : CultureTheme.accentOrange,
                   ),
                   const SizedBox(width: 5),
                   Text(
@@ -884,7 +924,9 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10.5,
                       fontWeight: FontWeight.w800,
-                      color: isUser ? CultureTheme.primaryBlue : CultureTheme.accentOrange,
+                      color: isUser
+                          ? CultureTheme.primaryBlue
+                          : CultureTheme.accentOrange,
                     ),
                   ),
                   const Spacer(),
@@ -896,14 +938,20 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: (isSpeaking ? CultureTheme.accentOrange : CultureTheme.ocreTerre)
+                          color: (isSpeaking
+                                  ? CultureTheme.accentOrange
+                                  : CultureTheme.ocreTerre)
                               .withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          isSpeaking ? Icons.stop_rounded : Icons.volume_up_rounded,
+                          isSpeaking
+                              ? Icons.stop_rounded
+                              : Icons.volume_up_rounded,
                           size: 15,
-                          color: isSpeaking ? CultureTheme.accentOrange : CultureTheme.ocreTerre,
+                          color: isSpeaking
+                              ? CultureTheme.accentOrange
+                              : CultureTheme.ocreTerre,
                         ),
                       ),
                     ),
@@ -915,7 +963,9 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                     child: Icon(
                       Icons.copy_rounded,
                       size: 13,
-                      color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                      color: isDark
+                          ? const Color(0xFF64748B)
+                          : const Color(0xFF94A3B8),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -925,7 +975,9 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                     child: Icon(
                       Icons.close_rounded,
                       size: 13,
-                      color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                      color: isDark
+                          ? const Color(0xFF64748B)
+                          : const Color(0xFF94A3B8),
                     ),
                   ),
                 ],
@@ -938,7 +990,9 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13.5,
                   height: 1.55,
-                  color: isDark ? const Color(0xFFE2D5C3) : const Color(0xFF2C1A08),
+                  color: isDark
+                      ? const Color(0xFFE2D5C3)
+                      : const Color(0xFF2C1A08),
                 ),
               ),
             ],
@@ -952,7 +1006,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
 
   Widget _buildInputBar(bool isDark) {
     final surface = isDark ? const Color(0xFF100B05) : Colors.white;
-    final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
+    final borderCol =
+        isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
     final hintText = widget.guideContext != null
         ? 'Posez une question sur ${widget.guideContext!.contentTitle}...'
@@ -970,7 +1025,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
           GestureDetector(
             onTap: () {
               if (widget.guideContext != null) {
-                _sendMessage('Raconte une anecdote ou un fait marquant sur ${widget.guideContext!.contentTitle}.');
+                _sendMessage(
+                    'Raconte une anecdote ou un fait marquant sur ${widget.guideContext!.contentTitle}.');
               } else {
                 _sendMessage('Raconte-moi un conte du Mali.');
               }
@@ -981,7 +1037,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
               decoration: BoxDecoration(
                 color: CultureTheme.accentOrange.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: CultureTheme.accentOrange.withValues(alpha: 0.3)),
+                border: Border.all(
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.3)),
               ),
               child: const Icon(
                 Icons.auto_stories_rounded,
@@ -998,9 +1055,11 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
               constraints: const BoxConstraints(minHeight: 46, maxHeight: 110),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1A1208) : const Color(0xFFFFF8EE),
+                color:
+                    isDark ? const Color(0xFF1A1208) : const Color(0xFFFFF8EE),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: CultureTheme.ocreTerre.withValues(alpha: 0.3)),
+                border: Border.all(
+                    color: CultureTheme.ocreTerre.withValues(alpha: 0.3)),
               ),
               child: TextField(
                 controller: _promptCtrl,
@@ -1009,13 +1068,17 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13.5,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? const Color(0xFFE2D5C3) : const Color(0xFF2C1A08),
+                  color: isDark
+                      ? const Color(0xFFE2D5C3)
+                      : const Color(0xFF2C1A08),
                 ),
                 decoration: InputDecoration(
                   hintText: hintText,
                   hintStyle: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
-                    color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                    color: isDark
+                        ? const Color(0xFF64748B)
+                        : const Color(0xFF94A3B8),
                   ),
                   border: InputBorder.none,
                   isDense: true,
@@ -1042,7 +1105,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                     ? []
                     : [
                         BoxShadow(
-                          color: CultureTheme.accentOrange.withValues(alpha: 0.4),
+                          color:
+                              CultureTheme.accentOrange.withValues(alpha: 0.4),
                           blurRadius: 10,
                           offset: const Offset(0, 3),
                         ),
@@ -1058,7 +1122,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                           color: Colors.white,
                         ),
                       )
-                    : const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                    : const Icon(Icons.send_rounded,
+                        color: Colors.white, size: 18),
               ),
             ),
           ),
@@ -1103,11 +1168,11 @@ class _SageAvatarWidget extends StatelessWidget {
   });
 
   Color get _glowColor => switch (state) {
-    _SageState.idle     => CultureTheme.ocreTerre,
-    _SageState.listening => CultureTheme.fleuveNiger,
-    _SageState.speaking => CultureTheme.accentOrange,
-    _SageState.thinking => CultureTheme.primaryBlue,
-  };
+        _SageState.idle => CultureTheme.ocreTerre,
+        _SageState.listening => CultureTheme.fleuveNiger,
+        _SageState.speaking => CultureTheme.accentOrange,
+        _SageState.thinking => CultureTheme.primaryBlue,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -1134,7 +1199,8 @@ class _SageAvatarWidget extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: _glowColor.withValues(alpha: 0.35 + pulseAnim.value * 0.15),
+                            color: _glowColor.withValues(
+                                alpha: 0.35 + pulseAnim.value * 0.15),
                             blurRadius: 26,
                             spreadRadius: 3,
                           ),
@@ -1169,11 +1235,12 @@ class _SageAvatarWidget extends StatelessWidget {
       builder: (context, _) {
         final eyeColor = state == _SageState.listening
             ? CultureTheme.fleuveNiger
-            : (state == _SageState.speaking ? CultureTheme.accentOrange : Colors.white);
+            : (state == _SageState.speaking
+                ? CultureTheme.accentOrange
+                : Colors.white);
 
-        final eyeH = state == _SageState.thinking
-            ? 4.0 + thinkingAnim.value * 4
-            : 10.0;
+        final eyeH =
+            state == _SageState.thinking ? 4.0 + thinkingAnim.value * 4 : 10.0;
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1189,7 +1256,9 @@ class _SageAvatarWidget extends StatelessWidget {
                     color: eyeColor,
                     borderRadius: BorderRadius.circular(5),
                     boxShadow: [
-                      BoxShadow(color: eyeColor.withValues(alpha: 0.8), blurRadius: 4),
+                      BoxShadow(
+                          color: eyeColor.withValues(alpha: 0.8),
+                          blurRadius: 4),
                     ],
                   ),
                 ),
@@ -1201,19 +1270,24 @@ class _SageAvatarWidget extends StatelessWidget {
                     color: eyeColor,
                     borderRadius: BorderRadius.circular(5),
                     boxShadow: [
-                      BoxShadow(color: eyeColor.withValues(alpha: 0.8), blurRadius: 4),
+                      BoxShadow(
+                          color: eyeColor.withValues(alpha: 0.8),
+                          blurRadius: 4),
                     ],
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 10),
-
             if (state == _SageState.speaking)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(4, (i) {
-                  final h = 3.0 + (math.sin((sageAnim.value * math.pi * 6) + i * 1.0).abs() * 10);
+                  final h = 3.0 +
+                      (math
+                              .sin((sageAnim.value * math.pi * 6) + i * 1.0)
+                              .abs() *
+                          10);
                   return Container(
                     margin: const EdgeInsets.symmetric(horizontal: 2),
                     width: 4,
@@ -1269,7 +1343,8 @@ class _SagePainter extends CustomPainter {
     );
 
     final paint = Paint()
-      ..shader = baseGradient.createShader(Rect.fromCircle(center: center, radius: radius));
+      ..shader = baseGradient
+          .createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawCircle(center, radius, paint);
 
     final ringPaint = Paint()
@@ -1285,7 +1360,8 @@ class _SagePainter extends CustomPainter {
     canvas.translate(center.dx, center.dy);
     canvas.rotate(angle);
     canvas.drawOval(
-      Rect.fromCenter(center: Offset.zero, width: radius * 1.8, height: radius * 0.75),
+      Rect.fromCenter(
+          center: Offset.zero, width: radius * 1.8, height: radius * 0.75),
       ringPaint,
     );
     canvas.restore();
@@ -1294,7 +1370,8 @@ class _SagePainter extends CustomPainter {
     canvas.translate(center.dx, center.dy);
     canvas.rotate(-angle * 0.8);
     canvas.drawOval(
-      Rect.fromCenter(center: Offset.zero, width: radius * 1.55, height: radius * 0.85),
+      Rect.fromCenter(
+          center: Offset.zero, width: radius * 1.55, height: radius * 0.85),
       ringPaint,
     );
     canvas.restore();

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../immersive/services/cultural_haptics.dart';
 
 /// Carte de collection d'art pour un élément gravé au Passeport
-class PassportItemCard extends StatelessWidget {
+/// Dotée d'un retour haptique calibré, d'une micro-interaction ressort et d'un sceau vivant.
+class PassportItemCard extends StatefulWidget {
   final PassportEntry entry;
   final bool isFeatured;
 
@@ -15,6 +16,62 @@ class PassportItemCard extends StatelessWidget {
     required this.entry,
     this.isFeatured = false,
   });
+
+  @override
+  State<PassportItemCard> createState() => _PassportItemCardState();
+}
+
+class _PassportItemCardState extends State<PassportItemCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pressController;
+  late final Animation<double> _scaleAnimation;
+  bool _isPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _pressController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 110),
+      reverseDuration: const Duration(milliseconds: 220),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.976).animate(
+      CurvedAnimation(
+        parent: _pressController,
+        curve: Curves.easeOutQuad,
+        reverseCurve: Curves.easeOutBack,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pressController.dispose();
+    super.dispose();
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    if (widget.entry.targetRoute.isEmpty) return;
+    setState(() => _isPressed = true);
+    _pressController.forward();
+    CulturalHaptics.cardPress();
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    if (widget.entry.targetRoute.isEmpty) return;
+    setState(() => _isPressed = false);
+    _pressController.reverse();
+    CulturalHaptics.cardRelease();
+    final stampHeroTag = 'passport_stamp_${widget.entry.id}';
+    context.push(widget.entry.targetRoute, extra: stampHeroTag);
+  }
+
+  void _handleTapCancel() {
+    if (widget.entry.targetRoute.isEmpty) return;
+    setState(() => _isPressed = false);
+    _pressController.reverse();
+  }
 
   String _formatDate(DateTime date) {
     const months = [
@@ -32,29 +89,42 @@ class PassportItemCard extends StatelessWidget {
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          if (entry.targetRoute.isNotEmpty) {
-            context.push(entry.targetRoute);
-          }
+    final stampHeroTag = 'passport_stamp_${widget.entry.id}';
+    final entry = widget.entry;
+    final isFeatured = widget.isFeatured;
+
+    final currentBorder = _isPressed
+        ? CultureTheme.accentOrange
+        : (isFeatured ? CultureTheme.accentOrange : borderCol);
+
+    return GestureDetector(
+      onTapDown: _handleTapDown,
+      onTapUp: _handleTapUp,
+      onTapCancel: _handleTapCancel,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: child,
+          );
         },
-        borderRadius: BorderRadius.circular(20),
         child: Container(
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isFeatured ? CultureTheme.accentOrange : borderCol,
-              width: isFeatured ? 1.6 : 1.2,
+              color: currentBorder,
+              width: _isPressed ? 1.8 : (isFeatured ? 1.6 : 1.2),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                color: Colors.black.withValues(
+                  alpha: isDark ? (_isPressed ? 0.38 : 0.22) : 0.05,
+                ),
+                blurRadius: _isPressed ? 6 : 12,
+                offset: Offset(0, _isPressed ? 1.5 : 4),
               ),
             ],
           ),
@@ -62,23 +132,26 @@ class PassportItemCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── 1. PHOTOGRAPHIE RÉELLE & TAMPON D'AUTHENTICITÉ ────────────
+              // ── 1. PHOTOGRAPHIE RÉELLE & TAMPON D'AUTHENTICITÉ (HERO) ──────
               SizedBox(
                 height: isFeatured ? 170 : 135,
                 width: double.infinity,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.asset(
-                      entry.photoUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: CultureTheme.primaryDark,
-                        child: Center(
-                          child: Icon(
-                            entry.type.icon,
-                            size: 36,
-                            color: Colors.white54,
+                    Hero(
+                      tag: stampHeroTag,
+                      child: Image.asset(
+                        entry.photoUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: CultureTheme.primaryDark,
+                          child: Center(
+                            child: Icon(
+                              entry.type.icon,
+                              size: 36,
+                              color: Colors.white54,
+                            ),
                           ),
                         ),
                       ),
@@ -158,38 +231,49 @@ class PassportItemCard extends StatelessWidget {
                       ),
                     ),
 
-                    // Sceau dateur de découverte (Bas Droite)
+                    // Sceau dateur de découverte vivant (Bas Droite)
                     Positioned(
                       bottom: 8,
                       right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0F172A).withValues(alpha: 0.82),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: CultureTheme.accentOrange.withValues(alpha: 0.5),
-                            width: 0.8,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.verified_rounded,
-                              size: 11,
+                      child: Transform.rotate(
+                        angle: -0.035, // Micro-angle d'authenticité de tampon manuel
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0F172A).withValues(alpha: 0.88),
+                            borderRadius: BorderRadius.circular(7),
+                            border: Border.all(
                               color: CultureTheme.accentOrange,
+                              width: 1.0,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Inscrit le ${_formatDate(entry.discoveredAt)}',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 8.5,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white.withValues(alpha: 0.9),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.35),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.verified_rounded,
+                                size: 11,
+                                color: CultureTheme.accentOrange,
+                              ),
+                              const SizedBox(width: 4.5),
+                              Text(
+                                'GRAVÉ LE ${_formatDate(entry.discoveredAt).toUpperCase()}',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.4,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
