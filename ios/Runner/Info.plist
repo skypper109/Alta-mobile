@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>AlternIA a besoin de votre microphone pour poser vos questions à l'avatar en direct.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>AlternIA utilise la reconnaissance vocale pour retranscrire vos questions au professeur.</string>
 </dict>
 </plist>

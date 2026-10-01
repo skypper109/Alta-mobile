@@ -4,15 +4,18 @@
 library;
 
 import 'dart:async';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../../core/constants/app_colors.dart';
 import '../../core/gemini_service.dart';
 import '../../presentation/common/widgets/alternia_avatar.dart';
+import '../../presentation/common/widgets/alternia_video_player.dart';
 
 class HolographicSalonPage extends StatefulWidget {
   const HolographicSalonPage({super.key});
@@ -23,12 +26,17 @@ class HolographicSalonPage extends StatefulWidget {
 
 class _HolographicSalonPageState extends State<HolographicSalonPage> {
   final FlutterTts _flutterTts = FlutterTts();
+  final AudioPlayer _audioPlayer = AudioPlayer();
   final ScrollController _scrollCtrl = ScrollController();
   final TextEditingController _promptCtrl = TextEditingController();
   final TextEditingController _codeCtrl = TextEditingController();
   final GeminiService _geminiService = GeminiService();
+  final stt.SpeechToText _speechToText = stt.SpeechToText();
 
   AvatarState _avatarState = AvatarState.idle;
+  String? _currentVideoUrl;
+  bool _isListening = false;
+  String _liveSpokenWords = '';
 
   // ── État de vérification Premium ──────────────────────────────────────────
   bool _isLoadingAuth = true;
@@ -40,9 +48,9 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
 
   final List<_SalonMessage> _transcript = [
     const _SalonMessage(
-      sender: 'AlterniA (AlternIA Live)',
+      sender: 'Professeur Henri (AlternIA Live)',
       text:
-          'Bonjour ! Je suis ton professeur particulier animé par AlternIA. Pose-moi tes questions à l\'oral ou à l\'écrit !',
+          'Bonjour ! Je suis ton professeur particulier Henri animé par AlternIA. Pose-moi tes questions à l\'oral ou à l\'écrit !',
       isUser: false,
       timestamp: 'Direct',
     ),
@@ -149,7 +157,31 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
     try {
       await _flutterTts.setLanguage('fr-FR');
       await _flutterTts.setSpeechRate(0.48);
-      await _flutterTts.setPitch(1.0);
+      // Pitch masculin plus posé et grave pour le professeur Henri
+      await _flutterTts.setPitch(0.82);
+
+      // Tenter de sélectionner une voix masculine française si présente sur le système
+      final voices = await _flutterTts.getVoices;
+      if (voices is List) {
+        for (final v in voices) {
+          if (v is Map) {
+            final name = (v['name'] ?? '').toString().toLowerCase();
+            final locale = (v['locale'] ?? '').toString().toLowerCase();
+            if (locale.contains('fr') &&
+                (name.contains('henri') ||
+                    name.contains('male') ||
+                    name.contains('homme') ||
+                    name.contains('thomas') ||
+                    name.contains('nicolas') ||
+                    name.contains('paul') ||
+                    name.contains('antoine'))) {
+              await _flutterTts
+                  .setVoice({'name': v['name'], 'locale': v['locale']});
+              break;
+            }
+          }
+        }
+      }
 
       _flutterTts.setCompletionHandler(() {
         if (mounted) {
@@ -161,10 +193,12 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
 
   @override
   void dispose() {
+    _speechToText.stop();
     _scrollCtrl.dispose();
     _promptCtrl.dispose();
     _codeCtrl.dispose();
     _stopTts();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -172,6 +206,95 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
     try {
       await _flutterTts.stop();
     } catch (_) {}
+    try {
+      await _audioPlayer.stop();
+    } catch (_) {}
+  }
+
+  // ── Speech-To-Text : 1 Clic Enregistre, 1 Clic Coupe et Envoie Directement ─
+  Future<void> _toggleVocalRecording() async {
+    HapticFeedback.heavyImpact();
+
+    if (_isListening) {
+      await _speechToText.stop();
+      final spoken = _liveSpokenWords.trim().isNotEmpty
+          ? _liveSpokenWords.trim()
+          : _promptCtrl.text.trim();
+      setState(() {
+        _isListening = false;
+        _liveSpokenWords = '';
+      });
+      if (spoken.isNotEmpty) {
+        _sendLiveQuestion(spoken);
+      }
+    } else {
+      await _stopTts();
+      bool available = false;
+      try {
+        available = await _speechToText.initialize(
+          onError: (_) {
+            if (mounted) setState(() => _isListening = false);
+          },
+          onStatus: (status) {
+            if (status == 'done' || status == 'notListening') {
+              if (mounted && _isListening) {
+                final spoken = _liveSpokenWords.trim().isNotEmpty
+                    ? _liveSpokenWords.trim()
+                    : _promptCtrl.text.trim();
+                setState(() {
+                  _isListening = false;
+                  _liveSpokenWords = '';
+                });
+                if (spoken.isNotEmpty) {
+                  _sendLiveQuestion(spoken);
+                }
+              }
+            }
+          },
+        );
+      } catch (_) {}
+
+      if (!mounted) return;
+
+      setState(() {
+        _isListening = true;
+        _liveSpokenWords = '';
+      });
+
+      if (available) {
+        _speechToText.listen(
+          onResult: (result) {
+            if (mounted) {
+              setState(() {
+                _liveSpokenWords = result.recognizedWords;
+                _promptCtrl.text = result.recognizedWords;
+              });
+              if (result.finalResult &&
+                  result.recognizedWords.trim().isNotEmpty) {
+                _speechToText.stop();
+                setState(() {
+                  _isListening = false;
+                  _liveSpokenWords = '';
+                });
+                _sendLiveQuestion(result.recognizedWords.trim());
+              }
+            }
+          },
+        );
+      } else {
+        // Fallback simulation si microphone/reconnaissance non supporté sur émulateur
+        Timer(const Duration(seconds: 3), () {
+          if (mounted && _isListening) {
+            setState(() {
+              _isListening = false;
+              _liveSpokenWords = '';
+            });
+            _sendLiveQuestion(
+                'Explique-moi le théorème de Pythagore avec un exemple concret.');
+          }
+        });
+      }
+    }
   }
 
   void _scrollToBottom() {
@@ -187,16 +310,35 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
   }
 
   Future<void> _speakText(String text) async {
+    // 1. Récupération préalable de l'audio TTS Henri haute fidélité
+    Uint8List? audioBytes;
+    try {
+      audioBytes = await _geminiService.fetchBackendTtsAudio(
+        text: text,
+        voice: 'henri',
+      );
+    } catch (_) {}
+
+    if (!mounted) return;
+
+    // 2. Affichage simultané de la réponse textuelle et démarrage de la voix
     setState(() {
       _avatarState = AvatarState.speaking;
       _transcript.add(_SalonMessage(
-        sender: 'AlterniA (AlternIA)',
+        sender: 'Professeur Henri (AlternIA)',
         text: text,
         isUser: false,
         timestamp: 'Maintenant',
       ));
     });
     _scrollToBottom();
+
+    if (audioBytes != null && audioBytes.isNotEmpty) {
+      try {
+        await _audioPlayer.play(BytesSource(audioBytes));
+        return;
+      } catch (_) {}
+    }
 
     try {
       await _flutterTts.speak(text);
@@ -229,6 +371,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
       final studentName = prefs.getString('det_user_name') ?? 'Élève';
       final studentClass = prefs.getString('det_user_class_id') ?? '11eme';
 
+      // 1. Calcul du texte didactique de réponse (non affiché tant que la vidéo n'est pas prête)
       final reply = await _geminiService.generateTeacherChatResponse(
         [
           {'role': 'user', 'text': userQuery.trim()}
@@ -237,16 +380,77 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
         studentClass: studentClass,
       );
 
-      if (mounted) {
-        final cleanReply = reply.replaceAll('*', '');
-        _speakText(cleanReply);
+      final cleanReply = reply.replaceAll('*', '');
 
-        // Appel asynchrone pour générer la vidéo labiale AlternIA en tâche de fond
-        unawaited(_geminiService.generateAlternIAAvatarVideo(text: cleanReply));
+      // 2. Appel synchrone pour générer la vidéo labiale Simli / AlternIA
+      // On ATTEND que Simli ait fini et renvoyé la vidéo avant d'afficher la réponse sur le téléphone
+      final videoUrl = await _geminiService.generateAlternIAAvatarVideo(
+        text: cleanReply,
+        voice: 'henri',
+      );
+
+      if (!mounted) return;
+
+      if (videoUrl != null && videoUrl.isNotEmpty) {
+        // La vidéo Simli et la voix Henri sont prêtes : affichage simultané du texte et de la vidéo
+        setState(() {
+          _currentVideoUrl = videoUrl;
+          _avatarState = AvatarState.speaking;
+          _transcript.add(_SalonMessage(
+            sender: 'Professeur Henri (AlternIA)',
+            text: cleanReply,
+            isUser: false,
+            timestamp: 'Maintenant',
+          ));
+        });
+        _scrollToBottom();
+      } else {
+        // Si la génération vidéo échoue ou est hors-ligne : attendre le TTS Henri avant d'afficher
+        Uint8List? audioBytes;
+        try {
+          audioBytes = await _geminiService.fetchBackendTtsAudio(
+            text: cleanReply,
+            voice: 'henri',
+          );
+        } catch (_) {}
+
+        if (!mounted) return;
+
+        setState(() {
+          _avatarState = AvatarState.speaking;
+          _transcript.add(_SalonMessage(
+            sender: 'Professeur Henri (AlternIA)',
+            text: cleanReply,
+            isUser: false,
+            timestamp: 'Maintenant',
+          ));
+        });
+        _scrollToBottom();
+
+        if (audioBytes != null && audioBytes.isNotEmpty) {
+          try {
+            await _audioPlayer.play(BytesSource(audioBytes));
+          } catch (_) {
+            await _flutterTts.speak(cleanReply);
+          }
+        } else {
+          await _flutterTts.speak(cleanReply);
+        }
       }
     } catch (_) {
       if (mounted) {
-        _speakText(
+        setState(() {
+          _avatarState = AvatarState.speaking;
+          _transcript.add(const _SalonMessage(
+            sender: 'Professeur Henri (AlternIA)',
+            text:
+                'Je suis à ton écoute. Pose-moi une question sur le programme malien pour que je puisse t\'aider !',
+            isUser: false,
+            timestamp: 'Maintenant',
+          ));
+        });
+        _scrollToBottom();
+        await _flutterTts.speak(
             'Je suis à ton écoute. Pose-moi une question sur le programme malien pour que je puisse t\'aider !');
       }
     }
@@ -653,27 +857,69 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
 
         const SizedBox(height: 10),
 
-        // Avatar Interactif AlterniA
-        AlterniaAvatar(
-          size: 150,
-          state: _avatarState,
-          onTap: () => _sendLiveQuestion(
-              'Explique-moi les principes essentiels du cours.'),
-        ),
+        // Avatar Interactif AlterniA (ou Vidéo Photoréaliste si disponible)
+        if (_currentVideoUrl != null && _currentVideoUrl!.isNotEmpty)
+          AlterniaVideoPlayer(
+            videoUrl: _currentVideoUrl!,
+            onTap: () => _sendLiveQuestion('Explique-moi les principes essentiels du cours.'),
+          )
+        else
+          AlterniaAvatar(
+            size: 150,
+            state: _avatarState,
+            onTap: () => _sendLiveQuestion(
+                'Explique-moi les principes essentiels du cours.'),
+          ),
 
         const SizedBox(height: 10),
 
-        Text(
-          _avatarState == AvatarState.speaking
-              ? 'L\'Avatar AlternIA s\'exprime...'
-              : (_avatarState == AvatarState.thinking
-                  ? 'AlterniA réfléchit avec le RAG Malien...'
-                  : 'Touche l\'Avatar ou écris ta question ci-dessous'),
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
-          ),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          child: _avatarState == AvatarState.thinking
+              ? Container(
+                  key: const ValueKey('thinking_badge'),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                        color: AppColors.accent.withValues(alpha: 0.4)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(
+                        width: 12,
+                        height: 12,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.accent,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'AlternIA & Simli préparent la vidéo...',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.accent,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : Text(
+                  key: ValueKey(_avatarState),
+                  _avatarState == AvatarState.speaking
+                      ? 'Le Professeur Henri s\'exprime...'
+                      : 'Touche l\'Avatar ou écris ta question ci-dessous',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
         ),
 
         const SizedBox(height: 10),
@@ -712,49 +958,137 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
           ),
         ),
 
-        // Barre de saisie question live
+        // Barre de saisie question live & Microphone 1-clic
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                child: Container(
-                  height: 48,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
+              if (_isListening)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF141B2D) : Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: AppColors.border),
+                    color: Colors.redAccent.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                        color: Colors.redAccent.withValues(alpha: 0.5)),
                   ),
-                  child: TextField(
-                    controller: _promptCtrl,
-                    style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13, color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Pose une question à l\'Avatar Live...',
-                      hintStyle: GoogleFonts.plusJakartaSans(
-                          fontSize: 12, color: AppColors.textMuted),
-                      border: InputBorder.none,
+                  child: Row(
+                    children: [
+                      const SizedBox(
+                        width: 8,
+                        height: 8,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _liveSpokenWords.isNotEmpty
+                              ? '« $_liveSpokenWords »'
+                              : 'Écoute en direct... Parlez maintenant, touchez pour envoyer',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.redAccent,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF141B2D) : Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: _isListening
+                              ? Colors.redAccent
+                              : AppColors.border,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _promptCtrl,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: _isListening
+                              ? 'Transcription en direct...'
+                              : 'Pose une question à l\'Avatar Live...',
+                          hintStyle: GoogleFonts.plusJakartaSans(
+                              fontSize: 12, color: AppColors.textMuted),
+                          border: InputBorder.none,
+                        ),
+                        onSubmitted: (val) => _sendLiveQuestion(val),
+                      ),
                     ),
-                    onSubmitted: (val) => _sendLiveQuestion(val),
                   ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () => _sendLiveQuestion(_promptCtrl.text),
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: const BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                    shape: BoxShape.circle,
+                  const SizedBox(width: 8),
+                  // Bouton Microphone 1-clic direct
+                  GestureDetector(
+                    onTap: _toggleVocalRecording,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: _isListening
+                            ? Colors.redAccent
+                            : const Color(0xFF314999),
+                        shape: BoxShape.circle,
+                        boxShadow: _isListening
+                            ? [
+                                BoxShadow(
+                                  color:
+                                      Colors.redAccent.withValues(alpha: 0.5),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                )
+                              ]
+                            : null,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          _isListening
+                              ? Icons.stop_rounded
+                              : Icons.mic_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                    ),
                   ),
-                  child: const Center(
-                    child:
-                        Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                  const SizedBox(width: 8),
+                  // Bouton Envoi
+                  GestureDetector(
+                    onTap: () => _sendLiveQuestion(_promptCtrl.text),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: const BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.send_rounded,
+                            color: Colors.white, size: 18),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
