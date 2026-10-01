@@ -178,7 +178,8 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
     final upper = cleanCode.toUpperCase();
     final Map<String, String> seedPlans = {
       'ALTERNIA-PREMIUM-2026': 'AlterniA Live Pro • Licence Nationale',
-      'SIMLI-LIVE-2026': 'Simli Avatar Live HD • Accès Illimité',
+      'LIVE-PRO-2026': 'AlternIA Live Pro • Accès Illimité',
+      'SIMLI-LIVE-2026': 'AlternIA Live Pro • Accès Illimité',
       'VIP-MALI-2026': 'Partenaire Ministère & Académie',
       'ML-BKO-0042': 'Lycée Soundiata Keïta • Bamako',
       'ALT-BOX-2026-001': 'Boîtier AlterniA Hardware Box',

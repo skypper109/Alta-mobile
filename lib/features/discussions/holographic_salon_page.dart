@@ -510,7 +510,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
               ],
             ),
             Text(
-              'Avatar IA Photoréaliste & Voix',
+              'Professeur Particulier en Direct',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -844,7 +844,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
                   size: 14, color: AppColors.secondary),
               const SizedBox(width: 6),
               Text(
-                'Moteur Photoréaliste AlternIA AI Connecté',
+                'Tuteur Pédagogique en Direct',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -899,7 +899,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'AlternIA & Simli préparent la vidéo...',
+                        'Le Professeur prépare sa réponse...',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -1027,7 +1027,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
                         decoration: InputDecoration(
                           hintText: _isListening
                               ? 'Transcription en direct...'
-                              : 'Pose une question à l\'Avatar Live...',
+                              : 'Pose une question à ton professeur...',
                           hintStyle: GoogleFonts.plusJakartaSans(
                               fontSize: 12, color: AppColors.textMuted),
                           border: InputBorder.none,
@@ -1101,7 +1101,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Statut de Licence Live',
+        title: Text('Statut de votre compte',
             style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
