@@ -69,10 +69,10 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
   }
 
   static const List<String> _filters = [
-    'Contes ',
-    'Devinettes ',
-    'Défis ',
-    'Proverbes ',
+    'Contes',
+    'Devinettes',
+    'Défis',
+    'Proverbes',
   ];
 
   static const List<IconData> _filterIcons = [
@@ -140,13 +140,6 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                 children: List.generate(_filters.length, (index) {
                   final isSelected = _selectedFilterIndex == index;
                   final activeCol = _getFilterColor(index);
-                  final int count = index == 0
-                      ? filteredStories.length
-                      : index == 1
-                          ? filteredRiddles.length
-                          : index == 2
-                              ? MockCultureChallengesData.quizPacks.length
-                              : filteredProverbs.length;
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -160,7 +153,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 220),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
+                            horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? activeCol
@@ -191,25 +184,6 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                                     : FontWeight.w600,
                                 color:
                                     isSelected ? Colors.white : subtitleColor,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 1.5),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Colors.black.withValues(alpha: 0.25)
-                                    : activeCol.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                '$count',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: isSelected ? Colors.white : activeCol,
-                                ),
                               ),
                             ),
                           ],
