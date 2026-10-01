@@ -2,9 +2,12 @@
 // Connecté directement au serveur local AlternIA (LLM Qwen 2.5 + RAG 1573 Chunks Maliens).
 library;
 
+import 'dart:io';
 import 'dart:typed_data';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'constants.dart';
 import 'malian_school_system.dart';
@@ -276,6 +279,23 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
       }
     }
     return null;
+  }
+
+  /// Joue des octets audio MP3 de manière 100% fiable sur iOS (AVPlayer) et Android.
+  /// Évite l'erreur DarwinAudioError de BytesSource en enregistrant temporairement
+  /// le fichier avec l'extension explicite .mp3 et le MIME type audio/mpeg.
+  static Future<void> playAudioBytes(AudioPlayer player, Uint8List bytes) async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File(
+          '${tempDir.path}/alternia_tts_${DateTime.now().millisecondsSinceEpoch}.mp3');
+      await tempFile.writeAsBytes(bytes, flush: true);
+      await player.play(DeviceFileSource(tempFile.path, mimeType: 'audio/mpeg'));
+    } catch (_) {
+      try {
+        await player.play(BytesSource(bytes, mimeType: 'audio/mpeg'));
+      } catch (_) {}
+    }
   }
 
   /// Alias de rétrocompatibilité pour appel direct

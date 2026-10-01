@@ -335,7 +335,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
 
     if (audioBytes != null && audioBytes.isNotEmpty) {
       try {
-        await _audioPlayer.play(BytesSource(audioBytes));
+        await GeminiService.playAudioBytes(_audioPlayer, audioBytes);
         return;
       } catch (_) {}
     }
@@ -429,7 +429,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
 
         if (audioBytes != null && audioBytes.isNotEmpty) {
           try {
-            await _audioPlayer.play(BytesSource(audioBytes));
+            await GeminiService.playAudioBytes(_audioPlayer, audioBytes);
           } catch (_) {
             await _flutterTts.speak(cleanReply);
           }

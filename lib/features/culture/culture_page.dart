@@ -239,7 +239,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
 
       if (audioBytes != null && audioBytes.isNotEmpty) {
         try {
-          await _audioPlayer.play(BytesSource(audioBytes));
+          await GeminiService.playAudioBytes(_audioPlayer, audioBytes);
         } catch (_) {
           await _flutterTts.speak(replyText);
         }

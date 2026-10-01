@@ -258,7 +258,7 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
         final gemini = GeminiService();
         final audioBytes = await gemini.fetchBackendTtsAudio(text: cleanText);
         if (audioBytes != null && audioBytes.isNotEmpty) {
-          await _audioPlayer.play(BytesSource(audioBytes));
+          await GeminiService.playAudioBytes(_audioPlayer, audioBytes);
           return;
         }
       } catch (_) {}
