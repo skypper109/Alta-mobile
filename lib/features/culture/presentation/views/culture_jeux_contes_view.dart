@@ -1179,55 +1179,22 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                           ),
                         ),
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 7, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: CultureTheme.cyanTurquoise
-                                  .withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              '+${riddle.xpReward} XP',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: CultureTheme.cyanTurquoise,
-                              ),
-                            ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: CultureTheme.cyanTurquoise
+                              .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '+${riddle.xpReward} XP',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: CultureTheme.cyanTurquoise,
                           ),
-                          const SizedBox(width: 6),
-                          // Bouton Partager dans l'en-tête de la devinette
-                          GestureDetector(
-                            onTap: () {
-                              CultureShareSheet.show(
-                                context: context,
-                                riddle: riddle,
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: CultureTheme.accentOrange
-                                    .withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: CultureTheme.accentOrange
-                                      .withValues(alpha: 0.3),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.share_rounded,
-                                size: 14,
-                                color: CultureTheme.accentOrange,
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),

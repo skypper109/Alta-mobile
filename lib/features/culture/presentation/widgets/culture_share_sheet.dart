@@ -54,11 +54,20 @@ class _CultureShareSheetState extends State<CultureShareSheet> {
       : 'Partager la Devinette';
 
   String get _subtitle => widget.proverb != null
-      ? 'Carte souvenir des veillées et terroirs du Mali'
-      : 'Défie tes amis avec cette énigme traditionnelle !';
+      ? 'Carte illustrée avec paroles et signification complète'
+      : 'Carte énigme avec transmission et explications des aînés';
 
-  // Texte à copier ou partager en légende
-  String _buildShareText() {
+  // Légende courte accompagnant l'image (l'image contient déjà toutes les informations)
+  String _buildShareCaption() {
+    if (widget.proverb != null) {
+      return '📜 Sagesse du Mali • AlterniA\n#CultureMali #AlternIA #Sagesse';
+    } else {
+      return '💡 Devinette du Mali • AlterniA\n#CultureMali #AlternIA #Devinette';
+    }
+  }
+
+  // Texte intégral complet pour la copie dans le presse-papiers
+  String _buildFullText() {
     if (widget.proverb != null) {
       final p = widget.proverb!;
       final buffer = StringBuffer();
@@ -68,6 +77,9 @@ class _CultureShareSheetState extends State<CultureShareSheet> {
       }
       buffer.writeln('« ${p.text} »');
       buffer.writeln('\n💡 Signification : ${p.meaning}');
+      if (p.moral != null && p.moral!.isNotEmpty) {
+        buffer.writeln('✨ Enseignement : ${p.moral}');
+      }
       buffer.writeln('\n🌟 Découvert sur AlterniA — Compagnon Culturel du Mali');
       buffer.writeln('#AlternIA #CultureMali #Sagesse #Mali');
       return buffer.toString();
@@ -80,6 +92,9 @@ class _CultureShareSheetState extends State<CultureShareSheet> {
       if (_showAnswer) {
         buffer.writeln('\n✅ Réponse : ${r.correctAnswer}');
         buffer.writeln('Explication : ${r.culturalExplanation}');
+        if (r.proverb != null && r.proverb!.isNotEmpty) {
+          buffer.writeln('📜 Proverbe associé : ${r.proverb}');
+        }
       } else {
         buffer.writeln('\n❓ Sauras-tu trouver la réponse ?');
       }
@@ -122,12 +137,12 @@ class _CultureShareSheetState extends State<CultureShareSheet> {
 
       if (!mounted) return;
 
-      // Partage natif via share_plus
+      // Partage natif via share_plus avec l'image complète
       final xFile = XFile(file.path);
       // ignore: deprecated_member_use
       await Share.shareXFiles(
         [xFile],
-        text: _buildShareText(),
+        text: _buildShareCaption(),
         subject: _title,
       );
     } catch (e) {
@@ -148,7 +163,7 @@ class _CultureShareSheetState extends State<CultureShareSheet> {
 
   void _copyText() {
     HapticFeedback.selectionClick();
-    final text = _buildShareText();
+    final text = _buildFullText();
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -181,32 +196,38 @@ class _CultureShareSheetState extends State<CultureShareSheet> {
     final subtitleColor =
         isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(
-          color: isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder,
-          width: 1.2,
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.92,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 25,
-            offset: const Offset(0, -5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            border: Border.all(
+              color: isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder,
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 25,
+                offset: const Offset(0, -5),
+              ),
+            ],
           ),
-        ],
-      ),
-      padding: EdgeInsets.fromLTRB(
-        20,
-        14,
-        20,
-        MediaQuery.of(context).viewInsets.bottom + 26,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              20,
+              14,
+              20,
+              MediaQuery.of(context).viewInsets.bottom + 26,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
           // Barre d'accroche drag handle
           Center(
             child: Container(
@@ -410,6 +431,9 @@ class _CultureShareSheetState extends State<CultureShareSheet> {
           ),
         ],
       ),
+    ),
+    ),
+    ),
     );
   }
 }

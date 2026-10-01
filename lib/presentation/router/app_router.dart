@@ -37,6 +37,7 @@ import '../documents/documents_screen.dart';
 import '../home/home_screen.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../profile/profile_screen.dart';
+import '../splash/splash_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -46,16 +47,12 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 GoRouter appRouter(Ref ref) {
   final userPrefs = ref.watch(userPrefsProvider);
 
-  final defaultLocation =
-      (!userPrefs.hasCompletedOnboarding || userPrefs.hasSelectedClass)
-          ? '/home'
-          : '/culture';
-
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: defaultLocation,
+    initialLocation: '/splash',
     debugLogDiagnostics: false,
     redirect: (context, state) {
+      if (state.matchedLocation == '/splash') return null;
       if (userPrefs.isLoading) return null;
       final isOnboarding = state.matchedLocation == '/onboarding';
       if (!userPrefs.hasCompletedOnboarding && !isOnboarding) {
@@ -388,6 +385,11 @@ GoRouter appRouter(Ref ref) {
         path: '/holo-salon',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const HolographicSalonPage(),
+      ),
+      GoRoute(
+        path: '/splash',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
         path: '/onboarding',
