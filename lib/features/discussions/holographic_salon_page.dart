@@ -826,36 +826,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
   Widget _buildLiveSalonView(bool isDark) {
     return Column(
       children: [
-        const SizedBox(height: 8),
-
-        // Badge AlternIA HD
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppColors.secondary.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(20),
-            border:
-                Border.all(color: AppColors.secondary.withValues(alpha: 0.4)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.videocam_rounded,
-                  size: 14, color: AppColors.secondary),
-              const SizedBox(width: 6),
-              Text(
-                'Tuteur Pédagogique en Direct',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.secondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
 
         // Avatar Interactif AlterniA (ou Vidéo Photoréaliste si disponible)
         if (_currentVideoUrl != null && _currentVideoUrl!.isNotEmpty)
@@ -1015,22 +986,42 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
                         border: Border.all(
                           color: _isListening
                               ? Colors.redAccent
-                              : AppColors.border,
+                              : (isDark
+                                  ? AppColors.border
+                                  : const Color(0xFFCBD5E1)),
+                          width: 1.2,
                         ),
+                        boxShadow: isDark
+                            ? null
+                            : [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.04),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
                       ),
                       child: TextField(
                         controller: _promptCtrl,
+                        cursorColor: isDark ? Colors.white : Colors.black,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13,
-                          color: isDark ? Colors.white : Colors.black87,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? Colors.white : Colors.black,
                         ),
                         decoration: InputDecoration(
                           hintText: _isListening
                               ? 'Transcription en direct...'
                               : 'Pose une question à ton professeur...',
                           hintStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 12, color: AppColors.textMuted),
+                            fontSize: 12,
+                            color: isDark
+                                ? AppColors.textMuted
+                                : const Color(0xFF64748B),
+                          ),
                           border: InputBorder.none,
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 12),
                         ),
                         onSubmitted: (val) => _sendLiveQuestion(val),
                       ),

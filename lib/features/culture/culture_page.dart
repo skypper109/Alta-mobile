@@ -774,8 +774,11 @@ class _CulturePageState extends ConsumerState<CulturePage> {
                       ),
                       child: TextField(
                         controller: _sageInputCtrl,
+                        cursorColor:
+                            isDark ? Colors.white : const Color(0xFF0F172A),
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13,
+                          fontWeight: FontWeight.w500,
                           color:
                               isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
@@ -785,9 +788,13 @@ class _CulturePageState extends ConsumerState<CulturePage> {
                               : 'Pose une question au Vieux Sage...',
                           hintStyle: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
-                            color: AppColors.textMuted,
+                            color: isDark
+                                ? AppColors.textMuted
+                                : const Color(0xFF64748B),
                           ),
                           border: InputBorder.none,
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 12),
                         ),
                         onSubmitted: (val) {
                           if (val.trim().isNotEmpty) {
