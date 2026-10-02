@@ -6,13 +6,15 @@ import '../../core/datasources/mock_culture_stories_data.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../../../core/services/vivienne_tts_service.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/authentic_photo_hero.dart';
 import '../widgets/connected_contents_section.dart';
+import '../widgets/culture_detail_sticky_header.dart';
 import '../widgets/story_audio_player_sheet.dart';
 
 /// Fiche détaillée d'un Conte Malien (Écouter, Lire, Commencer l'expérience)
-class StoryDetailScreen extends StatelessWidget {
+class StoryDetailScreen extends StatefulWidget {
   final String id;
   final InteractiveStory? story;
   final String? heroTag;
@@ -25,8 +27,48 @@ class StoryDetailScreen extends StatelessWidget {
   });
 
   @override
+  State<StoryDetailScreen> createState() => _StoryDetailScreenState();
+}
+
+class _StoryDetailScreenState extends State<StoryDetailScreen> {
+  late final ScrollController _scrollController;
+  bool _isScrolled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final scrolled =
+        _scrollController.hasClients && _scrollController.offset > 160;
+    if (scrolled != _isScrolled) {
+      setState(() => _isScrolled = scrolled);
+    }
+  }
+
+  @override
+  void deactivate() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final item = story ?? MockCultureStoriesData.getStoryById(id);
+    final item = widget.story ?? MockCultureStoriesData.getStoryById(widget.id);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
@@ -34,23 +76,31 @@ class StoryDetailScreen extends StatelessWidget {
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
     final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
-    return Scaffold(
-      backgroundColor: isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // ── 1. GRANDE PHOTOGRAPHIE AUTHENTIQUE (HERO) ──────────────────────
-          SliverToBoxAdapter(
-            child: AuthenticPhotoHero(
-              photoUrl: item.photoUrl,
-              photoCredits: item.photoCredits,
-              tag: item.tag,
-              regionName: item.regionName,
-              subtitleInfo: item.origin,
-              accentColor: CultureTheme.accentOrange,
-              heroTag: heroTag ?? 'culture_story_${item.id}',
-            ),
-          ),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        VivienneTtsService.instance.stop();
+      },
+      child: Scaffold(
+        backgroundColor: isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground,
+        body: Stack(
+          children: [
+            CustomScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                // ── 1. GRANDE PHOTOGRAPHIE AUTHENTIQUE (HERO) ──────────────────────
+                SliverToBoxAdapter(
+                  child: AuthenticPhotoHero(
+                    photoUrl: item.photoUrl,
+                    photoCredits: item.photoCredits,
+                    tag: item.tag,
+                    regionName: item.regionName,
+                    subtitleInfo: item.origin,
+                    accentColor: CultureTheme.accentOrange,
+                    heroTag: widget.heroTag ?? 'culture_story_${item.id}',
+                    showTopActions: false, // Actions gérées par le sticky header
+                  ),
+                ),
 
           // ── 2. CORPS ÉDITORIAL & ACTIONS ──────────────────────────────────
           SliverPadding(
@@ -389,6 +439,15 @@ class StoryDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
+      // ── EN-TÊTE SUPÉRIEUR PERSISTANT (RETOUR & FAVORI) ────────────────
+      CultureDetailStickyHeader(
+        title: item.title,
+        isScrolled: _isScrolled,
+        accentColor: CultureTheme.accentOrange,
+      ),
+    ],
+  ),
+),
+);
   }
 }

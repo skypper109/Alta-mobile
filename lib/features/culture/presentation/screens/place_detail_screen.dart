@@ -12,10 +12,12 @@ import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/authentic_photo_hero.dart';
 import '../widgets/connected_contents_section.dart';
 import '../widgets/culture_audio_listen_badge.dart';
+import '../../../../core/services/vivienne_tts_service.dart';
+import '../widgets/culture_detail_sticky_header.dart';
 import '../widgets/passport_stamp_toast.dart';
 
 /// Fiche de consultation immersive d'une Ville ou Village du Mali
-class PlaceDetailScreen extends ConsumerWidget {
+class PlaceDetailScreen extends ConsumerStatefulWidget {
   final String id;
   final PlaceDetail? place;
   final String? heroTag;
@@ -28,8 +30,48 @@ class PlaceDetailScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final item = place ?? MockCultureDetailsData.getPlaceById(id);
+  ConsumerState<PlaceDetailScreen> createState() => _PlaceDetailScreenState();
+}
+
+class _PlaceDetailScreenState extends ConsumerState<PlaceDetailScreen> {
+  late final ScrollController _scrollController;
+  bool _isScrolled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final scrolled =
+        _scrollController.hasClients && _scrollController.offset > 160;
+    if (scrolled != _isScrolled) {
+      setState(() => _isScrolled = scrolled);
+    }
+  }
+
+  @override
+  void deactivate() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final item = widget.place ?? MockCultureDetailsData.getPlaceById(widget.id);
     final activeRegion = ref.watch(activeCultureRegionProvider).activeRegion;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -62,23 +104,31 @@ class PlaceDetailScreen extends ConsumerWidget {
     final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
     final surfaceAlt = isDark ? CultureTheme.darkSurfaceAlt : CultureTheme.lightSurfaceAlt;
 
-    return Scaffold(
-      backgroundColor: isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // ── 1. GRANDE PHOTOGRAPHIE AUTHENTIQUE DU LIEU (HERO) ──────────────
-          SliverToBoxAdapter(
-            child: AuthenticPhotoHero(
-              photoUrl: item.photoUrl,
-              photoCredits: item.photoCredits,
-              tag: item.tag,
-              regionName: item.regionName,
-              subtitleInfo: item.fondation,
-              accentColor: CultureTheme.cyanTurquoise,
-              heroTag: heroTag ?? 'culture_place_${item.id}',
-            ),
-          ),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        VivienneTtsService.instance.stop();
+      },
+      child: Scaffold(
+        backgroundColor: isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground,
+        body: Stack(
+          children: [
+            CustomScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                // ── 1. GRANDE PHOTOGRAPHIE AUTHENTIQUE DU LIEU (HERO) ──────────────
+                SliverToBoxAdapter(
+                  child: AuthenticPhotoHero(
+                    photoUrl: item.photoUrl,
+                    photoCredits: item.photoCredits,
+                    tag: item.tag,
+                    regionName: item.regionName,
+                    subtitleInfo: item.fondation,
+                    accentColor: CultureTheme.cyanTurquoise,
+                    heroTag: widget.heroTag ?? 'culture_place_${item.id}',
+                    showTopActions: false, // Actions gérées par le sticky header
+                  ),
+                ),
 
           // ── 2. CORPS ÉDITORIAL & DÉCOUVERTE DU TERROIR ────────────────────
           SliverPadding(
@@ -403,6 +453,15 @@ class PlaceDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
+      // ── EN-TÊTE SUPÉRIEUR PERSISTANT (RETOUR & FAVORI) ────────────────
+      CultureDetailStickyHeader(
+        title: item.name,
+        isScrolled: _isScrolled,
+        accentColor: CultureTheme.cyanTurquoise,
+      ),
+    ],
+  ),
+),
+);
   }
 }

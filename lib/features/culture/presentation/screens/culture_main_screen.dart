@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/services/vivienne_tts_service.dart';
 import '../../core/theme/culture_theme.dart';
 import '../views/culture_decouvrir_view.dart';
 import '../views/culture_home_view.dart';
@@ -44,10 +45,22 @@ class _CultureMainScreenState extends ConsumerState<CultureMainScreen> {
   }
 
   void _onTabSelected(int index) {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+
     ref.read(cultureActiveTabProvider.notifier).state = index;
     setState(() {
       _currentTabIndex = index;
     });
+  }
+
+  @override
+  void dispose() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    super.dispose();
   }
 
   @override

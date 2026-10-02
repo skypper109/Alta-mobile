@@ -18,6 +18,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/culture_ai_service.dart';
 import '../../core/culture_simli_service.dart';
 import '../../core/gemini_service.dart';
+import '../../core/services/vivienne_tts_service.dart';
 import '../../presentation/common/widgets/alternia_avatar.dart';
 import '../../presentation/common/widgets/alternia_video_player.dart';
 import '../../shared/widgets.dart';
@@ -94,6 +95,12 @@ class _CulturePageState extends ConsumerState<CulturePage> {
   }
 
   @override
+  void deactivate() {
+    _stopAudio();
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _speechToText.stop();
     _sageInputCtrl.dispose();
@@ -104,6 +111,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
 
   Future<void> _stopAudio() async {
     try {
+      await VivienneTtsService.instance.stop();
       await _flutterTts.stop();
     } catch (_) {}
     try {

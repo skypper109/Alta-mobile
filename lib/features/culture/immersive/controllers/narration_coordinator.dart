@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import '../../../../core/services/vivienne_tts_service.dart';
 
 /// États de la narration vocale
 enum NarrationState {
@@ -25,7 +25,7 @@ class NarrationSnapshot {
     this.currentText = '',
     this.activeContentId,
     this.progress = 0.0,
-    this.speechRate = 0.48,
+    this.speechRate = VivienneTtsService.vivienneSpeechRate,
     this.errorMessage,
   });
 
@@ -55,68 +55,26 @@ class NarrationSnapshot {
   }
 }
 
-/// Coordinateur centralisé pour la synthèse vocale (Griot & Narrateur culturel)
+/// Coordinateur centralisé pour la voix Neurale Vivienne (AlternIA)
 class NarrationCoordinator extends StateNotifier<NarrationSnapshot> {
-  final FlutterTts _flutterTts = FlutterTts();
-  bool _isInitialized = false;
+  final VivienneTtsService _vivienneTts = VivienneTtsService.instance;
   VoidCallback? _currentCompletionCallback;
 
-  NarrationCoordinator() : super(const NarrationSnapshot()) {
-    _initTts();
-  }
+  NarrationCoordinator() : super(const NarrationSnapshot());
 
-  Future<void> _initTts() async {
-    try {
-      await _flutterTts.setLanguage('fr-FR');
-      await _flutterTts.setSpeechRate(state.speechRate);
-      await _flutterTts.setPitch(0.95);
-
-      _flutterTts.setStartHandler(() {
-        state = state.copyWith(state: NarrationState.speaking);
-      });
-
-      _flutterTts.setCompletionHandler(() {
-        state = state.copyWith(
-          state: NarrationState.completed,
-          progress: 1.0,
-        );
-        _currentCompletionCallback?.call();
-        _currentCompletionCallback = null;
-      });
-
-      _flutterTts.setErrorHandler((msg) {
-        state = state.copyWith(
-          state: NarrationState.error,
-          errorMessage: msg.toString(),
-        );
-      });
-
-      _isInitialized = true;
-    } catch (e) {
-      debugPrint('[NarrationCoordinator] Erreur d\'initialisation TTS : $e');
-    }
-  }
-
-  /// Modifier le débit de lecture du Griot (ex: 0.40 posé, 0.48 normal, 0.58 rapide)
+  /// Modifier le débit de lecture
   Future<void> setSpeechRate(double rate) async {
     final clamped = rate.clamp(0.35, 0.70);
-    try {
-      await _flutterTts.setSpeechRate(clamped);
-      state = state.copyWith(speechRate: clamped);
-    } catch (_) {}
+    state = state.copyWith(speechRate: clamped);
   }
 
-  /// Démarre ou relance la lecture du texte avec identifiant de contenu optionnel
+  /// Démarre ou relance la lecture du texte avec la voix Neurale Vivienne
   Future<void> speak(
     String text, {
     String? contentId,
     VoidCallback? onComplete,
   }) async {
     if (text.trim().isEmpty) return;
-
-    if (!_isInitialized) {
-      await _initTts();
-    }
 
     try {
       _currentCompletionCallback = onComplete;
@@ -127,8 +85,27 @@ class NarrationCoordinator extends StateNotifier<NarrationSnapshot> {
         progress: 0.0,
         errorMessage: null,
       );
-      await _flutterTts.stop();
-      await _flutterTts.speak(text);
+
+      await _vivienneTts.speak(
+        text,
+        onStart: () {
+          state = state.copyWith(state: NarrationState.speaking);
+        },
+        onComplete: () {
+          state = state.copyWith(
+            state: NarrationState.completed,
+            progress: 1.0,
+          );
+          _currentCompletionCallback?.call();
+          _currentCompletionCallback = null;
+        },
+        onError: (err) {
+          state = state.copyWith(
+            state: NarrationState.error,
+            errorMessage: err.toString(),
+          );
+        },
+      );
     } catch (e) {
       state = state.copyWith(
         state: NarrationState.error,
@@ -137,10 +114,10 @@ class NarrationCoordinator extends StateNotifier<NarrationSnapshot> {
     }
   }
 
-  /// Arrête immédiatement la narration
+  /// Arrête immédiatement la narration Vivienne
   Future<void> stop() async {
     try {
-      await _flutterTts.stop();
+      await _vivienneTts.stop();
       _currentCompletionCallback = null;
       state = state.copyWith(
         state: NarrationState.idle,
@@ -165,7 +142,7 @@ class NarrationCoordinator extends StateNotifier<NarrationSnapshot> {
 
   @override
   void dispose() {
-    _flutterTts.stop();
+    _vivienneTts.stop();
     super.dispose();
   }
 }

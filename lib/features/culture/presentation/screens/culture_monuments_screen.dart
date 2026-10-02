@@ -90,6 +90,34 @@ class CultureMonumentsScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      context.push('/culture/scanner');
+                    },
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: CultureTheme.accentOrange.withValues(
+                          alpha: isDark ? 0.22 : 0.14,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: CultureTheme.accentOrange.withValues(alpha: 0.5),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.document_scanner_rounded,
+                          size: 20,
+                          color: CultureTheme.accentOrange,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   const RegionFilterPill(compact: true),
                 ],
               ),
@@ -101,6 +129,76 @@ class CultureMonumentsScreen extends ConsumerWidget {
                 color:
                     isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder,
                 height: 20,
+              ),
+            ),
+
+            // ── BANNIÈRE SCANNER IA ─────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  context.push('/culture/scanner');
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: CultureTheme.accentOrange.withValues(
+                      alpha: isDark ? 0.16 : 0.10,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.45),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: CultureTheme.accentOrange,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt_rounded,
+                          size: 18,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Scanner IA de Monuments',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: titleColor,
+                              ),
+                            ),
+                            Text(
+                              'Pointez votre caméra pour révéler l\'histoire',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: subtitleColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 13,
+                        color: CultureTheme.accentOrange,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
 

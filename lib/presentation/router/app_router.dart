@@ -19,6 +19,7 @@ import '../../features/culture/presentation/screens/culture_monuments_screen.dar
 import '../../features/culture/presentation/screens/culture_personnages_screen.dart';
 import '../../features/culture/core/theme/culture_theme.dart';
 import '../../features/culture/presentation/screens/culture_villes_screen.dart';
+import '../../features/culture/scanner/scanner.dart';
 import '../../features/culture/presentation/screens/historical_figure_detail_screen.dart';
 import '../../features/culture/presentation/screens/interactive_story_player_screen.dart';
 import '../../features/culture/presentation/screens/monument_detail_screen.dart';
@@ -36,12 +37,48 @@ import '../discussions/discussions_screen.dart';
 import '../documents/documents_screen.dart';
 import '../home/home_screen.dart';
 import '../onboarding/onboarding_screen.dart';
+import '../../core/services/vivienne_tts_service.dart';
 import '../profile/profile_screen.dart';
 import '../splash/splash_screen.dart';
 
 part 'app_router.g.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+
+/// Observateur de navigation global : coupe immédiatement toute synthèse vocale
+/// ou lecture audio (TTS Vivienne / récits / contes) dès qu'une route est poussée,
+/// dépilée ou remplacée.
+class GlobalTtsRouteObserver extends NavigatorObserver {
+  void _stopTts() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _stopTts();
+    super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _stopTts();
+    super.didPop(route, previousRoute);
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    _stopTts();
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _stopTts();
+    super.didRemove(route, previousRoute);
+  }
+}
 
 @riverpod
 GoRouter appRouter(Ref ref) {
@@ -51,6 +88,7 @@ GoRouter appRouter(Ref ref) {
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
     debugLogDiagnostics: false,
+    observers: [GlobalTtsRouteObserver()],
     redirect: (context, state) {
       if (state.matchedLocation == '/splash') return null;
       if (userPrefs.isLoading) return null;
@@ -168,6 +206,16 @@ GoRouter appRouter(Ref ref) {
         path: '/culture/map',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const ExploreMaliScreen(),
+      ),
+      GoRoute(
+        path: '/culture/scanner',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const MonumentScannerScreen(),
+      ),
+      GoRoute(
+        path: '/culture/monuments/scanner',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const MonumentScannerScreen(),
       ),
 
       // ── Culture Étape 2 : Écrans Découverte ──────────────────────────────

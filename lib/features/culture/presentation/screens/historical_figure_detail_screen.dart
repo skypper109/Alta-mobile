@@ -11,6 +11,7 @@ import '../../core/models/culture_detail_models.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/services/cultural_haptics.dart';
+import '../../../../core/services/vivienne_tts_service.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/authentic_photo_hero.dart';
 import '../widgets/connected_contents_section.dart';
@@ -59,7 +60,18 @@ class _HistoricalFigureDetailScreenState
   }
 
   @override
+  void deactivate() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -170,10 +182,14 @@ class _HistoricalFigureDetailScreenState
         isDark ? CultureTheme.darkSurfaceAlt : CultureTheme.lightSurfaceAlt;
     final topPadding = MediaQuery.paddingOf(context).top;
 
-    return Scaffold(
-      backgroundColor:
-          isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground,
-      body: Stack(
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        VivienneTtsService.instance.stop();
+      },
+      child: Scaffold(
+        backgroundColor:
+            isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground,
+        body: Stack(
         children: [
           // ── CONTENU DÉFILANT ──────────────────────────────────────────────
           CustomScrollView(
@@ -582,6 +598,7 @@ class _HistoricalFigureDetailScreenState
                     borderCol: borderCol,
                     onTap: () {
                       HapticFeedback.lightImpact();
+                      VivienneTtsService.instance.stop();
                       if (context.canPop()) {
                         context.pop();
                       }
@@ -626,6 +643,7 @@ class _HistoricalFigureDetailScreenState
           ),
         ],
       ),
+    ),
     );
   }
 }

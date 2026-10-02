@@ -12,20 +12,62 @@ import '../../../core/models/cultural_guide_models.dart';
 import '../../../core/models/culture_item.dart';
 import '../../../core/models/culture_passport_models.dart';
 import '../../../core/models/culture_story_models.dart';
+import '../../../../../core/services/vivienne_tts_service.dart';
 import '../../../core/theme/culture_theme.dart';
 import '../../../presentation/widgets/ask_cultural_guide_button.dart';
 import '../../../presentation/widgets/authentic_photo_hero.dart';
+import '../../../presentation/widgets/culture_detail_sticky_header.dart';
 import '../../../presentation/widgets/passport_stamp_toast.dart';
 import '../../data/models/mali_region.dart';
 
 /// Fiche Détaillée d'une Région du Mali (Design System Unifié Alternia Culture)
-class RegionDetailScreen extends ConsumerWidget {
+class RegionDetailScreen extends ConsumerStatefulWidget {
   final MaliRegion region;
 
   const RegionDetailScreen({
     super.key,
     required this.region,
   });
+
+  @override
+  ConsumerState<RegionDetailScreen> createState() => _RegionDetailScreenState();
+}
+
+class _RegionDetailScreenState extends ConsumerState<RegionDetailScreen> {
+  late final ScrollController _scrollController;
+  bool _isScrolled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final scrolled =
+        _scrollController.hasClients && _scrollController.offset > 160;
+    if (scrolled != _isScrolled) {
+      setState(() => _isScrolled = scrolled);
+    }
+  }
+
+  @override
+  void deactivate() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   String _resolveRegionPhoto(String regionId) {
     switch (regionId) {
@@ -53,9 +95,9 @@ class RegionDetailScreen extends ConsumerWidget {
     }
   }
 
-  void _applyGlobalFilter(BuildContext context, WidgetRef ref) {
+  void _applyGlobalFilter(BuildContext context) {
     HapticFeedback.mediumImpact();
-    ref.read(activeCultureRegionProvider.notifier).selectRegion(region);
+    ref.read(activeCultureRegionProvider.notifier).selectRegion(widget.region);
 
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -67,7 +109,7 @@ class RegionDetailScreen extends ConsumerWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Filtre actif : ${region.nom} (appliqué à tout l\'univers Culture)',
+                'Filtre actif : ${widget.region.nom} (appliqué à tout l\'univers Culture)',
                 style: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.w700,
                   fontSize: 12.5,
@@ -85,7 +127,8 @@ class RegionDetailScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final region = widget.region;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final subtitleColor =
@@ -142,291 +185,318 @@ class RegionDetailScreen extends ConsumerWidget {
         .where((v) => v.regionId == region.id)
         .toList();
 
-    return Scaffold(
-      backgroundColor: bgColor,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // ── 1. PHOTOGRAPHIE RÉELLE AUTHENTIQUE DU TERROIR ─────────────────
-          SliverToBoxAdapter(
-            child: AuthenticPhotoHero(
-              photoUrl: photoUrl,
-              photoCredits: '${region.nom} • Archives du Patrimoine National',
-              tag: region.code,
-              regionName: region.nom,
-              subtitleInfo: region.surnom,
-              accentColor: CultureTheme.primaryBlue,
-            ),
-          ),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        VivienneTtsService.instance.stop();
+      },
+      child: Scaffold(
+        backgroundColor: bgColor,
+        body: Stack(
+          children: [
+            CustomScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                // ── 1. PHOTOGRAPHIE RÉELLE AUTHENTIQUE DU TERROIR ─────────────────
+                SliverToBoxAdapter(
+                  child: AuthenticPhotoHero(
+                    photoUrl: photoUrl,
+                    photoCredits:
+                        '${region.nom} • Archives du Patrimoine National',
+                    tag: region.code,
+                    regionName: region.nom,
+                    subtitleInfo: region.surnom,
+                    accentColor: CultureTheme.primaryBlue,
+                    showTopActions:
+                        false, // Actions gérées par le sticky header
+                  ),
+                ),
 
-          // ── 2. CORPS ÉDITORIAL & DÉCOUVERTES CULTURELLES ──────────────────
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                // En-tête : Nom & Surnom
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                // ── 2. CORPS ÉDITORIAL & DÉCOUVERTES CULTURELLES ──────────────────
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      // En-tête : Nom & Surnom
+                      Row(
                         children: [
-                          Text(
-                            region.nom,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w900,
-                              color: titleColor,
-                              letterSpacing: -0.5,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  region.nom,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w900,
+                                    color: titleColor,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                Text(
+                                  region.surnom,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: CultureTheme.accentOrange,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          Text(
-                            region.surnom,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w700,
-                              color: CultureTheme.accentOrange,
+                          // Bouton filtre global
+                          GestureDetector(
+                            onTap: () => _applyGlobalFilter(context),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isFilterActive
+                                    ? Colors.green
+                                    : CultureTheme.primaryBlue,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: (isFilterActive
+                                            ? Colors.green
+                                            : CultureTheme.primaryBlue)
+                                        .withValues(alpha: 0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    isFilterActive
+                                        ? Icons.check_circle_rounded
+                                        : Icons.filter_alt_rounded,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    isFilterActive
+                                        ? 'Filtre Actif'
+                                        : 'Filtrer Culture',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    // Bouton filtre global
-                    GestureDetector(
-                      onTap: () => _applyGlobalFilter(context, ref),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isFilterActive
-                              ? Colors.green
-                              : CultureTheme.primaryBlue,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: (isFilterActive
-                                      ? Colors.green
-                                      : CultureTheme.primaryBlue)
-                                  .withValues(alpha: 0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              isFilterActive
-                                  ? Icons.check_circle_rounded
-                                  : Icons.filter_alt_rounded,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              isFilterActive
-                                  ? 'Filtre Actif'
-                                  : 'Filtrer Culture',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+
+                      const SizedBox(height: 16),
+
+                      // Données géographiques clés (Chef-lieu, Population, Superficie)
+                      Row(
+                        children: [
+                          _buildInfoCard(
+                            label: 'CHEF-LIEU',
+                            value: region.chefLieu,
+                            icon: Icons.location_city_rounded,
+                            isDark: isDark,
+                            cardBg: cardBg,
+                            borderCol: borderCol,
+                            titleColor: titleColor,
+                            subtitleColor: subtitleColor,
+                          ),
+                          const SizedBox(width: 8),
+                          _buildInfoCard(
+                            label: 'SUPERFICIE',
+                            value: region.superficie,
+                            icon: Icons.map_rounded,
+                            isDark: isDark,
+                            cardBg: cardBg,
+                            borderCol: borderCol,
+                            titleColor: titleColor,
+                            subtitleColor: subtitleColor,
+                          ),
+                          const SizedBox(width: 8),
+                          _buildInfoCard(
+                            label: 'POPULATION',
+                            value: region.population,
+                            icon: Icons.groups_rounded,
+                            isDark: isDark,
+                            cardBg: cardBg,
+                            borderCol: borderCol,
+                            titleColor: titleColor,
+                            subtitleColor: subtitleColor,
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Présentation historique & culturelle
+                      Text(
+                        'Histoire & Mémoire du Terroir',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: titleColor,
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(height: 8),
+                      Text(
+                        region.descriptionComplete,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13.5,
+                          color: subtitleColor,
+                          height: 1.55,
+                        ),
+                      ),
 
-                const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                // Données géographiques clés (Chef-lieu, Population, Superficie)
-                Row(
-                  children: [
-                    _buildInfoCard(
-                      label: 'CHEF-LIEU',
-                      value: region.chefLieu,
-                      icon: Icons.location_city_rounded,
-                      isDark: isDark,
-                      cardBg: cardBg,
-                      borderCol: borderCol,
-                      titleColor: titleColor,
-                      subtitleColor: subtitleColor,
-                    ),
-                    const SizedBox(width: 8),
-                    _buildInfoCard(
-                      label: 'SUPERFICIE',
-                      value: region.superficie,
-                      icon: Icons.map_rounded,
-                      isDark: isDark,
-                      cardBg: cardBg,
-                      borderCol: borderCol,
-                      titleColor: titleColor,
-                      subtitleColor: subtitleColor,
-                    ),
-                    const SizedBox(width: 8),
-                    _buildInfoCard(
-                      label: 'POPULATION',
-                      value: region.population,
-                      icon: Icons.groups_rounded,
-                      isDark: isDark,
-                      cardBg: cardBg,
-                      borderCol: borderCol,
-                      titleColor: titleColor,
-                      subtitleColor: subtitleColor,
-                    ),
-                  ],
-                ),
+                      // Guide Culturel IA Contextuel
+                      AskCulturalGuideButton(
+                        contextData: CulturalGuideContext(
+                          contentType: CulturalContentType.region,
+                          contentId: region.id,
+                          contentTitle: region.nom,
+                          subtitle: region.surnom,
+                          regionId: region.id,
+                          regionName: region.nom,
+                        ),
+                      ),
 
-                const SizedBox(height: 20),
+                      const SizedBox(height: 24),
 
-                // Présentation historique & culturelle
-                Text(
-                  'Histoire & Mémoire du Terroir',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: titleColor,
+                      // ── 3. MONUMENTS DU TERROIR ─────────────────────────────────
+                      if (monuments.isNotEmpty) ...[
+                        _buildSectionHeader('MONUMENTS HISTORIQUES',
+                            CultureTheme.rougeKoulikoro),
+                        const SizedBox(height: 10),
+                        ...monuments.map((m) => _buildCultureItemTile(
+                              item: m,
+                              route: '/culture/monument/${m.id}',
+                              accentColor: CultureTheme.rougeKoulikoro,
+                              context: context,
+                              isDark: isDark,
+                              cardBg: cardBg,
+                              borderCol: borderCol,
+                              titleColor: titleColor,
+                              subtitleColor: subtitleColor,
+                            )),
+                        const SizedBox(height: 20),
+                      ],
+
+                      // ── 4. PERSONNAGES HISTORIQUES ──────────────────────────────
+                      if (figures.isNotEmpty) ...[
+                        _buildSectionHeader('FIGURES HISTORIQUES & SOUVERAINS',
+                            CultureTheme.accentOrange),
+                        const SizedBox(height: 10),
+                        ...figures.map((p) => _buildCultureItemTile(
+                              item: p,
+                              route: '/culture/personnage/${p.id}',
+                              accentColor: CultureTheme.accentOrange,
+                              context: context,
+                              isDark: isDark,
+                              cardBg: cardBg,
+                              borderCol: borderCol,
+                              titleColor: titleColor,
+                              subtitleColor: subtitleColor,
+                            )),
+                        const SizedBox(height: 20),
+                      ],
+
+                      // ── 5. CONTES & TRADITIONS ORALES ───────────────────────────
+                      if (stories.isNotEmpty) ...[
+                        _buildSectionHeader('CONTES & TRADITIONS ORALES',
+                            CultureTheme.primaryBlue),
+                        const SizedBox(height: 10),
+                        ...stories.map((s) => _buildStoryTile(
+                              story: s,
+                              context: context,
+                              isDark: isDark,
+                              cardBg: cardBg,
+                              borderCol: borderCol,
+                              titleColor: titleColor,
+                              subtitleColor: subtitleColor,
+                            )),
+                        const SizedBox(height: 20),
+                      ],
+
+                      // ── 6. DÉFIS & DEVINETTES   ──────────────────────────────
+                      if (riddles.isNotEmpty) ...[
+                        _buildSectionHeader('DÉFIS & DEVINETTES DU TERROIR',
+                            CultureTheme.cyanTurquoise),
+                        const SizedBox(height: 10),
+                        ...riddles.map((r) => _buildRiddleTile(
+                              riddle: r,
+                              context: context,
+                              isDark: isDark,
+                              cardBg: cardBg,
+                              borderCol: borderCol,
+                              titleColor: titleColor,
+                              subtitleColor: subtitleColor,
+                            )),
+                        const SizedBox(height: 20),
+                      ],
+
+                      // ── 7. VILLES & VILLAGES ────────────────────────────────────
+                      if (villes.isNotEmpty) ...[
+                        _buildSectionHeader('VILLES & CITÉS HISTORIQUES',
+                            CultureTheme.orPatrimoine),
+                        const SizedBox(height: 10),
+                        ...villes.map((v) => _buildCultureItemTile(
+                              item: v,
+                              route: '/culture/ville/${v.id}',
+                              accentColor: CultureTheme.orPatrimoine,
+                              context: context,
+                              isDark: isDark,
+                              cardBg: cardBg,
+                              borderCol: borderCol,
+                              titleColor: titleColor,
+                              subtitleColor: subtitleColor,
+                            )),
+                        const SizedBox(height: 20),
+                      ],
+
+                      // ── 8. SYMBOLES & TRADITIONS DU TERROIR ─────────────────────
+                      _buildSectionHeader('POINTS FORTS & TRADITIONS',
+                          CultureTheme.vertNaturel),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          ...region.pointsForts.map((pt) => _buildTag(
+                              pt,
+                              CultureTheme.primaryBlue,
+                              isDark,
+                              cardBg,
+                              borderCol)),
+                          ...region.symbolesEtTraditions.map((sy) => _buildTag(
+                              sy,
+                              CultureTheme.accentOrange,
+                              isDark,
+                              cardBg,
+                              borderCol)),
+                        ],
+                      ),
+                    ]),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  region.descriptionComplete,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13.5,
-                    color: subtitleColor,
-                    height: 1.55,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Guide Culturel IA Contextuel
-                AskCulturalGuideButton(
-                  contextData: CulturalGuideContext(
-                    contentType: CulturalContentType.region,
-                    contentId: region.id,
-                    contentTitle: region.nom,
-                    subtitle: region.surnom,
-                    regionId: region.id,
-                    regionName: region.nom,
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // ── 3. MONUMENTS DU TERROIR ─────────────────────────────────
-                if (monuments.isNotEmpty) ...[
-                  _buildSectionHeader(
-                      'MONUMENTS HISTORIQUES', CultureTheme.rougeKoulikoro),
-                  const SizedBox(height: 10),
-                  ...monuments.map((m) => _buildCultureItemTile(
-                        item: m,
-                        route: '/culture/monument/${m.id}',
-                        accentColor: CultureTheme.rougeKoulikoro,
-                        context: context,
-                        isDark: isDark,
-                        cardBg: cardBg,
-                        borderCol: borderCol,
-                        titleColor: titleColor,
-                        subtitleColor: subtitleColor,
-                      )),
-                  const SizedBox(height: 20),
-                ],
-
-                // ── 4. PERSONNAGES HISTORIQUES ──────────────────────────────
-                if (figures.isNotEmpty) ...[
-                  _buildSectionHeader('FIGURES HISTORIQUES & SOUVERAINS',
-                      CultureTheme.accentOrange),
-                  const SizedBox(height: 10),
-                  ...figures.map((p) => _buildCultureItemTile(
-                        item: p,
-                        route: '/culture/personnage/${p.id}',
-                        accentColor: CultureTheme.accentOrange,
-                        context: context,
-                        isDark: isDark,
-                        cardBg: cardBg,
-                        borderCol: borderCol,
-                        titleColor: titleColor,
-                        subtitleColor: subtitleColor,
-                      )),
-                  const SizedBox(height: 20),
-                ],
-
-                // ── 5. CONTES & TRADITIONS ORALES ───────────────────────────
-                if (stories.isNotEmpty) ...[
-                  _buildSectionHeader(
-                      'CONTES & TRADITIONS ORALES', CultureTheme.primaryBlue),
-                  const SizedBox(height: 10),
-                  ...stories.map((s) => _buildStoryTile(
-                        story: s,
-                        context: context,
-                        isDark: isDark,
-                        cardBg: cardBg,
-                        borderCol: borderCol,
-                        titleColor: titleColor,
-                        subtitleColor: subtitleColor,
-                      )),
-                  const SizedBox(height: 20),
-                ],
-
-                // ── 6. DÉFIS & DEVINETTES   ──────────────────────────────
-                if (riddles.isNotEmpty) ...[
-                  _buildSectionHeader('DÉFIS & DEVINETTES DU TERROIR',
-                      CultureTheme.cyanTurquoise),
-                  const SizedBox(height: 10),
-                  ...riddles.map((r) => _buildRiddleTile(
-                        riddle: r,
-                        context: context,
-                        isDark: isDark,
-                        cardBg: cardBg,
-                        borderCol: borderCol,
-                        titleColor: titleColor,
-                        subtitleColor: subtitleColor,
-                      )),
-                  const SizedBox(height: 20),
-                ],
-
-                // ── 7. VILLES & VILLAGES ────────────────────────────────────
-                if (villes.isNotEmpty) ...[
-                  _buildSectionHeader(
-                      'VILLES & CITÉS HISTORIQUES', CultureTheme.orPatrimoine),
-                  const SizedBox(height: 10),
-                  ...villes.map((v) => _buildCultureItemTile(
-                        item: v,
-                        route: '/culture/ville/${v.id}',
-                        accentColor: CultureTheme.orPatrimoine,
-                        context: context,
-                        isDark: isDark,
-                        cardBg: cardBg,
-                        borderCol: borderCol,
-                        titleColor: titleColor,
-                        subtitleColor: subtitleColor,
-                      )),
-                  const SizedBox(height: 20),
-                ],
-
-                // ── 8. SYMBOLES & TRADITIONS DU TERROIR ─────────────────────
-                _buildSectionHeader(
-                    'POINTS FORTS & TRADITIONS', CultureTheme.vertNaturel),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ...region.pointsForts.map((pt) => _buildTag(pt,
-                        CultureTheme.primaryBlue, isDark, cardBg, borderCol)),
-                    ...region.symbolesEtTraditions.map((sy) => _buildTag(sy,
-                        CultureTheme.accentOrange, isDark, cardBg, borderCol)),
-                  ],
-                ),
-              ]),
+              ],
             ),
-          ),
-        ],
+            // ── EN-TÊTE SUPÉRIEUR PERSISTANT (RETOUR & FAVORI) ────────────────
+            CultureDetailStickyHeader(
+              title: region.nom,
+              isScrolled: _isScrolled,
+              accentColor: CultureTheme.primaryBlue,
+            ),
+          ],
+        ),
       ),
     );
   }

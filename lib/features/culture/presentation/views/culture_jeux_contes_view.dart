@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import '../../../../core/services/vivienne_tts_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_filter_controller.dart';
@@ -41,9 +42,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
 
   Future<void> _initTts() async {
     try {
-      await _flutterTts.setLanguage('fr-FR');
-      await _flutterTts.setSpeechRate(0.48);
-      await _flutterTts.setPitch(0.95);
+      await VivienneTtsService.applyVivienneProfile(_flutterTts);
       _flutterTts.setCompletionHandler(() {
         if (mounted) setState(() => _currentlySpeakingProverbId = null);
       });
@@ -51,20 +50,36 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
   }
 
   @override
+  void deactivate() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
-    _flutterTts.stop();
+    try {
+      VivienneTtsService.instance.stop();
+      _flutterTts.stop();
+    } catch (_) {}
     super.dispose();
   }
 
   Future<void> _toggleSpeakProverb(CultureProverb p) async {
     HapticFeedback.lightImpact();
     if (_currentlySpeakingProverbId == p.id) {
-      await _flutterTts.stop();
-      setState(() => _currentlySpeakingProverbId = null);
+      await VivienneTtsService.instance.stop();
+      if (mounted) setState(() => _currentlySpeakingProverbId = null);
     } else {
-      setState(() => _currentlySpeakingProverbId = p.id);
+      if (mounted) setState(() => _currentlySpeakingProverbId = p.id);
       final text = 'Sagesse du Mali. ${p.text}. Signification : ${p.meaning}';
-      await _flutterTts.speak(text);
+      await VivienneTtsService.instance.speak(
+        text,
+        onComplete: () {
+          if (mounted) setState(() => _currentlySpeakingProverbId = null);
+        },
+      );
     }
   }
 
@@ -427,12 +442,16 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        story.readingDuration,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w600,
-                          color: subtitleColor,
+                      Expanded(
+                        child: Text(
+                          story.readingDuration,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                            color: subtitleColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -733,12 +752,16 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            pack.regionName,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: subtitleColor,
+                          Expanded(
+                            child: Text(
+                              pack.regionName,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: subtitleColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -1490,25 +1513,33 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 10,
-                      backgroundImage: AssetImage(proverb.speakerAvatar),
-                      backgroundColor: CultureTheme.accentOrange,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      proverb.speakerName,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w600,
-                        color: subtitleColor,
+                Expanded(
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 10,
+                        backgroundImage: AssetImage(proverb.speakerAvatar),
+                        backgroundColor: CultureTheme.accentOrange,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          proverb.speakerName,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                            color: subtitleColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // Bouton Écouter
                     IconButton(
@@ -1524,11 +1555,12 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                       ),
                       tooltip: 'Écouter la parole',
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                      constraints:
+                          const BoxConstraints(minWidth: 32, minHeight: 32),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
 
-                    // Bouton Partager la carte
+                    // Bouton Partager
                     TextButton.icon(
                       onPressed: () {
                         CultureShareSheet.show(
@@ -1542,7 +1574,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                         color: CultureTheme.accentOrange,
                       ),
                       label: Text(
-                        'Partager la carte',
+                        'Partager',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,

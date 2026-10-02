@@ -21,6 +21,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../core/culture_ai_service.dart';
+import '../../../../../core/services/vivienne_tts_service.dart';
 import '../../../core/datasources/mock_cultural_guide_knowledge.dart';
 import '../../../core/models/cultural_guide_models.dart';
 import '../../../core/theme/culture_theme.dart';
@@ -201,9 +202,7 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
 
   Future<void> _initTts() async {
     try {
-      await _tts.setLanguage('fr-FR');
-      await _tts.setSpeechRate(0.42);
-      await _tts.setPitch(0.88);
+      await VivienneTtsService.applyVivienneProfile(_tts);
       _tts.setCompletionHandler(() {
         if (mounted) {
           setState(() {
@@ -216,6 +215,13 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
   }
 
   @override
+  void deactivate() {
+    _stopTts();
+    VivienneTtsService.instance.stop();
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _scrollCtrl.dispose();
     _promptCtrl.dispose();
@@ -223,11 +229,13 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
     _pulseAnim.dispose();
     _thinkingAnim.dispose();
     _stopTts();
+    VivienneTtsService.instance.stop();
     super.dispose();
   }
 
   Future<void> _stopTts() async {
     try {
+      await VivienneTtsService.instance.stop();
       await _tts.stop();
     } catch (_) {}
     if (mounted) {
@@ -255,13 +263,27 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
     });
 
     try {
-      await _tts.speak(msg.text);
+      await VivienneTtsService.instance.speak(
+        msg.text,
+        onComplete: () {
+          if (mounted) {
+            setState(() {
+              _currentlySpeakingMessageId = null;
+              _sageState = _SageState.idle;
+            });
+          }
+        },
+      );
     } catch (_) {
-      if (mounted) {
-        setState(() {
-          _currentlySpeakingMessageId = null;
-          _sageState = _SageState.idle;
-        });
+      try {
+        await _tts.speak(msg.text);
+      } catch (_) {
+        if (mounted) {
+          setState(() {
+            _currentlySpeakingMessageId = null;
+            _sageState = _SageState.idle;
+          });
+        }
       }
     }
   }
@@ -345,8 +367,22 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
         });
         _scrollToBottom();
         try {
-          await _tts.speak(reply);
-        } catch (_) {}
+          await VivienneTtsService.instance.speak(
+            reply,
+            onComplete: () {
+              if (mounted) {
+                setState(() {
+                  _currentlySpeakingMessageId = null;
+                  _sageState = _SageState.idle;
+                });
+              }
+            },
+          );
+        } catch (_) {
+          try {
+            await _tts.speak(reply);
+          } catch (_) {}
+        }
       }
     } catch (_) {
       if (mounted) {
@@ -413,26 +449,32 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF080D14) : const Color(0xFFFAF7F2),
-      body: Stack(
-        children: [
-          _buildBackground(isDark),
-          SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(isDark),
-                _buildSuggestionsOrTopicBar(isDark),
-                _buildSageAvatarHero(isDark),
-                const SizedBox(height: 4),
-                _buildDivider(isDark),
-                Expanded(child: _buildTranscript(isDark)),
-                _buildInputBar(isDark),
-              ],
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        _stopTts();
+        VivienneTtsService.instance.stop();
+      },
+      child: Scaffold(
+        backgroundColor:
+            isDark ? const Color(0xFF080D14) : const Color(0xFFFAF7F2),
+        body: Stack(
+          children: [
+            _buildBackground(isDark),
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(isDark),
+                  _buildSuggestionsOrTopicBar(isDark),
+                  _buildSageAvatarHero(isDark),
+                  const SizedBox(height: 4),
+                  _buildDivider(isDark),
+                  Expanded(child: _buildTranscript(isDark)),
+                  _buildInputBar(isDark),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -467,6 +509,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
           GestureDetector(
             onTap: () {
               HapticFeedback.lightImpact();
+              _stopTts();
+              VivienneTtsService.instance.stop();
               if (context.canPop()) {
                 context.pop();
               } else {

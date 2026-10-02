@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import '../../../../core/services/vivienne_tts_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_passport_controller.dart';
@@ -54,9 +55,7 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
 
   Future<void> _initTts() async {
     try {
-      await _flutterTts.setLanguage('fr-FR');
-      await _flutterTts.setSpeechRate(0.5);
-      await _flutterTts.setPitch(0.95);
+      await VivienneTtsService.applyVivienneProfile(_flutterTts);
       _flutterTts.setCompletionHandler(() {
         if (mounted) setState(() => _isSpeaking = false);
       });
@@ -68,13 +67,18 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
   Future<void> _toggleTts() async {
     HapticFeedback.lightImpact();
     if (_isSpeaking) {
-      await _flutterTts.stop();
-      setState(() => _isSpeaking = false);
+      await VivienneTtsService.instance.stop();
+      if (mounted) setState(() => _isSpeaking = false);
     } else {
-      setState(() => _isSpeaking = true);
+      if (mounted) setState(() => _isSpeaking = true);
       final text =
           '${_currentRiddle.formulaIntro}. ${_currentRiddle.riddleText}';
-      await _flutterTts.speak(text);
+      await VivienneTtsService.instance.speak(
+        text,
+        onComplete: () {
+          if (mounted) setState(() => _isSpeaking = false);
+        },
+      );
     }
   }
 
@@ -212,8 +216,19 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
   }
 
   @override
+  void deactivate() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
-    _flutterTts.stop();
+    try {
+      VivienneTtsService.instance.stop();
+      _flutterTts.stop();
+    } catch (_) {}
     super.dispose();
   }
 

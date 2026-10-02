@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../../../core/services/vivienne_tts_service.dart';
 import '../../immersive/controllers/narration_coordinator.dart';
 
 /// Modal d'écoute audio immersif de la veillée de conte (Voix du Griot & Scènes)
@@ -14,13 +15,16 @@ class StoryAudioPlayerSheet extends ConsumerStatefulWidget {
 
   const StoryAudioPlayerSheet({super.key, required this.story});
 
-  static Future<void> show(BuildContext context, InteractiveStory story) {
-    return showModalBottomSheet(
+  static Future<void> show(BuildContext context, InteractiveStory story) async {
+    await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => StoryAudioPlayerSheet(story: story),
     );
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
   }
 
   @override
@@ -48,7 +52,24 @@ class _StoryAudioPlayerSheetState extends ConsumerState<StoryAudioPlayerSheet>
   }
 
   @override
+  void deactivate() {
+    try {
+      ref.read(narrationCoordinatorProvider.notifier).stop();
+    } catch (_) {}
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
+    try {
+      ref.read(narrationCoordinatorProvider.notifier).stop();
+    } catch (_) {}
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
     _waveController.dispose();
     super.dispose();
   }

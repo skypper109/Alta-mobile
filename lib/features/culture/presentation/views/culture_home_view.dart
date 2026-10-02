@@ -303,6 +303,126 @@ class CultureHomeView extends ConsumerWidget {
               ),
             ),
 
+            const SizedBox(height: 20),
+
+            // ── NOUVEAUTÉ : SCANNER IA DE MONUMENTS & LIEUX ──────────────────
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 220),
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/culture/scanner');
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isDark ? CultureTheme.darkSurface : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.5),
+                      width: 1.4,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            CultureTheme.accentOrange.withValues(alpha: 0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: CultureTheme.accentOrange,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: CultureTheme.accentOrange
+                                  .withValues(alpha: 0.35),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.document_scanner_rounded,
+                            size: 28,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: CultureTheme.accentOrange
+                                        .withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'VISION IA & HISTOIRE',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: CultureTheme.accentOrange,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Scanner un Monument ou Lieu',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                color: titleColor,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Pointez votre caméra pour révéler son histoire',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11.5,
+                                color: subtitleColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color:
+                              CultureTheme.accentOrange.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 16,
+                          color: CultureTheme.accentOrange,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
             const SizedBox(height: 24),
 
             // ── 3. REPRENDRE — ACTIVITÉ RÉCENTE PERSONNALISÉE ────────────────
