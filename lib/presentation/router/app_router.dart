@@ -34,8 +34,10 @@ import '../../shared/widgets.dart';
 import '../culture/culture_screen.dart';
 import '../discussions/discussions_screen.dart';
 import '../documents/documents_screen.dart';
+import '../education/education_setup_screen.dart';
 import '../home/home_screen.dart';
 import '../onboarding/onboarding_screen.dart';
+import '../portal/universe_gateway_screen.dart';
 import '../profile/profile_screen.dart';
 import '../splash/splash_screen.dart';
 
@@ -43,15 +45,26 @@ part 'app_router.g.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
+class _RouterRefreshNotifier extends ChangeNotifier {
+  _RouterRefreshNotifier(Ref ref) {
+    ref.listen(userPrefsProvider, (_, __) {
+      notifyListeners();
+    });
+  }
+}
+
 @riverpod
 GoRouter appRouter(Ref ref) {
-  final userPrefs = ref.watch(userPrefsProvider);
+  final refreshNotifier = _RouterRefreshNotifier(ref);
+  ref.onDispose(refreshNotifier.dispose);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
+    refreshListenable: refreshNotifier,
     debugLogDiagnostics: false,
     redirect: (context, state) {
+      final userPrefs = ref.read(userPrefsProvider);
       if (state.matchedLocation == '/splash') return null;
       if (userPrefs.isLoading) return null;
       final isOnboarding = state.matchedLocation == '/onboarding';
@@ -59,13 +72,13 @@ GoRouter appRouter(Ref ref) {
         return '/onboarding';
       }
 
-      // Verrouillage de l'espace Éducation si aucune classe n'a été sélectionnée
+      // Redirection vers la configuration Éducation si aucune classe n'a été sélectionnée
       if (userPrefs.hasCompletedOnboarding && !userPrefs.hasSelectedClass) {
         final isEducationRoute = state.matchedLocation == '/home' ||
             state.matchedLocation == '/discussions' ||
             state.matchedLocation == '/documents';
         if (isEducationRoute) {
-          return '/culture';
+          return '/education-setup';
         }
       }
 
@@ -390,6 +403,27 @@ GoRouter appRouter(Ref ref) {
         path: '/splash',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/gateway',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => _fadePage(
+          key: state.pageKey,
+          child: const UniverseGatewayScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/universe-choice',
+        parentNavigatorKey: _rootNavigatorKey,
+        redirect: (_, __) => '/gateway',
+      ),
+      GoRoute(
+        path: '/education-setup',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => _fadePage(
+          key: state.pageKey,
+          child: const EducationSetupScreen(),
+        ),
       ),
       GoRoute(
         path: '/onboarding',

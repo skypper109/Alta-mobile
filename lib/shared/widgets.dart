@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/constants/app_colors.dart';
 import '../features/profile/user_prefs_notifier.dart';
 import '../presentation/common/widgets/alternia_top_header_bar.dart';
-import '../presentation/common/widgets/class_selection_required_sheet.dart';
 import '../presentation/common/widgets/custom_button.dart';
 import '../presentation/common/widgets/custom_card.dart';
 import '../presentation/common/widgets/universe_splash_transition.dart';
@@ -30,11 +29,9 @@ class DetShellScaffold extends ConsumerWidget {
     // Les branches 0 (Accueil), 1 (Discussions) et 2 (Documents) appartiennent au pôle Éducation
     if (index == 0 || index == 1 || index == 2) {
       final userPrefs = ref.read(userPrefsProvider);
-      if (!userPrefs.hasSelectedClass) {
-        final chosen = await showClassSelectionRequiredSheet(context);
-        if (!chosen || !context.mounted) {
-          return;
-        }
+      if (!userPrefs.hasSelectedClass || userPrefs.name.isEmpty) {
+        context.push('/education-setup');
+        return;
       }
     }
 

@@ -98,10 +98,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     final userPrefs = ref.read(userPrefsProvider);
     if (!userPrefs.hasCompletedOnboarding) {
       context.go('/onboarding');
-    } else if (userPrefs.hasSelectedClass) {
-      context.go('/home');
     } else {
-      context.go('/culture');
+      context.go('/gateway');
     }
   }
 
