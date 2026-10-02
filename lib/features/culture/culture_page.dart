@@ -4,14 +4,22 @@
 // bouton constant de fermeture [X] et navigation sub-bar propre et adaptative aux thèmes.
 library;
 
+import 'dart:async';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../../core/constants/app_colors.dart';
+import '../../core/culture_ai_service.dart';
+import '../../core/culture_simli_service.dart';
+import '../../core/gemini_service.dart';
 import '../../presentation/common/widgets/alternia_avatar.dart';
+import '../../presentation/common/widgets/alternia_video_player.dart';
 import '../../shared/widgets.dart';
 import '../profile/user_prefs_notifier.dart';
 import 'core/theme/culture_theme.dart';
@@ -28,63 +36,299 @@ class _CulturePageState extends ConsumerState<CulturePage> {
       0; // 0: Avatar Live, 1: Histoire, 2: Inventions, 3: Sagesse
   AvatarState _avatarState = AvatarState.speaking;
   String _liveSpeechText =
-      'Bonjour ! Je suis ton Avatar Interactif AlterniA. Pose-moi  importe quelle question sur l\'Histoire et les Inventions du Mali !';
+      'Bonjour ! Je suis le Vieux Sage du Mali. Pose-moi n\'importe quelle question sur l\'Histoire, les Rois et les Inventions de notre terre !';
+  String? _currentVideoUrl;
+
+  final CultureAlternIAService _cultureService = CultureAlternIAService();
+  final GeminiService _geminiService = GeminiService();
+  final CultureAiService _cultureAiService = CultureAiService();
+  final FlutterTts _flutterTts = FlutterTts();
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  final stt.SpeechToText _speechToText = stt.SpeechToText();
+  final TextEditingController _sageInputCtrl = TextEditingController();
+
+  bool _isListening = false;
+  String _liveSpokenWords = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _initTts();
+  }
+
+  Future<void> _initTts() async {
+    try {
+      await _flutterTts.setLanguage('fr-FR');
+      await _flutterTts.setSpeechRate(0.48);
+      // Pitch masculin plus grave et posé pour le Vieux Sage Henri
+      await _flutterTts.setPitch(0.80);
+
+      final voices = await _flutterTts.getVoices;
+      if (voices is List) {
+        for (final v in voices) {
+          if (v is Map) {
+            final name = (v['name'] ?? '').toString().toLowerCase();
+            final locale = (v['locale'] ?? '').toString().toLowerCase();
+            if (locale.contains('fr') &&
+                (name.contains('henri') ||
+                    name.contains('male') ||
+                    name.contains('homme') ||
+                    name.contains('thomas') ||
+                    name.contains('nicolas') ||
+                    name.contains('paul') ||
+                    name.contains('antoine'))) {
+              await _flutterTts
+                  .setVoice({'name': v['name'], 'locale': v['locale']});
+              break;
+            }
+          }
+        }
+      }
+
+      _flutterTts.setCompletionHandler(() {
+        if (mounted) {
+          setState(() => _avatarState = AvatarState.idle);
+        }
+      });
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _speechToText.stop();
+    _sageInputCtrl.dispose();
+    _stopAudio();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  Future<void> _stopAudio() async {
+    try {
+      await _flutterTts.stop();
+    } catch (_) {}
+    try {
+      await _audioPlayer.stop();
+    } catch (_) {}
+  }
+
+  // ── Speech-To-Text : 1 Clic Enregistre, 1 Clic Coupe et Envoie Directement ─
+  Future<void> _toggleVocalRecording() async {
+    HapticFeedback.heavyImpact();
+
+    if (_isListening) {
+      await _speechToText.stop();
+      final spoken = _liveSpokenWords.trim().isNotEmpty
+          ? _liveSpokenWords.trim()
+          : _sageInputCtrl.text.trim();
+      setState(() {
+        _isListening = false;
+        _liveSpokenWords = '';
+      });
+      if (spoken.isNotEmpty) {
+        _sageInputCtrl.clear();
+        _askSageQuestion(spoken);
+      }
+    } else {
+      await _stopAudio();
+      bool available = false;
+      try {
+        available = await _speechToText.initialize(
+          onError: (_) {
+            if (mounted) setState(() => _isListening = false);
+          },
+          onStatus: (status) {
+            if (status == 'done' || status == 'notListening') {
+              if (mounted && _isListening) {
+                final spoken = _liveSpokenWords.trim().isNotEmpty
+                    ? _liveSpokenWords.trim()
+                    : _sageInputCtrl.text.trim();
+                setState(() {
+                  _isListening = false;
+                  _liveSpokenWords = '';
+                });
+                if (spoken.isNotEmpty) {
+                  _sageInputCtrl.clear();
+                  _askSageQuestion(spoken);
+                }
+              }
+            }
+          },
+        );
+      } catch (_) {}
+
+      if (!mounted) return;
+
+      setState(() {
+        _isListening = true;
+        _liveSpokenWords = '';
+      });
+
+      if (available) {
+        _speechToText.listen(
+          onResult: (result) {
+            if (mounted) {
+              setState(() {
+                _liveSpokenWords = result.recognizedWords;
+                _sageInputCtrl.text = result.recognizedWords;
+              });
+              if (result.finalResult &&
+                  result.recognizedWords.trim().isNotEmpty) {
+                _speechToText.stop();
+                setState(() {
+                  _isListening = false;
+                  _liveSpokenWords = '';
+                });
+                _sageInputCtrl.clear();
+                _askSageQuestion(result.recognizedWords.trim());
+              }
+            }
+          },
+        );
+      } else {
+        Timer(const Duration(seconds: 3), () {
+          if (mounted && _isListening) {
+            setState(() {
+              _isListening = false;
+              _liveSpokenWords = '';
+            });
+            _sageInputCtrl.clear();
+            _askSageQuestion(
+                'Raconte-moi l\'histoire de Mansa Moussa et son héritage.');
+          }
+        });
+      }
+    }
+  }
+
+  /// Charge la réponse vidéo Simli et ne l'affiche qu'une fois le rendu terminé
+  Future<void> _loadSageResponse(String replyText, {String? subject}) async {
+    await _stopAudio();
+
+    // 1. Appel du backend pour générer la vidéo Simli
+    // Tant que Simli n'a pas fini et renvoyé la vidéo, on n'affiche rien sur le téléphone
+    final videoUrl = await _cultureService.generateSageVideo(
+      text: replyText,
+      subject: subject,
+    );
+
+    if (!mounted) return;
+
+    if (videoUrl != null && videoUrl.isNotEmpty) {
+      // Vidéo et audio Henri prêts : affichage simultané du texte et de la vidéo
+      setState(() {
+        _currentVideoUrl = videoUrl;
+        _liveSpeechText = replyText;
+        _avatarState = AvatarState.speaking;
+      });
+    } else {
+      // Fallback si la vidéo échoue : attendre le flux TTS Henri avant d'afficher la réponse
+      Uint8List? audioBytes;
+      try {
+        audioBytes = await _geminiService.fetchBackendTtsAudio(
+          text: replyText,
+          voice: 'henri',
+        );
+      } catch (_) {}
+
+      if (!mounted) return;
+
+      setState(() {
+        _liveSpeechText = replyText;
+        _avatarState = AvatarState.speaking;
+      });
+
+      if (audioBytes != null && audioBytes.isNotEmpty) {
+        try {
+          await GeminiService.playAudioBytes(_audioPlayer, audioBytes);
+        } catch (_) {
+          await _flutterTts.speak(replyText);
+        }
+      } else {
+        await _flutterTts.speak(replyText);
+      }
+    }
+  }
 
   void _enterProtagonistMode(String title) {
     HapticFeedback.heavyImpact();
+    String speech;
+    if (title.contains('Mansa Moussa')) {
+      speech =
+          'Je suis Mansa Moussa, l\'Empereur du Mali ! En 1324, j\'ai accompli mon pèlerinage avec des tonnes d\'or pour faire rayonner notre savoir.';
+    } else if (title.contains('Sundiata') || title.contains('Manden')) {
+      speech =
+          'Je suis Sundiata Keïta, le Lion du Manden ! En 1236, nous avons proclamé la Charte du Manden pour la paix et les droits de tous.';
+    } else if (title.contains('Dogon') || title.contains('Astronomie')) {
+      speech =
+          'Nous sommes les astronomes Dogons de Bandiagara ! Interroge-nous sur l\'étoile Sirius B et les secrets célestes de nos ancêtres.';
+    } else if (title.contains('Djenné') || title.contains('Banco')) {
+      speech =
+          'Je suis le Maître Architecte de Djenné ! L\'art du banco est un prodige d\'ingénierie durable et de fierté malienne.';
+    } else {
+      speech =
+          'Je me mets dans la peau du protagoniste de : "$title" ! Écoute ma parole ancestrale.';
+    }
+
     setState(() {
-      _subTabIndex = 0; // Switch to Avatar Live tab
-      _avatarState = AvatarState.speaking;
-      if (title.contains('Mansa Moussa')) {
-        _liveSpeechText =
-            'Je suis Mansa Moussa, l\'Empereur du Mali ! Pose-moi des questions sur mon pèlerinage de 1324 à La Mecque et nos réserves d\'or !';
-      } else if (title.contains('Sundiata') || title.contains('Manden')) {
-        _liveSpeechText =
-            'Je suis Sundiata Keïta, le Lion du Manden ! Interroge-moi sur la Charte du Manden de 1236 et les principes de paix.';
-      } else if (title.contains('Dogon') || title.contains('Astronomie')) {
-        _liveSpeechText =
-            'Nous sommes les astronomes Dogons de Bandiagara ! Questionne-nous sur l\'étoile Sirius B et la cosmogonie.';
-      } else if (title.contains('Djenné') || title.contains('Banco')) {
-        _liveSpeechText =
-            'Je suis le Maître Architecte de Djenné ! Demande-moi les secrets de construction de la Mosquée en banco.';
-      } else {
-        _liveSpeechText =
-            'Je me mets dans la peau du protagoniste de : "$title" ! Pose-moi tes questions en direct !';
-      }
+      _subTabIndex = 0; // Basculer sur l'onglet Avatar Live
+      _avatarState = AvatarState.thinking;
+      _liveSpeechText = 'Le Vieux Sage prépare sa réponse vidéo et vocale...';
     });
+
+    _loadSageResponse(speech, subject: title);
   }
 
   void _onExitCultureMode() {
     HapticFeedback.mediumImpact();
+    _stopAudio();
     context.go('/home');
   }
 
   void _onAvatarTapped() {
     HapticFeedback.heavyImpact();
-    setState(() {
-      if (_avatarState == AvatarState.speaking) {
+    if (_avatarState == AvatarState.thinking) return;
+
+    if (_avatarState == AvatarState.speaking) {
+      _stopAudio();
+      setState(() {
         _avatarState = AvatarState.listening;
         _liveSpeechText =
-            'J\'écoute attentivement ta question ! Parle maintenant...';
-      } else if (_avatarState == AvatarState.listening) {
+            'J\'écoute attentivement ta question ! Parle maintenant ou sélectionne un thème de sagesse ci-dessous...';
+      });
+    } else {
+      const replyText =
+          'Savais-tu que Mansa Moussa a fait rayonner le Mali dans le monde entier en 1324 lors de son grand pèlerinage ?';
+
+      setState(() {
         _avatarState = AvatarState.thinking;
-        _liveSpeechText =
-            'Analyse de ta question en cours avec le programme officiel...';
-        Future.delayed(const Duration(milliseconds: 1500), () {
-          if (mounted) {
-            setState(() {
-              _avatarState = AvatarState.speaking;
-              _liveSpeechText =
-                  'Savais-tu que Mansa Moussa a fait rayonner le Mali dans le monde entier en 1324 ?';
-            });
-          }
-        });
-      } else {
-        _avatarState = AvatarState.speaking;
-        _liveSpeechText =
-            'Touche mon avatar pour changer d\'état ou poser une question !';
-      }
+        _liveSpeechText = 'Le Vieux Sage prépare sa réponse vidéo et vocale...';
+      });
+
+      _loadSageResponse(replyText, subject: 'Histoire du Mali');
+    }
+  }
+
+  Future<void> _askSageQuestion(String query) async {
+    HapticFeedback.mediumImpact();
+    await _stopAudio();
+
+    setState(() {
+      _avatarState = AvatarState.thinking;
+      _liveSpeechText = 'Le Vieux Sage prépare sa réponse vidéo et vocale...';
     });
+
+    try {
+      final result = await _cultureAiService.culturalSearch(query);
+      final text = result.aiNarrative.isNotEmpty
+          ? result.aiNarrative
+          : 'La culture et les traditions du Mali sont riches d\'enseignements pour toutes les générations.';
+      await _loadSageResponse(text, subject: query);
+    } catch (_) {
+      await _loadSageResponse(
+        'La sagesse des anciens nous enseigne la paix, la solidarité et le respect des traditions.',
+        subject: query,
+      );
+    }
   }
 
   void _showStoryModal(String title, String category, String fullText,
@@ -336,11 +580,20 @@ class _CulturePageState extends ConsumerState<CulturePage> {
         const Spacer(),
 
         // ── AVATAR INTERACTIF ANIMÉ ─────────────────────────────────────────
-        AlterniaAvatar(
-          size: 190,
-          state: _avatarState,
-          onTap: _onAvatarTapped,
-        ),
+        if (_currentVideoUrl != null && _currentVideoUrl!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: AlterniaVideoPlayer(
+              videoUrl: _currentVideoUrl!,
+              onTap: _onAvatarTapped,
+            ),
+          )
+        else
+          AlterniaAvatar(
+            size: 190,
+            state: _avatarState,
+            onTap: _onAvatarTapped,
+          ),
 
         const Spacer(),
 
@@ -385,10 +638,10 @@ class _CulturePageState extends ConsumerState<CulturePage> {
                     const SizedBox(width: 8),
                     Text(
                       _avatarState == AvatarState.speaking
-                          ? 'ALTERNIA PARLE…'
+                          ? 'LE VIEUX SAGE PARLE…'
                           : (_avatarState == AvatarState.listening
                               ? 'ÉCOUTE ACTIVE…'
-                              : 'RÉFLEXION…'),
+                              : 'PRÉPARATION VIDÉO & SAGESSE…'),
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -416,8 +669,243 @@ class _CulturePageState extends ConsumerState<CulturePage> {
           ),
         ),
 
+        const SizedBox(height: 14),
+
+        // ── THÈMES RAPIDES POUR INTERROGER LE VIEUX SAGE ───────────────────
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              _buildQuickTopicChip(
+                label: 'Mansa Moussa',
+                icon: Icons.account_balance_rounded,
+                query: 'Raconte-moi le voyage légendaire de Mansa Moussa et ses réserves d\'or.',
+                isDark: isDark,
+              ),
+              const SizedBox(width: 8),
+              _buildQuickTopicChip(
+                label: 'Sundiata Keïta',
+                icon: Icons.gavel_rounded,
+                query: 'Raconte-moi l\'épopée de Sundiata Keïta et la Charte du Manden de 1236.',
+                isDark: isDark,
+              ),
+              const SizedBox(width: 8),
+              _buildQuickTopicChip(
+                label: 'Mosquée de Djenné',
+                icon: Icons.apartment_rounded,
+                query: 'Quels sont les secrets d\'architecture de la Grande Mosquée de Djenné ?',
+                isDark: isDark,
+              ),
+              const SizedBox(width: 8),
+              _buildQuickTopicChip(
+                label: 'Manuscrits Tombouctou',
+                icon: Icons.auto_stories_rounded,
+                query: 'Que contiennent les célèbres manuscrits anciens de Tombouctou ?',
+                isDark: isDark,
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 14),
+
+        // ── BARRE DE PAROLE ET MICROPHONE 1-CLIC (VIEUX SAGE) ──────────────
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_isListening)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                        color: Colors.redAccent.withValues(alpha: 0.5)),
+                  ),
+                  child: Row(
+                    children: [
+                      const SizedBox(
+                        width: 8,
+                        height: 8,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _liveSpokenWords.isNotEmpty
+                              ? '« $_liveSpokenWords »'
+                              : 'Écoute en direct... Parlez au Vieux Sage, touchez pour envoyer',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.redAccent,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: _isListening
+                              ? Colors.redAccent
+                              : (isDark
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFE2E8F0)),
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _sageInputCtrl,
+                        cursorColor:
+                            isDark ? Colors.white : const Color(0xFF0F172A),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color:
+                              isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                        decoration: InputDecoration(
+                          hintText: _isListening
+                              ? 'Transcription en direct...'
+                              : 'Pose une question au Vieux Sage...',
+                          hintStyle: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: isDark
+                                ? AppColors.textMuted
+                                : const Color(0xFF64748B),
+                          ),
+                          border: InputBorder.none,
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        onSubmitted: (val) {
+                          if (val.trim().isNotEmpty) {
+                            _sageInputCtrl.clear();
+                            _askSageQuestion(val.trim());
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Bouton Microphone 1-clic direct
+                  GestureDetector(
+                    onTap: _toggleVocalRecording,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: _isListening
+                            ? Colors.redAccent
+                            : AppColors.accent,
+                        shape: BoxShape.circle,
+                        boxShadow: _isListening
+                            ? [
+                                BoxShadow(
+                                  color:
+                                      Colors.redAccent.withValues(alpha: 0.5),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                )
+                              ]
+                            : null,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          _isListening
+                              ? Icons.stop_rounded
+                              : Icons.mic_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Bouton Envoyer
+                  GestureDetector(
+                    onTap: () {
+                      final val = _sageInputCtrl.text.trim();
+                      if (val.isNotEmpty) {
+                        _sageInputCtrl.clear();
+                        _askSageQuestion(val);
+                      }
+                    },
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF1E293B)
+                            : const Color(0xFF314999),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.accent.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.send_rounded,
+                            color: Colors.white, size: 18),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
         const SizedBox(height: 16),
       ],
+    );
+  }
+
+  Widget _buildQuickTopicChip({
+    required String label,
+    required IconData icon,
+    required String query,
+    required bool isDark,
+  }) {
+    return ActionChip(
+      avatar: Icon(icon, size: 16, color: AppColors.accent),
+      label: Text(
+        label,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: isDark ? Colors.white : const Color(0xFF0F172A),
+        ),
+      ),
+      backgroundColor: isDark
+          ? const Color(0xFF1E293B)
+          : AppColors.accent.withValues(alpha: 0.08),
+      side: BorderSide(
+        color: AppColors.accent.withValues(alpha: 0.3),
+        width: 1,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      onPressed: _avatarState == AvatarState.thinking
+          ? null
+          : () => _askSageQuestion(query),
     );
   }
 

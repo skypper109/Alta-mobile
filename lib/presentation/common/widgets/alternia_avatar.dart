@@ -10,11 +10,15 @@ class AlterniaAvatar extends StatefulWidget {
     super.key,
     this.size = 180.0,
     this.state = AvatarState.idle,
+    this.imagePath,
+    this.imageUrl,
     this.onTap,
   });
 
   final double size;
   final AvatarState state;
+  final String? imagePath;
+  final String? imageUrl;
   final VoidCallback? onTap;
 
   @override
@@ -24,7 +28,6 @@ class AlterniaAvatar extends StatefulWidget {
 class _AlterniaAvatarState extends State<AlterniaAvatar> with TickerProviderStateMixin {
   late AnimationController _animCtrl;
   late AnimationController _pulseCtrl;
-
   @override
   void initState() {
     super.initState();
@@ -51,12 +54,15 @@ class _AlterniaAvatarState extends State<AlterniaAvatar> with TickerProviderStat
   Color get _glowColor => switch (widget.state) {
     AvatarState.idle      => AppColors.primary,
     AvatarState.listening => AppColors.secondary,
-    AvatarState.speaking  => AppColors.primaryLight,
-    AvatarState.thinking  => AppColors.accent,
+    AvatarState.speaking  => AppColors.accent,
+    AvatarState.thinking  => AppColors.primaryLight,
   };
 
   @override
   Widget build(BuildContext context) {
+    final hasImage = (widget.imagePath != null && widget.imagePath!.isNotEmpty) ||
+        (widget.imageUrl != null && widget.imageUrl!.isNotEmpty);
+
     return GestureDetector(
       onTap: widget.onTap,
       // RepaintBoundary isole le painter du reste du widget tree
@@ -64,7 +70,7 @@ class _AlterniaAvatarState extends State<AlterniaAvatar> with TickerProviderStat
         child: AnimatedBuilder(
           animation: Listenable.merge([_animCtrl, _pulseCtrl]),
           builder: (context, child) {
-            final scale = 1.0 + (_pulseCtrl.value * 0.05);
+            final scale = 1.0 + (_pulseCtrl.value * 0.04);
 
             return Transform.scale(
               scale: scale,
@@ -83,32 +89,118 @@ class _AlterniaAvatarState extends State<AlterniaAvatar> with TickerProviderStat
                         boxShadow: [
                           BoxShadow(
                             color: _glowColor.withValues(alpha: 0.35 + (_pulseCtrl.value * 0.2)),
-                            blurRadius: 30,
-                            spreadRadius: 5,
+                            blurRadius: 28,
+                            spreadRadius: 4,
                           ),
                         ],
                       ),
                     ),
 
-                    // Custom Painted Avatar Face & Core
-                    CustomPaint(
-                      size: Size(widget.size, widget.size),
-                      painter: _AvatarPainter(
-                        progress: _animCtrl.value,
-                        pulse: _pulseCtrl.value,
-                        state: widget.state,
-                        accentColor: _glowColor,
+                    // Si une image photoréaliste est fournie, afficher le portrait avec frame lumineuse
+                    if (hasImage) ...[
+                      // Portrait photoréaliste
+                      Container(
+                        width: widget.size * 0.88,
+                        height: widget.size * 0.88,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: _glowColor,
+                            width: 2.8,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.5),
+                              blurRadius: 14,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: widget.imagePath != null
+                              ? Image.asset(
+                                  widget.imagePath!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => _buildFallbackVector(),
+                                )
+                              : Image.network(
+                                  widget.imageUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => _buildFallbackVector(),
+                                ),
+                        ),
                       ),
-                    ),
 
-                    // Avatar Center Face (Holographic Eyes & Expression)
-                    _buildFacialFeatures(),
+                      // Anneau orbital fin
+                      CustomPaint(
+                        size: Size(widget.size, widget.size),
+                        painter: _OrbitalRingPainter(
+                          progress: _animCtrl.value,
+                          color: _glowColor,
+                        ),
+                      ),
+
+                      // Indicateur dynamique de parole / écoute en bas de l'avatar
+                      if (widget.state == AvatarState.speaking)
+                        Positioned(
+                          bottom: 4,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.75),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppColors.accent, width: 1.2),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(4, (i) {
+                                final h = 4.0 + (math.sin((_animCtrl.value * math.pi * 4) + (i * 0.8)).abs() * 9.0);
+                                return Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                                  width: 3,
+                                  height: h,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.accent,
+                                    borderRadius: BorderRadius.circular(1.5),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ),
+                        ),
+                    ] else ...[
+                      // Mode vectoriel par défaut
+                      CustomPaint(
+                        size: Size(widget.size, widget.size),
+                        painter: _AvatarPainter(
+                          progress: _animCtrl.value,
+                          pulse: _pulseCtrl.value,
+                          state: widget.state,
+                          accentColor: _glowColor,
+                        ),
+                      ),
+
+                      // Avatar Center Face (Holographic Eyes & Expression)
+                      _buildFacialFeatures(),
+                    ],
                   ],
                 ),
               ),
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildFallbackVector() {
+    return CustomPaint(
+      size: Size(widget.size, widget.size),
+      painter: _AvatarPainter(
+        progress: _animCtrl.value,
+        pulse: _pulseCtrl.value,
+        state: widget.state,
+        accentColor: _glowColor,
       ),
     );
   }
@@ -268,4 +360,46 @@ class _AvatarPainter extends CustomPainter {
 
   @override
   bool shouldRebuildSemantics(covariant _AvatarPainter oldDelegate) => false;
+}
+
+class _OrbitalRingPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  _OrbitalRingPainter({
+    required this.progress,
+    required this.color,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2.05;
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4
+      ..color = color.withValues(alpha: 0.55);
+
+    canvas.drawCircle(center, radius, paint);
+
+    // Points orbitaux discrets
+    final angle = progress * 2 * math.pi;
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.rotate(angle);
+
+    final dotPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(Offset(radius * 0.98, 0), 2.5, dotPaint);
+    canvas.drawCircle(Offset(-radius * 0.98, 0), 2.0, dotPaint);
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _OrbitalRingPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.color != color;
 }

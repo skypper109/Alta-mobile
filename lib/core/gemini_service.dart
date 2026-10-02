@@ -2,9 +2,12 @@
 // Connecté directement au serveur local AlternIA (LLM Qwen 2.5 + RAG 1573 Chunks Maliens).
 library;
 
+import 'dart:io';
 import 'dart:typed_data';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'constants.dart';
 import 'malian_school_system.dart';
@@ -174,22 +177,28 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
       } catch (_) {}
     }
 
-    // Fallback de vérification hors-ligne si serveur déconnecté mais code officiel reconnu
+    // Fallback de vérification hors-ligne / direct si serveur déconnecté mais code officiel reconnu
     final upper = cleanCode.toUpperCase();
-    final isLocalMaster = upper == 'ALTERNIA-PREMIUM-2026' ||
-        upper == 'AlternIA-LIVE-2026' ||
-        upper == 'ML-BKO-0042' ||
-        upper == 'ALT-BOX-2026-001' ||
-        upper == 'VIP-MALI-2026' ||
-        upper == 'PREMIUM2026';
+    final Map<String, String> seedPlans = {
+      'ALTERNIA-PREMIUM-2026': 'AlterniA Live Pro • Licence Nationale',
+      'LIVE-PRO-2026': 'AlternIA Live Pro • Accès Illimité',
+      'SIMLI-LIVE-2026': 'AlternIA Live Pro • Accès Illimité',
+      'VIP-MALI-2026': 'Partenaire Ministère & Académie',
+      'ML-BKO-0042': 'Lycée Soundiata Keïta • Bamako',
+      'ALT-BOX-2026-001': 'Boîtier AlterniA Hardware Box',
+      'PREMIUM2026': 'AlterniA Live • Accès Démo Rapide',
+      'ALTA-PRO': 'AlterniA Famille & Lycée',
+    };
 
-    if (isLocalMaster) {
+    if (seedPlans.containsKey(upper)) {
       return {
         'valide': true,
-        'message': 'Code premium validé (mode hors-ligne vérifié)',
+        'message': 'Code premium validé avec succès (${seedPlans[upper]}).',
         'code': upper,
-        'plan': 'AlterniA Live Pro',
-        'AlternIA_enabled': true,
+        'plan': seedPlans[upper],
+        'simli_enabled': true,
+        'alternia_enabled': true,
+        'server_endpoint': _candidateBaseUrls.first,
       };
     }
 
@@ -204,6 +213,7 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
     required String text,
     String? subject,
     String? voice,
+    String? faceId,
   }) async {
     for (final baseUrl in _candidateBaseUrls) {
       try {
@@ -213,7 +223,8 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
             'question': text,
             'phrase': text,
             'matiere': subject ?? 'Général',
-            'voice': voice ?? 'vivienne',
+            'voice': voice ?? 'henri',
+            'faceId': faceId ?? 'bb1212ec-2cc5-4ca0-ad32-4a4427600345',
           },
           options: Options(
             connectTimeout: const Duration(seconds: 6),
@@ -236,7 +247,7 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
   /// Récupère le flux audio de synthèse vocale généré par le serveur AlternIA (/api/tts)
   Future<Uint8List?> fetchBackendTtsAudio({
     required String text,
-    String voice = 'vivienne',
+    String voice = 'henri',
   }) async {
     final cleanText = text.trim();
     if (cleanText.isEmpty) return null;
@@ -268,6 +279,23 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
       }
     }
     return null;
+  }
+
+  /// Joue des octets audio MP3 de manière 100% fiable sur iOS (AVPlayer) et Android.
+  /// Évite l'erreur DarwinAudioError de BytesSource en enregistrant temporairement
+  /// le fichier avec l'extension explicite .mp3 et le MIME type audio/mpeg.
+  static Future<void> playAudioBytes(AudioPlayer player, Uint8List bytes) async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File(
+          '${tempDir.path}/alternia_tts_${DateTime.now().millisecondsSinceEpoch}.mp3');
+      await tempFile.writeAsBytes(bytes, flush: true);
+      await player.play(DeviceFileSource(tempFile.path, mimeType: 'audio/mpeg'));
+    } catch (_) {
+      try {
+        await player.play(BytesSource(bytes, mimeType: 'audio/mpeg'));
+      } catch (_) {}
+    }
   }
 
   /// Alias de rétrocompatibilité pour appel direct

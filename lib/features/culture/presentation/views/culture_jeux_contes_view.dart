@@ -69,10 +69,10 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
   }
 
   static const List<String> _filters = [
-    'Contes ',
-    'Devinettes ',
-    'Défis ',
-    'Proverbes ',
+    'Contes',
+    'Devinettes',
+    'Défis',
+    'Proverbes',
   ];
 
   static const List<IconData> _filterIcons = [
@@ -120,12 +120,6 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     final filteredProverbs = MockCultureProverbsData.getFiltered(
       regionId: activeRegion?.id,
     );
-    final featuredStory = filteredStories.firstWhere(
-      (s) => s.isFeatured,
-      orElse: () => filteredStories.isNotEmpty
-          ? filteredStories.first
-          : MockCultureStoriesData.stories.first,
-    );
     final featuredProverb = MockCultureProverbsData.featuredProverb;
 
     return CulturalAtmosphereCanvas(
@@ -146,13 +140,6 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                 children: List.generate(_filters.length, (index) {
                   final isSelected = _selectedFilterIndex == index;
                   final activeCol = _getFilterColor(index);
-                  final int count = index == 0
-                      ? filteredStories.length
-                      : index == 1
-                          ? filteredRiddles.length
-                          : index == 2
-                              ? MockCultureChallengesData.quizPacks.length
-                              : filteredProverbs.length;
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -166,7 +153,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 220),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
+                            horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? activeCol
@@ -199,25 +186,6 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                                     isSelected ? Colors.white : subtitleColor,
                               ),
                             ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 1.5),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Colors.black.withValues(alpha: 0.25)
-                                    : activeCol.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                '$count',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: isSelected ? Colors.white : activeCol,
-                                ),
-                              ),
-                            ),
                           ],
                         ),
                       ),
@@ -231,20 +199,6 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
 
             // ── 2. SOUS-UNIVERS 1 : CONTES & RÉCITS DES VEILLÉES ───────────────
             if (_selectedFilterIndex == 0) ...[
-              // Grand Conte en Vedette
-              AnimatedCulturalReveal(
-                delay: const Duration(milliseconds: 80),
-                child: _buildHeroStoryCard(
-                  story: featuredStory,
-                  context: context,
-                  isDark: isDark,
-                  cardBg: cardBg,
-                  borderCol: borderCol,
-                  titleColor: titleColor,
-                  subtitleColor: subtitleColor,
-                ),
-              ),
-              const SizedBox(height: 24),
 
               // Section Tous les Contes
               _buildSectionHeader(
@@ -414,249 +368,6 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     );
   }
 
-  // ── 1. CARTE VEDETTE CONTE SOUS L'ARBRE (INTERACTIVE) ──────────────────────
-  Widget _buildHeroStoryCard({
-    required InteractiveStory story,
-    required BuildContext context,
-    required bool isDark,
-    required Color cardBg,
-    required Color borderCol,
-    required Color titleColor,
-    required Color subtitleColor,
-  }) {
-    return CulturalInteractiveCard(
-      padding: EdgeInsets.zero,
-      showSudaneseCorners: true,
-      activeAccentColor: CultureTheme.accentOrange,
-      backgroundColor: cardBg,
-      borderRadius: 22,
-      onTap: () {
-        context.push(
-          '/culture/conte/${story.id}/play',
-          extra: story,
-        );
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image photographique réelle
-          SizedBox(
-            height: 145,
-            width: double.infinity,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                if (story.photoUrl.isNotEmpty)
-                  Image.asset(
-                    story.photoUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: CultureTheme.primaryDark,
-                      child: const Center(
-                        child: Icon(Icons.auto_stories_rounded,
-                            size: 40, color: Colors.white54),
-                      ),
-                    ),
-                  )
-                else
-                  Container(color: CultureTheme.primaryDark),
-
-                // Overlay sombre uni pour contraste texte
-                Container(
-                  color: Colors.black.withValues(alpha: 0.40),
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: CultureTheme.accentOrange,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              'VEILLÉE SOUS L\'ARBRE',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.6),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.25),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.location_on_rounded,
-                                  size: 11,
-                                  color: CultureTheme.accentOrange,
-                                ),
-                                const SizedBox(width: 3),
-                                Text(
-                                  story.regionName,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2.5),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              '${story.readingDuration} • ${story.origin}',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Corps descriptif et actions
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  story.title,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16.5,
-                    fontWeight: FontWeight.w800,
-                    color: titleColor,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  story.subtitle,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: CultureTheme.accentOrange,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  story.summary,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    color: subtitleColor,
-                    height: 1.4,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    // Bouton Écouter
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          StoryAudioPlayerSheet.show(context, story);
-                        },
-                        icon: const Icon(Icons.headphones_rounded, size: 16),
-                        label: Text(
-                          'Écouter',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: CultureTheme.accentOrange,
-                          side: BorderSide(
-                            color: CultureTheme.accentOrange
-                                .withValues(alpha: 0.5),
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    // Bouton Jouer / Lire
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          HapticFeedback.mediumImpact();
-                          context.push(
-                            '/culture/conte/${story.id}/play',
-                            extra: story,
-                          );
-                        },
-                        icon: const Icon(Icons.play_arrow_rounded,
-                            size: 18, color: Colors.white),
-                        label: Text(
-                          'Explorer',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: CultureTheme.accentOrange,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // ── 2. ÉLÉMENT LISTE CONTE (INTERACTIF) ────────────────────────────────────
   Widget _buildStoryRowItem({
     required InteractiveStory story,
@@ -680,38 +391,18 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
         },
         child: Row(
           children: [
-            // Vignette photo réelle
+            // Icône conte minimaliste
             Container(
-              width: 64,
-              height: 64,
+              width: 42,
+              height: 42,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: CultureTheme.accentOrange.withValues(alpha: 0.3),
-                ),
+                color: CultureTheme.accentOrange.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(13),
-                child: story.photoUrl.isNotEmpty
-                    ? Image.asset(
-                        story.photoUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color:
-                              CultureTheme.accentOrange.withValues(alpha: 0.15),
-                          child: const Icon(Icons.auto_stories_rounded,
-                              size: 24, color: CultureTheme.accentOrange),
-                        ),
-                      )
-                    : Container(
-                        color:
-                            CultureTheme.accentOrange.withValues(alpha: 0.15),
-                        child: const Icon(Icons.auto_stories_rounded,
-                            size: 24, color: CultureTheme.accentOrange),
-                      ),
-              ),
+              child: const Icon(Icons.auto_stories_rounded,
+                  size: 20, color: CultureTheme.accentOrange),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
