@@ -29,12 +29,15 @@ const String _kBluePieceSvg = '''
 </svg>
 ''';
 
-/// Écran d'accueil cinématique au lancement (~4.6s) 100% RESPONSIVE :
-/// - Adapté à toutes les résolutions d'écran (petits téléphones, grands écrans, tablettes, orientation paysage).
-/// - Zéro dépassement de pixels (protection overflow totale).
-/// - Dès le départ : les 3 morceaux sont DÉJÀ DÉTACHÉS et flottent dans l'espace.
-/// - Rassemblement un par un avec trajectoires courbées, vibrations haptiques synchronisées et ondes d'impact.
-/// - Révélation élégante : "AlterniA" + "Alternative pour apprendre l'essentiel".
+/// Écran d'accueil cinématique au lancement (~2.6s) :
+/// - DÈS LE PREMIER MILLISECONDE : Les 3 pièces du logo s'affichent DÉTACHÉES dans l'espace cosmic.
+///   (Aucun bloc statique, aucun badge blanc initial, aucun retard).
+/// - Convergence magnétique avec trajectoires paraboliques en arc et auras lumineuses.
+/// - Snap de fusion au millimètre près avec retour haptique puissant et onde de choc photonique.
+/// - Le badge blanc s'épanouit au moment exact de l'impact sous le logo unifié.
+/// - Balayage de brillance spéculaire sur le logo assemblé.
+/// - Révélation de la marque : "AlterniA" + Slogan officiel.
+/// - 100% Responsive et scroll-safe sur tous les téléphones et tablettes.
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -45,9 +48,8 @@ class SplashScreen extends ConsumerStatefulWidget {
 class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  bool _hasTriggeredBlue = false;
-  bool _hasTriggeredOrange = false;
-  bool _hasTriggeredTurquoise = false;
+  bool _hasTriggeredSnapImpact = false;
+  bool _hasTriggeredApproachHaptic = false;
   bool _hasNavigated = false;
 
   @override
@@ -56,7 +58,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 4600),
+      duration: const Duration(milliseconds: 2600),
     );
 
     _controller.addListener(_onAnimationTick);
@@ -76,17 +78,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   void _onAnimationTick() {
     final t = _controller.value;
 
-    // Déclenchements haptiques calibrés aux impacts de chaque morceau
-    if (t >= 0.44 && !_hasTriggeredBlue) {
-      _hasTriggeredBlue = true;
-      HapticFeedback.lightImpact();
+    // Déclenchement haptique léger quand les pièces amorcent leur accélération magnétique
+    if (t >= 0.28 && !_hasTriggeredApproachHaptic) {
+      _hasTriggeredApproachHaptic = true;
+      HapticFeedback.selectionClick();
     }
-    if (t >= 0.66 && !_hasTriggeredOrange) {
-      _hasTriggeredOrange = true;
-      HapticFeedback.lightImpact();
-    }
-    if (t >= 0.86 && !_hasTriggeredTurquoise) {
-      _hasTriggeredTurquoise = true;
+
+    // Déclenchement haptique puissant au moment précis de l'assemblage (t = 0.58)
+    if (t >= 0.58 && !_hasTriggeredSnapImpact) {
+      _hasTriggeredSnapImpact = true;
       HapticFeedback.heavyImpact();
     }
   }
@@ -115,7 +115,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     return Scaffold(
       backgroundColor: const Color(0xFF070A11),
       body: GestureDetector(
-        onTap: _navigateToNextScreen, // Permet de passer immédiatement d'un tap
+        onTap: _navigateToNextScreen, // Tap pour passer immédiatement
         behavior: HitTestBehavior.opaque,
         child: SafeArea(
           child: LayoutBuilder(
@@ -124,90 +124,97 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               final availableWidth = constraints.maxWidth;
               final shortestSide = math.min(availableWidth, availableHeight);
 
-              // ── Calculs dynamiques d'échelle responsive ────────────────────
+              // ── Calculs d'échelle responsive ───────────────────────────────
               final isCompactHeight = availableHeight < 620;
               final isUltraCompact = availableHeight < 500;
 
-              // Taille adaptative du badge blanc et du logo interne
               final double badgeSize;
               if (isUltraCompact) {
-                badgeSize = 90.0;
+                badgeSize = 92.0;
               } else if (isCompactHeight) {
                 badgeSize = (availableHeight * 0.22).clamp(95.0, 125.0);
               } else {
-                badgeSize = (shortestSide * 0.36).clamp(120.0, 152.0);
+                badgeSize = (shortestSide * 0.36).clamp(120.0, 150.0);
               }
 
-              final logoSize = badgeSize * 0.58;
-              final scaleFactor = logoSize / 88.0;
-              final spacing = isUltraCompact ? 10.0 : (isCompactHeight ? 18.0 : 30.0);
-              final borderRadius = badgeSize * 0.25;
+              final logoSize = badgeSize * 0.60;
+              final scaleFactor = logoSize / 85.0;
+              final spacing = isUltraCompact ? 12.0 : (isCompactHeight ? 20.0 : 32.0);
+              final borderRadius = badgeSize * 0.26;
 
               return AnimatedBuilder(
                 animation: _controller,
                 builder: (context, child) {
                   final t = _controller.value;
 
-                  // ── 1. Apparition du badge (0.0 -> 0.16) ───────────────────
-                  final badgeScale = Curves.easeOutBack.transform(
-                    (t / 0.16).clamp(0.0, 1.0),
-                  );
-                  final badgeOpacity = (t / 0.10).clamp(0.0, 1.0);
+                  // ── 1. TRANSFORMATION DES PIÈCES DÉTACHÉES DÈS t = 0 ────────
+                  // DÈS LE LANCEMENT (t=0) : les 3 pièces sont LARGEMENT DÉTACHÉES dans l'espace.
+                  // À t = 0.10, la force magnétique s'active et les attire en arc vers le centre.
+                  // À t = 0.58, elles se verrouillent avec une précision chirurgicale à (0,0).
 
-                  // ── 2. Calcul des transformations (DÉJÀ DÉTACHÉS DÈS t=0) ───
-                  // Morceau 1 : BLEU ROYAL (Gauche) -> s'assemble entre 0.22 et 0.44
-                  final blue = _computePieceArc(
+                  // Pièce 1 : BLEU ROYAL (Éducation / Savoir) - vient de la gauche
+                  final blue = _computeDetachedPieceArc(
                     t: t,
-                    assembleStart: 0.22,
-                    assembleEnd: 0.44,
-                    initialOffset: Offset(-68 * scaleFactor, 20 * scaleFactor),
+                    startDelay: 0.10,
+                    lockTime: 0.56,
+                    initialOffset: Offset(-115 * scaleFactor, 32 * scaleFactor),
                     initialRotation: 0.28,
-                    initialScale: 1.12,
-                    arcCurvature: Offset(-18 * scaleFactor, -22 * scaleFactor),
+                    initialScale: 1.25,
+                    arcCurvature: Offset(-24 * scaleFactor, -30 * scaleFactor),
                   );
 
-                  // Morceau 2 : ORANGE VIF (Haut-Droit) -> s'assemble entre 0.44 et 0.66
-                  final orange = _computePieceArc(
+                  // Pièce 2 : ORANGE SOLAIRE (Culture / Héritage) - vient du haut droit
+                  final orange = _computeDetachedPieceArc(
                     t: t,
-                    assembleStart: 0.44,
-                    assembleEnd: 0.66,
-                    initialOffset: Offset(58 * scaleFactor, -54 * scaleFactor),
-                    initialRotation: -0.32,
-                    initialScale: 1.12,
-                    arcCurvature: Offset(26 * scaleFactor, -15 * scaleFactor),
+                    startDelay: 0.10,
+                    lockTime: 0.58,
+                    initialOffset: Offset(105 * scaleFactor, -90 * scaleFactor),
+                    initialRotation: -0.34,
+                    initialScale: 1.25,
+                    arcCurvature: Offset(32 * scaleFactor, -20 * scaleFactor),
                   );
 
-                  // Morceau 3 : TURQUOISE (Bas-Droit) -> s'assemble entre 0.66 et 0.86
-                  final turquoise = _computePieceArc(
+                  // Pièce 3 : TURQUOISE LUMINEUX (Innovation / IA) - vient du bas droit
+                  final turquoise = _computeDetachedPieceArc(
                     t: t,
-                    assembleStart: 0.66,
-                    assembleEnd: 0.86,
-                    initialOffset: Offset(44 * scaleFactor, 62 * scaleFactor),
-                    initialRotation: 0.35,
-                    initialScale: 1.12,
-                    arcCurvature: Offset(18 * scaleFactor, 26 * scaleFactor),
+                    startDelay: 0.10,
+                    lockTime: 0.60,
+                    initialOffset: Offset(80 * scaleFactor, 105 * scaleFactor),
+                    initialRotation: 0.36,
+                    initialScale: 1.25,
+                    arcCurvature: Offset(22 * scaleFactor, 32 * scaleFactor),
                   );
 
-                  // ── 3. Ondes d'impact concentriques à la taille du badge ────
-                  final blueRipple = _computeRippleProgress(t, start: 0.44, duration: 0.12);
-                  final orangeRipple = _computeRippleProgress(t, start: 0.66, duration: 0.12);
-                  final turquoiseRipple = _computeRippleProgress(t, start: 0.86, duration: 0.14);
+                  // ── 2. ÉPANOOUISSEMENT DU BADGE BLANC AU MOMENT DU VERROUILLAGE ─
+                  // Le badge blanc NE S'AFFICHE PAS au départ !
+                  // Il n'apparaît qu'au moment précis où les morceaux fusionnent (t = 0.54 -> 0.68)
+                  final badgeProgress = ((t - 0.54) / 0.14).clamp(0.0, 1.0);
+                  final badgeScale = Curves.easeOutBack.transform(badgeProgress);
+                  final badgeOpacity = Curves.easeOutCubic.transform(badgeProgress);
 
-                  // ── 4. Rebond d'impact à l'assemblage final (0.86 -> 0.96) ─
+                  // ── 3. REBOND ÉLASTIQUE DU LOGO COMPLET (0.58 -> 0.72) ──────
                   double grandPulse = 1.0;
-                  if (t >= 0.86 && t <= 0.97) {
-                    final pulseP = (t - 0.86) / 0.11;
-                    grandPulse = 1.0 + 0.08 * math.sin(pulseP * math.pi);
+                  if (t >= 0.58 && t <= 0.74) {
+                    final pulseP = (t - 0.58) / 0.16;
+                    grandPulse = 1.0 + 0.12 * math.sin(pulseP * math.pi);
                   }
 
-                  // ── 5. Révélation progressive du nom & slogan (0.78 -> 0.94)
-                  final textProgress = ((t - 0.78) / 0.16).clamp(0.0, 1.0);
-                  final textOpacity = Curves.easeOutCubic.transform(textProgress);
-                  final textSlide = (1.0 - Curves.easeOutBack.transform(textProgress)) * 18;
+                  // ── 4. BALAYAGE LUMINEUX SPÉCULAIRE (0.66 -> 0.82) ──────────
+                  final sheenProgress = ((t - 0.66) / 0.16).clamp(0.0, 1.0);
 
-                  // ── 6. Fondu de sortie global vers l'application (0.96 -> 1.0)
-                  final globalOpacity = t > 0.96
-                      ? (1.0 - (t - 0.96) / 0.04).clamp(0.0, 1.0)
+                  // ── 5. ONDES DE CHOC QUANTIQUE D'IMPACT (0.58 -> 0.78) ──────
+                  final impactProgress = ((t - 0.58) / 0.18).clamp(0.0, 1.0);
+                  final flashOpacity = (1.0 - impactProgress) * 0.9;
+                  final shockwaveRadius = (badgeSize * 0.5) + impactProgress * 90 * scaleFactor;
+
+                  // ── 6. RÉVÉLATION DU TEXTE "AlterniA" (0.64 -> 0.86) ────────
+                  final textProgress = ((t - 0.64) / 0.18).clamp(0.0, 1.0);
+                  final textOpacity = Curves.easeOutCubic.transform(textProgress);
+                  final textSlide = (1.0 - Curves.easeOutBack.transform(textProgress)) * 20;
+
+                  // ── 7. FONDU DE SORTIE VERS L'ONBOARDING (0.95 -> 1.0) ──────
+                  final globalOpacity = t > 0.95
+                      ? (1.0 - (t - 0.95) / 0.05).clamp(0.0, 1.0)
                       : 1.0;
 
                   return Opacity(
@@ -215,13 +222,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        // ── Fond dégradé radial subtil ───────────────────────
+                        // ── Fond Cosmique Dégradé Radial Profond ─────────────
                         Positioned.fill(
                           child: Container(
                             decoration: const BoxDecoration(
                               gradient: RadialGradient(
                                 center: Alignment.center,
-                                radius: 1.3,
+                                radius: 1.35,
                                 colors: [
                                   Color(0xFF131D31),
                                   Color(0xFF070A11),
@@ -231,16 +238,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           ),
                         ),
 
-                        // ── Auras lumineuses positionnées de façon 100% responsive
+                        // ── Auras Lumineuses Flottantes Dynamiques ───────────
                         Positioned.fill(
                           child: IgnorePointer(
                             child: Stack(
                               children: [
-                                // Aura Orange (Haut / Droite)
+                                // Halo Orange Solaire (Haut / Droite)
                                 Align(
                                   alignment: const Alignment(0.65, -0.45),
                                   child: Opacity(
-                                    opacity: (0.4 + 0.3 * math.sin(t * math.pi * 3))
+                                    opacity: (0.35 + 0.25 * math.sin(t * math.pi * 3))
                                         .clamp(0.0, 1.0),
                                     child: Container(
                                       width: shortestSide * 0.45,
@@ -248,12 +255,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: CultureTheme.accentOrange
-                                            .withValues(alpha: 0.15),
+                                            .withValues(alpha: 0.16),
                                         boxShadow: [
                                           BoxShadow(
                                             color: CultureTheme.accentOrange
-                                                .withValues(alpha: 0.22),
-                                            blurRadius: 80,
+                                                .withValues(alpha: 0.24),
+                                            blurRadius: 85,
                                             spreadRadius: 25,
                                           ),
                                         ],
@@ -262,11 +269,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                   ),
                                 ),
 
-                                // Aura Bleu Royal (Gauche)
+                                // Halo Bleu Royal (Gauche)
                                 Align(
-                                  alignment: const Alignment(-0.65, 0.05),
+                                  alignment: const Alignment(-0.65, 0.08),
                                   child: Opacity(
-                                    opacity: (0.4 + 0.3 * math.cos(t * math.pi * 3))
+                                    opacity: (0.35 + 0.25 * math.cos(t * math.pi * 3))
                                         .clamp(0.0, 1.0),
                                     child: Container(
                                       width: shortestSide * 0.45,
@@ -274,12 +281,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: const Color(0xFF314999)
-                                            .withValues(alpha: 0.15),
+                                            .withValues(alpha: 0.16),
                                         boxShadow: [
                                           BoxShadow(
                                             color: const Color(0xFF314999)
-                                                .withValues(alpha: 0.22),
-                                            blurRadius: 80,
+                                                .withValues(alpha: 0.24),
+                                            blurRadius: 85,
                                             spreadRadius: 25,
                                           ),
                                         ],
@@ -288,11 +295,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                   ),
                                 ),
 
-                                // Aura Turquoise (Bas / Droite)
+                                // Halo Turquoise Lumineux (Bas / Droite)
                                 Align(
                                   alignment: const Alignment(0.55, 0.48),
                                   child: Opacity(
-                                    opacity: (0.4 + 0.3 * math.sin((t + 0.5) * math.pi * 3))
+                                    opacity: (0.35 + 0.25 * math.sin((t + 0.5) * math.pi * 3))
                                         .clamp(0.0, 1.0),
                                     child: Container(
                                       width: shortestSide * 0.42,
@@ -300,12 +307,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: CultureTheme.cyanTurquoise
-                                            .withValues(alpha: 0.12),
+                                            .withValues(alpha: 0.14),
                                         boxShadow: [
                                           BoxShadow(
                                             color: CultureTheme.cyanTurquoise
-                                                .withValues(alpha: 0.20),
-                                            blurRadius: 75,
+                                                .withValues(alpha: 0.22),
+                                            blurRadius: 80,
                                             spreadRadius: 20,
                                           ),
                                         ],
@@ -325,108 +332,182 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 20,
-                                vertical: 14,
+                                vertical: 16,
                               ),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  // ── BADGE BLANC AVEC ONDES CONCENTRIQUES ET PIÈCES ──
-                                  Stack(
-                                    alignment: Alignment.center,
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      // Onde d'impact Bleu
-                                      if (blueRipple > 0)
-                                        _buildCenteredRipple(
-                                          radius: (badgeSize * 0.5) + blueRipple * 50 * scaleFactor,
-                                          color: const Color(0xFF314999),
-                                          opacity: (1.0 - blueRipple) * 0.75,
-                                        ),
+                                  // ── CONTENEUR MAÎTRE DU LOGO ET DU BADGE ───
+                                  SizedBox(
+                                    width: badgeSize * 1.8,
+                                    height: badgeSize * 1.8,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        // Onde de choc 1 : Flash blanc photonique à l'impact
+                                        if (t >= 0.58 && impactProgress < 1.0)
+                                          _buildShockwaveRing(
+                                            radius: shockwaveRadius,
+                                            color: Colors.white,
+                                            opacity: flashOpacity,
+                                            borderWidth: 3.0 * (1.0 - impactProgress),
+                                          ),
 
-                                      // Onde d'impact Orange
-                                      if (orangeRipple > 0)
-                                        _buildCenteredRipple(
-                                          radius: (badgeSize * 0.5) + orangeRipple * 65 * scaleFactor,
-                                          color: const Color(0xFFF1851F),
-                                          opacity: (1.0 - orangeRipple) * 0.8,
-                                        ),
+                                        // Onde de choc 2 : Anneau cyan turquoise
+                                        if (t >= 0.60 && impactProgress < 1.0)
+                                          _buildShockwaveRing(
+                                            radius: shockwaveRadius * 0.85,
+                                            color: const Color(0xFF40BBCC),
+                                            opacity: flashOpacity * 0.8,
+                                            borderWidth: 2.0,
+                                          ),
 
-                                      // Onde d'impact Turquoise (finale)
-                                      if (turquoiseRipple > 0)
-                                        _buildCenteredRipple(
-                                          radius: (badgeSize * 0.5) + turquoiseRipple * 85 * scaleFactor,
-                                          color: const Color(0xFF40BBCC),
-                                          opacity: (1.0 - turquoiseRipple) * 0.9,
-                                        ),
+                                        // Onde de choc 3 : Anneau orange solaire
+                                        if (t >= 0.62 && impactProgress < 1.0)
+                                          _buildShockwaveRing(
+                                            radius: shockwaveRadius * 0.70,
+                                            color: const Color(0xFFF1851F),
+                                            opacity: flashOpacity * 0.85,
+                                            borderWidth: 2.0,
+                                          ),
 
-                                      // Le badge blanc conteneur
-                                      Transform.scale(
-                                        scale: badgeScale * grandPulse,
-                                        child: Opacity(
-                                          opacity: badgeOpacity,
-                                          child: Container(
-                                            width: badgeSize,
-                                            height: badgeSize,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(borderRadius),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black.withValues(alpha: 0.45),
-                                                  blurRadius: 30,
-                                                  offset: const Offset(0, 12),
+                                        // ── BADGE BLANC ÉLÉGANT ──────────────
+                                        // Ne s'affiche qu'à l'assemblage des morceaux !
+                                        if (badgeProgress > 0)
+                                          Transform.scale(
+                                            scale: badgeScale * grandPulse,
+                                            child: Opacity(
+                                              opacity: badgeOpacity,
+                                              child: Container(
+                                                width: badgeSize,
+                                                height: badgeSize,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(borderRadius),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black
+                                                          .withValues(alpha: 0.45),
+                                                      blurRadius: 32,
+                                                      offset: const Offset(0, 14),
+                                                    ),
+                                                    BoxShadow(
+                                                      color: CultureTheme.accentOrange
+                                                          .withValues(alpha: 0.28),
+                                                      blurRadius: 40,
+                                                      spreadRadius: 3,
+                                                    ),
+                                                  ],
                                                 ),
-                                                BoxShadow(
-                                                  color: CultureTheme.accentOrange
-                                                      .withValues(alpha: 0.22),
-                                                  blurRadius: 35,
-                                                  spreadRadius: 2,
-                                                ),
-                                              ],
-                                            ),
-                                            clipBehavior: Clip.none,
-                                            child: Center(
-                                              child: SizedBox(
-                                                width: logoSize,
-                                                height: logoSize,
+                                                clipBehavior: Clip.hardEdge,
                                                 child: Stack(
-                                                  clipBehavior: Clip.none,
                                                   children: [
-                                                    // 1. Morceau BLEU ROYAL (Gauche)
-                                                    _buildPiece(
-                                                      svgString: _kBluePieceSvg,
-                                                      transform: blue,
-                                                      size: logoSize,
-                                                    ),
-
-                                                    // 2. Morceau ORANGE (Haut / Droite)
-                                                    _buildPiece(
-                                                      svgString: _kOrangePieceSvg,
-                                                      transform: orange,
-                                                      size: logoSize,
-                                                    ),
-
-                                                    // 3. Morceau TURQUOISE (Bas / Droite)
-                                                    _buildPiece(
-                                                      svgString: _kTurquoisePieceSvg,
-                                                      transform: turquoise,
-                                                      size: logoSize,
-                                                    ),
+                                                    // Balayage spéculaire (brillance de lumière)
+                                                    if (sheenProgress > 0.0 && sheenProgress < 1.0)
+                                                      Positioned.fill(
+                                                        child: Transform.translate(
+                                                          offset: Offset(
+                                                            (sheenProgress * 2.6 - 1.3) *
+                                                                badgeSize,
+                                                            0,
+                                                          ),
+                                                          child: Transform.rotate(
+                                                            angle: 0.45,
+                                                            child: Container(
+                                                              width: badgeSize * 0.45,
+                                                              decoration: BoxDecoration(
+                                                                gradient: LinearGradient(
+                                                                  colors: [
+                                                                    Colors.white
+                                                                        .withValues(alpha: 0.0),
+                                                                    Colors.white
+                                                                        .withValues(alpha: 0.45),
+                                                                    Colors.white
+                                                                        .withValues(alpha: 0.0),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
                                                   ],
                                                 ),
                                               ),
                                             ),
                                           ),
+
+                                        // ── LES 3 PIÈCES VECTORIELLES DÉTACHÉES ───
+                                        // Flottent librement dans l'espace DÈS t=0
+                                        // et s'assemblent vers le centre !
+                                        Transform.scale(
+                                          scale: grandPulse,
+                                          child: SizedBox(
+                                            width: logoSize,
+                                            height: logoSize,
+                                            child: Stack(
+                                              alignment: Alignment.center,
+                                              clipBehavior: Clip.none,
+                                              children: [
+                                                // Halo propre à la pièce Bleu (Éducation)
+                                                if (t < 0.65)
+                                                  _buildPieceGlow(
+                                                    transform: blue,
+                                                    color: const Color(0xFF314999),
+                                                    size: logoSize * 0.9,
+                                                  ),
+
+                                                // Halo propre à la pièce Orange (Culture)
+                                                if (t < 0.65)
+                                                  _buildPieceGlow(
+                                                    transform: orange,
+                                                    color: const Color(0xFFF1851F),
+                                                    size: logoSize * 0.9,
+                                                  ),
+
+                                                // Halo propre à la pièce Turquoise (Innovation)
+                                                if (t < 0.65)
+                                                  _buildPieceGlow(
+                                                    transform: turquoise,
+                                                    color: const Color(0xFF40BBCC),
+                                                    size: logoSize * 0.9,
+                                                  ),
+
+                                                // 1. Morceau BLEU ROYAL (Gauche)
+                                                _buildPiece(
+                                                  svgString: _kBluePieceSvg,
+                                                  transform: blue,
+                                                  size: logoSize,
+                                                ),
+
+                                                // 2. Morceau ORANGE SOLAIRE (Haut / Droite)
+                                                _buildPiece(
+                                                  svgString: _kOrangePieceSvg,
+                                                  transform: orange,
+                                                  size: logoSize,
+                                                ),
+
+                                                // 3. Morceau TURQUOISE LUMINEUX (Bas / Droite)
+                                                _buildPiece(
+                                                  svgString: _kTurquoisePieceSvg,
+                                                  transform: turquoise,
+                                                  size: logoSize,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
 
                                   SizedBox(height: spacing),
 
-                                  // ── TEXTE RÉVÉLÉ : "AlterniA" + Slogan Responsive
+                                  // ── TEXTE RÉVÉLÉ : "AlterniA" + Slogan Responsive ──
                                   Transform.translate(
                                     offset: Offset(0, textSlide),
                                     child: Opacity(
@@ -439,10 +520,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                             child: RichText(
                                               text: TextSpan(
                                                 style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: isCompactHeight ? 26 : 32,
+                                                  fontSize: isCompactHeight ? 28 : 34,
                                                   fontWeight: FontWeight.w800,
-                                                  letterSpacing: -0.5,
+                                                  letterSpacing: -0.6,
                                                   color: Colors.white,
+                                                  shadows: [
+                                                    Shadow(
+                                                      color: Colors.black
+                                                          .withValues(alpha: 0.5),
+                                                      blurRadius: 16,
+                                                      offset: const Offset(0, 4),
+                                                    ),
+                                                  ],
                                                 ),
                                                 children: const [
                                                   TextSpan(text: 'Altern'),
@@ -458,16 +547,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                           ),
                                           const SizedBox(height: 8),
                                           Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                            ),
                                             child: FittedBox(
                                               fit: BoxFit.scaleDown,
                                               child: Text(
                                                 'Alternative pour apprendre l\'essentiel',
                                                 style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: isCompactHeight ? 12 : 13.5,
+                                                  fontSize: isCompactHeight ? 12 : 14,
                                                   fontWeight: FontWeight.w600,
                                                   color: const Color(0xFF94A3B8),
-                                                  letterSpacing: 0.3,
+                                                  letterSpacing: 0.4,
                                                 ),
                                                 textAlign: TextAlign.center,
                                                 maxLines: 1,
@@ -481,16 +572,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
                                   SizedBox(height: spacing * 0.9),
 
-                                  // Signature MALI 2026 intégrée au flux (zéro collision)
+                                  // ── Signature MALI 2026 intégrée au flux ──────────
                                   Opacity(
-                                    opacity: (t / 0.4).clamp(0.0, 0.4),
+                                    opacity: (textOpacity * 0.5).clamp(0.0, 0.5),
                                     child: Text(
                                       'MALI • 2026',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 9.5,
+                                        fontSize: 10.0,
                                         fontWeight: FontWeight.w700,
-                                        letterSpacing: 2.0,
-                                        color: Colors.white.withValues(alpha: 0.4),
+                                        letterSpacing: 2.5,
+                                        color: Colors.white.withValues(alpha: 0.45),
                                       ),
                                     ),
                                   ),
@@ -511,24 +602,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
   }
 
-  /// Calcule la trajectoire incurvée et l'oscillation d'un morceau
-  /// DÈS t=0 : le morceau est DÉJÀ DÉTACHÉ et lévite dans l'espace.
-  /// Puis à assembleStart, il entame un vol en arc de cercle vers (0, 0).
-  _PieceTransform _computePieceArc({
+  /// Calcule la trajectoire des pièces DÉTACHÉES :
+  /// - DÈS t=0 : Les morceaux sont DÉJÀ DÉTACHÉS et flottent avec une douce oscillation dans l'espace.
+  /// - Dès que t >= startDelay : attraction magnétique exponentielle avec courbure parabolique.
+  /// - À lockTime : les pièces se verrouillent à (0, 0) avec orientation et échelle parfaites.
+  _PieceTransform _computeDetachedPieceArc({
     required double t,
-    required double assembleStart,
-    required double assembleEnd,
+    required double startDelay,
+    required double lockTime,
     required Offset initialOffset,
     required double initialRotation,
     required double initialScale,
     required Offset arcCurvature,
   }) {
-    // Phase 1 : AVANT L'ASSEMBLAGE -> LE MORCEAU FLOTTE DÉJÀ AU LOIN DANS L'ESPACE
-    if (t < assembleStart) {
-      final floatTime = t * 14.0;
-      final floatX = math.sin(floatTime) * 2.5;
-      final floatY = math.cos(floatTime * 0.85) * 2.5;
-      final rotWobble = math.sin(floatTime * 0.7) * 0.035;
+    // ── Phase 1 : DÉTACHÉ DANS L'ESPACE (DÈS t=0) ──────────────────────────
+    if (t < startDelay) {
+      final floatProgress = t / startDelay;
+      final floatX = math.sin(floatProgress * math.pi) * 3.0;
+      final floatY = math.cos(floatProgress * math.pi) * 3.0;
+      final rotWobble = math.sin(floatProgress * math.pi) * 0.02;
 
       return _PieceTransform(
         offset: Offset(initialOffset.dx + floatX, initialOffset.dy + floatY),
@@ -537,16 +629,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       );
     }
 
-    // Phase 2 : VOL DE RASSEMBLEMENT EN ARC DE CERCLE ("UNE PAR UNE")
-    if (t >= assembleStart && t < assembleEnd) {
-      final progress = ((t - assembleStart) / (assembleEnd - assembleStart))
-          .clamp(0.0, 1.0);
+    // ── Phase 2 : VOL DE CONVERGENCE MAGNÉTIQUE EN ARC ──────────────────────
+    if (t >= startDelay && t < lockTime) {
+      final rawProgress = ((t - startDelay) / (lockTime - startDelay)).clamp(0.0, 1.0);
 
-      final p = Curves.easeOutBack.transform(progress);
-      final remaining = 1.0 - p;
+      // Courbe d'accélération puis amorti magnétique (Cubic)
+      final progress = Curves.easeInOutCubic.transform(rawProgress);
+      final remaining = 1.0 - progress;
 
-      // Arc de déviation parabolique pour une trajectoire dynamique
-      final arcFactor = math.sin(progress * math.pi);
+      // Arc parabolique accentué
+      final arcFactor = math.sin(rawProgress * math.pi);
       final arcX = arcCurvature.dx * arcFactor;
       final arcY = arcCurvature.dy * arcFactor;
 
@@ -565,7 +657,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       );
     }
 
-    // Phase 3 : ASSEMBLÉ ET VERROUILLÉ EN POSITION OFFICIELLE (0, 0)
+    // ── Phase 3 : VERROUILLÉ EN POSITION OFFICIELLE (0, 0) ──────────────────
     return const _PieceTransform(
       offset: Offset.zero,
       rotation: 0.0,
@@ -573,18 +665,40 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
   }
 
-  /// Calcule l'onde de choc circulaire lors de l'impact
-  double _computeRippleProgress(double t,
-      {required double start, required double duration}) {
-    if (t < start || t > (start + duration)) return 0.0;
-    return ((t - start) / duration).clamp(0.0, 1.0);
+  /// Halo lumineux qui suit la pièce dans l'espace
+  Widget _buildPieceGlow({
+    required _PieceTransform transform,
+    required Color color,
+    required double size,
+  }) {
+    return Transform.translate(
+      offset: transform.offset,
+      child: Transform.scale(
+        scale: transform.scale,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: 0.35),
+                blurRadius: 30,
+                spreadRadius: 10,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
-  /// Affiche l'onde de choc directement centrée autour du badge
-  Widget _buildCenteredRipple({
+  /// Anneau de choc circulaire lors de l'impact
+  Widget _buildShockwaveRing({
     required double radius,
     required Color color,
     required double opacity,
+    required double borderWidth,
   }) {
     return IgnorePointer(
       child: Container(
@@ -594,7 +708,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           shape: BoxShape.circle,
           border: Border.all(
             color: color.withValues(alpha: opacity.clamp(0.0, 1.0)),
-            width: 2.2,
+            width: borderWidth,
           ),
         ),
       ),
