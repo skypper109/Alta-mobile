@@ -35,7 +35,8 @@ enum UniverseDestination {
 
 /// Transition cinématique inter-univers de rang mondial.
 /// Utilise l'animation dynamique des 3 morceaux vectoriels du logo AlterniA
-/// qui se rassemblent dans l'espace avec ondes d'impact haptiques et lueur de l'univers cible.
+/// qui se rassemblent dans l'espace avec ondes d'impact haptiques et révélation
+/// épurée du titre de l'univers ("UNIVERS CULTURE" ou "UNIVERS ÉDUCATION").
 class UniverseSplashTransition {
   static void toCulture(
     BuildContext context, {
@@ -101,15 +102,14 @@ class _UniverseLogoAssemblyView extends StatefulWidget {
 class _UniverseLogoAssemblyViewState extends State<_UniverseLogoAssemblyView>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  bool _hasTriggeredBlue = false;
-  bool _hasTriggeredOrange = false;
-  bool _hasTriggeredTurquoise = false;
+  bool _hasTriggeredApproachHaptic = false;
+  bool _hasTriggeredSnapImpact = false;
   bool _hasTriggeredFinish = false;
 
   @override
   void initState() {
     super.initState();
-    // Durée calibrée pour un ressenti dynamique et cinématographique (~1800ms)
+    // Durée calibrée pour un ressenti dynamique et cinématographique (~1850ms)
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1850),
@@ -133,17 +133,13 @@ class _UniverseLogoAssemblyViewState extends State<_UniverseLogoAssemblyView>
   void _onTick() {
     final t = _controller.value;
 
-    // Vibrations haptiques synchronisées aux jonctions des pièces
-    if (t >= 0.40 && !_hasTriggeredBlue) {
-      _hasTriggeredBlue = true;
-      HapticFeedback.lightImpact();
+    if (t >= 0.25 && !_hasTriggeredApproachHaptic) {
+      _hasTriggeredApproachHaptic = true;
+      HapticFeedback.selectionClick();
     }
-    if (t >= 0.62 && !_hasTriggeredOrange) {
-      _hasTriggeredOrange = true;
-      HapticFeedback.lightImpact();
-    }
-    if (t >= 0.82 && !_hasTriggeredTurquoise) {
-      _hasTriggeredTurquoise = true;
+
+    if (t >= 0.56 && !_hasTriggeredSnapImpact) {
+      _hasTriggeredSnapImpact = true;
       HapticFeedback.heavyImpact();
     }
   }
@@ -177,15 +173,8 @@ class _UniverseLogoAssemblyViewState extends State<_UniverseLogoAssemblyView>
     final primaryAccent =
         isToCulture ? AppColors.accent : AppColors.secondary;
 
-    final badgeLabel = isToCulture
-        ? 'PATRIMOINE VIVANT & MÉMOIRE'
-        : 'SAVOIR & INNOVATION IA';
-
+    // Titre épuré et percutant (seul texte conservé selon la demande)
     final title = isToCulture ? 'UNIVERS CULTURE' : 'UNIVERS ÉDUCATION';
-
-    final subtitle = isToCulture
-        ? 'Contes du Baobab, récits des sages et trésors millénaires'
-        : 'Tuteur IA interactif, méthodologie et fiches d\'excellence';
 
     return Material(
       color: Colors.transparent,
@@ -206,7 +195,7 @@ class _UniverseLogoAssemblyViewState extends State<_UniverseLogoAssemblyView>
             ),
           ),
 
-          // ── Animation du rassemblement du logo et du contenu ──────────────
+          // ── Animation du rassemblement du logo et du titre ────────────────
           AnimatedBuilder(
             animation: _controller,
             builder: (context, child) {
@@ -220,64 +209,64 @@ class _UniverseLogoAssemblyViewState extends State<_UniverseLogoAssemblyView>
               final globalOpacity = inOpacity * outOpacity;
 
               // Constantes de taille
-              const badgeSize = 110.0;
-              const logoSize = 78.0;
+              const badgeSize = 112.0;
+              const logoSize = 80.0;
 
-              // Apparition du badge blanc (0.0 -> 0.20)
-              final badgeScale = Curves.easeOutBack.transform(
-                (t / 0.22).clamp(0.0, 1.0),
-              );
+              // ── Épanouissement du badge blanc uniquement à l'assemblage ────
+              final badgeProgress = ((t - 0.50) / 0.16).clamp(0.0, 1.0);
+              final badgeScale = Curves.easeOutBack.transform(badgeProgress);
+              final badgeOpacity = Curves.easeOutCubic.transform(badgeProgress);
 
               // ── Transformations des 3 segments qui se rassemblent ─────────
-              // 1. BLEU ROYAL (Gauche) -> s'assemble entre 0.18 et 0.42
+              // 1. BLEU ROYAL (Gauche)
               final blue = _computePieceArc(
                 t: t,
-                assembleStart: 0.18,
-                assembleEnd: 0.42,
-                initialOffset: const Offset(-55, 16),
-                initialRotation: 0.24,
-                initialScale: 1.15,
-                arcCurvature: const Offset(-15, -18),
+                assembleStart: 0.10,
+                assembleEnd: 0.54,
+                initialOffset: const Offset(-75, 22),
+                initialRotation: 0.28,
+                initialScale: 1.20,
+                arcCurvature: const Offset(-18, -22),
               );
 
-              // 2. ORANGE (Haut / Droit) -> s'assemble entre 0.42 et 0.64
+              // 2. ORANGE SOLAIRE (Haut / Droit)
               final orange = _computePieceArc(
                 t: t,
-                assembleStart: 0.42,
-                assembleEnd: 0.64,
-                initialOffset: const Offset(48, -45),
-                initialRotation: -0.28,
-                initialScale: 1.15,
-                arcCurvature: const Offset(20, -12),
+                assembleStart: 0.10,
+                assembleEnd: 0.56,
+                initialOffset: const Offset(68, -60),
+                initialRotation: -0.32,
+                initialScale: 1.20,
+                arcCurvature: const Offset(24, -16),
               );
 
-              // 3. TURQUOISE (Bas / Droit) -> s'assemble entre 0.64 et 0.82
+              // 3. TURQUOISE LUMINEUX (Bas / Droit)
               final turquoise = _computePieceArc(
                 t: t,
-                assembleStart: 0.64,
-                assembleEnd: 0.82,
-                initialOffset: const Offset(38, 52),
-                initialRotation: 0.30,
-                initialScale: 1.15,
-                arcCurvature: const Offset(14, 20),
+                assembleStart: 0.10,
+                assembleEnd: 0.58,
+                initialOffset: const Offset(52, 70),
+                initialRotation: 0.35,
+                initialScale: 1.20,
+                arcCurvature: const Offset(18, 25),
               );
 
               // Ondes d'impact lumineuses
-              final blueRipple = _computeRippleProgress(t, start: 0.42, duration: 0.16);
-              final orangeRipple = _computeRippleProgress(t, start: 0.64, duration: 0.16);
-              final turquoiseRipple = _computeRippleProgress(t, start: 0.82, duration: 0.18);
+              final impactProgress = ((t - 0.56) / 0.22).clamp(0.0, 1.0);
+              final impactOpacity = (1.0 - impactProgress) * 0.9;
+              final shockwaveRadius = (badgeSize * 0.5) + impactProgress * 65;
 
-              // Rebond d'impact final (0.82 -> 0.94)
+              // Rebond d'impact final (0.56 -> 0.72)
               double grandPulse = 1.0;
-              if (t >= 0.82 && t <= 0.94) {
-                final pulseP = (t - 0.82) / 0.12;
-                grandPulse = 1.0 + 0.08 * math.sin(pulseP * math.pi);
+              if (t >= 0.56 && t <= 0.72) {
+                final pulseP = (t - 0.56) / 0.16;
+                grandPulse = 1.0 + 0.10 * math.sin(pulseP * math.pi);
               }
 
-              // Révélation du texte (0.70 -> 0.90)
-              final textProgress = ((t - 0.70) / 0.20).clamp(0.0, 1.0);
+              // Révélation du Titre (0.60 -> 0.82)
+              final textProgress = ((t - 0.60) / 0.18).clamp(0.0, 1.0);
               final textOpacity = Curves.easeOutCubic.transform(textProgress);
-              final textSlide = (1.0 - Curves.easeOutBack.transform(textProgress)) * 14;
+              final textSlide = (1.0 - Curves.easeOutBack.transform(textProgress)) * 16;
 
               return Opacity(
                 opacity: globalOpacity,
@@ -287,178 +276,126 @@ class _UniverseLogoAssemblyViewState extends State<_UniverseLogoAssemblyView>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // ── LOGO ALTERNIA QUI SE RASSEMBLE DANS LE BADGE ─────
-                        Stack(
-                          alignment: Alignment.center,
-                          clipBehavior: Clip.none,
-                          children: [
-                            // Onde d'impact Bleu
-                            if (blueRipple > 0)
-                              _buildCenteredRipple(
-                                radius: (badgeSize * 0.5) + blueRipple * 40,
-                                color: const Color(0xFF314999),
-                                opacity: (1.0 - blueRipple) * 0.8,
-                              ),
-
-                            // Onde d'impact Orange
-                            if (orangeRipple > 0)
-                              _buildCenteredRipple(
-                                radius: (badgeSize * 0.5) + orangeRipple * 50,
-                                color: const Color(0xFFF1851F),
-                                opacity: (1.0 - orangeRipple) * 0.85,
-                              ),
-
-                            // Onde d'impact Turquoise finale (ou couleur de l'univers)
-                            if (turquoiseRipple > 0)
-                              _buildCenteredRipple(
-                                radius: (badgeSize * 0.5) + turquoiseRipple * 65,
-                                color: primaryAccent,
-                                opacity: (1.0 - turquoiseRipple) * 0.9,
-                              ),
-
-                            // Le badge conteneur blanc lustré avec ombre 3D
-                            Transform.scale(
-                              scale: badgeScale * grandPulse,
-                              child: Container(
-                                width: badgeSize,
-                                height: badgeSize,
-                                decoration: BoxDecoration(
+                        // ── LOGO ALTERNIA QUI SE RASSEMBLE ET BADGE ───────────
+                        SizedBox(
+                          width: badgeSize * 1.6,
+                          height: badgeSize * 1.6,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            clipBehavior: Clip.none,
+                            children: [
+                              // Ondes de choc photoniques à l'impact
+                              if (t >= 0.56 && impactProgress < 1.0)
+                                _buildCenteredRipple(
+                                  radius: shockwaveRadius,
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(28),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.45),
-                                      blurRadius: 32,
-                                      offset: const Offset(0, 12),
-                                    ),
-                                    BoxShadow(
-                                      color: primaryAccent.withValues(alpha: 0.35),
-                                      blurRadius: 40,
-                                      spreadRadius: 3,
-                                    ),
-                                  ],
+                                  opacity: impactOpacity * 0.85,
+                                  borderWidth: 2.5,
                                 ),
-                                clipBehavior: Clip.none,
-                                child: Center(
-                                  child: SizedBox(
-                                    width: logoSize,
-                                    height: logoSize,
-                                    child: Stack(
-                                      clipBehavior: Clip.none,
-                                      children: [
-                                        // 1. Morceau BLEU ROYAL (Gauche)
-                                        _buildPiece(
-                                          svgString: _kBluePieceSvg,
-                                          transform: blue,
-                                          size: logoSize,
-                                        ),
 
-                                        // 2. Morceau ORANGE (Haut / Droit)
-                                        _buildPiece(
-                                          svgString: _kOrangePieceSvg,
-                                          transform: orange,
-                                          size: logoSize,
-                                        ),
-
-                                        // 3. Morceau TURQUOISE (Bas / Droit)
-                                        _buildPiece(
-                                          svgString: _kTurquoisePieceSvg,
-                                          transform: turquoise,
-                                          size: logoSize,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                              if (t >= 0.58 && impactProgress < 1.0)
+                                _buildCenteredRipple(
+                                  radius: shockwaveRadius * 0.82,
+                                  color: primaryAccent,
+                                  opacity: impactOpacity * 0.9,
+                                  borderWidth: 2.0,
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
 
-                        const SizedBox(height: 28),
-
-                        // ── TEXTES DE L'UNIVERS CIBLE ────────────────────────
-                        Transform.translate(
-                          offset: Offset(0, textSlide),
-                          child: Opacity(
-                            opacity: textOpacity,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Badge Univers
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF070B14)
-                                        .withValues(alpha: 0.75),
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(
-                                      color: primaryAccent.withValues(alpha: 0.5),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 6,
-                                        height: 6,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: primaryAccent,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: primaryAccent.withValues(alpha: 0.8),
-                                              blurRadius: 6,
-                                            ),
-                                          ],
-                                        ),
+                              // Le badge conteneur blanc lustré qui s'épanouit au snap
+                              if (badgeProgress > 0)
+                                Transform.scale(
+                                  scale: badgeScale * grandPulse,
+                                  child: Opacity(
+                                    opacity: badgeOpacity,
+                                    child: Container(
+                                      width: badgeSize,
+                                      height: badgeSize,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(28),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.45),
+                                            blurRadius: 32,
+                                            offset: const Offset(0, 12),
+                                          ),
+                                          BoxShadow(
+                                            color: primaryAccent.withValues(alpha: 0.35),
+                                            blurRadius: 40,
+                                            spreadRadius: 3,
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(width: 7),
-                                      Text(
-                                        badgeLabel,
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w800,
-                                          color: primaryAccent,
-                                          letterSpacing: 0.9,
-                                        ),
+                                    ),
+                                  ),
+                                ),
+
+                              // ── Les 3 pièces vectorielles qui s'assemblent ──
+                              Transform.scale(
+                                scale: grandPulse,
+                                child: SizedBox(
+                                  width: logoSize,
+                                  height: logoSize,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      // 1. Morceau BLEU ROYAL (Gauche)
+                                      _buildPiece(
+                                        svgString: _kBluePieceSvg,
+                                        transform: blue,
+                                        size: logoSize,
+                                      ),
+
+                                      // 2. Morceau ORANGE (Haut / Droit)
+                                      _buildPiece(
+                                        svgString: _kOrangePieceSvg,
+                                        transform: orange,
+                                        size: logoSize,
+                                      ),
+
+                                      // 3. Morceau TURQUOISE (Bas / Droit)
+                                      _buildPiece(
+                                        svgString: _kTurquoisePieceSvg,
+                                        transform: turquoise,
+                                        size: logoSize,
                                       ),
                                     ],
                                   ),
                                 ),
+                              ),
+                            ],
+                          ),
+                        ),
 
-                                const SizedBox(height: 12),
+                        const SizedBox(height: 24),
 
-                                // Titre
-                                Text(
-                                  title,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 23,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.white,
-                                    letterSpacing: -0.3,
+                        // ── TITRE ÉPURÉ DE L'UNIVERS (Seul texte conservé) ───
+                        Transform.translate(
+                          offset: Offset(0, textSlide),
+                          child: Opacity(
+                            opacity: textOpacity,
+                            child: Text(
+                              title,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.0,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(
+                                    color: primaryAccent.withValues(alpha: 0.7),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 3),
                                   ),
-                                ),
-
-                                const SizedBox(height: 6),
-
-                                // Sous-titre
-                                Text(
-                                  subtitle,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w400,
-                                    color: const Color(0xFFCBD5E1),
-                                    height: 1.4,
+                                  Shadow(
+                                    color: Colors.black.withValues(alpha: 0.6),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 2),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -498,13 +435,13 @@ class _UniverseLogoAssemblyViewState extends State<_UniverseLogoAssemblyView>
     }
 
     if (t >= assembleStart && t < assembleEnd) {
-      final progress = ((t - assembleStart) / (assembleEnd - assembleStart))
+      final rawProgress = ((t - assembleStart) / (assembleEnd - assembleStart))
           .clamp(0.0, 1.0);
 
-      final p = Curves.easeOutBack.transform(progress);
-      final remaining = 1.0 - p;
+      final progress = Curves.easeInOutCubic.transform(rawProgress);
+      final remaining = 1.0 - progress;
 
-      final arcFactor = math.sin(progress * math.pi);
+      final arcFactor = math.sin(rawProgress * math.pi);
       final arcX = arcCurvature.dx * arcFactor;
       final arcY = arcCurvature.dy * arcFactor;
 
@@ -530,16 +467,11 @@ class _UniverseLogoAssemblyViewState extends State<_UniverseLogoAssemblyView>
     );
   }
 
-  double _computeRippleProgress(double t,
-      {required double start, required double duration}) {
-    if (t < start || t > (start + duration)) return 0.0;
-    return ((t - start) / duration).clamp(0.0, 1.0);
-  }
-
   Widget _buildCenteredRipple({
     required double radius,
     required Color color,
     required double opacity,
+    required double borderWidth,
   }) {
     return IgnorePointer(
       child: Container(
@@ -549,7 +481,7 @@ class _UniverseLogoAssemblyViewState extends State<_UniverseLogoAssemblyView>
           shape: BoxShape.circle,
           border: Border.all(
             color: color.withValues(alpha: opacity.clamp(0.0, 1.0)),
-            width: 2.0,
+            width: borderWidth,
           ),
         ),
       ),
