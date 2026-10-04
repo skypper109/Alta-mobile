@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import '../../core/services/vivienne_tts_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
@@ -110,8 +111,7 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
 
   Future<void> _initAudioServices() async {
     try {
-      await _flutterTts.setLanguage('fr-FR');
-      await _flutterTts.setSpeechRate(0.5);
+      await VivienneTtsService.applyVivienneProfile(_flutterTts);
       _flutterTts.setCompletionHandler(() {
         if (mounted) setState(() => _currentlySpeakingText = null);
       });
@@ -119,6 +119,12 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
         if (mounted) setState(() => _currentlySpeakingText = null);
       });
     } catch (_) {}
+  }
+
+  @override
+  void deactivate() {
+    _safeStopTts();
+    super.deactivate();
   }
 
   @override
@@ -135,6 +141,7 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
 
   Future<void> _safeStopTts() async {
     try {
+      await VivienneTtsService.instance.stop();
       await _audioPlayer.stop();
     } catch (_) {}
     try {
@@ -242,33 +249,25 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
     }
   }
 
-  // ── Text-To-Speech (Lecture Vocale de la réponse du Professeur via Backend AlternIA) ────
+  // ── Text-To-Speech (Voix Neurale Vivienne 100% Embarquée Sans Backend) ────
   Future<void> _toggleSpeakMessage(String text) async {
     HapticFeedback.lightImpact();
     if (_currentlySpeakingText == text) {
       await _safeStopTts();
-      setState(() => _currentlySpeakingText = null);
+      if (mounted) setState(() => _currentlySpeakingText = null);
     } else {
       await _safeStopTts();
-      setState(() => _currentlySpeakingText = text);
-      final cleanText = _cleanMarkdownFormatting(text);
+      if (mounted) setState(() => _currentlySpeakingText = text);
 
-      try {
-        // 1. Tenter la synthèse vocale neurale haute fidélité du serveur AlternIA (/api/tts)
-        final gemini = GeminiService();
-        final audioBytes = await gemini.fetchBackendTtsAudio(text: cleanText);
-        if (audioBytes != null && audioBytes.isNotEmpty) {
-          await GeminiService.playAudioBytes(_audioPlayer, audioBytes);
-          return;
-        }
-      } catch (_) {}
-
-      // 2. Fallback transparent sur le moteur TTS local si serveur hors-ligne
-      try {
-        await _flutterTts.speak(cleanText);
-      } catch (_) {
-        if (mounted) setState(() => _currentlySpeakingText = null);
-      }
+      await VivienneTtsService.instance.speak(
+        text,
+        onComplete: () {
+          if (mounted) setState(() => _currentlySpeakingText = null);
+        },
+        onError: (_) {
+          if (mounted) setState(() => _currentlySpeakingText = null);
+        },
+      );
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import '../../../../core/services/vivienne_tts_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_passport_controller.dart';
@@ -62,9 +63,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
 
   Future<void> _initTts() async {
     try {
-      await _flutterTts.setLanguage('fr-FR');
-      await _flutterTts.setSpeechRate(0.48);
-      await _flutterTts.setPitch(0.96);
+      await VivienneTtsService.applyVivienneProfile(_flutterTts);
       _flutterTts.setCompletionHandler(() {
         if (mounted) setState(() => _isSpeaking = false);
       });
@@ -72,8 +71,20 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
   }
 
   @override
+  void deactivate() {
+    try {
+      VivienneTtsService.instance.stop();
+      _flutterTts.stop();
+    } catch (_) {}
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
-    _flutterTts.stop();
+    try {
+      VivienneTtsService.instance.stop();
+      _flutterTts.stop();
+    } catch (_) {}
     super.dispose();
   }
 
@@ -82,17 +93,22 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
   Future<void> _toggleTts() async {
     CulturalHaptics.audioToggle();
     if (_isSpeaking) {
-      await _flutterTts.stop();
-      setState(() => _isSpeaking = false);
+      await VivienneTtsService.instance.stop();
+      if (mounted) setState(() => _isSpeaking = false);
     } else {
-      setState(() => _isSpeaking = true);
+      if (mounted) setState(() => _isSpeaking = true);
       final q = _currentQuestion;
       final optionsBuffer = StringBuffer();
       for (int i = 0; i < q.options.length; i++) {
         optionsBuffer.write('Option ${String.fromCharCode(65 + i)} : ${q.options[i]}. ');
       }
       final speech = '${q.category}. ${q.question}. $optionsBuffer';
-      await _flutterTts.speak(speech);
+      await VivienneTtsService.instance.speak(
+        speech,
+        onComplete: () {
+          if (mounted) setState(() => _isSpeaking = false);
+        },
+      );
     }
   }
 
@@ -186,34 +202,40 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
     final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
     final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
-    return Scaffold(
-      backgroundColor: bgColor,
-      body: SafeArea(
-        top: false,
-        child: Column(
-          children: [
-            // ── 1. BARRE D'EN-TÊTE ÉLÉGANTE & MINIMALISTE ─────────────────────
-            Container(
-              padding: EdgeInsets.fromLTRB(16, topPadding + 10, 16, 12),
-              decoration: BoxDecoration(
-                color: cardBg,
-                border: Border(bottom: BorderSide(color: borderCol, width: 1.0)),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      // Bouton Retour
-                      GestureDetector(
-                        onTap: () {
-                          CulturalHaptics.cardRelease();
-                          _flutterTts.stop();
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.go('/culture');
-                          }
-                        },
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        VivienneTtsService.instance.stop();
+        _flutterTts.stop();
+      },
+      child: Scaffold(
+        backgroundColor: bgColor,
+        body: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              // ── 1. BARRE D'EN-TÊTE ÉLÉGANTE & MINIMALISTE ─────────────────────
+              Container(
+                padding: EdgeInsets.fromLTRB(16, topPadding + 10, 16, 12),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  border: Border(bottom: BorderSide(color: borderCol, width: 1.0)),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        // Bouton Retour
+                        GestureDetector(
+                          onTap: () {
+                            CulturalHaptics.cardRelease();
+                            VivienneTtsService.instance.stop();
+                            _flutterTts.stop();
+                            if (context.canPop()) {
+                              context.pop();
+                            } else {
+                              context.go('/culture');
+                            }
+                          },
                         child: Container(
                           width: 40,
                           height: 40,
@@ -388,6 +410,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 

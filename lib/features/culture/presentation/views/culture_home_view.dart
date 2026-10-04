@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/controllers/culture_passport_controller.dart';
-import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
@@ -39,12 +39,38 @@ class CultureHomeView extends ConsumerWidget {
     final borderCol =
         isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
-    final featured = MockCultureStage1Data.featuredItem;
-    final recommendations = [
-      ...MockCultureStage1Data.personnages,
-      ...MockCultureStage1Data.monuments,
-      ...MockCultureStage1Data.villes,
-    ].where((item) => item.matchesRegion(activeRegion?.id)).take(4).toList();
+    final featuredAsync = ref.watch(cultureFeaturedItemProvider);
+    final figuresAsync = ref.watch(cultureFiguresProvider);
+    final monumentsAsync = ref.watch(cultureMonumentsProvider);
+    final villesAsync = ref.watch(cultureVillesProvider);
+
+    final featured = featuredAsync.valueOrNull ??
+        const CultureItem(
+          id: 'featured_soundiata',
+          title: 'Soundiata Keïta & la Charte du Manden',
+          subtitle: 'Le fondateur de l\'Empire du Mali et la proclamation de 1236',
+          category: 'accueil',
+          subCategory: 'personnages',
+          description:
+              'Découvrez l\'épopée du Lion du Manden, sa victoire décisive à Kirina en 1235 et la proclamation de l\'une des premières déclarations des droits humains à Kouroukan Fouga.',
+          regionId: 'koulikoro',
+          regionName: 'Koulikoro',
+          tag: 'Épopée Majeure',
+          icon: Icons.shield_rounded,
+          imageUrl: 'assets/images/culture/personnages/soundiata.jpg',
+          isFeatured: true,
+          info: 'Lecture : 4 min',
+        );
+
+    final allItems = [
+      ...(figuresAsync.valueOrNull ?? []),
+      ...(monumentsAsync.valueOrNull ?? []),
+      ...(villesAsync.valueOrNull ?? []),
+    ];
+    final recommendations = allItems
+        .where((item) => item.matchesRegion(activeRegion?.id))
+        .take(4)
+        .toList();
 
     return CulturalAtmosphereCanvas(
       enableParticles: true,
@@ -175,6 +201,8 @@ class CultureHomeView extends ConsumerWidget {
                                           color: Colors.white,
                                           letterSpacing: 0.4,
                                         ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     Container(
@@ -299,6 +327,126 @@ class CultureHomeView extends ConsumerWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // ── NOUVEAUTÉ : SCANNER IA DE MONUMENTS & LIEUX ──────────────────
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 220),
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/culture/scanner');
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isDark ? CultureTheme.darkSurface : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.5),
+                      width: 1.4,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            CultureTheme.accentOrange.withValues(alpha: 0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: CultureTheme.accentOrange,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: CultureTheme.accentOrange
+                                  .withValues(alpha: 0.35),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.document_scanner_rounded,
+                            size: 28,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: CultureTheme.accentOrange
+                                        .withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'DÉCOUVERTE & HISTOIRE',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: CultureTheme.accentOrange,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Scanner un Monument ou Lieu',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                color: titleColor,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Pointez votre caméra pour révéler son histoire',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11.5,
+                                color: subtitleColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color:
+                              CultureTheme.accentOrange.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 16,
+                          color: CultureTheme.accentOrange,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -772,31 +920,41 @@ class CultureHomeView extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color:
-                            CultureTheme.accentOrange.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text(
-                        item.tag.toUpperCase(),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 8.5,
-                          fontWeight: FontWeight.w800,
-                          color: CultureTheme.accentOrange,
-                          letterSpacing: 0.5,
+                    Flexible(
+                      flex: 3,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color:
+                              CultureTheme.accentOrange.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Text(
+                          item.tag.toUpperCase(),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w800,
+                            color: CultureTheme.accentOrange,
+                            letterSpacing: 0.5,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      '• ${item.regionName}',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10,
-                        color: subtitleColor,
-                        fontWeight: FontWeight.w600,
+                    Flexible(
+                      flex: 2,
+                      child: Text(
+                        '• ${item.regionName}',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10,
+                          color: subtitleColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],

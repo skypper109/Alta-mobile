@@ -14,6 +14,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../../core/constants/app_colors.dart';
 import '../../core/gemini_service.dart';
+import '../../core/services/vivienne_tts_service.dart';
 import '../../presentation/common/widgets/alternia_avatar.dart';
 import '../../presentation/common/widgets/alternia_video_player.dart';
 
@@ -192,6 +193,12 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
   }
 
   @override
+  void deactivate() {
+    _stopTts();
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _speechToText.stop();
     _scrollCtrl.dispose();
@@ -204,6 +211,7 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
 
   Future<void> _stopTts() async {
     try {
+      await VivienneTtsService.instance.stop();
       await _flutterTts.stop();
     } catch (_) {}
     try {

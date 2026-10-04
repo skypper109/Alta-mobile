@@ -6,11 +6,15 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/controllers/culture_filter_controller.dart';
 import '../../../core/theme/culture_theme.dart';
 import '../../data/datasources/mock_mali_regions.dart';
+import '../../data/models/mali_historical_place_marker.dart';
 import '../../data/models/mali_region.dart';
+import '../../../scanner/data/monument_scan_knowledge.dart';
+import '../../../scanner/models/monument_scan_models.dart';
+import '../../../scanner/widgets/monument_3d_viewer_modal.dart';
 import '../widgets/mali_interactive_map.dart';
 
 /// Écran d'exploration culturelle interactive par la carte premium du Mali
-/// 100% conforme à la référence visuelle
+/// Style Google/Apple Maps avec zoom intérieur, points rouges interactifs et fiches détaillées.
 class ExploreMaliScreen extends ConsumerStatefulWidget {
   final String? initialRegionId;
 
@@ -22,28 +26,92 @@ class ExploreMaliScreen extends ConsumerStatefulWidget {
 
 class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
   String? _selectedRegionId;
+  MaliHistoricalPlaceMarker? _selectedPlace;
 
   @override
   void initState() {
     super.initState();
-    _selectedRegionId = widget.initialRegionId ??
-        ref.read(activeCultureRegionProvider).activeRegion?.id ??
-        'tombouctou'; // Tombouctou sélectionnée par défaut comme sur l'image
+    // Par défaut, vue globale sur l'ensemble du Mali (Toutes les régions)
+    _selectedRegionId = widget.initialRegionId;
   }
 
   void _onRegionSelected(String? regionId) {
     HapticFeedback.selectionClick();
     setState(() {
       _selectedRegionId = regionId;
+      // Si la région change et ne correspond plus au lieu historique actif, on le désélectionne
+      if (regionId != null &&
+          _selectedPlace != null &&
+          _selectedPlace!.regionId != regionId) {
+        _selectedPlace = null;
+      }
+    });
+  }
+
+  void _onPlaceSelected(MaliHistoricalPlaceMarker? place) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _selectedPlace = place;
+      if (place != null) {
+        _selectedRegionId = place.regionId;
+      }
     });
   }
 
   void _navigateToRegionDetail(MaliRegion region) {
     HapticFeedback.mediumImpact();
-    // Applique le filtre global
     ref.read(activeCultureRegionProvider.notifier).selectRegion(region);
-    // Navigue vers la fiche détaillée de la région
     context.push('/culture/region/${region.id}');
+  }
+
+  void _navigateToPlaceDetail(MaliHistoricalPlaceMarker place) {
+    HapticFeedback.mediumImpact();
+    context.push(place.routePath);
+  }
+
+  void _openScannerForPlace(MaliHistoricalPlaceMarker place) {
+    HapticFeedback.mediumImpact();
+    context.push('/culture/scanner');
+  }
+
+  void _openSageForPlace(MaliHistoricalPlaceMarker place) {
+    HapticFeedback.mediumImpact();
+    context.push('/culture/sage');
+  }
+
+  void _open3DViewerForPlace(MaliHistoricalPlaceMarker place) {
+    HapticFeedback.mediumImpact();
+    final targetId = place.scannerId ?? place.id;
+    final target = MonumentScanKnowledge.findById(targetId) ??
+        MonumentScanTarget(
+          id: targetId,
+          name: place.fullName,
+          subtitle: place.subtitle,
+          regionId: place.regionId,
+          regionName: place.regionName,
+          ville: place.regionName,
+          era: place.era,
+          architectureStyle: place.tag,
+          locationDetails: place.subtitle,
+          photoUrl: place.photoUrl,
+          galleryPhotos: [place.photoUrl],
+          tag: place.tag,
+          latitude: place.latitude,
+          longitude: place.longitude,
+          unlockedBadge: 'Explorateur 3D',
+          xpEarned: 50,
+          keywords: [place.name, place.fullName],
+          detectionFeatures: const [],
+          secretsAndMysteries: place.keyFact,
+          historicalStory: place.description,
+          audioNarrationText: place.description,
+          whyItMatters: place.keyFact,
+          routePath: place.routePath,
+          arAvailable: true,
+          validationStatus: 'Validé CultureLens AI',
+        );
+
+    Monument3DViewerModal.show(context, target);
   }
 
   String _resolveRegionImage(String regionId) {
@@ -69,7 +137,6 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
     }
   }
 
-  // Icône personnalisée de chaque chip calquée sur la référence
   IconData _getRegionChipIcon(String regionId) {
     switch (regionId) {
       case 'kayes':
@@ -139,6 +206,10 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
             MockMaliRegions.regions.first
         : null;
 
+    final bottomCardSpacing = _selectedPlace != null
+        ? 285.0
+        : (selectedRegion != null ? 275.0 : 72.0);
+
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
@@ -166,7 +237,8 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: isDark ? CultureTheme.darkSurfaceAlt : Colors.white,
+                        color:
+                            isDark ? CultureTheme.darkSurfaceAlt : Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: borderCol, width: 1.2),
                         boxShadow: [
@@ -211,7 +283,7 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                           ),
                         ),
                         Text(
-                          'Explorez les régions et découvrez la richesse culturelle du Mali',
+                          'Touchez les points rouges pour explorer les monuments',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w500,
@@ -224,26 +296,33 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                     ),
                   ),
 
-                  // Bouton Carte Icon
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: isDark ? CultureTheme.darkSurfaceAlt : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: borderCol, width: 1.2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.map_outlined,
-                      size: 22,
-                      color: Color(0xFF283B7E),
+                  // Bouton Scanner IA rapide
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      context.push('/culture/scanner');
+                    },
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color:
+                            isDark ? CultureTheme.darkSurfaceAlt : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: borderCol, width: 1.2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.document_scanner_rounded,
+                        size: 20,
+                        color: Color(0xFFDF6E21),
+                      ),
                     ),
                   ),
                 ],
@@ -301,7 +380,7 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
             Expanded(
               child: Stack(
                 children: [
-                  // Carte vectorielle interactive
+                  // Carte vectorielle interactive avec calque des points rouges
                   Positioned.fill(
                     child: AnimatedPadding(
                       duration: const Duration(milliseconds: 260),
@@ -310,17 +389,19 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                         14,
                         10,
                         14,
-                        selectedRegion != null ? 245 : 72,
+                        bottomCardSpacing,
                       ),
                       child: MaliInteractiveMap(
                         regions: allRegions,
                         selectedRegionId: _selectedRegionId,
+                        selectedPlaceId: _selectedPlace?.id,
                         onRegionSelected: _onRegionSelected,
+                        onPlaceSelected: _onPlaceSelected,
                       ),
                     ),
                   ),
 
-                  // Panneau Flottant : Fiche Région Sélectionnée OU Barre d'indication
+                  // Panneau Flottant : Fiche Lieu Historique OU Fiche Région OU Barre d'indication
                   Positioned(
                     left: 14,
                     right: 14,
@@ -329,9 +410,9 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                       duration: const Duration(milliseconds: 260),
                       switchInCurve: Curves.easeOutCubic,
                       switchOutCurve: Curves.easeInCubic,
-                      child: selectedRegion != null
-                          ? _buildSelectedRegionCard(
-                              region: selectedRegion,
+                      child: _selectedPlace != null
+                          ? _buildSelectedPlaceCard(
+                              place: _selectedPlace!,
                               context: context,
                               isDark: isDark,
                               cardBg: cardBg,
@@ -339,7 +420,17 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                               titleColor: titleColor,
                               subtitleColor: subtitleColor,
                             )
-                          : _buildBottomIndicator(isDark, subtitleColor),
+                          : (selectedRegion != null
+                              ? _buildSelectedRegionCard(
+                                  region: selectedRegion,
+                                  context: context,
+                                  isDark: isDark,
+                                  cardBg: cardBg,
+                                  borderCol: borderCol,
+                                  titleColor: titleColor,
+                                  subtitleColor: subtitleColor,
+                                )
+                              : _buildBottomIndicator(isDark, subtitleColor)),
                     ),
                   ),
                 ],
@@ -408,7 +499,402 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
     );
   }
 
-  // ── CARTE PREMIUM DE RÉGION SÉLECTIONNÉE (CONFORME À L'IMAGE) ──────────────
+  // ── CARTE PREMIUM DE LIEU HISTORIQUE SÉLECTIONNÉ (POINT ROUGE CLIQUE) ───────
+  Widget _buildSelectedPlaceCard({
+    required MaliHistoricalPlaceMarker place,
+    required BuildContext context,
+    required bool isDark,
+    required Color cardBg,
+    required Color borderCol,
+    required Color titleColor,
+    required Color subtitleColor,
+  }) {
+    return Container(
+      key: ValueKey<String>('place_card_${place.id}'),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: const Color(0xFFFF5252).withValues(alpha: 0.5),
+          width: 1.4,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFD32F2F).withValues(alpha: isDark ? 0.25 : 0.12),
+            blurRadius: 22,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ── Rangée 1 : En-tête avec tag rouge et bouton fermer ────────────
+          Row(
+            children: [
+              // Indicateur rouge animé
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE53935),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xFFFF5252),
+                      blurRadius: 6,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              // Tag de catégorie (prend l'espace disponible et s'elliptise)
+              Expanded(
+                child: Text(
+                  'LIEU · ${place.tag.toUpperCase()}',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFFE53935),
+                    letterSpacing: 0.5,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Badge Région
+              Container(
+                constraints: const BoxConstraints(maxWidth: 90),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 7, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF283B7E).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  place.regionName,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF283B7E),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Bouton Fermer (Retour à la vue générale)
+              GestureDetector(
+                onTap: () => _onPlaceSelected(null),
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  width: 26,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? CultureTheme.darkSurfaceAlt
+                        : const Color(0xFFF1F5F9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.close_rounded,
+                    size: 15,
+                    color: subtitleColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // ── Rangée 2 : Photographie réelle + Titre & Descriptif ────────────
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Photo du monument
+              Container(
+                width: 92,
+                height: 84,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: borderCol),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: Image.asset(
+                    place.photoUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: const Color(0xFFE53935).withValues(alpha: 0.1),
+                      child: const Icon(
+                        Icons.account_balance_rounded,
+                        color: Color(0xFFE53935),
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Contenu textuel
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      place.fullName,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: titleColor,
+                        letterSpacing: -0.3,
+                        height: 1.15,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.schedule_rounded,
+                          size: 11,
+                          color: Color(0xFFDF6E21),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            place.era,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFFDF6E21),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      place.description,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: subtitleColor,
+                        height: 1.3,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // ── Rangée 3 : Fait marquant (Bandeau clé) ─────────────────────────
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFF1B2338)
+                  : const Color(0xFFFBF4ED),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: const Color(0xFFDF6E21).withValues(alpha: 0.25),
+                width: 0.9,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.stars_rounded,
+                  size: 14,
+                  color: Color(0xFFDF6E21),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    place.keyFact,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: isDark
+                          ? const Color(0xFFFFB74D)
+                          : const Color(0xFF8C3E00),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // ── Rangée 4 : Boutons d'action directs ───────────────────────────
+          Row(
+            children: [
+              // Bouton 1 : Voir la fiche complète (Primaire)
+              Expanded(
+                flex: 5,
+                child: ElevatedButton(
+                  onPressed: () => _navigateToPlaceDetail(place),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF283B7E),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Fiche complète',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 14,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              // Bouton 2 : Scanner IA
+              Expanded(
+                flex: 4,
+                child: OutlinedButton(
+                  onPressed: () => _openScannerForPlace(place),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFDF6E21),
+                    side: const BorderSide(color: Color(0xFFDF6E21), width: 1.2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.document_scanner_rounded,
+                          size: 14,
+                          color: Color(0xFFDF6E21),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Scanner',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFFDF6E21),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              // Bouton 3 : Rendu 3D Spécifique / AR
+              GestureDetector(
+                onTap: () => _open3DViewerForPlace(place),
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00E676).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF00E676).withValues(alpha: 0.45),
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.view_in_ar_rounded,
+                      size: 20,
+                      color: Color(0xFF00C853),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              // Bouton 4 : Voix du Griot / Sage IA
+              GestureDetector(
+                onTap: () => _openSageForPlace(place),
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? CultureTheme.darkSurfaceAlt
+                        : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: borderCol),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.smart_toy_outlined,
+                      size: 18,
+                      color: Color(0xFF283B7E),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── CARTE PREMIUM DE RÉGION SÉLECTIONNÉE (AVEC CHIPS DES MONUMENTS) ───────
   Widget _buildSelectedRegionCard({
     required MaliRegion region,
     required BuildContext context,
@@ -419,6 +905,7 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
     required Color subtitleColor,
   }) {
     final photoUrl = _resolveRegionImage(region.id);
+    final regionPlaces = MaliHistoricalPlacesRegistry.forRegion(region.id);
 
     return Container(
       key: ValueKey<String>('card_${region.id}'),
@@ -527,16 +1014,78 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
             ],
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
+
+          // Chips horizontaux des lieux historiques de cette région (points rouges)
+          if (regionPlaces.isNotEmpty) ...[
+            SizedBox(
+              height: 30,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: regionPlaces.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 6),
+                itemBuilder: (context, index) {
+                  final p = regionPlaces[index];
+                  return GestureDetector(
+                    onTap: () => _onPlaceSelected(p),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE53935).withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: const Color(0xFFFF5252).withValues(alpha: 0.35),
+                          width: 1.0,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFE53935),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            p.name,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              color: isDark
+                                  ? const Color(0xFFFF8A80)
+                                  : const Color(0xFFC62828),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
 
           // Ligne 1 : 4 Statistiques de contenu réparties sur la largeur
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatItem(Icons.auto_stories_rounded, '128', 'Contes', const Color(0xFFDF6E21), isDark),
-              _buildStatItem(Icons.account_balance_rounded, '48', 'Monuments', const Color(0xFF2E7D32), isDark),
-              _buildStatItem(Icons.people_rounded, '32', 'Héros', const Color(0xFF1976D2), isDark),
-              _buildStatItem(Icons.sports_esports_rounded, '15', 'Défis', const Color(0xFFE65100), isDark),
+              _buildStatItem(Icons.auto_stories_rounded, '128', 'Contes',
+                  const Color(0xFFDF6E21), isDark),
+              _buildStatItem(Icons.account_balance_rounded, '48', 'Monuments',
+                  const Color(0xFF2E7D32), isDark),
+              _buildStatItem(Icons.people_rounded, '32', 'Héros',
+                  const Color(0xFF1976D2), isDark),
+              _buildStatItem(Icons.sports_esports_rounded, '15', 'Défis',
+                  const Color(0xFFE65100), isDark),
             ],
           ),
 
@@ -649,19 +1198,19 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF283B7E).withValues(alpha: 0.12),
+                    color: const Color(0xFFE53935).withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
-                    Icons.touch_app_rounded,
+                    Icons.location_on_rounded,
                     size: 16,
-                    color: Color(0xFF283B7E),
+                    color: Color(0xFFE53935),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Touchez une région pour découvrir ses trésors culturels',
+                    'Pincez pour zoomer et touchez un point rouge pour inspecter un monument',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -679,7 +1228,7 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(
-                Icons.people_outline_rounded,
+                Icons.account_balance_rounded,
                 size: 16,
                 color: Color(0xFF283B7E),
               ),
@@ -689,7 +1238,7 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '56 témoignages',
+                    '18 sites',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
@@ -697,7 +1246,7 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                     ),
                   ),
                   Text(
-                    '120 contributions',
+                    'UNESCO & Mali',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 9,
                       color: subtitleColor,

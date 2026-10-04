@@ -591,6 +591,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                         DetButton(
                           label: 'Étape suivante',
                           icon: Icons.arrow_forward_rounded,
+                          isFullWidth: false,
                           onPressed: () {
                             setState(() => _currentStep++);
                           },
@@ -600,6 +601,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                           label: 'Fermer',
                           icon: Icons.check_circle_rounded,
                           variant: DetButtonVariant.secondary,
+                          isFullWidth: false,
                           onPressed: () {
                             setState(() {
                               _scannedFileName = null;

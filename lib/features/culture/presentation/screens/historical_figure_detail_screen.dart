@@ -3,14 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/controllers/culture_passport_controller.dart';
-import '../../core/datasources/mock_culture_details_data.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_detail_models.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/services/cultural_haptics.dart';
+import '../../../../core/services/vivienne_tts_service.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/authentic_photo_hero.dart';
 import '../widgets/connected_contents_section.dart';
@@ -59,7 +60,18 @@ class _HistoricalFigureDetailScreenState
   }
 
   @override
+  void deactivate() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -133,9 +145,26 @@ class _HistoricalFigureDetailScreenState
 
   @override
   Widget build(BuildContext context) {
-    final item = widget.figure ?? MockCultureDetailsData.getFigureById(widget.id);
-    final activeRegion = ref.watch(activeCultureRegionProvider).activeRegion;
+    final detailAsync = widget.figure != null
+        ? null
+        : ref.watch(historicalFigureDetailProvider(widget.id));
+    final item = widget.figure ?? detailAsync?.valueOrNull;
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (item == null) {
+      return Scaffold(
+        backgroundColor:
+            isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: isDark ? CultureTheme.orPatrimoine : CultureTheme.primaryDark,
+          ),
+        ),
+      );
+    }
+
+    final activeRegion = ref.watch(activeCultureRegionProvider).activeRegion;
 
     // Enregistrement automatique de la découverte dans le Passeport Culturel
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -170,10 +199,14 @@ class _HistoricalFigureDetailScreenState
         isDark ? CultureTheme.darkSurfaceAlt : CultureTheme.lightSurfaceAlt;
     final topPadding = MediaQuery.paddingOf(context).top;
 
-    return Scaffold(
-      backgroundColor:
-          isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground,
-      body: Stack(
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        VivienneTtsService.instance.stop();
+      },
+      child: Scaffold(
+        backgroundColor:
+            isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground,
+        body: Stack(
         children: [
           // ── CONTENU DÉFILANT ──────────────────────────────────────────────
           CustomScrollView(
@@ -582,6 +615,7 @@ class _HistoricalFigureDetailScreenState
                     borderCol: borderCol,
                     onTap: () {
                       HapticFeedback.lightImpact();
+                      VivienneTtsService.instance.stop();
                       if (context.canPop()) {
                         context.pop();
                       }
@@ -626,6 +660,7 @@ class _HistoricalFigureDetailScreenState
           ),
         ],
       ),
+    ),
     );
   }
 }

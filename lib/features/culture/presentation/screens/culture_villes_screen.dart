@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
-import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
@@ -26,10 +26,11 @@ class CultureVillesScreen extends ConsumerWidget {
     final bgColor =
         isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground;
 
-    final items = MockCultureStage1Data.getFiltered(
-      source: MockCultureStage1Data.villes,
-      regionId: filterState.activeRegionId,
-    );
+    final villesAsync = ref.watch(cultureVillesProvider);
+    final allVilles = villesAsync.valueOrNull ?? [];
+    final items = allVilles
+        .where((v) => v.matchesRegion(filterState.activeRegionId))
+        .toList();
 
     return Scaffold(
       backgroundColor: bgColor,

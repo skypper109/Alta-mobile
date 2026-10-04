@@ -28,6 +28,7 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
   final VoidCallback? onGuideAiTap;
   final VoidCallback? onSearchTap;
   final VoidCallback? onSageTap;
+  final VoidCallback? onScannerTap;
 
   const AlterniaTopHeaderBar({
     super.key,
@@ -37,6 +38,7 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
     this.onGuideAiTap,
     this.onSearchTap,
     this.onSageTap,
+    this.onScannerTap,
   });
 
   const AlterniaTopHeaderBar.education({
@@ -46,7 +48,8 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
         onLocationTap = null,
         onGuideAiTap = null,
         onSearchTap = null,
-        onSageTap = null;
+        onSageTap = null,
+        onScannerTap = null;
 
   const AlterniaTopHeaderBar.culture({
     super.key,
@@ -55,6 +58,7 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
     this.onGuideAiTap,
     this.onSearchTap,
     this.onSageTap,
+    this.onScannerTap,
   }) : variant = AlterniaHeaderVariant.culture;
 
   @override
@@ -104,6 +108,42 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // 0. Bouton Scanner IA de Monuments & Lieux
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onScannerTap ??
+                () {
+                  HapticFeedback.lightImpact();
+                  context.push('/culture/scanner');
+                },
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: CultureTheme.accentOrange.withValues(
+                  alpha: isDark ? 0.22 : 0.14,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: CultureTheme.accentOrange.withValues(alpha: 0.5),
+                  width: 1.2,
+                ),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.document_scanner_rounded,
+                  size: 20,
+                  color: CultureTheme.accentOrange,
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 8),
+
         // 1. Bouton Recherche Culturelle IA (Icône Loupe Plein Écran)
         Material(
           color: Colors.transparent,

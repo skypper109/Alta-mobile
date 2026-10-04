@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/culture_detail_models.dart';
 
-/// Données éditoriales authentiques et immersives pour les fiches de consultation
+/// Données mock obsolètes - REMPLACÉES PAR LA BASE DE DONNÉES
+@Deprecated('Obsolète : Utiliser exclusivement la base de données centrale via culture_data_providers et CultureRepository.')
 abstract final class MockCultureDetailsData {
   // ══════════════════════════════════════════════════════════════════════════
   // 1. GRANDS PERSONNAGES HISTORIQUES
@@ -430,6 +431,179 @@ abstract final class MockCultureDetailsData {
   // ══════════════════════════════════════════════════════════════════════════
 
   static const List<MonumentDetail> monuments = [
+    // ── 0. BAMAKO (PRIORITÉ CAPITALE) ──────────────────────────────────────
+    MonumentDetail(
+      id: 'monument_independance_bamako',
+      name: 'Monument de l\'Indépendance',
+      subtitle: 'Symbole de la Souveraineté du Mali (1960)',
+      era: 'Inauguré dans les années 1990 · Célébration du 22 septembre 1960',
+      regionId: 'bamako',
+      regionName: 'Bamako',
+      tag: 'Symbole National',
+      photoUrl: 'assets/images/culture/monuments/monument_independance.jpg',
+      photoCredits: 'Boulevard de l\'Indépendance, Bamako • Archives Nationales',
+      locationDetails: 'Boulevard de l\'Indépendance, Centre-ville de Bamako',
+      presentation:
+          'Érigé au cœur de la capitale malienne, ce minaret laïque et élancé commémore l\'accession solennelle de la République du Mali à la pleine indépendance le 22 septembre 1960 sous la présidence de Modibo Keïta.',
+      architectureAndMaterials:
+          'Structure pyramidale élancée en béton ornée de frises géométriques mandingues et coiffée de l\'emblème républicain.',
+      whyItMatters:
+          'Ce monument est le repère civique par excellence de Bamako, où se déroulent les défilés commémoratifs et les rassemblements patriotiques majeurs de la nation.',
+      keyFacts: [
+        HistoricalKeyFact(
+          label: 'Date historique',
+          value: '22 septembre 1960',
+          icon: Icons.event_rounded,
+        ),
+        HistoricalKeyFact(
+          label: 'Président',
+          value: 'Modibo Keïta',
+          icon: Icons.person_rounded,
+        ),
+        HistoricalKeyFact(
+          label: 'Localisation',
+          value: 'Centre-ville de Bamako',
+          icon: Icons.location_on_rounded,
+        ),
+        HistoricalKeyFact(
+          label: 'Statut',
+          value: 'Monument commémoratif national',
+          icon: Icons.verified_rounded,
+        ),
+      ],
+      chapters: [
+        EditorialStoryChapter(
+          title: 'La Proclamation de l\'Indépendance',
+          content:
+              'Le 22 septembre 1960, le Congrès extraordinaire de l\'Union Soudanaise-RDA proclame la naissance de la République du Mali, consacrant l\'hymne national "Pour l\'Afrique et pour toi, Mali".',
+        ),
+      ],
+      connectedItems: [
+        ConnectedItemRef(
+          id: 'ville_bamako',
+          title: 'Bamako',
+          subtitle: 'La Cité des Trois Caïmans',
+          type: ConnectedItemType.ville,
+          tag: 'Capitale',
+          regionName: 'Bamako',
+          icon: Icons.location_city_rounded,
+        ),
+      ],
+    ),
+
+    MonumentDetail(
+      id: 'monument_tour_afrique_bamako',
+      name: 'Tour de l\'Afrique',
+      subtitle: 'Phare du Panafricanisme & de la Mémoire Continentale',
+      era: 'Inaugurée en 2001 · Sommet France-Afrique',
+      regionId: 'bamako',
+      regionName: 'Bamako',
+      tag: 'Panafricanisme',
+      photoUrl: 'assets/images/culture/monuments/tour_afrique.jpg',
+      photoCredits: 'Rond-point de Faladié, Bamako • Cliché Ville de Bamako',
+      locationDetails: 'Échangeur de Faladié, Rive droite du fleuve Niger, Bamako',
+      presentation:
+          'Haute de 46 mètres, la Tour de l\'Afrique est une spectaculaire tour cylindrique combinant la symbolique du baobab protecteur et du minaret sahélien, couronnée d\'un flambeau métallique.',
+      architectureAndMaterials:
+          'Béton armé revêtu de briques de terre stabilisée et bas-reliefs narrant les grandes figures de la libération africaine.',
+      whyItMatters:
+          'Érigée pour symboliser l\'idéal des États-Unis d\'Afrique promu par Kwamé Nkrumah, Modibo Keïta et Gamal Abdel Nasser.',
+      keyFacts: [
+        HistoricalKeyFact(
+          label: 'Hauteur',
+          value: '46 mètres',
+          icon: Icons.height_rounded,
+        ),
+        HistoricalKeyFact(
+          label: 'Inauguration',
+          value: 'Janvier 2001',
+          icon: Icons.event_rounded,
+        ),
+        HistoricalKeyFact(
+          label: 'Symbole',
+          value: 'Flambeau de l\'Unité Africaine',
+          icon: Icons.local_fire_department_rounded,
+        ),
+        HistoricalKeyFact(
+          label: 'Quartier',
+          value: 'Faladié / Sogoniko',
+          icon: Icons.map_rounded,
+        ),
+      ],
+      chapters: [
+        EditorialStoryChapter(
+          title: 'Le Phare de l\'Unité Africaine',
+          content:
+              'La Tour de l\'Afrique abrite un mémorial des résistances anticoloniales et célèbre la solidarité panafricaine à la croisée des axes routiers reliant le Mali à la Côte d\'Ivoire et au Burkina Faso.',
+        ),
+      ],
+      connectedItems: [
+        ConnectedItemRef(
+          id: 'ville_bamako',
+          title: 'Bamako',
+          subtitle: 'La Cité des Trois Caïmans',
+          type: ConnectedItemType.ville,
+          tag: 'Capitale',
+          regionName: 'Bamako',
+          icon: Icons.location_city_rounded,
+        ),
+      ],
+    ),
+
+    MonumentDetail(
+      id: 'monument_paix_bamako',
+      name: 'Monument de la Paix',
+      subtitle: 'Colombe Métallique de la Réconciliation',
+      era: 'Érigé en 1996 · Flamme de la Paix',
+      regionId: 'bamako',
+      regionName: 'Bamako',
+      tag: 'Paix & Vivre-Ensemble',
+      photoUrl: 'assets/images/culture/monuments/monument_paix.jpg',
+      photoCredits: 'Rond-point de l\'ACI 2000, Hamdallaye, Bamako',
+      locationDetails: 'Carrefour Hamdallaye ACI 2000, Bamako',
+      presentation:
+          'Colombe monumentale en dentelle d\'acier aux ailes déployées vers le ciel, symbolisant l\'aspiration universelle des communautés maliennes à la concorde et à la paix durable.',
+      architectureAndMaterials:
+          'Structure ajourée en acier forgé et socle en marbre blanc de Sélinkegny.',
+      whyItMatters:
+          'Rappelle la Flamme de la Paix de Tombouctou (1996) et la valeur suprême du dialogue traditionnel et du vivre-ensemble.',
+      keyFacts: [
+        HistoricalKeyFact(
+          label: 'Symbole',
+          value: 'Colombe de la Paix',
+          icon: Icons.flutter_dash_rounded,
+        ),
+        HistoricalKeyFact(
+          label: 'Matériau',
+          value: 'Acier forgé & Marbre',
+          icon: Icons.architecture_rounded,
+        ),
+        HistoricalKeyFact(
+          label: 'Quartier',
+          value: 'Hamdallaye ACI 2000',
+          icon: Icons.location_pin,
+        ),
+      ],
+      chapters: [
+        EditorialStoryChapter(
+          title: 'Le Vœu Sacré de Concorde',
+          content:
+              'Ce monument célèbre le génie du dialogue intercommunautaire malien hérité de la Charte de Kouroukan Fouga et du cousinage à plaisanterie (Sinankunya).',
+        ),
+      ],
+      connectedItems: [
+        ConnectedItemRef(
+          id: 'ville_bamako',
+          title: 'Bamako',
+          subtitle: 'La Cité des Trois Caïmans',
+          type: ConnectedItemType.ville,
+          tag: 'Capitale',
+          regionName: 'Bamako',
+          icon: Icons.location_city_rounded,
+        ),
+      ],
+    ),
+
     // Grande Mosquée de Djenné
     MonumentDetail(
       id: 'monument_mosquee_djenne',

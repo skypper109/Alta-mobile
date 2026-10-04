@@ -77,65 +77,72 @@ class _CustomButtonState extends State<CustomButton> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     final enabled = widget.onPressed != null && !widget.isLoading;
 
-    return ScaleTransition(
-      scale: _scaleCtrl,
-      child: SizedBox(
-        width: widget.isFullWidth ? double.infinity : null,
-        height: widget.height,
-        child: Material(
-          color: enabled ? _bgColor : AppColors.surfaceAlt.withValues(alpha: 0.5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: _border,
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: enabled
-                ? () {
-                    HapticFeedback.lightImpact();
-                    _scaleCtrl.reverse().then((_) => _scaleCtrl.forward());
-                    widget.onPressed!();
-                  }
-                : null,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (widget.isLoading)
-                    SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.2,
-                        color: _fgColor,
-                      ),
-                    )
-                  else ...[
-                    if (widget.icon != null) ...[
-                      Icon(widget.icon, size: 20, color: _fgColor),
-                      const SizedBox(width: 8),
-                    ],
-                    Flexible(
-                      child: Text(
-                        widget.label,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: _fgColor,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isFiniteWidth = constraints.maxWidth.isFinite;
+        final buttonWidth = (widget.isFullWidth && isFiniteWidth) ? double.infinity : null;
+
+        return ScaleTransition(
+          scale: _scaleCtrl,
+          child: SizedBox(
+            width: buttonWidth,
+            height: widget.height,
+            child: Material(
+              color: enabled ? _bgColor : AppColors.surfaceAlt.withValues(alpha: 0.5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: _border,
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: enabled
+                    ? () {
+                        HapticFeedback.lightImpact();
+                        _scaleCtrl.reverse().then((_) => _scaleCtrl.forward());
+                        widget.onPressed!();
+                      }
+                    : null,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (widget.isLoading)
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.2,
+                            color: _fgColor,
+                          ),
+                        )
+                      else ...[
+                        if (widget.icon != null) ...[
+                          Icon(widget.icon, size: 20, color: _fgColor),
+                          const SizedBox(width: 8),
+                        ],
+                        Flexible(
+                          child: Text(
+                            widget.label,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: _fgColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ],
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

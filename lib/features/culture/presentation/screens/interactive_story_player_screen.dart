@@ -9,6 +9,7 @@ import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../../../core/services/vivienne_tts_service.dart';
 import '../../immersive/immersive.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/connected_contents_section.dart';
@@ -128,7 +129,24 @@ class _InteractiveStoryPlayerScreenState
   }
 
   @override
+  void deactivate() {
+    try {
+      ref.read(narrationCoordinatorProvider.notifier).stop();
+    } catch (_) {}
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
+    try {
+      ref.read(narrationCoordinatorProvider.notifier).stop();
+    } catch (_) {}
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
     super.dispose();
   }
 

@@ -52,4 +52,11 @@ class CulturalHaptics {
   static void audioToggle() {
     HapticFeedback.mediumImpact();
   }
+
+  /// Notification de non-reconnaissance ou avertissement doux.
+  static Future<void> warning() async {
+    await HapticFeedback.mediumImpact();
+    await Future.delayed(const Duration(milliseconds: 60));
+    await HapticFeedback.lightImpact();
+  }
 }

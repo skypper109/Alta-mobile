@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
-import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
@@ -25,10 +25,11 @@ class CulturePersonnagesScreen extends ConsumerWidget {
         isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
     final bgColor = isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground;
 
-    final items = MockCultureStage1Data.getFiltered(
-      source: MockCultureStage1Data.personnages,
-      regionId: filterState.activeRegionId,
-    );
+    final figuresAsync = ref.watch(cultureFiguresProvider);
+    final allFigures = figuresAsync.valueOrNull ?? [];
+    final items = allFigures
+        .where((p) => p.matchesRegion(filterState.activeRegionId))
+        .toList();
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -439,12 +440,17 @@ class _PersonnageCard extends StatelessWidget {
                               color: subtitleColor,
                             ),
                             const SizedBox(width: 5),
-                            Text(
-                              item.info,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: subtitleColor,
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 160),
+                              child: Text(
+                                item.info,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: subtitleColor,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/constants/app_colors.dart';
+import '../core/services/vivienne_tts_service.dart';
 import '../features/profile/user_prefs_notifier.dart';
 import '../presentation/common/widgets/alternia_top_header_bar.dart';
 import '../presentation/common/widgets/custom_button.dart';
@@ -36,6 +37,11 @@ class DetShellScaffold extends ConsumerWidget {
     }
 
     HapticFeedback.selectionClick();
+    // Coupe immédiatement toute synthèse vocale ou histoire en cours lors du changement d'onglet
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,

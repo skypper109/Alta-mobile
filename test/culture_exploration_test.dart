@@ -13,19 +13,21 @@ void main() {
       final regions = await repository.getRegions();
 
       expect(regions.length, equals(11));
-      expect(regions.map((r) => r.id), containsAll([
-        'kayes',
-        'koulikoro',
-        'sikasso',
-        'segou',
-        'mopti',
-        'tombouctou',
-        'gao',
-        'kidal',
-        'taoudenit',
-        'menaka',
-        'bamako',
-      ]));
+      expect(
+          regions.map((r) => r.id),
+          containsAll([
+            'kayes',
+            'koulikoro',
+            'sikasso',
+            'segou',
+            'mopti',
+            'tombouctou',
+            'gao',
+            'kidal',
+            'taoudenit',
+            'menaka',
+            'bamako',
+          ]));
     });
 
     test('MaliGeoRegistry contains geometry for all 11 regions', () {
@@ -41,7 +43,8 @@ void main() {
     });
 
     test('MaliRegion serialization and deserialization works correctly', () {
-      final region = MockMaliRegions.regions.firstWhere((r) => r.id == 'sikasso');
+      final region =
+          MockMaliRegions.regions.firstWhere((r) => r.id == 'sikasso');
       final json = region.toJson();
 
       expect(json['id'], equals('sikasso'));
@@ -54,7 +57,8 @@ void main() {
       expect(fromJson.pointsForts, equals(region.pointsForts));
     });
 
-    test('CultureExplorationNotifier handles region selection and toggle', () async {
+    test('CultureExplorationNotifier handles region selection and toggle',
+        () async {
       const repository = MockCultureRepository();
       final notifier = CultureExplorationNotifier(repository);
 

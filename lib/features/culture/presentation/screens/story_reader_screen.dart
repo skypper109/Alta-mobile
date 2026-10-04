@@ -8,6 +8,7 @@ import '../../core/datasources/mock_culture_stories_data.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/models/culture_story_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../../../core/services/vivienne_tts_service.dart';
 import '../../immersive/controllers/narration_coordinator.dart';
 import '../widgets/connected_contents_section.dart';
 import '../widgets/culture_audio_listen_badge.dart';
@@ -33,6 +34,7 @@ class _StoryReaderScreenState extends ConsumerState<StoryReaderScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final story =
           widget.story ?? MockCultureStoriesData.getStoryById(widget.id);
       final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
@@ -58,8 +60,24 @@ class _StoryReaderScreenState extends ConsumerState<StoryReaderScreen> {
   }
 
   @override
+  void deactivate() {
+    try {
+      ref.read(narrationCoordinatorProvider.notifier).stop();
+    } catch (_) {}
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
-    ref.read(narrationCoordinatorProvider.notifier).stop();
+    try {
+      ref.read(narrationCoordinatorProvider.notifier).stop();
+    } catch (_) {}
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
     super.dispose();
   }
 
@@ -549,21 +567,25 @@ class _StoryReaderScreenState extends ConsumerState<StoryReaderScreen> {
                                 color: CultureTheme.accentOrange,
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                'SAGESSE & MORALE DU CONTE',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.6,
-                                  color: CultureTheme.accentOrange,
+                              Expanded(
+                                child: Text(
+                                  'SAGESSE & MORALE DU CONTE',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.5,
+                                    color: CultureTheme.accentOrange,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              const Spacer(),
+                              const SizedBox(width: 8),
                               CultureAudioListenBadge(
                                 contentId: '${story.id}_moral',
                                 speechText:
                                     'Voici la morale du conte ${story.title} : ${story.moral}',
-                                label: 'Écouter la morale',
+                                label: 'Écouter',
                                 compact: true,
                                 activeColor: CultureTheme.accentOrange,
                               ),
