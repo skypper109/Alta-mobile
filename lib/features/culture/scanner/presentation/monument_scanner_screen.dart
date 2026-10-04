@@ -11,6 +11,8 @@ import '../models/monument_scan_models.dart';
 import '../widgets/monument_demo_targets_strip.dart';
 import '../widgets/monument_scan_result_sheet.dart';
 import '../widgets/monument_viewfinder_overlay.dart';
+import '../widgets/culture_offline_packs_modal.dart';
+
 
 /// Écran principal du Scanner IA de Lieux & Monuments
 /// 100% Plein Écran immersif : viseur central HUD, commandes au bas et détection Edge AI.
@@ -167,6 +169,32 @@ class MonumentScannerScreen extends ConsumerWidget {
 
                       const SizedBox(width: 8),
 
+                      // Bouton Packs Hors Ligne
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          CultureOfflinePacksModal.show(context);
+                        },
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.65),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: CultureTheme.accentOrange.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.cloud_download_rounded,
+                            size: 18,
+                            color: CultureTheme.accentOrange,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 8),
+
                       // Bouton Flash
                       GestureDetector(
                         onTap: controller.toggleFlash,
@@ -193,6 +221,7 @@ class MonumentScannerScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
+
                     ],
                   ),
                 ),

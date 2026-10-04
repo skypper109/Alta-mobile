@@ -386,17 +386,33 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
       }
     } catch (_) {
       if (mounted) {
-        const fallback =
-            'Les esprits de la mémoire sont momentanément silencieux. Posez-moi à nouveau votre question dans un instant.';
+        final fallback = _cultureAi.generateLocalSageResponse(query, contextStr);
+        _history.add({'role': 'assistant', 'text': fallback});
+        final botMsg = _SageMessage(
+          text: fallback,
+          isUser: false,
+          timestamp: DateTime.now(),
+        );
         setState(() {
           _isLoading = false;
-          _sageState = _SageState.idle;
-          _messages.add(_SageMessage(
-            text: fallback,
-            isUser: false,
-            timestamp: DateTime.now(),
-          ));
+          _sageState = _SageState.speaking;
+          _messages.add(botMsg);
+          _currentlySpeakingMessageId = botMsg.id;
         });
+        _scrollToBottom();
+        try {
+          await VivienneTtsService.instance.speak(
+            fallback,
+            onComplete: () {
+              if (mounted) {
+                setState(() {
+                  _currentlySpeakingMessageId = null;
+                  _sageState = _SageState.idle;
+                });
+              }
+            },
+          );
+        } catch (_) {}
       }
     }
   }

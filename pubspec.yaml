@@ -84,6 +84,23 @@ flutter:
     - assets/images/culture/
     - assets/images/culture/personnages/
     - assets/images/culture/monuments/
+    - assets/images/culture/monuments/monument_al_quouds/
+    - assets/images/culture/monuments/monument_armee_noire_bamako/
+    - assets/images/culture/monuments/monument_cathedrale_bamako/
+    - assets/images/culture/monuments/monument_djingareyber/
+    - assets/images/culture/monuments/monument_fort_medine/
+    - assets/images/culture/monuments/monument_independance_bamako/
+    - assets/images/culture/monuments/monument_kwame_nkrumah_bamako/
+    - assets/images/culture/monuments/monument_maliba_bamako/
+    - assets/images/culture/monuments/monument_martyrs_bamako/
+    - assets/images/culture/monuments/monument_mosquee_djenne/
+    - assets/images/culture/monuments/monument_obelisque_bamako/
+    - assets/images/culture/monuments/monument_Place_de_la_liberté/
+    - assets/images/culture/monuments/monument_paix_bamako/
+    - assets/images/culture/monuments/monument_samory_toure_bamako/
+    - assets/images/culture/monuments/monument_sogolon_bamako/
+    - assets/images/culture/monuments/monument_tour_afrique_bamako/
+    - assets/images/culture/monuments/segou/
     - assets/images/culture/villes/
     - assets/images/culture/contes/
     - assets/icons/

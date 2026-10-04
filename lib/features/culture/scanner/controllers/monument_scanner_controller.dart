@@ -8,10 +8,14 @@ import '../../immersive/services/cultural_haptics.dart';
 import '../models/monument_scan_models.dart';
 import '../services/monument_scanner_service.dart';
 
+import '../../core/datasources/culture_repository.dart';
+
 /// Provider d'instance du service de scan
 final monumentScannerServiceProvider = Provider<MonumentScannerService>((ref) {
-  return MonumentScannerService();
+  final repository = ref.watch(cultureRepositoryProvider);
+  return MonumentScannerService(repository: repository);
 });
+
 
 /// Provider d'état du Scanner IA de Monuments
 final monumentScannerControllerProvider =
