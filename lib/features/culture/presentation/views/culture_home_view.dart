@@ -201,6 +201,8 @@ class CultureHomeView extends ConsumerWidget {
                                           color: Colors.white,
                                           letterSpacing: 0.4,
                                         ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     Container(
@@ -918,31 +920,41 @@ class CultureHomeView extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color:
-                            CultureTheme.accentOrange.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text(
-                        item.tag.toUpperCase(),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 8.5,
-                          fontWeight: FontWeight.w800,
-                          color: CultureTheme.accentOrange,
-                          letterSpacing: 0.5,
+                    Flexible(
+                      flex: 3,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color:
+                              CultureTheme.accentOrange.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Text(
+                          item.tag.toUpperCase(),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w800,
+                            color: CultureTheme.accentOrange,
+                            letterSpacing: 0.5,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      '• ${item.regionName}',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10,
-                        color: subtitleColor,
-                        fontWeight: FontWeight.w600,
+                    Flexible(
+                      flex: 2,
+                      child: Text(
+                        '• ${item.regionName}',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10,
+                          color: subtitleColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
