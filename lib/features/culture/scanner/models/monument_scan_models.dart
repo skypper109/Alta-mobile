@@ -115,10 +115,16 @@ class MonumentScanTarget {
   factory MonumentScanTarget.fromJson(Map<String, dynamic> json) {
     final rawKeywords = json['keywords'] ?? json['mots_cles'] ?? [];
     final rawFeatures = json['detectionFeatures'] ?? json['caracteristiques_detection'] ?? [];
+    final rawPhotos = json['galleryPhotos'] ?? json['realPhotos'];
 
     List<String> keywordsList = [];
     if (rawKeywords is List) {
       keywordsList = rawKeywords.map((e) => e.toString()).toList();
+    }
+
+    List<String> photosList = [];
+    if (rawPhotos is List) {
+      photosList = rawPhotos.map((e) => e.toString()).toList();
     }
 
     List<ScanDetectionFeature> featuresList = [];
@@ -155,10 +161,7 @@ class MonumentScanTarget {
       modele3dUrl: json['modele3dUrl'] ?? json['modele_3d_url'],
       arAvailable: json['arAvailable'] ?? json['ar_disponible'] ?? false,
       validationStatus: json['validationStatus'] ?? json['statut_validation'] ?? 'Patrimoine vérifié',
-      galleryPhotos: (json['galleryPhotos'] ?? json['realPhotos'] as List?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          const [],
+      galleryPhotos: photosList,
     );
   }
 
@@ -219,7 +222,17 @@ class MonumentScanResult {
   factory MonumentScanResult.fromJson(Map<String, dynamic> json) {
     final targetMap = json['target'] as Map<String, dynamic>? ?? {};
     final target = MonumentScanTarget.fromJson(targetMap);
-    final rawFeatures = json['recognizedFeatures'] as List? ?? target.detectionFeatures;
+    final rawFeatures = json['recognizedFeatures'] ?? target.detectionFeatures;
+
+    List<ScanDetectionFeature> recognizedFeaturesList = [];
+    if (rawFeatures is List<ScanDetectionFeature>) {
+      recognizedFeaturesList = rawFeatures;
+    } else if (rawFeatures is List) {
+      recognizedFeaturesList = rawFeatures
+          .whereType<Map<String, dynamic>>()
+          .map((f) => ScanDetectionFeature.fromJson(f))
+          .toList();
+    }
 
     return MonumentScanResult(
       target: target,
@@ -228,9 +241,7 @@ class MonumentScanResult {
       isFromCamera: json['isFromCamera'] ?? false,
       isDemoTarget: json['isDemoTarget'] ?? false,
       scannedAt: json['scannedAt'] != null ? DateTime.tryParse(json['scannedAt']) ?? DateTime.now() : DateTime.now(),
-      recognizedFeatures: rawFeatures is List<ScanDetectionFeature>
-          ? rawFeatures
-          : rawFeatures.whereType<Map<String, dynamic>>().map((f) => ScanDetectionFeature.fromJson(f)).toList(),
+      recognizedFeatures: recognizedFeaturesList,
       estimatedDistanceKm: (json['estimatedDistanceKm'] as num?)?.toDouble(),
     );
   }
