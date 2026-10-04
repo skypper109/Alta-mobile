@@ -16,8 +16,9 @@ class CultureApiClient {
       : _dio = dio ??
             Dio(
               BaseOptions(
-                connectTimeout: const Duration(seconds: 3),
-                receiveTimeout: const Duration(seconds: 4),
+                connectTimeout: const Duration(seconds: 12),
+                receiveTimeout: const Duration(seconds: 25),
+                sendTimeout: const Duration(seconds: 25),
                 validateStatus: (status) => status != null && status < 600,
               ),
             ),
@@ -109,6 +110,10 @@ class CultureApiClient {
       final res = await _dio.post(
         '$_activeBaseUrl/api/v1/culture/identify',
         data: payload,
+        options: Options(
+          sendTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
       );
 
       if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
@@ -122,9 +127,9 @@ class CultureApiClient {
       }
     } on DioException catch (dioErr) {
       final code = dioErr.response?.statusCode;
-      _logger.d('CultureApiClient.identifyMonument : distant non joignable ($code) — passage au mode hors ligne');
+      _logger.w('CultureApiClient.identifyMonument : distant non joignable ($code / ${dioErr.type}) — passage au mode hors ligne');
     } catch (e) {
-      _logger.d('CultureApiClient.identifyMonument fallback : $e');
+      _logger.w('CultureApiClient.identifyMonument fallback : $e');
     }
     return null;
   }

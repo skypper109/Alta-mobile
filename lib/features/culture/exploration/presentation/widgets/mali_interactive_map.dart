@@ -467,10 +467,9 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: (isDark || isSatellite
-                  ? const Color(0xFF0F172A)
-                  : Colors.white)
-              .withValues(alpha: 0.94),
+          color:
+              (isDark || isSatellite ? const Color(0xFF0F172A) : Colors.white)
+                  .withValues(alpha: 0.94),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSatellite
@@ -498,7 +497,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
             ),
             const SizedBox(width: 6),
             Text(
-              isSatellite ? 'Google Satellite' : 'Google Plan',
+              isSatellite ? 'Satellite' : 'Plan',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w800,
@@ -515,13 +514,11 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
 
   // ── COMMANDES FLOTTANTES ZOOM IN / OUT / BAMAKO / RECENTRER ────────────────
   Widget _buildZoomControls(bool isDark, bool isSatellite) {
-    final bgColor = (isDark || isSatellite
-            ? const Color(0xFF0F172A)
-            : Colors.white)
-        .withValues(alpha: 0.94);
-    final borderCol = isDark || isSatellite
-        ? Colors.white24
-        : const Color(0xFFE8ECF2);
+    final bgColor =
+        (isDark || isSatellite ? const Color(0xFF0F172A) : Colors.white)
+            .withValues(alpha: 0.94);
+    final borderCol =
+        isDark || isSatellite ? Colors.white24 : const Color(0xFFE8ECF2);
     final iconColor =
         isDark || isSatellite ? Colors.white : const Color(0xFF1E284A);
 
@@ -618,15 +615,12 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: (isDark || isSatellite
-                ? const Color(0xFF0F172A)
-                : Colors.white)
+        color: (isDark || isSatellite ? const Color(0xFF0F172A) : Colors.white)
             .withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark || isSatellite
-              ? Colors.white24
-              : const Color(0xFFE8ECF2),
+          color:
+              isDark || isSatellite ? Colors.white24 : const Color(0xFFE8ECF2),
           width: 1.0,
         ),
         boxShadow: const [
