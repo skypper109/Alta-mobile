@@ -1115,6 +1115,446 @@ abstract final class MonumentScanKnowledge {
       arAvailable: false,
       validationStatus: 'Validé Patrimoine National',
     ),
+
+    // 17. PLACE DE LA LIBERTÉ
+    MonumentScanTarget(
+      id: 'monument_Place_de_la_liberté',
+      name: 'Place de la Liberté',
+      subtitle: 'Le Cœur Civique et Historique de la Capitale',
+      regionId: 'bamako',
+      regionName: 'District de Bamako',
+      ville: 'Bamako',
+      era: 'Aménagée dès le début du XXe siècle',
+      architectureStyle:
+          'Esplanade circulaire pavée, perspectives urbaines coloniales et néo-soudanaises',
+      locationDetails: 'Place de la Liberté, Centre-ville, Commune III, Bamako',
+      photoUrl:
+          'assets/images/culture/monuments/monument_Place_de_la_liberté/lib1.jpg',
+      galleryPhotos: [
+        'assets/images/culture/monuments/monument_Place_de_la_liberté/lib1.jpg',
+        'assets/images/culture/monuments/monument_Place_de_la_liberté/lib2.jpg',
+        'assets/images/culture/monuments/monument_Place_de_la_liberté/lib3.jpg',
+        'assets/images/culture/monuments/monument_Place_de_la_liberté/lib10.jpg',
+      ],
+      tag: 'Cœur Historique & Citoyen',
+      latitude: 12.6514,
+      longitude: -7.9982,
+      unlockedBadge: 'Pèlerin de la Liberté',
+      xpEarned: 50,
+      keywords: [
+        'place',
+        'liberte',
+        'centre-ville',
+        'bamako',
+        'esplanade',
+      ],
+      detectionFeatures: [
+        ScanDetectionFeature(
+          label: 'Esplanade centrale pavée et arbres séculaires',
+          confidence: 0.990,
+          category: 'Urbanisme',
+          icon: Icons.nature_people_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Perspective vers les bâtiments historiques',
+          confidence: 0.981,
+          category: 'Vue',
+          icon: Icons.visibility_rounded,
+        ),
+      ],
+      secretsAndMysteries:
+          'Point de départ de la croissance urbaine de Bamako au début du XXe siècle, reliant le centre commercial à Koulouba.',
+      historicalStory:
+          'Lieu hautement symbolique de Bamako ayant accueilli les grands rassemblements populaires et célébrations nationales.',
+      audioNarrationText:
+          'Vous voici sur la Place de la Liberté, le cœur battant de la ville de Bamako. Un espace de rencontre et de citoyenneté.',
+      whyItMatters:
+          'Centre névralgique de la capitale malienne.',
+      routePath: '/culture/monuments',
+      arAvailable: false,
+      validationStatus: 'Validé',
+    ),
+
+    // 18. MOSQUÉE ET UNIVERSITÉ DE SANKORÉ
+    MonumentScanTarget(
+      id: 'monument_sankore',
+      name: 'Mosquée et Université de Sankoré',
+      subtitle: 'Le Berceau du Savoir Universel et des Manuscrits de Tombouctou',
+      regionId: 'tombouctou',
+      regionName: 'Tombouctou',
+      ville: 'Tombouctou',
+      era: 'Fondée vers 1300, réaménagée sous Askia Mohammed en 1578',
+      architectureStyle:
+          'Architecture en banco soudanais avec cour sacrée respectant les dimensions de la Kaaba',
+      locationDetails: 'Nord de Tombouctou, Quartier Sankoré',
+      photoUrl:
+          'assets/images/culture/monuments/monument_sankore/sank.jpg',
+      galleryPhotos: [
+        'assets/images/culture/monuments/monument_sankore/sank.jpg',
+        'assets/images/culture/monuments/monument_sankore/sank2.jpg',
+        'assets/images/culture/monuments/monument_sankore/sank3.jpg',
+        'assets/images/culture/monuments/monument_sankore/san11.jpg',
+      ],
+      tag: 'Patrimoine Mondial UNESCO',
+      latitude: 16.7778,
+      longitude: -3.0033,
+      unlockedBadge: 'Maître des Sciences de Sankoré',
+      xpEarned: 70,
+      keywords: [
+        'sankore',
+        'universite',
+        'tombouctou',
+        'ahmed',
+        'baba',
+        'manuscrits',
+        'savoir',
+        'unesco',
+      ],
+      detectionFeatures: [
+        ScanDetectionFeature(
+          label: 'Minaret pyramidale à renforts en bois de rônier',
+          confidence: 0.985,
+          category: 'Structure',
+          icon: Icons.castle_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Cour intérieure aux proportions sacrées de la Kaaba',
+          confidence: 0.976,
+          category: 'Géométrie',
+          icon: Icons.square_foot_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Bibliothèque des manuscrits anciens en ajami',
+          confidence: 0.989,
+          category: 'Patrimoine',
+          icon: Icons.auto_stories_rounded,
+        ),
+      ],
+      secretsAndMysteries:
+          'L\'illustre savant Ahmed Baba (1556-1627) y enseignait et possédait une bibliothèque personnelle de plus de 1 600 ouvrages rares.',
+      historicalStory:
+          'L\'Université de Sankoré a fait de Tombouctou la capitale intellectuelle de l\'Afrique subsaharienne avec 25 000 étudiants au XVIe siècle.',
+      audioNarrationText:
+          'Vous regardez l\'Université et Mosquée de Sankoré. Au XVIe siècle, plus de 25 000 étudiants fréquentaient ses cours.',
+      whyItMatters:
+          'Prouve la place centrale du Mali dans l\'histoire de la science mondiale et de la culture écrite.',
+      routePath: '/culture/monuments',
+      arAvailable: false,
+      validationStatus: 'Patrimoine Mondial UNESCO',
+    ),
+
+    // 19. LE TATA DE SIKASSO
+    MonumentScanTarget(
+      id: 'monument_tata_sikasso',
+      name: 'Le Tata de Sikasso',
+      subtitle: 'La Muraille de Résistance Héroïque du Kénédougou',
+      regionId: 'sikasso',
+      regionName: 'Sikasso',
+      ville: 'Sikasso',
+      era: 'Édifié entre 1877 et 1890 par le roi Tiéba Traoré',
+      architectureStyle:
+          'Fortification militaire massive en banco durci et blocs de latérite taillée',
+      locationDetails: 'Colline du Mamelon, Centre de Sikasso',
+      photoUrl:
+          'assets/images/culture/monuments/monument_tata_sikasso/tat1.jpg',
+      galleryPhotos: [
+        'assets/images/culture/monuments/monument_tata_sikasso/tat1.jpg',
+        'assets/images/culture/monuments/monument_tata_sikasso/tat2.jpg',
+        'assets/images/culture/monuments/monument_tata_sikasso/tat3.jpg',
+        'assets/images/culture/monuments/monument_tata_sikasso/tat10.jpg',
+      ],
+      tag: 'Monument National de Résistance',
+      latitude: 11.3176,
+      longitude: -5.6665,
+      unlockedBadge: 'Bravoure du Kénédougou',
+      xpEarned: 65,
+      keywords: [
+        'sikasso',
+        'tata',
+        'rempart',
+        'muraille',
+        'tieba',
+        'babemba',
+        'traore',
+        'kenedougou',
+        'mamelon',
+      ],
+      detectionFeatures: [
+        ScanDetectionFeature(
+          label: 'Blocs de latérite taillée & terre rouge cuite',
+          confidence: 0.988,
+          category: 'Matériau',
+          icon: Icons.layers_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Épaisseur défensive (3 à 6 mètres)',
+          confidence: 0.974,
+          category: 'Structure',
+          icon: Icons.shield_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Meurtrières de tir & créneaux de garde',
+          confidence: 0.965,
+          category: 'Tactique',
+          icon: Icons.security_rounded,
+        ),
+      ],
+      secretsAndMysteries:
+          'Le Tata mesurait à son apogée plus de 9 kilomètres de circonférence. En 1898, encerclé par les troupes coloniales, le roi Babemba Traoré s\'exclama : « Plutôt la mort que la honte » (Sayi té Maloya Sa).',
+      historicalStory:
+          'Chef-d\'œuvre de génie militaire précolonial ouest-africain, le Tata de Sikasso est l\'ultime forteresse de la souveraineté.',
+      audioNarrationText:
+          'Voici les vestiges héroïques du Tata de Sikasso, l\'enceinte fortifiée du royaume du Kénédougou. Érigée par Tiéba Traoré et défendue jusqu\'au dernier souffle par son frère Babemba en 1898.',
+      whyItMatters:
+          'Témoignage suprême du refus de la servitude et du sens aigu de l\'indépendance nationale.',
+      routePath: '/culture/monuments',
+      arAvailable: false,
+      validationStatus: 'Monument National',
+    ),
+
+    // 20. TOMBEAU PYRAMIDAL DES ASKIA
+    MonumentScanTarget(
+      id: 'monument_tombeau_askia',
+      name: 'Tombeau pyramidal des Askia',
+      subtitle: 'Symbole de la Gloire Impériale Songhoï',
+      regionId: 'gao',
+      regionName: 'Gao',
+      ville: 'Gao',
+      era: 'Construit en 1495 par l\'empereur Askia Mohammed',
+      architectureStyle:
+          'Structure pyramidale à degrés sahélienne avec deux minarets et nécropole sacrée',
+      locationDetails: 'Bord du fleuve Niger, Gao',
+      photoUrl:
+          'assets/images/culture/monuments/monument_tombeau_askia/tomb1.jpg',
+      galleryPhotos: [
+        'assets/images/culture/monuments/monument_tombeau_askia/tomb1.jpg',
+        'assets/images/culture/monuments/monument_tombeau_askia/tomb2.jpg',
+        'assets/images/culture/monuments/monument_tombeau_askia/tomb3.jpg',
+        'assets/images/culture/monuments/monument_tombeau_askia/tomb4.jpg',
+      ],
+      tag: 'Patrimoine Mondial UNESCO',
+      latitude: 16.2974,
+      longitude: -0.0447,
+      unlockedBadge: 'Héritier de l\'Empire Songhoï',
+      xpEarned: 65,
+      keywords: [
+        'gao',
+        'askia',
+        'tombeau',
+        'pyramide',
+        'songhoi',
+        'unesco',
+        'mohammed',
+        'sahel',
+      ],
+      detectionFeatures: [
+        ScanDetectionFeature(
+          label: 'Forme pyramidale tronquée à degrés (17m)',
+          confidence: 0.991,
+          category: 'Géométrie',
+          icon: Icons.change_history_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Échafaudages permanents en troncs d\'acacia',
+          confidence: 0.982,
+          category: 'Structure',
+          icon: Icons.architecture_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Enduit d\'argile fine du lit du Niger',
+          confidence: 0.970,
+          category: 'Matériau',
+          icon: Icons.brush_rounded,
+        ),
+      ],
+      secretsAndMysteries:
+          'Askia Mohammed ramena de la terre et de l\'eau bénite de La Mecque en 1496 pour sceller les fondations spirituelles de ce tombeau impérial.',
+      historicalStory:
+          'Témoin de la puissance commerciale, intellectuelle et militaire de l\'Empire Songhoï aux XVe et XVIe siècles, le tombeau est le seul complexe pyramidal en banco préservé dans tout le Sahara.',
+      audioNarrationText:
+          'Vous contemplez le Tombeau des Askia à Gao, joyau de l\'Empire Songhoï bâti en 1495 par l\'empereur Askia Mohammed.',
+      whyItMatters:
+          'L\'un des plus prestigieux complexes monumentaux de l\'Afrique subsaharienne précoloniale.',
+      routePath: '/culture/monuments',
+      arAvailable: false,
+      validationStatus: 'Patrimoine Mondial UNESCO',
+    ),
+
+    // 21. MASQUE CIWARA DE SÉNOU
+    MonumentScanTarget(
+      id: 'monument_ciwara_senou_bamako',
+      name: 'Masque Ciwara de Sénou',
+      subtitle: 'L\'Emblème Sacré de l\'Agriculture et de l\'Accueil',
+      regionId: 'bamako',
+      regionName: 'District de Bamako',
+      ville: 'Bamako',
+      era: 'Porte d\'accueil aéroportuaire de Bamako',
+      architectureStyle: 'Sculpture zoomorphe géante en bois noble',
+      locationDetails: 'Rond-point d\'accès de l\'Aéroport International Modibo Keïta de Sénou',
+      photoUrl: 'assets/images/culture/monuments/ciwara_senou.jpg',
+      galleryPhotos: [
+        'assets/images/culture/monuments/ciwara_senou.jpg',
+      ],
+      tag: 'Emblème Sacré Agricole',
+      latitude: 12.5510,
+      longitude: -7.9548,
+      unlockedBadge: 'Gardien du Ciwara',
+      xpEarned: 55,
+      keywords: ['ciwara', 'senou', 'aeroport', 'antilope', 'agriculture', 'bamako'],
+      detectionFeatures: [
+        ScanDetectionFeature(
+          label: 'Grandes cornes recourbées en arc vers le ciel',
+          confidence: 0.990,
+          category: 'Structure',
+          icon: Icons.pets_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Crinière ajourée en dents de scie',
+          confidence: 0.985,
+          category: 'Détail',
+          icon: Icons.grain_rounded,
+        ),
+      ],
+      secretsAndMysteries: 'Le Ciwara est l\'être mythique mi-humain mi-animal qui enseigna l\'art du labour et de la culture de la terre aux ancêtres bambaras.',
+      historicalStory: 'Érigée à l\'entrée aéroportuaire de Bamako, cette antilope majestueuse accueille tout voyageur foulant la terre du Mali en lui souhaitant la bienvenue sacrée.',
+      audioNarrationText: 'Vous admirez le Masque Ciwara de Sénou, symbole universel de labeur, d\'ingéniosité agricole et de la légendaire hospitalité malienne.',
+      whyItMatters: 'Emblème culturel national et symbole d\'excellence laborieuse reconnu dans le monde entier.',
+      routePath: '/culture/monuments',
+      arAvailable: true,
+      validationStatus: 'Validé CultureLens AI',
+    ),
+
+    // 22. MUSÉE NATIONAL DU MALI
+    MonumentScanTarget(
+      id: 'monument_musee_national_bamako',
+      name: 'Musée National du Mali',
+      subtitle: 'Trésor Vivant & Archéologie Sahélienne',
+      regionId: 'bamako',
+      regionName: 'District de Bamako',
+      ville: 'Bamako',
+      era: '1953 · Rénovation d\'architecture en terre crue',
+      architectureStyle: 'Architecture néo-soudanaise bioclimatique en banco stabilisé ocre-rouge',
+      locationDetails: 'Parc National du Mali, Avenue de la Liberté / Koulouba',
+      photoUrl: 'assets/images/culture/monuments/musee_national.jpg',
+      galleryPhotos: [
+        'assets/images/culture/monuments/musee_national.jpg',
+      ],
+      tag: 'Trésor Vivant & Archéologie',
+      latitude: 12.6601,
+      longitude: -8.0019,
+      unlockedBadge: 'Conservateur du Patrimoine',
+      xpEarned: 60,
+      keywords: ['musee', 'national', 'koulouba', 'banco', 'archeologie', 'bamako'],
+      detectionFeatures: [
+        ScanDetectionFeature(
+          label: 'Murs en banco ocre-rouge et arcades sahéliennes',
+          confidence: 0.992,
+          category: 'Matériau',
+          icon: Icons.architecture_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Colonnades à claire-voie et toitures à débord',
+          confidence: 0.980,
+          category: 'Style',
+          icon: Icons.layers_rounded,
+        ),
+      ],
+      secretsAndMysteries: 'Le musée abrite les célébrissimes textiles Tellem du XIe siècle découverts dans les grottes de Bandiagara, ainsi que des trésors de statuaire préhistorique.',
+      historicalStory: 'Fondé en 1953 et magnifié par l\'architecte Diébédo Francis Kéré, le Musée National est le temple de la conservation de la mémoire matérielle et des arts ancestraux du Mali.',
+      audioNarrationText: 'Bienvenue au Musée National du Mali, chef-d\'œuvre en terre ocre niché au cœur d\'une forêt botanique apaisante au pied de Koulouba.',
+      whyItMatters: 'Le plus grand conservatoire d\'art rituel, de parures et de manuscrits de la république.',
+      routePath: '/culture/monuments',
+      arAvailable: true,
+      validationStatus: 'Validé CultureLens AI',
+    ),
+
+    // 23. PALAIS DE LA CULTURE AMADOU HAMPÂTÉ BÂ
+    MonumentScanTarget(
+      id: 'monument_palais_culture_bamako',
+      name: 'Palais de la Culture Amadou Hampâté Bâ',
+      subtitle: 'L\'Agora des Arts Vivants et du Djoliba',
+      regionId: 'bamako',
+      regionName: 'District de Bamako',
+      ville: 'Bamako',
+      era: '1976 · Inauguration sur la rive droite',
+      architectureStyle: 'Amphithéâtre monumental en hémicycle et complexe scénique',
+      locationDetails: 'Badalabougou, Rive droite du fleuve Niger',
+      photoUrl: 'assets/images/culture/monuments/palais_culture.jpg',
+      galleryPhotos: [
+        'assets/images/culture/monuments/palais_culture.jpg',
+      ],
+      tag: 'Arts Vivants & Spectacle',
+      latitude: 12.6262,
+      longitude: -7.9897,
+      unlockedBadge: 'Mélomane du Mandé',
+      xpEarned: 50,
+      keywords: ['palais', 'culture', 'hampate', 'ba', 'badalabougou', 'djoliba', 'bamako'],
+      detectionFeatures: [
+        ScanDetectionFeature(
+          label: 'Amphithéâtre ouvert face au fleuve Niger',
+          confidence: 0.988,
+          category: 'Structure',
+          icon: Icons.theater_comedy_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Coque acoustique monumentale',
+          confidence: 0.975,
+          category: 'Acoustique',
+          icon: Icons.music_note_rounded,
+        ),
+      ],
+      secretsAndMysteries: 'Le palais porte le nom du vénérable Amadou Hampâté Bâ, auteur de la célèbre maxime : « En Afrique, un vieillard qui meurt est une bibliothèque qui brûle ».',
+      historicalStory: 'Érigé au bord du mythique Djoliba, le Palais de la Culture est l\'arène vibrante des grands maîtres griots, de la kora, du balafon et des troupes théâtrales nationales.',
+      audioNarrationText: 'Vous êtes devant le Palais de la Culture Amadou Hampâté Bâ, haut lieu de la parole, de la musique et des arts scéniques maliens.',
+      whyItMatters: 'Le cœur battant de la création artistique contemporaine et de la transmission orale.',
+      routePath: '/culture/monuments',
+      arAvailable: true,
+      validationStatus: 'Validé CultureLens AI',
+    ),
+
+    // 24. GRANDE MOSQUÉE DE BAMAKO
+    MonumentScanTarget(
+      id: 'monument_mosquee_bamako',
+      name: 'Grande Mosquée de Bamako',
+      subtitle: 'Architecture Religieuse & Minarets Célestes',
+      regionId: 'bamako',
+      regionName: 'District de Bamako',
+      ville: 'Bamako',
+      era: 'Érigée à l\'époque coloniale, rénovée en 1970 avec l\'Arabie Saoudite',
+      architectureStyle: 'Style islamique contemporain à minarets élancés et arcades blanches',
+      locationDetails: 'Quartier Dabanani, Centre commercial de Bamako',
+      photoUrl: 'assets/images/culture/monuments/mosquee_djingareyber.jpg',
+      galleryPhotos: [
+        'assets/images/culture/monuments/mosquee_djingareyber.jpg',
+      ],
+      tag: 'Architecture Religieuse (1970)',
+      latitude: 12.6520,
+      longitude: -7.9960,
+      unlockedBadge: 'Pèlerin de Dabanani',
+      xpEarned: 55,
+      keywords: ['mosquee', 'grande', 'bamako', 'dabanani', 'minaret', 'priere'],
+      detectionFeatures: [
+        ScanDetectionFeature(
+          label: 'Deux grands minarets élancés couronnés de croissants dorés',
+          confidence: 0.995,
+          category: 'Structure',
+          icon: Icons.mosque_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Façade blanche et arcades islamiques',
+          confidence: 0.982,
+          category: 'Façade',
+          icon: Icons.layers_rounded,
+        ),
+      ],
+      secretsAndMysteries: 'Construite sur l\'emplacement d\'une mosquée précoloniale en banco, ses minarets sont visibles depuis les quatre points cardinaux de la cuvette de Bamako.',
+      historicalStory: 'Située au cœur vibrant du marché Dabanani, elle rassemble chaque semaine des milliers de fidèles dans une ferveur solennelle et fraternelle.',
+      audioNarrationText: 'Voici la Grande Mosquée de Bamako, dont les minarets blancs s\'élancent vers le ciel au-dessus du tumulte commerçant de Dabanani.',
+      whyItMatters: 'Le principal pôle spirituel de la capitale malienne.',
+      routePath: '/culture/monuments',
+      arAvailable: true,
+      validationStatus: 'Validé CultureLens AI',
+    ),
   ];
 
   /// Trouver un monument par son ID

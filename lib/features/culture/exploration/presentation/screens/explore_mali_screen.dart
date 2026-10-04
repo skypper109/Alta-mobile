@@ -8,6 +8,9 @@ import '../../../core/theme/culture_theme.dart';
 import '../../data/datasources/mock_mali_regions.dart';
 import '../../data/models/mali_historical_place_marker.dart';
 import '../../data/models/mali_region.dart';
+import '../../../scanner/data/monument_scan_knowledge.dart';
+import '../../../scanner/models/monument_scan_models.dart';
+import '../../../scanner/widgets/monument_3d_viewer_modal.dart';
 import '../widgets/mali_interactive_map.dart';
 
 /// Écran d'exploration culturelle interactive par la carte premium du Mali
@@ -74,6 +77,41 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
   void _openSageForPlace(MaliHistoricalPlaceMarker place) {
     HapticFeedback.mediumImpact();
     context.push('/culture/sage');
+  }
+
+  void _open3DViewerForPlace(MaliHistoricalPlaceMarker place) {
+    HapticFeedback.mediumImpact();
+    final targetId = place.scannerId ?? place.id;
+    final target = MonumentScanKnowledge.findById(targetId) ??
+        MonumentScanTarget(
+          id: targetId,
+          name: place.fullName,
+          subtitle: place.subtitle,
+          regionId: place.regionId,
+          regionName: place.regionName,
+          ville: place.regionName,
+          era: place.era,
+          architectureStyle: place.tag,
+          locationDetails: place.subtitle,
+          photoUrl: place.photoUrl,
+          galleryPhotos: [place.photoUrl],
+          tag: place.tag,
+          latitude: place.latitude,
+          longitude: place.longitude,
+          unlockedBadge: 'Explorateur 3D',
+          xpEarned: 50,
+          keywords: [place.name, place.fullName],
+          detectionFeatures: const [],
+          secretsAndMysteries: place.keyFact,
+          historicalStory: place.description,
+          audioNarrationText: place.description,
+          whyItMatters: place.keyFact,
+          routePath: place.routePath,
+          arAvailable: true,
+          validationStatus: 'Validé CultureLens AI',
+        );
+
+    Monument3DViewerModal.show(context, target);
   }
 
   String _resolveRegionImage(String regionId) {
@@ -794,7 +832,32 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
 
               const SizedBox(width: 8),
 
-              // Bouton 3 : Voix du Griot / Sage IA
+              // Bouton 3 : Rendu 3D Spécifique / AR
+              GestureDetector(
+                onTap: () => _open3DViewerForPlace(place),
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00E676).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF00E676).withValues(alpha: 0.45),
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.view_in_ar_rounded,
+                      size: 20,
+                      color: Color(0xFF00C853),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              // Bouton 4 : Voix du Griot / Sage IA
               GestureDetector(
                 onTap: () => _openSageForPlace(place),
                 child: Container(

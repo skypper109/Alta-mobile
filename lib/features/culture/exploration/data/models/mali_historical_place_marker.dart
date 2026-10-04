@@ -391,25 +391,25 @@ abstract final class MaliHistoricalPlacesRegistry {
     icon: Icons.water_rounded,
   );
 
-  // ── 7. KOULIKORO / BAMAKO ──────────────────────────────────────────────────
+  // ── 7. DISTRICT DE BAMAKO (POINTS CULTURELENS & REGROUPEMENT CAPITALE) ────
   static const MaliHistoricalPlaceMarker monumentIndependance =
       MaliHistoricalPlaceMarker(
     id: 'monument_independance_bamako',
-    name: 'Monument Indépendance',
-    fullName: 'Monument de l\'Indépendance du Mali',
-    subtitle: 'Symbole Éternel de Souveraineté & Fraternité',
-    regionId: 'koulikoro',
-    regionName: 'Koulikoro',
+    name: 'Indépendance',
+    fullName: 'Monument de l\'Indépendance',
+    subtitle: 'Symbole National de la Souveraineté (22 Septembre 1960)',
+    regionId: 'bamako',
+    regionName: 'Bamako',
     normalizedPosition: Offset(280, 615),
-    latitude: 12.6392,
-    longitude: -8.0029,
+    latitude: 12.6469,
+    longitude: -8.0028,
     category: HistoricalPlaceCategory.monument,
-    tag: 'Monument National',
-    era: '1960 · Hommage aux Pères de l\'Indépendance',
-    photoUrl: 'assets/images/culture/personnages/soundiata.jpg',
+    tag: 'Symbole National (1960)',
+    era: '1960 · Boulevard de l\'Indépendance',
+    photoUrl: 'assets/images/culture/monuments/monument_independance_bamako/ind11.jpg',
     description:
-        'Édifice majestueux au centre de la capitale symbolisant la marche du peuple malien vers la liberté et l\'unité africaine.',
-    keyFact: 'Mémorial national et flamme de la patrie',
+        'Obélisque monumental soudanais étagé orné de frises géométriques mandingues au cœur du grand boulevard de la capitale.',
+    keyFact: 'Flèche souveraine de 25m et flamme de la patrie',
     routePath: '/culture/monuments',
     scannerId: 'monument_independance_bamako',
     icon: Icons.flag_rounded,
@@ -418,21 +418,21 @@ abstract final class MaliHistoricalPlacesRegistry {
   static const MaliHistoricalPlaceMarker tourAfrique =
       MaliHistoricalPlaceMarker(
     id: 'monument_tour_afrique_bamako',
-    name: 'Tour de l\'Afrique',
-    fullName: 'La Tour de l\'Afrique de Bamako',
+    name: 'Tour d\'Afrique',
+    fullName: 'Tour de l\'Afrique de Bamako',
     subtitle: 'Phare Panafricain & Étoile de Faladié',
     regionId: 'bamako',
     regionName: 'Bamako',
     normalizedPosition: Offset(295, 630),
-    latitude: 12.5935,
-    longitude: -7.9463,
+    latitude: 12.5975,
+    longitude: -7.9542,
     category: HistoricalPlaceCategory.monument,
-    tag: 'Symbole Panafricain',
-    era: '2001 · Baobab de la Fraternité Africaine',
-    photoUrl: 'assets/images/culture/villes/djenne_ville.jpg',
+    tag: 'Panafricanisme (2001)',
+    era: '2001 · Sommet France-Afrique',
+    photoUrl: 'assets/images/culture/monuments/monument_tour_afrique_bamako/tour11.jpg',
     description:
-        'Tour monumentale néo-soudanaise de 46 mètres évoquant un baobab surmonté d\'une corbeille sacrée.',
-    keyFact: 'Haute de 46m au carrefour de la paix',
+        'Tour cylindrique de 46 mètres inspirée de l\'écorce d\'un baobab protecteur, couronnée par le flambeau ardent de l\'unité africaine.',
+    keyFact: 'Haute de 46m sur un grand rond-point verdoyant',
     routePath: '/culture/monuments',
     scannerId: 'monument_tour_afrique_bamako',
     icon: Icons.nature_rounded,
@@ -441,21 +441,21 @@ abstract final class MaliHistoricalPlacesRegistry {
   static const MaliHistoricalPlaceMarker monumentPaix =
       MaliHistoricalPlaceMarker(
     id: 'monument_paix_bamako',
-    name: 'Monument de la Paix',
+    name: 'Monum. Paix',
     fullName: 'Monument de la Paix d\'Hamdallaye ACI 2000',
-    subtitle: 'La Colombe de la Réconciliation',
+    subtitle: 'La Colombe de la Concorde Nationale',
     regionId: 'bamako',
     regionName: 'Bamako',
     normalizedPosition: Offset(275, 620),
-    latitude: 12.6322,
-    longitude: -8.0261,
+    latitude: 12.6311,
+    longitude: -8.0267,
     category: HistoricalPlaceCategory.monument,
-    tag: 'Concorde Nationale',
-    era: '1996 · Dans la ferveur de la Flamme de la Paix',
-    photoUrl: 'assets/images/culture/contes/savane_crepuscule_stage.jpg',
+    tag: 'Paix & Vivre-Ensemble (1996)',
+    era: '1996 · Flamme de la Paix historique',
+    photoUrl: 'assets/images/culture/monuments/monument_paix_bamako/ref_P10.jpg',
     description:
-        'Colombe blanche sculpturale géante prenant son envol au-dessus du globe terrestre.',
-    keyFact: 'Symbole du dialogue et de la concorde',
+        'Colombe métallique monumentale aux ailes ajourées en acier culminant sur un socle géométrique au grand carrefour de l\'ACI 2000.',
+    keyFact: 'Envergure d\'acier de 12 mètres symbolisant la réconciliation',
     routePath: '/culture/monuments',
     scannerId: 'monument_paix_bamako',
     icon: Icons.flutter_dash_rounded,
@@ -464,95 +464,326 @@ abstract final class MaliHistoricalPlacesRegistry {
   static const MaliHistoricalPlaceMarker monumentArmeeNoire =
       MaliHistoricalPlaceMarker(
     id: 'monument_armee_noire_bamako',
-    name: 'Héros de l\'Armée Noire',
+    name: 'Armée Noire',
     fullName: 'Monument des Héros de l\'Armée Noire',
-    subtitle: 'Mémoire Éternelle des Combattants Africains',
+    subtitle: 'Mémoire Éternelle des Tirailleurs et Combattants',
     regionId: 'bamako',
     regionName: 'Bamako',
     normalizedPosition: Offset(282, 610),
-    latitude: 12.6514,
-    longitude: -7.9982,
+    latitude: 12.6512,
+    longitude: -7.9989,
     category: HistoricalPlaceCategory.monument,
-    tag: 'Mémoire Militaire',
+    tag: 'Mémoire Militaire (1924)',
     era: '1924 · Place de la Liberté',
-    photoUrl: 'assets/images/culture/personnages/soundiata.jpg',
+    photoUrl: 'assets/images/culture/monuments/monument_armee_noire_bamako/ref_N1.webp',
     description:
-        'Statuaire monumentale en bronze honorant le sacrifice suprême des tirailleurs pour la liberté.',
-    keyFact: 'Réplique historique du monument de Reims',
+        'Statue de bronze figurant les soldats africains en uniforme sur un piédestal en pierre sculptée, réplique du monument de Reims.',
+    keyFact: 'Bronze historique rendant hommage au courage des tirailleurs',
     routePath: '/culture/monuments',
     scannerId: 'monument_armee_noire_bamako',
     icon: Icons.groups_rounded,
   );
 
-  static const MaliHistoricalPlaceMarker museeNationalBamako =
-      MaliHistoricalPlaceMarker(
-    id: 'monument_musee_national_bamako',
-    name: 'Musée National du Mali',
-    fullName: 'Musée National du Mali à Koulouba',
-    subtitle: 'Trésor Millénaire des Civilisations Sahéliennes',
-    regionId: 'bamako',
-    regionName: 'Bamako',
-    normalizedPosition: Offset(280, 605),
-    latitude: 12.6597,
-    longitude: -7.9989,
-    category: HistoricalPlaceCategory.monument,
-    tag: 'Patrimoine & Musée',
-    era: '1953 · Rénovation Prix Aga Khan 2003',
-    photoUrl: 'assets/images/culture/monuments/mosquee_djenne.jpg',
-    description:
-        'Architecture bioclimatique en grès rouge abritant plus de 10 000 chefs-d\'œuvre archéologiques.',
-    keyFact: 'Conserve les textiles Tellem du XIe siècle',
-    routePath: '/culture/monuments',
-    scannerId: 'monument_musee_national_bamako',
-    icon: Icons.museum_rounded,
-  );
-
   static const MaliHistoricalPlaceMarker ciwaraSenou =
       MaliHistoricalPlaceMarker(
     id: 'monument_ciwara_senou_bamako',
-    name: 'Masque Ciwara de Sénou',
-    fullName: 'Monument de l\'Hospitalité (Ciwara)',
-    subtitle: 'L\'Emblème Sacré de l\'Agriculture et de l\'Accueil',
+    name: 'Masque Ciwara',
+    fullName: 'Masque Ciwara de Sénou',
+    subtitle: 'L\'Emblème Sacré Agricole et d\'Accueil',
     regionId: 'bamako',
     regionName: 'Bamako',
     normalizedPosition: Offset(305, 640),
-    latitude: 12.5517,
+    latitude: 12.5510,
     longitude: -7.9548,
     category: HistoricalPlaceCategory.monument,
-    tag: 'Hospitalité Malienne',
-    era: 'Porte d\'entrée aéroportuaire',
-    photoUrl: 'assets/images/culture/villes/djenne_ville.jpg',
+    tag: 'Emblème Sacré Agricole',
+    era: 'Porte d\'accueil aéroportuaire de Bamako',
+    photoUrl: 'assets/images/culture/monuments/ciwara_senou.jpg',
     description:
-        'Sculpture monumentale d\'antilope Ciwara souhaitant la bienvenue aux voyageurs entrant à Bamako.',
-    keyFact: 'Emblème culturel majeur du labeur et de la dignité',
+        'Sculpture monumentale de l\'antilope Ciwara aux cornes recourbées et crinière ajourée, accueillant les voyageurs au Mali.',
+    keyFact: 'Symbole universel de fertilité et d\'hospitalité mandingue',
     routePath: '/culture/monuments',
     scannerId: 'monument_ciwara_senou_bamako',
     icon: Icons.pets_rounded,
   );
 
+  static const MaliHistoricalPlaceMarker museeNationalBamako =
+      MaliHistoricalPlaceMarker(
+    id: 'monument_musee_national_bamako',
+    name: 'Musée National',
+    fullName: 'Musée National du Mali à Koulouba',
+    subtitle: 'Trésor Vivant & Archéologie Sahélienne',
+    regionId: 'bamako',
+    regionName: 'Bamako',
+    normalizedPosition: Offset(280, 605),
+    latitude: 12.6601,
+    longitude: -8.0019,
+    category: HistoricalPlaceCategory.monument,
+    tag: 'Trésor Vivant & Archéologie',
+    era: 'Architecture banco ocre-rouge primée',
+    photoUrl: 'assets/images/culture/monuments/musee_national.jpg',
+    description:
+        'Chef-d\'œuvre en terre cuite stabilisée et colonnades sahéliennes, niché dans le parc national au pied de la colline du pouvoir.',
+    keyFact: 'Abrite plus de 10 000 pièces préhistoriques et rituelles',
+    routePath: '/culture/monuments',
+    scannerId: 'monument_musee_national_bamako',
+    icon: Icons.museum_rounded,
+  );
+
+  static const MaliHistoricalPlaceMarker samoryToure =
+      MaliHistoricalPlaceMarker(
+    id: 'monument_samory_toure_bamako',
+    name: 'Samory Touré',
+    fullName: 'Monument Almamy Samory Touré',
+    subtitle: 'Résistance Anticoloniale & Épopée Mandingue',
+    regionId: 'bamako',
+    regionName: 'Bamako',
+    normalizedPosition: Offset(270, 625),
+    latitude: 12.6105,
+    longitude: -8.0550,
+    category: HistoricalPlaceCategory.monument,
+    tag: 'Résistance Anticoloniale',
+    era: 'Érigé en mémoire de l\'Almamy du Wassoulou',
+    photoUrl: 'assets/images/culture/monuments/monument_samory_toure_bamako/sam5.jpg',
+    description:
+        'Statue équestre impériale en bronze d\'Almamy Samory Touré sur son cheval cabré, veillant sur l\'entrée ouest de Bamako à Sébénikoro.',
+    keyFact: 'Génie militaire et figure majeure de la résistance africaine',
+    routePath: '/culture/monuments',
+    scannerId: 'monument_samory_toure_bamako',
+    icon: Icons.shield_rounded,
+  );
+
+  static const MaliHistoricalPlaceMarker martyrsBamako =
+      MaliHistoricalPlaceMarker(
+    id: 'monument_martyrs_bamako',
+    name: 'Monum. Martyrs',
+    fullName: 'Monument des Martyrs du 26 Mars',
+    subtitle: 'Démocratie & Mémoire Populaire',
+    regionId: 'bamako',
+    regionName: 'Bamako',
+    normalizedPosition: Offset(283, 617),
+    latitude: 12.6358,
+    longitude: -7.9942,
+    category: HistoricalPlaceCategory.monument,
+    tag: 'Démocratie & Mémoire (1991)',
+    era: '1991 · Révolution Démocratique',
+    photoUrl: 'assets/images/culture/monuments/monument_martyrs_bamako/mart10.jpg',
+    description:
+        'Stèle commémorative et flamme démocratique dominant les abords du fleuve Niger à la culée du Pont des Martyrs.',
+    keyFact: 'Hommage solennel aux héros tombés pour l\'avènement de la liberté',
+    routePath: '/culture/monuments',
+    scannerId: 'monument_martyrs_bamako',
+    icon: Icons.local_fire_department_rounded,
+  );
+
   static const MaliHistoricalPlaceMarker palaisCultureBamako =
       MaliHistoricalPlaceMarker(
     id: 'monument_palais_culture_bamako',
-    name: 'Palais Amadou Hampâté Bâ',
+    name: 'Palais Culture',
     fullName: 'Palais de la Culture Amadou Hampâté Bâ',
-    subtitle: 'L\'Agora des Arts Vivants et du Djoliba',
+    subtitle: 'Arts Vivants & Spectacle sur le Djoliba',
     regionId: 'bamako',
     regionName: 'Bamako',
     normalizedPosition: Offset(286, 622),
     latitude: 12.6262,
     longitude: -7.9897,
     category: HistoricalPlaceCategory.monument,
-    tag: 'Arts & Théâtre',
-    era: '1976 · Rive droite du fleuve Niger',
-    photoUrl: 'assets/images/culture/villes/segou_koro.jpg',
+    tag: 'Arts Vivants & Spectacle',
+    era: '1976 · Rive droite de Badalabougou',
+    photoUrl: 'assets/images/culture/monuments/palais_culture.jpg',
     description:
-        'Grand complexe artistique et amphithéâtre au bord du fleuve Niger nommé d\'après le grand sage malien.',
-    keyFact: 'Temple des griots et de la kora malienne',
+        'Amphithéâtre à ciel ouvert et grand complexe des arts scéniques, temple des grands concerts et des contes de la parole sahélienne.',
+    keyFact: 'Nommé en hommage à l\'illustre écrivain et sage Amadou Hampâté Bâ',
     routePath: '/culture/monuments',
     scannerId: 'monument_palais_culture_bamako',
     icon: Icons.theater_comedy_rounded,
   );
 
+  static const MaliHistoricalPlaceMarker kwameNkrumah =
+      MaliHistoricalPlaceMarker(
+    id: 'monument_kwame_nkrumah_bamako',
+    name: 'Kwamé Nkrumah',
+    fullName: 'Monument Kwamé Nkrumah',
+    subtitle: 'Panafricanisme & Fraternité Transafricaine',
+    regionId: 'bamako',
+    regionName: 'Bamako',
+    normalizedPosition: Offset(278, 616),
+    latitude: 12.6380,
+    longitude: -8.0120,
+    category: HistoricalPlaceCategory.monument,
+    tag: 'Panafricanisme',
+    era: 'Avenue Kwamé Nkrumah',
+    photoUrl: 'assets/images/culture/monuments/monument_kwame_nkrumah_bamako/kk6.jpg',
+    description:
+        'Buste en bronze du père de l\'indépendance ghanéenne et théoricien des États-Unis d\'Afrique, érigé sur une stèle noire gravée.',
+    keyFact: 'Rappelle l\'alliance historique de 1958 Mali-Ghana-Guinée',
+    routePath: '/culture/monuments',
+    scannerId: 'monument_kwame_nkrumah_bamako',
+    icon: Icons.public_rounded,
+  );
+
+  static const MaliHistoricalPlaceMarker cathedraleBamako =
+      MaliHistoricalPlaceMarker(
+    id: 'monument_cathedrale_bamako',
+    name: 'Cathédrale',
+    fullName: 'Cathédrale du Sacré-Cœur de Bamako',
+    subtitle: 'Patrimoine Religieux en Grès Sahélien (1927)',
+    regionId: 'bamako',
+    regionName: 'Bamako',
+    normalizedPosition: Offset(281, 612),
+    latitude: 12.6450,
+    longitude: -7.9970,
+    category: HistoricalPlaceCategory.monument,
+    tag: 'Patrimoine Religieux (1927)',
+    era: 'Érigée entre 1925 et 1927',
+    photoUrl: 'assets/images/culture/monuments/monument_cathedrale_bamako/cat1.jpg',
+    description:
+        'Édifice majestueux en pierres de taille locales extrait des collines de Bamako, style néo-roman africain orné d\'un clocher en grès.',
+    keyFact: 'Pierre angulaire posée en 1925 en plein cœur de Bamako',
+    routePath: '/culture/monuments',
+    scannerId: 'monument_cathedrale_bamako',
+    icon: Icons.church_rounded,
+  );
+
+  static const MaliHistoricalPlaceMarker mosqueeBamako =
+      MaliHistoricalPlaceMarker(
+    id: 'monument_mosquee_bamako',
+    name: 'Grande Mosquée',
+    fullName: 'Grande Mosquée de Bamako',
+    subtitle: 'Architecture Religieuse & Minarets Élançés',
+    regionId: 'bamako',
+    regionName: 'Bamako',
+    normalizedPosition: Offset(282, 609),
+    latitude: 12.6520,
+    longitude: -7.9960,
+    category: HistoricalPlaceCategory.monument,
+    tag: 'Architecture Religieuse (1970)',
+    era: 'Rénovée en 1970 au cœur de Dabanani',
+    photoUrl: 'assets/images/culture/monuments/mosquee_djingareyber.jpg',
+    description:
+        'Minarets blancs élancés, dômes et arcades islamiques dressés au centre commerçant le plus animé de la capitale malienne.',
+    keyFact: 'Haut lieu de spiritualité et de prières collectives du vendredi',
+    routePath: '/culture/monuments',
+    scannerId: 'monument_mosquee_bamako',
+    icon: Icons.mosque_rounded,
+  );
+
+  static const MaliHistoricalPlaceMarker sogolonBamako =
+      MaliHistoricalPlaceMarker(
+    id: 'monument_sogolon_bamako',
+    name: 'Sogolon Kolonkan',
+    fullName: 'Statue de Sogolon Kolonkan',
+    subtitle: 'Matrimoine & Mémoire Fondatrice du Mandé',
+    regionId: 'bamako',
+    regionName: 'Bamako',
+    normalizedPosition: Offset(276, 618),
+    latitude: 12.6340,
+    longitude: -8.0200,
+    category: HistoricalPlaceCategory.monument,
+    tag: 'Matrimoine Mandingue',
+    era: 'Hommage à la sœur de Soundiata Keïta',
+    photoUrl: 'assets/images/culture/monuments/monument_sogolon_bamako/sog9.jpg',
+    description:
+        'Statue d\'art public célébrant Sogolon Kolonkan, figure féminine héroïque garante des savoirs occultes et de la diplomatie du Mandé.',
+    keyFact: 'Célèbre le rôle fondamental des femmes dans l\'épopée mandingue',
+    routePath: '/culture/monuments',
+    scannerId: 'monument_sogolon_bamako',
+    icon: Icons.woman_rounded,
+  );
+
+  static const MaliHistoricalPlaceMarker alQoudsBamako =
+      MaliHistoricalPlaceMarker(
+    id: 'monument_al_quouds',
+    name: 'Monum. Al-Qods',
+    fullName: 'Monument Al-Qoods (Al-Qods)',
+    subtitle: 'Solidarité Internationale & Fraternité',
+    regionId: 'bamako',
+    regionName: 'Bamako',
+    normalizedPosition: Offset(274, 619),
+    latitude: 12.6360,
+    longitude: -8.0250,
+    category: HistoricalPlaceCategory.monument,
+    tag: 'Fraternité Internationale',
+    era: 'Rond-point d\'Hamdallaye ACI 2000',
+    photoUrl: 'assets/images/culture/monuments/monument_al_quouds/qu1.jpg',
+    description:
+        'Dôme doré inspiré de la coupole du Rocher, rehaussé d\'arcades orientales et d\'un croissant commémoratif sur un rond-point moderne.',
+    keyFact: 'Rappel des liens d\'amitié et de paix entre les peuples',
+    routePath: '/culture/monuments',
+    scannerId: 'monument_al_quouds',
+    icon: Icons.stars_rounded,
+  );
+
+  static const MaliHistoricalPlaceMarker malibaBamako =
+      MaliHistoricalPlaceMarker(
+    id: 'monument_maliba_bamako',
+    name: 'Monum. MaliBa',
+    fullName: 'Monument MaliBa (Grand Mali)',
+    subtitle: 'Fierté Patriotique & Lettres Tricolores',
+    regionId: 'bamako',
+    regionName: 'Bamako',
+    normalizedPosition: Offset(280, 611),
+    latitude: 12.6480,
+    longitude: -8.0010,
+    category: HistoricalPlaceCategory.monument,
+    tag: 'Fierté Patriotique',
+    era: 'Centre civique de Bamako',
+    photoUrl: 'assets/images/culture/monuments/monument_maliba_bamako/mb5.jpg',
+    description:
+        'Lettres monumentales en 3D « M A L I B A » aux couleurs nationales Vert, Jaune et Rouge incarnant l\'attachement de la jeunesse.',
+    keyFact: 'Point photo civique et symbole populaire de l\'unité nationale',
+    routePath: '/culture/monuments',
+    scannerId: 'monument_maliba_bamako',
+    icon: Icons.emoji_flags_rounded,
+  );
+
+  static const MaliHistoricalPlaceMarker obelisqueBamako =
+      MaliHistoricalPlaceMarker(
+    id: 'monument_obelisque_bamako',
+    name: 'Obélisque',
+    fullName: 'Obélisque de Bamako',
+    subtitle: 'Cœur Civique & Stèle Commémorative',
+    regionId: 'bamako',
+    regionName: 'Bamako',
+    normalizedPosition: Offset(282, 610),
+    latitude: 12.6510,
+    longitude: -7.9985,
+    category: HistoricalPlaceCategory.monument,
+    tag: 'Cœur Civique & Historique',
+    era: 'Avenue de la Liberté',
+    photoUrl: 'assets/images/culture/monuments/monument_obelisque_bamako/ob14.jpg',
+    description:
+        'Obélisque monolithique en pierre érigé au carrefour urbain historique à proximité immédiate de la Place de la Liberté.',
+    keyFact: 'Repère visuel séculaire dans l\'urbanisme de la capitale',
+    routePath: '/culture/monuments',
+    scannerId: 'monument_obelisque_bamako',
+    icon: Icons.vertical_align_top_rounded,
+  );
+
+  static const MaliHistoricalPlaceMarker placeDeLaLiberte =
+      MaliHistoricalPlaceMarker(
+    id: 'monument_Place_de_la_liberté',
+    name: 'Place Liberté',
+    fullName: 'Place de la Liberté de Bamako',
+    subtitle: 'Urbanisme & Cœur Battant de la République',
+    regionId: 'bamako',
+    regionName: 'Bamako',
+    normalizedPosition: Offset(282, 609),
+    latitude: 12.6514,
+    longitude: -7.9982,
+    category: HistoricalPlaceCategory.monument,
+    tag: 'Urbanisme & Histoire',
+    era: 'Esplanade centrale de Bamako',
+    photoUrl: 'assets/images/culture/monuments/monument_Place_de_la_liberté/lib10.jpg',
+    description:
+        'Vaste place circulaire arborée formant le carrefour institutionnel majeur de la capitale, bordée de fontaines et de verdure.',
+    keyFact: 'Cœur battant historique et carrefour des grandes artères républicaines',
+    routePath: '/culture/monuments',
+    scannerId: 'monument_Place_de_la_liberté',
+    icon: Icons.place_rounded,
+  );
+
+  // ── 8. KOULIKORO ───────────────────────────────────────────────────────────
   static const MaliHistoricalPlaceMarker kamablonKangaba =
       MaliHistoricalPlaceMarker(
     id: 'monument_kamablon_kangaba',
@@ -576,8 +807,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     icon: Icons.temple_buddhist_rounded,
   );
 
-
-  // ── 8. KIDAL ───────────────────────────────────────────────────────────────
+  // ── 9. KIDAL ───────────────────────────────────────────────────────────────
   static const MaliHistoricalPlaceMarker adrarIfoghas =
       MaliHistoricalPlaceMarker(
     id: 'monument_adrar_ifoghas',
@@ -623,17 +853,28 @@ abstract final class MaliHistoricalPlacesRegistry {
     icon: Icons.night_shelter_rounded,
   );
 
-  /// Liste complète de tous les lieux historiques géoréférencés
+  /// Liste complète de tous les lieux et monuments historiques géoréférencés du Mali
   static const List<MaliHistoricalPlaceMarker> all = [
-    // Bamako (priorité capitale)
+    // ── Bamako (tous les 17 monuments de la capitale géoréférencés) ──
     monumentIndependance,
     tourAfrique,
     monumentPaix,
     monumentArmeeNoire,
-    museeNationalBamako,
     ciwaraSenou,
+    museeNationalBamako,
+    samoryToure,
+    martyrsBamako,
     palaisCultureBamako,
-    // Autres régions du Mali
+    kwameNkrumah,
+    cathedraleBamako,
+    mosqueeBamako,
+    sogolonBamako,
+    alQoudsBamako,
+    malibaBamako,
+    obelisqueBamako,
+    placeDeLaLiberte,
+
+    // ── Monuments et sites des Régions du Mali ──
     sankore,
     djingareyber,
     villeTombouctou,
@@ -700,7 +941,7 @@ abstract final class MaliRegionCoordinates {
   static double getRegionZoom(String? regionId) {
     switch (regionId) {
       case 'bamako':
-        return 12.5;
+        return 13.2;
       case 'tombouctou':
         return 12.0; // Zoom immersif sur les 3 monuments de la ville
       case 'segou':

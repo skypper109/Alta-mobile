@@ -73,7 +73,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
           _allMarkers.where((m) => m.id == widget.selectedPlaceId).firstOrNull;
       if (place != null) {
         final currentZoom = _mapController.camera.zoom;
-        final targetZoom = currentZoom < 10.0 ? 11.5 : currentZoom;
+        final targetZoom = currentZoom < 15.5 ? 16.5 : currentZoom;
         _animatedMapMove(place.latLng, targetZoom);
         return;
       }
@@ -123,7 +123,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     );
 
     final controller = AnimationController(
-      duration: const Duration(milliseconds: 650),
+      duration: const Duration(milliseconds: 550),
       vsync: this,
     );
     _cameraAnimController = controller;
@@ -156,8 +156,8 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
   void _zoomIn() {
     HapticFeedback.lightImpact();
     final camera = _mapController.camera;
-    if (camera.zoom < 18.0) {
-      _animatedMapMove(camera.center, (camera.zoom + 1.2).clamp(4.0, 18.0));
+    if (camera.zoom < 20.0) {
+      _animatedMapMove(camera.center, (camera.zoom + 1.2).clamp(4.0, 20.0));
     }
   }
 
@@ -165,8 +165,17 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     HapticFeedback.lightImpact();
     final camera = _mapController.camera;
     if (camera.zoom > 4.5) {
-      _animatedMapMove(camera.center, (camera.zoom - 1.2).clamp(4.0, 18.0));
+      _animatedMapMove(camera.center, (camera.zoom - 1.2).clamp(4.0, 20.0));
     }
+  }
+
+  void _focusBamako() {
+    HapticFeedback.mediumImpact();
+    widget.onRegionSelected('bamako');
+    _animatedMapMove(
+      MaliRegionCoordinates.getRegionCenter('bamako'),
+      13.5,
+    );
   }
 
   void _toggleMapLayer() {
@@ -237,7 +246,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
               initialCenter: initialCenter,
               initialZoom: initialZoom,
               minZoom: 4.5,
-              maxZoom: 18.0,
+              maxZoom: 20.0,
               interactionOptions: const InteractionOptions(
                 flags: InteractiveFlag.all,
               ),
@@ -249,59 +258,36 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
               },
             ),
             children: [
-              // ── A. TUILES FOND DE CARTE (PLAN OU SATELLITE RÉEL) ───────────
+              // ── A. TUILES FOND DE CARTE GOOGLE MAPS HAUTE DÉFINITION ─────────
               if (isSatellite) ...[
-                // Vue Satellite haute résolution Esri World Imagery (100% gratuit, sans clé)
+                // Vue Satellite Google Maps Hybride (photographies réelles satellite + routes & repères)
                 TileLayer(
                   urlTemplate:
-                      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                  maxNativeZoom: 15,
-                  maxZoom: 18.0,
-                  keepBuffer: 1,
-                  panBuffer: 0,
-                  errorTileCallback: (tile, error, stackTrace) {
-                    // Absorbe silencieusement les micro-coupures réseau sans bloquer le débogueur
-                  },
-                ),
-                // Calque transparent des frontières et noms de villes
-                TileLayer(
-                  urlTemplate:
-                      'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-                  maxNativeZoom: 15,
-                  maxZoom: 18.0,
-                  keepBuffer: 1,
-                  panBuffer: 0,
-                  errorTileCallback: (tile, error, stackTrace) {
-                    // Absorbe silencieusement les erreurs réseau
-                  },
-                ),
-              ] else ...[
-                // Carte OpenStreetMap France / Humanitaire (sans warning console, ultra-rapide)
-                TileLayer(
-                  urlTemplate:
-                      'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-                  subdomains: const ['a', 'b', 'c'],
+                      'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+                  subdomains: const ['0', '1', '2', '3'],
                   userAgentPackageName: 'com.alternia.det_mobile',
-                  maxNativeZoom: 18,
-                  maxZoom: 19.0,
-                  keepBuffer: 1,
-                  panBuffer: 0,
+                  maxNativeZoom: 20,
+                  maxZoom: 20.0,
+                  keepBuffer: 2,
+                  panBuffer: 1,
                   errorTileCallback: (tile, error, stackTrace) {
                     // Absorbe silencieusement les micro-coupures réseau
                   },
-                  tileBuilder: isDark
-                      ? (context, tileWidget, tile) {
-                          return ColorFiltered(
-                            colorFilter: const ColorFilter.matrix(<double>[
-                              -0.80, 0.0, 0.0, 0.0, 240.0,
-                              0.0, -0.80, 0.0, 0.0, 240.0,
-                              0.0, 0.0, -0.80, 0.0, 240.0,
-                              0.0, 0.0, 0.0, 1.0, 0.0,
-                            ]),
-                            child: tileWidget,
-                          );
-                        }
-                      : null,
+                ),
+              ] else ...[
+                // Vue Plan Google Maps officiel (haute lisibilité routière et urbaine)
+                TileLayer(
+                  urlTemplate:
+                      'https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+                  subdomains: const ['0', '1', '2', '3'],
+                  userAgentPackageName: 'com.alternia.det_mobile',
+                  maxNativeZoom: 20,
+                  maxZoom: 20.0,
+                  keepBuffer: 2,
+                  panBuffer: 1,
+                  errorTileCallback: (tile, error, stackTrace) {
+                    // Absorbe silencieusement les micro-coupures réseau
+                  },
                 ),
               ],
 
@@ -401,7 +387,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
                       onTap: () {
                         final currentZoom = _mapController.camera.zoom;
                         final targetZoom =
-                            currentZoom < 10.0 ? 11.5 : currentZoom;
+                            currentZoom < 15.5 ? 16.5 : currentZoom;
                         _animatedMapMove(marker.latLng, targetZoom);
                         widget.onPlaceSelected?.call(marker);
                       },
@@ -412,7 +398,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
             ],
           ),
 
-          // ── 2. SÉLECTEUR DE VUE FLOTTANT (PLAN / SATELLITE) (Haut Gauche) ──
+          // ── 2. SÉLECTEUR DE VUE FLOTTANT (GOOGLE PLAN / SATELLITE HD) (Haut Gauche) ──
           Positioned(
             top: 14,
             left: 14,
@@ -437,7 +423,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     );
   }
 
-  // ── SÉLECTEUR DE COUCHE FLOTTANT (PLAN / SATELLITE RÉEL) ───────────────────
+  // ── SÉLECTEUR DE COUCHE FLOTTANT (GOOGLE PLAN / SATELLITE HYBRIDE) ─────────
   Widget _buildLayerToggleSwitch(bool isSatellite, bool isDark) {
     return GestureDetector(
       onTap: _toggleMapLayer,
@@ -475,7 +461,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
             ),
             const SizedBox(width: 6),
             Text(
-              isSatellite ? 'Vue Satellite' : 'Vue Plan',
+              isSatellite ? 'Google Satellite' : 'Google Plan',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w800,
@@ -490,7 +476,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     );
   }
 
-  // ── COMMANDES FLOTTANTES ZOOM IN / OUT / RECENTRER ─────────────────────────
+  // ── COMMANDES FLOTTANTES ZOOM IN / OUT / BAMAKO / RECENTRER ────────────────
   Widget _buildZoomControls(bool isDark, bool isSatellite) {
     final bgColor = (isDark || isSatellite
             ? const Color(0xFF0F172A)
@@ -532,7 +518,27 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
           ),
           Container(width: 24, height: 1, color: borderCol),
 
-          // Recentrer sur le Mali (Bouton central Google Maps)
+          // Raccourci Focus Bamako (Zoom 13.5 direct sur la capitale)
+          GestureDetector(
+            onTap: _focusBamako,
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+              width: 40,
+              height: 36,
+              child: Center(
+                child: Icon(
+                  Icons.location_city_rounded,
+                  size: 19,
+                  color: (widget.selectedRegionId == 'bamako')
+                      ? const Color(0xFF00E676)
+                      : iconColor.withValues(alpha: 0.75),
+                ),
+              ),
+            ),
+          ),
+          Container(width: 24, height: 1, color: borderCol),
+
+          // Recentrer sur le Mali global
           GestureDetector(
             onTap: _recenterOverview,
             behavior: HitTestBehavior.opaque,
@@ -573,7 +579,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
   // ── BADGE D'INDICATION INTERACTIF ──────────────────────────────────────────
   Widget _buildInteractiveHintBadge(bool isDark, bool isSatellite) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: (isDark || isSatellite
                 ? const Color(0xFF0F172A)
@@ -601,20 +607,19 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
             width: 7,
             height: 7,
             decoration: const BoxDecoration(
-              color: Color(0xFFE53935),
+              color: Color(0xFF00E676),
               shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 6),
           Text(
-            '${_allMarkers.length} sites historiques',
+            'Google Maps HD · ${_allMarkers.length} Sites',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 10,
               fontWeight: FontWeight.w800,
               color: isDark || isSatellite
                   ? Colors.white
                   : const Color(0xFF1E284A),
-              letterSpacing: -0.2,
             ),
           ),
         ],
