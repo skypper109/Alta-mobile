@@ -289,15 +289,16 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
             children: [
               // ── A. TUILES FOND DE CARTE HAUTE DÉFINITION & STABILITÉ ─────────
               if (isSatellite) ...[
-                // Vue Satellite Esri World Imagery (fluide, sans timeout ni exception au débogueur)
+                // Vue Satellite Google Maps Hybrid (haute résolution sub-métrique sans filigrane 'not yet available')
                 TileLayer(
                   urlTemplate:
-                      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                      'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+                  subdomains: const ['0', '1', '2', '3'],
                   fallbackUrl:
-                      'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                   userAgentPackageName: 'com.alternia.det_mobile',
-                  maxNativeZoom: 18,
-                  maxZoom: 19.0,
+                  maxNativeZoom: 19,
+                  maxZoom: 20.0,
                   keepBuffer: 3,
                   panBuffer: 1,
                   tileProvider: NetworkTileProvider(
@@ -326,29 +327,6 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
                   errorTileCallback: (tile, error, stackTrace) {},
                 ),
               ],
-
-              // ── B. DÉLIMITATIONS GÉOGRAPHIQUES RÉGIONALES DU MALI ────────────
-              PolygonLayer(
-                polygons: MaliGeoRegionsRegistry.allRegions.map((boundary) {
-                  final isSelected = widget.selectedRegionId == boundary.id;
-                  final isAnySelected = widget.selectedRegionId != null;
-
-                  return Polygon(
-                    points: boundary.polygon,
-                    color: isSelected
-                        ? boundary.color.withValues(alpha: isSatellite ? 0.32 : 0.24)
-                        : (isAnySelected
-                            ? boundary.color.withValues(alpha: isSatellite ? 0.05 : 0.03)
-                            : boundary.color.withValues(alpha: isSatellite ? 0.16 : 0.10)),
-                    borderColor: isSelected
-                        ? Colors.white
-                        : (isSatellite
-                            ? boundary.color.withValues(alpha: 0.90)
-                            : boundary.color.withValues(alpha: 0.70)),
-                    borderStrokeWidth: isSelected ? 2.8 : 1.5,
-                  );
-                }).toList(),
-              ),
 
               // ── B. CALQUE DES VILLES PRINCIPALES DU MALI ───────────────────
               MarkerLayer(
