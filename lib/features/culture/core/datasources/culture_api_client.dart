@@ -10,31 +10,48 @@ class CultureApiClient {
   final Logger _logger;
   String _activeBaseUrl = AltaApiConfig.serverBaseUrl;
 
+  bool _isResolving = false;
+
   CultureApiClient({Dio? dio, Logger? logger})
       : _dio = dio ??
             Dio(
               BaseOptions(
-                connectTimeout: const Duration(seconds: 4),
-                receiveTimeout: const Duration(seconds: 6),
+                connectTimeout: const Duration(seconds: 3),
+                receiveTimeout: const Duration(seconds: 4),
               ),
             ),
-        _logger = logger ?? Logger();
+        _logger = logger ?? Logger() {
+    // Vérification asynchrone des serveurs disponibles (local et cloud)
+    resolveActiveUrl();
+  }
 
   String get activeBaseUrl => _activeBaseUrl;
 
   /// Tente de résoudre l'URL active la plus réactive parmi les candidates
   Future<String> resolveActiveUrl() async {
-    for (final url in AltaApiConfig.candidateBaseUrls) {
-      try {
-        final res = await _dio.get('$url/api/v1/culture/health');
-        if (res.statusCode == 200) {
-          _activeBaseUrl = url;
-          _logger.i('✅ Serveur CultureLens connecté sur : $url');
-          return url;
+    if (_isResolving) return _activeBaseUrl;
+    _isResolving = true;
+    try {
+      for (final url in AltaApiConfig.candidateBaseUrls) {
+        try {
+          final res = await _dio.get(
+            '$url/api/v1/culture/health',
+            options: Options(
+              sendTimeout: const Duration(milliseconds: 1500),
+              receiveTimeout: const Duration(milliseconds: 1500),
+            ),
+          );
+          if (res.statusCode == 200) {
+            _activeBaseUrl = url;
+            _logger.i('✅ Serveur CultureLens connecté sur : $url');
+            return url;
+          }
+        } catch (_) {
+          // Continue vers la suivante si inaccessible
         }
-      } catch (_) {
-        // Continue vers la suivante
       }
+    } finally {
+      _isResolving = false;
     }
     return _activeBaseUrl;
   }
@@ -94,8 +111,11 @@ class CultureApiClient {
           return MonumentScanResult.fromJson(data);
         }
       }
+    } on DioException catch (dioErr) {
+      final code = dioErr.response?.statusCode;
+      _logger.d('CultureApiClient.identifyMonument : distant non joignable ($code) — passage au mode hors ligne');
     } catch (e) {
-      _logger.w('CultureApiClient.identifyMonument offline : $e');
+      _logger.d('CultureApiClient.identifyMonument fallback : $e');
     }
     return null;
   }
@@ -175,8 +195,11 @@ class CultureApiClient {
         data: payload,
       );
       return res.statusCode == 200;
+    } on DioException catch (dioErr) {
+      _logger.d('CultureApiClient.recordDiscovery conservé localement (${dioErr.response?.statusCode ?? "hors-ligne"})');
+      return false;
     } catch (e) {
-      _logger.w('CultureApiClient.recordDiscovery : $e');
+      _logger.d('CultureApiClient.recordDiscovery : $e');
       return false;
     }
   }
@@ -193,6 +216,97 @@ class CultureApiClient {
       }
     } catch (e) {
       _logger.w('CultureApiClient.fetchDiscoveries : $e');
+    }
+    return [];
+  }
+
+  /// Récupère la fiche détaillée d'un monument
+  Future<Map<String, dynamic>?> fetchMonumentDetail(String monumentId) async {
+    try {
+      final res = await _dio.get('$_activeBaseUrl/api/v1/culture/monuments/$monumentId');
+      if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
+        return res.data as Map<String, dynamic>;
+      }
+    } catch (e) {
+      _logger.d('CultureApiClient.fetchMonumentDetail fallback : $e');
+    }
+    return null;
+  }
+
+  /// Récupère la liste des personnages historiques
+  Future<List<Map<String, dynamic>>> fetchFigures() async {
+    try {
+      final res = await _dio.get('$_activeBaseUrl/api/v1/culture/figures');
+      if (res.statusCode == 200 && res.data is List) {
+        return (res.data as List).whereType<Map<String, dynamic>>().toList();
+      }
+    } catch (e) {
+      _logger.d('CultureApiClient.fetchFigures fallback : $e');
+    }
+    return [];
+  }
+
+  /// Récupère la fiche détaillée d'un personnage historique
+  Future<Map<String, dynamic>?> fetchFigureDetail(String figureId) async {
+    try {
+      final res = await _dio.get('$_activeBaseUrl/api/v1/culture/figures/$figureId');
+      if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
+        return res.data as Map<String, dynamic>;
+      }
+    } catch (e) {
+      _logger.d('CultureApiClient.fetchFigureDetail fallback : $e');
+    }
+    return null;
+  }
+
+  /// Récupère la liste des terroirs et cités historiques
+  Future<List<Map<String, dynamic>>> fetchPlaces() async {
+    try {
+      final res = await _dio.get('$_activeBaseUrl/api/v1/culture/places');
+      if (res.statusCode == 200 && res.data is List) {
+        return (res.data as List).whereType<Map<String, dynamic>>().toList();
+      }
+    } catch (e) {
+      _logger.d('CultureApiClient.fetchPlaces fallback : $e');
+    }
+    return [];
+  }
+
+  /// Récupère la fiche détaillée d'une ville ou terroir historique
+  Future<Map<String, dynamic>?> fetchPlaceDetail(String placeId) async {
+    try {
+      final res = await _dio.get('$_activeBaseUrl/api/v1/culture/places/$placeId');
+      if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
+        return res.data as Map<String, dynamic>;
+      }
+    } catch (e) {
+      _logger.d('CultureApiClient.fetchPlaceDetail fallback : $e');
+    }
+    return null;
+  }
+
+  /// Récupère les contes
+  Future<List<Map<String, dynamic>>> fetchStories() async {
+    try {
+      final res = await _dio.get('$_activeBaseUrl/api/v1/culture/stories');
+      if (res.statusCode == 200 && res.data is List) {
+        return (res.data as List).whereType<Map<String, dynamic>>().toList();
+      }
+    } catch (e) {
+      _logger.d('CultureApiClient.fetchStories fallback : $e');
+    }
+    return [];
+  }
+
+  /// Récupère les proverbes et énigmes
+  Future<List<Map<String, dynamic>>> fetchProverbs() async {
+    try {
+      final res = await _dio.get('$_activeBaseUrl/api/v1/culture/proverbs');
+      if (res.statusCode == 200 && res.data is List) {
+        return (res.data as List).whereType<Map<String, dynamic>>().toList();
+      }
+    } catch (e) {
+      _logger.d('CultureApiClient.fetchProverbs fallback : $e');
     }
     return [];
   }

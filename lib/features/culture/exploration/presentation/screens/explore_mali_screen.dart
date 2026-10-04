@@ -761,31 +761,35 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                     foregroundColor: Colors.white,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
+                      horizontal: 8,
                       vertical: 10,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(13),
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Fiche complète',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Fiche complète',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 14,
                           color: Colors.white,
                         ),
-                      ),
-                      const SizedBox(width: 5),
-                      const Icon(
-                        Icons.arrow_forward_rounded,
-                        size: 15,
-                        color: Colors.white,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -801,31 +805,35 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
                     foregroundColor: const Color(0xFFDF6E21),
                     side: const BorderSide(color: Color(0xFFDF6E21), width: 1.2),
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
+                      horizontal: 6,
                       vertical: 10,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(13),
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.document_scanner_rounded,
-                        size: 15,
-                        color: Color(0xFFDF6E21),
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        'Scanner IA',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFFDF6E21),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.document_scanner_rounded,
+                          size: 14,
+                          color: Color(0xFFDF6E21),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 4),
+                        Text(
+                          'Scanner',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFFDF6E21),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

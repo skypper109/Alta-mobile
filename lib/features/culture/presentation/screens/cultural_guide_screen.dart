@@ -133,7 +133,7 @@ class _CulturalGuideScreenState extends State<CulturalGuideScreen> {
                       ),
                     ),
                     child: const Icon(
-                      Icons.smart_toy_rounded,
+                      Icons.auto_stories_rounded,
                       color: CultureTheme.accentOrange,
                       size: 22,
                     ),
@@ -146,7 +146,7 @@ class _CulturalGuideScreenState extends State<CulturalGuideScreen> {
                         Row(
                           children: [
                             Text(
-                              'Guide Culturel IA',
+                              'Guide du Patrimoine',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w800,

@@ -31,7 +31,7 @@ class _CultureOfflinePacksModalState extends ConsumerState<CultureOfflinePacksMo
   final List<Map<String, dynamic>> _availablePacks = [
     {
       'id': 'pack_bamako_capitale',
-      'title': 'Pack Bamako — Capitale & Monuments',
+      'title': 'Bamako — Capitale & Monuments',
       'description': '12 monuments complets (Indépendance, Tour de l\'Afrique, Paix, Héros, Musée National...), narrations audio et coordonnées GPS.',
       'sizeMo': 14.8,
       'elementsCount': 12,
@@ -39,7 +39,7 @@ class _CultureOfflinePacksModalState extends ConsumerState<CultureOfflinePacksMo
     },
     {
       'id': 'pack_mali_patrimoine_mondial',
-      'title': 'Pack Trésors UNESCO du Mali',
+      'title': 'Trésors UNESCO du Mali',
       'description': 'Grande Mosquée de Djenné, Tombeau des Askia de Gao, Mosquées de Tombouctou et Sanctuaire Kamablon de Kangaba.',
       'sizeMo': 22.4,
       'elementsCount': 8,
@@ -47,7 +47,7 @@ class _CultureOfflinePacksModalState extends ConsumerState<CultureOfflinePacksMo
     },
     {
       'id': 'pack_tombouctou_savoir',
-      'title': 'Pack Tombouctou — Cité des Saints',
+      'title': 'Tombouctou — Cité des Savoirs',
       'description': 'Bibliothèques de manuscrits, astronomie médiévale africaine et sanctuaires de Sankoré et Djingareyber.',
       'sizeMo': 18.2,
       'elementsCount': 6,
@@ -55,7 +55,7 @@ class _CultureOfflinePacksModalState extends ConsumerState<CultureOfflinePacksMo
     },
     {
       'id': 'pack_sud_resistances',
-      'title': 'Pack Sud & Résistances',
+      'title': 'Région Sud & Résistances',
       'description': 'La forteresse du Tata de Sikasso, le Fort de Médine à Kayes et les Monts Mandingues.',
       'sizeMo': 16.5,
       'elementsCount': 8,
@@ -166,7 +166,7 @@ class _CultureOfflinePacksModalState extends ConsumerState<CultureOfflinePacksMo
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Packs Hors Ligne CultureLens',
+                        'Guides Sans Connexion',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,

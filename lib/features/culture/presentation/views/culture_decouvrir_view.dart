@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
-import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
@@ -56,15 +56,20 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
 
     final categoryColor = _getCategoryColor(_selectedFilterIndex);
 
+    // Données réelles issues de la base de données centrale
+    final figuresAsync = ref.watch(cultureFiguresProvider);
+    final monumentsAsync = ref.watch(cultureMonumentsProvider);
+    final villesAsync = ref.watch(cultureVillesProvider);
+
     // Filtre par région
     final regionId = activeRegion?.id;
-    final figures = MockCultureStage1Data.personnages
+    final figures = (figuresAsync.valueOrNull ?? [])
         .where((i) => i.matchesRegion(regionId))
         .toList();
-    final monuments = MockCultureStage1Data.monuments
+    final monuments = (monumentsAsync.valueOrNull ?? [])
         .where((i) => i.matchesRegion(regionId))
         .toList();
-    final villes = MockCultureStage1Data.villes
+    final villes = (villesAsync.valueOrNull ?? [])
         .where((i) => i.matchesRegion(regionId))
         .toList();
 

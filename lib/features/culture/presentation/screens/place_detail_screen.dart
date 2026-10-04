@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/controllers/culture_passport_controller.dart';
-import '../../core/datasources/mock_culture_details_data.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_detail_models.dart';
 import '../../core/models/culture_passport_models.dart';
@@ -71,9 +71,26 @@ class _PlaceDetailScreenState extends ConsumerState<PlaceDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final item = widget.place ?? MockCultureDetailsData.getPlaceById(widget.id);
-    final activeRegion = ref.watch(activeCultureRegionProvider).activeRegion;
+    final detailAsync = widget.place != null
+        ? null
+        : ref.watch(placeDetailProvider(widget.id));
+    final item = widget.place ?? detailAsync?.valueOrNull;
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (item == null) {
+      return Scaffold(
+        backgroundColor:
+            isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: isDark ? CultureTheme.orPatrimoine : CultureTheme.primaryDark,
+          ),
+        ),
+      );
+    }
+
+    final activeRegion = ref.watch(activeCultureRegionProvider).activeRegion;
 
     // Enregistrement automatique au Passeport Culturel
     WidgetsBinding.instance.addPostFrameCallback((_) {

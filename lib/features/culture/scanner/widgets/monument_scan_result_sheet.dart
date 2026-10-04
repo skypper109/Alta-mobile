@@ -156,7 +156,7 @@ class _MonumentScanResultSheetState extends ConsumerState<MonumentScanResultShee
                               ),
                               const SizedBox(width: 5),
                               Text(
-                                '${result.confidencePercent} CERTITUDE IA',
+                                'MONUMENT IDENTIFIÉ',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
@@ -348,7 +348,7 @@ class _MonumentScanResultSheetState extends ConsumerState<MonumentScanResultShee
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
-                                        'GRIOT IA',
+                                        'GRIOT',
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 8.5,
                                           fontWeight: FontWeight.w800,
@@ -453,13 +453,10 @@ class _MonumentScanResultSheetState extends ConsumerState<MonumentScanResultShee
                                   color: CultureTheme.accentOrange.withValues(alpha: 0.20),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: Text(
-                                  feat.confidencePercent,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w800,
-                                    color: CultureTheme.accentOrange,
-                                  ),
+                                child: const Icon(
+                                  Icons.check_rounded,
+                                  size: 11,
+                                  color: CultureTheme.accentOrange,
                                 ),
                               ),
                             ],
@@ -600,8 +597,8 @@ class _MonumentScanResultSheetState extends ConsumerState<MonumentScanResultShee
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildActionCircle(
-                          icon: Icons.smart_toy_rounded,
-                          label: 'Guide IA',
+                          icon: Icons.auto_stories_rounded,
+                          label: 'Le Guide',
                           color: CultureTheme.primaryBlue,
                           surfaceAlt: surfaceAlt,
                           borderCol: borderCol,

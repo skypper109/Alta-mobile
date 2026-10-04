@@ -771,7 +771,7 @@ class _Monument3DViewerModalState extends State<Monument3DViewerModal>
                       Row(
                         children: [
                           Text(
-                            'Jumeau Spatial 3D',
+                            'Modèle 3D',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -786,7 +786,7 @@ class _Monument3DViewerModalState extends State<Monument3DViewerModal>
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'HAUTE FIDÉLITÉ',
+                              'DÉTAILS',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w800,
@@ -922,7 +922,7 @@ class _Monument3DViewerModalState extends State<Monument3DViewerModal>
                       const SizedBox(height: 8),
                       _buildHudPill(
                         icon: Icons.grid_4x4_rounded,
-                        tooltip: 'Affichage écorché fil de fer',
+                        tooltip: 'Afficher la structure',
                         isActive: _showWireframe,
                         onTap: () {
                           HapticFeedback.selectionClick();

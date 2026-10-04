@@ -98,7 +98,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
         actions: [
           // Bouton Guide IA avec contexte Passeport
           IconButton(
-            tooltip: 'Conseils personnalisés de l\'IA',
+            tooltip: 'Conseils de découverte',
             icon: Container(
               padding: const EdgeInsets.all(7),
               decoration: BoxDecoration(
@@ -952,7 +952,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
         const guideContext = CulturalGuideContext(
           contentType: CulturalContentType.passeport,
           contentTitle: 'Mon Passeport Culturel',
-          subtitle: 'Conseils & prochaines découvertes suggérées par l\'IA',
+          subtitle: 'Conseils & prochaines découvertes suggérées',
         );
         context.push('/culture/sage', extra: guideContext);
       },
@@ -986,7 +986,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Guide Culturel IA & Votre Parcours',
+                    'Le Guide & Votre Parcours',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
@@ -995,7 +995,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'L\'IA analyse votre Passeport pour vous recommander vos prochaines découvertes au Mali.',
+                    'Découvrez les prochaines étapes recommandées pour enrichir votre découverte du Mali.',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w500,

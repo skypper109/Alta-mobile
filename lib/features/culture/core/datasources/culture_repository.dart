@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
@@ -7,7 +8,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../scanner/data/monument_scan_knowledge.dart';
 import '../../scanner/models/monument_scan_models.dart';
+import '../models/culture_detail_models.dart';
+import '../models/culture_item.dart';
 import 'culture_api_client.dart';
+import 'culture_database_seed.dart';
 
 /// Provider Riverpod global pour CultureApiClient
 final cultureApiClientProvider = Provider<CultureApiClient>((ref) {
@@ -29,6 +33,11 @@ class CultureRepository {
   static const String _historyPrefKey = 'culture_scan_history_json';
   static const String _installedPacksPrefKey = 'culture_installed_packs';
   static const String _cachedMonumentsPrefKey = 'culture_cached_monuments_json';
+  static const String _cachedMonumentsCultureItemsPrefKey = 'culture_cached_monuments_items_json';
+  static const String _cachedFiguresPrefKey = 'culture_cached_figures_json';
+  static const String _cachedPlacesPrefKey = 'culture_cached_places_json';
+  static const String _cachedStoriesPrefKey = 'culture_cached_stories_json';
+  static const String _cachedProverbsPrefKey = 'culture_cached_proverbs_json';
 
   CultureRepository({
     CultureApiClient? apiClient,
@@ -343,5 +352,349 @@ class CultureRepository {
       }
     } catch (_) {}
     return [];
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // ACCÈS DIRECT BASE DE DONNÉES / API POUR TOUS LES MODULES CULTURELS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /// Récupère les monuments sous forme de CultureItem (depuis la base de données)
+  Future<List<CultureItem>> getMonumentsAsCultureItems({
+    String? regionId,
+    String? query,
+  }) async {
+    // 1. Appel API vers la base de données centrale
+    final remote = await _apiClient.fetchMonuments(
+      regionId: regionId,
+      query: query,
+    );
+    if (remote.isNotEmpty) {
+      final items = remote.map((t) => CultureItem(
+        id: t.id,
+        title: t.name,
+        subtitle: t.subtitle,
+        category: 'decouvrir',
+        subCategory: 'monuments',
+        description: t.historicalStory.isNotEmpty ? t.historicalStory : t.secretsAndMysteries,
+        regionId: t.regionId,
+        regionName: t.regionName,
+        tag: t.tag,
+        icon: Icons.museum_rounded,
+        imageUrl: t.photoUrl,
+        info: t.era,
+      )).toList();
+      _cacheCultureItemsLocally(_cachedMonumentsCultureItemsPrefKey, items);
+      return _filterCultureItems(items, regionId: regionId, query: query);
+    }
+
+    // 2. Cache local persistant de la base
+    final cached = await _loadCachedCultureItems(_cachedMonumentsCultureItemsPrefKey);
+    if (cached.isNotEmpty) {
+      return _filterCultureItems(cached, regionId: regionId, query: query);
+    }
+
+    // 3. Fallback sur le catalogue certifié
+    final fallback = MonumentScanKnowledge.targets.map((t) => CultureItem(
+      id: t.id,
+      title: t.name,
+      subtitle: t.subtitle,
+      category: 'decouvrir',
+      subCategory: 'monuments',
+      description: t.historicalStory.isNotEmpty ? t.historicalStory : t.secretsAndMysteries,
+      regionId: t.regionId,
+      regionName: t.regionName,
+      tag: t.tag,
+      icon: Icons.museum_rounded,
+      imageUrl: t.photoUrl,
+      info: t.era,
+    )).toList();
+    _cacheCultureItemsLocally(_cachedMonumentsCultureItemsPrefKey, fallback);
+    return _filterCultureItems(fallback, regionId: regionId, query: query);
+  }
+
+  /// Récupère les personnages historiques (depuis la base de données)
+  Future<List<CultureItem>> getFiguresAsCultureItems({
+    String? regionId,
+    String? query,
+  }) async {
+    final remote = await _apiClient.fetchFigures();
+    if (remote.isNotEmpty) {
+      final items = remote.map((j) => CultureItem.fromFigure(j)).toList();
+      _cacheCultureItemsLocally(_cachedFiguresPrefKey, items);
+      return _filterCultureItems(items, regionId: regionId, query: query);
+    }
+
+    final cached = await _loadCachedCultureItems(_cachedFiguresPrefKey);
+    if (cached.isNotEmpty) {
+      return _filterCultureItems(cached, regionId: regionId, query: query);
+    }
+
+    final initial = CultureDatabaseSeed.initialFigures;
+    _cacheCultureItemsLocally(_cachedFiguresPrefKey, initial);
+    return _filterCultureItems(initial, regionId: regionId, query: query);
+  }
+
+  /// Récupère les terroirs et cités historiques (depuis la base de données)
+  Future<List<CultureItem>> getPlacesAsCultureItems({
+    String? regionId,
+    String? query,
+  }) async {
+    final remote = await _apiClient.fetchPlaces();
+    if (remote.isNotEmpty) {
+      final items = remote.map((j) => CultureItem.fromPlace(j)).toList();
+      _cacheCultureItemsLocally(_cachedPlacesPrefKey, items);
+      return _filterCultureItems(items, regionId: regionId, query: query);
+    }
+
+    final cached = await _loadCachedCultureItems(_cachedPlacesPrefKey);
+    if (cached.isNotEmpty) {
+      return _filterCultureItems(cached, regionId: regionId, query: query);
+    }
+
+    final initial = CultureDatabaseSeed.initialPlaces;
+    _cacheCultureItemsLocally(_cachedPlacesPrefKey, initial);
+    return _filterCultureItems(initial, regionId: regionId, query: query);
+  }
+
+  /// Récupère les contes et fables (depuis la base de données)
+  Future<List<CultureItem>> getStoriesAsCultureItems({
+    String? regionId,
+    String? query,
+  }) async {
+    final remote = await _apiClient.fetchStories();
+    if (remote.isNotEmpty) {
+      final items = remote.map((j) => CultureItem.fromStory(j)).toList();
+      _cacheCultureItemsLocally(_cachedStoriesPrefKey, items);
+      return _filterCultureItems(items, regionId: regionId, query: query);
+    }
+
+    final cached = await _loadCachedCultureItems(_cachedStoriesPrefKey);
+    if (cached.isNotEmpty) {
+      return _filterCultureItems(cached, regionId: regionId, query: query);
+    }
+
+    final initial = CultureDatabaseSeed.initialStories;
+    _cacheCultureItemsLocally(_cachedStoriesPrefKey, initial);
+    return _filterCultureItems(initial, regionId: regionId, query: query);
+  }
+
+  /// Récupère les devinettes et sagesses (depuis la base de données)
+  Future<List<CultureItem>> getDefisAsCultureItems({
+    String? regionId,
+    String? query,
+  }) async {
+    final remote = await _apiClient.fetchProverbs();
+    if (remote.isNotEmpty) {
+      final items = remote.map((j) => CultureItem.fromProverb(j)).toList();
+      _cacheCultureItemsLocally(_cachedProverbsPrefKey, items);
+      return _filterCultureItems(items, regionId: regionId, query: query);
+    }
+
+    final cached = await _loadCachedCultureItems(_cachedProverbsPrefKey);
+    if (cached.isNotEmpty) {
+      return _filterCultureItems(cached, regionId: regionId, query: query);
+    }
+
+    final initial = CultureDatabaseSeed.initialDefis;
+    _cacheCultureItemsLocally(_cachedProverbsPrefKey, initial);
+    return _filterCultureItems(initial, regionId: regionId, query: query);
+  }
+
+  /// Récupère l'élément en vedette (depuis la base de données)
+  Future<CultureItem?> getFeaturedItem() async {
+    final figures = await getFiguresAsCultureItems();
+    final soundiata = figures.firstWhere(
+      (f) => f.id == 'perso_soundiata',
+      orElse: () => figures.isNotEmpty
+          ? figures.first
+          : const CultureItem(
+              id: 'featured_soundiata',
+              title: 'Soundiata Keïta & la Charte du Manden',
+              subtitle: 'Le fondateur de l\'Empire du Mali et la proclamation de 1236',
+              category: 'accueil',
+              subCategory: 'personnages',
+              description: 'Découvrez l\'épopée du Lion du Manden, sa victoire décisive à Kirina en 1235 et la proclamation de l\'une des premières déclarations des droits humains à Kouroukan Fouga.',
+              regionId: 'koulikoro',
+              regionName: 'Koulikoro',
+              tag: 'Épopée Majeure',
+              icon: Icons.shield_rounded,
+              imageUrl: 'assets/images/culture/personnages/soundiata.jpg',
+              isFeatured: true,
+              info: 'Lecture : 4 min',
+            ),
+    );
+    return CultureItem(
+      id: soundiata.id,
+      title: 'Soundiata Keïta & la Charte du Manden',
+      subtitle: soundiata.subtitle,
+      category: 'accueil',
+      subCategory: 'personnages',
+      description: soundiata.description,
+      regionId: soundiata.regionId,
+      regionName: soundiata.regionName,
+      tag: 'Épopée Majeure',
+      icon: Icons.shield_rounded,
+      imageUrl: soundiata.imageUrl,
+      isFeatured: true,
+      info: 'Lecture : 4 min',
+    );
+  }
+
+  /// Récupère la fiche détaillée d'un monument
+  Future<MonumentDetail?> getMonumentDetail(String id) async {
+    final remote = await _apiClient.fetchMonumentDetail(id);
+    if (remote != null) {
+      final detail = MonumentDetail.fromJson(remote);
+      _cacheDetailLocally('monument_$id', detail.toJson());
+      return detail;
+    }
+
+    final cached = await _loadCachedDetail('monument_$id');
+    if (cached != null) {
+      return MonumentDetail.fromJson(cached);
+    }
+
+    final target = MonumentScanKnowledge.findById(id);
+    if (target != null) {
+      return MonumentDetail(
+        id: target.id,
+        name: target.name,
+        subtitle: target.subtitle,
+        era: target.era,
+        regionId: target.regionId,
+        regionName: target.regionName,
+        tag: target.tag,
+        photoUrl: target.photoUrl,
+        photoCredits: 'Direction Nationale du Patrimoine',
+        locationDetails: target.locationDetails,
+        presentation: target.historicalStory,
+        architectureAndMaterials: target.architectureStyle,
+        whyItMatters: target.whyItMatters,
+        keyFacts: target.detectionFeatures
+            .map((f) => HistoricalKeyFact(label: f.label, value: f.category, icon: f.icon))
+            .toList(),
+        chapters: [
+          EditorialStoryChapter(title: 'Histoire & Origine', content: target.historicalStory),
+          EditorialStoryChapter(title: 'Secrets & Mystères', content: target.secretsAndMysteries),
+        ],
+        connectedItems: [
+          const ConnectedItemRef(
+            id: 'ville_bamako',
+            title: 'Bamako',
+            subtitle: 'La Cité des Trois Caïmans',
+            type: ConnectedItemType.ville,
+            tag: 'Capitale',
+            regionName: 'Bamako',
+          ),
+        ],
+      );
+    }
+    return null;
+  }
+
+  /// Récupère la fiche détaillée d'un personnage historique
+  Future<HistoricalFigureDetail?> getFigureDetail(String id) async {
+    final remote = await _apiClient.fetchFigureDetail(id);
+    if (remote != null) {
+      final detail = HistoricalFigureDetail.fromJson(remote);
+      _cacheDetailLocally('figure_$id', detail.toJson());
+      return detail;
+    }
+
+    final cached = await _loadCachedDetail('figure_$id');
+    if (cached != null) {
+      return HistoricalFigureDetail.fromJson(cached);
+    }
+
+    final initial = CultureDatabaseSeed.getInitialFigureDetail(id);
+    if (initial != null) {
+      _cacheDetailLocally('figure_$id', initial.toJson());
+      return initial;
+    }
+    return null;
+  }
+
+  /// Récupère la fiche détaillée d'une ville ou terroir historique
+  Future<PlaceDetail?> getPlaceDetail(String id) async {
+    final remote = await _apiClient.fetchPlaceDetail(id);
+    if (remote != null) {
+      final detail = PlaceDetail.fromJson(remote);
+      _cacheDetailLocally('place_$id', detail.toJson());
+      return detail;
+    }
+
+    final cached = await _loadCachedDetail('place_$id');
+    if (cached != null) {
+      return PlaceDetail.fromJson(cached);
+    }
+
+    final initial = CultureDatabaseSeed.getInitialPlaceDetail(id);
+    if (initial != null) {
+      _cacheDetailLocally('place_$id', initial.toJson());
+      return initial;
+    }
+    return null;
+  }
+
+  Future<void> _cacheCultureItemsLocally(String key, List<CultureItem> items) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonList = items.map((i) => i.toJson()).toList();
+      await prefs.setString(key, jsonEncode(jsonList));
+    } catch (_) {}
+  }
+
+  Future<List<CultureItem>> _loadCachedCultureItems(String key) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(key);
+      if (raw != null) {
+        final decoded = jsonDecode(raw) as List;
+        return decoded
+            .whereType<Map<String, dynamic>>()
+            .map((j) => CultureItem.fromJson(j))
+            .toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  Future<void> _cacheDetailLocally(String key, Map<String, dynamic> data) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('detail_$key', jsonEncode(data));
+    } catch (_) {}
+  }
+
+  Future<Map<String, dynamic>?> _loadCachedDetail(String key) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('detail_$key');
+      if (raw != null) {
+        return jsonDecode(raw) as Map<String, dynamic>;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  List<CultureItem> _filterCultureItems(
+    List<CultureItem> list, {
+    String? regionId,
+    String? query,
+  }) {
+    var res = list;
+    if (regionId != null && regionId.isNotEmpty && regionId != 'all') {
+      res = res.where((i) => i.matchesRegion(regionId)).toList();
+    }
+    if (query != null && query.trim().isNotEmpty) {
+      final q = query.trim().toLowerCase();
+      res = res.where((i) =>
+          i.title.toLowerCase().contains(q) ||
+          i.subtitle.toLowerCase().contains(q) ||
+          i.description.toLowerCase().contains(q) ||
+          i.regionName.toLowerCase().contains(q) ||
+          i.tag.toLowerCase().contains(q)).toList();
+    }
+    return res;
   }
 }

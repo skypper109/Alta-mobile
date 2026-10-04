@@ -62,13 +62,13 @@ class MonumentScannerService {
     double? longitude,
     void Function(String stepMessage, double progress)? onProgress,
   }) async {
-    onProgress?.call('Initialisation de l\'analyse visuelle Edge AI...', 0.20);
+    onProgress?.call('Recherche du monument...', 0.20);
     await Future.delayed(const Duration(milliseconds: 300));
 
-    onProgress?.call('Analyse des volumes, textures et signatures patrimoniales...', 0.50);
+    onProgress?.call('Observation des détails architecturaux...', 0.50);
     await Future.delayed(const Duration(milliseconds: 350));
 
-    onProgress?.call('Croisement géospatial et catalogue de Bamako & Mali...', 0.80);
+    onProgress?.call('Consultation de la mémoire du Mali...', 0.80);
 
     final fileName = File(imagePath).uri.pathSegments.last.toLowerCase();
 
@@ -81,7 +81,7 @@ class MonumentScannerService {
         longitude: longitude,
         hintTarget: hintTarget,
       );
-      onProgress?.call('Identification certifiée !', 1.0);
+      onProgress?.call('Monument reconnu !', 1.0);
       return result;
     }
 
@@ -105,7 +105,7 @@ class MonumentScannerService {
       );
     }
 
-    onProgress?.call('Identification certifiée !', 1.0);
+    onProgress?.call('Monument reconnu !', 1.0);
     await Future.delayed(const Duration(milliseconds: 150));
 
     return MonumentScanResult(

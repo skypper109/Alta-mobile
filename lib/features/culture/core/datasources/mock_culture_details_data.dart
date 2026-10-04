@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/culture_detail_models.dart';
 
-/// Données éditoriales authentiques et immersives pour les fiches de consultation
+/// Données mock obsolètes - REMPLACÉES PAR LA BASE DE DONNÉES
+@Deprecated('Obsolète : Utiliser exclusivement la base de données centrale via culture_data_providers et CultureRepository.')
 abstract final class MockCultureDetailsData {
   // ══════════════════════════════════════════════════════════════════════════
   // 1. GRANDS PERSONNAGES HISTORIQUES
@@ -439,7 +440,7 @@ abstract final class MockCultureDetailsData {
       regionId: 'bamako',
       regionName: 'Bamako',
       tag: 'Symbole National',
-      photoUrl: 'assets/images/culture/villes/djenne_ville.jpg',
+      photoUrl: 'assets/images/culture/monuments/monument_independance.jpg',
       photoCredits: 'Boulevard de l\'Indépendance, Bamako • Archives Nationales',
       locationDetails: 'Boulevard de l\'Indépendance, Centre-ville de Bamako',
       presentation:
@@ -498,7 +499,7 @@ abstract final class MockCultureDetailsData {
       regionId: 'bamako',
       regionName: 'Bamako',
       tag: 'Panafricanisme',
-      photoUrl: 'assets/images/culture/monuments/mosquee_djingareyber.jpg',
+      photoUrl: 'assets/images/culture/monuments/tour_afrique.jpg',
       photoCredits: 'Rond-point de Faladié, Bamako • Cliché Ville de Bamako',
       locationDetails: 'Échangeur de Faladié, Rive droite du fleuve Niger, Bamako',
       presentation:
@@ -557,7 +558,7 @@ abstract final class MockCultureDetailsData {
       regionId: 'bamako',
       regionName: 'Bamako',
       tag: 'Paix & Vivre-Ensemble',
-      photoUrl: 'assets/images/culture/villes/tombouctou_ville.jpg',
+      photoUrl: 'assets/images/culture/monuments/monument_paix.jpg',
       photoCredits: 'Rond-point de l\'ACI 2000, Hamdallaye, Bamako',
       locationDetails: 'Carrefour Hamdallaye ACI 2000, Bamako',
       presentation:

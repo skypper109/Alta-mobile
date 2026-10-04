@@ -120,7 +120,7 @@ class MonumentScannerScreen extends ConsumerWidget {
                               ),
                             ),
                             Text(
-                              'Vision IA & Patrimoine Malien',
+                              'Découverte du Patrimoine',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
@@ -131,7 +131,7 @@ class MonumentScannerScreen extends ConsumerWidget {
                         ),
                       ),
 
-                      // Badge Edge AI (100% Hors-Ligne)
+                      // Statut autonome
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
@@ -156,7 +156,7 @@ class MonumentScannerScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: 5),
                             Text(
-                              'Edge AI',
+                              'Autonome',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,

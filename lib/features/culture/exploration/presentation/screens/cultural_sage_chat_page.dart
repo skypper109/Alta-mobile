@@ -558,7 +558,7 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                 Row(
                   children: [
                     Text(
-                      'GUIDE CULTUREL IA',
+                      'LE VIEUX SAGE DU MALI',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 9.5,
                         fontWeight: FontWeight.w800,

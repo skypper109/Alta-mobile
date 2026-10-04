@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/controllers/culture_passport_controller.dart';
-import '../../core/datasources/mock_culture_details_data.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_detail_models.dart';
 import '../../core/models/culture_passport_models.dart';
@@ -145,9 +145,26 @@ class _HistoricalFigureDetailScreenState
 
   @override
   Widget build(BuildContext context) {
-    final item = widget.figure ?? MockCultureDetailsData.getFigureById(widget.id);
-    final activeRegion = ref.watch(activeCultureRegionProvider).activeRegion;
+    final detailAsync = widget.figure != null
+        ? null
+        : ref.watch(historicalFigureDetailProvider(widget.id));
+    final item = widget.figure ?? detailAsync?.valueOrNull;
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (item == null) {
+      return Scaffold(
+        backgroundColor:
+            isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: isDark ? CultureTheme.orPatrimoine : CultureTheme.primaryDark,
+          ),
+        ),
+      );
+    }
+
+    final activeRegion = ref.watch(activeCultureRegionProvider).activeRegion;
 
     // Enregistrement automatique de la découverte dans le Passeport Culturel
     WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -160,10 +160,10 @@ class MonumentScannerController extends StateNotifier<ScannerState> {
           photoUrl: result.target.photoUrl,
           tag: result.target.tag,
           culturalQuote:
-              '« Reconnu par le Scanner IA AlterniA — ${result.confidencePercent} de certitude. »',
+              '« Trésor patrimonial reconnu et ajouté à votre carnet de découverte. »',
           targetRoute: result.target.routePath,
           isMilestone: true,
-          milestoneLabel: 'Monument scanné via l\'IA de Vision',
+          milestoneLabel: 'Monument découvert',
           xpEarned: result.target.xpEarned,
         );
   }

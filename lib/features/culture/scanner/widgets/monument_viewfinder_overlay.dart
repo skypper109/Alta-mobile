@@ -170,8 +170,8 @@ class _MonumentViewfinderOverlayState extends State<MonumentViewfinderOverlay>
                     const SizedBox(width: 8),
                     Text(
                       isAnalyzing
-                          ? 'ANALYSE EN COURS...'
-                          : 'EDGE AI EN VEILLE ACTIVE',
+                          ? 'RECHERCHE DU MONUMENT...'
+                          : 'VISEZ UN MONUMENT',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,

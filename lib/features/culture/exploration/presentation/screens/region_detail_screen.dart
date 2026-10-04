@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/controllers/culture_data_providers.dart';
 import '../../../core/controllers/culture_filter_controller.dart';
 import '../../../core/controllers/culture_passport_controller.dart';
 import '../../../core/datasources/mock_culture_challenges_data.dart';
-import '../../../core/datasources/mock_culture_stage1_data.dart';
 import '../../../core/datasources/mock_culture_stories_data.dart';
 import '../../../core/models/cultural_guide_models.dart';
 import '../../../core/models/culture_item.dart';
@@ -168,11 +168,16 @@ class _RegionDetailScreenState extends ConsumerState<RegionDetailScreen> {
       }
     });
 
+    // Données culturelles réelles de la base
+    final monumentsAsync = ref.watch(cultureMonumentsProvider);
+    final figuresAsync = ref.watch(cultureFiguresProvider);
+    final villesAsync = ref.watch(cultureVillesProvider);
+
     // Trésors culturels associés
-    final monuments = MockCultureStage1Data.monuments
+    final monuments = (monumentsAsync.valueOrNull ?? [])
         .where((m) => m.regionId == region.id)
         .toList();
-    final figures = MockCultureStage1Data.personnages
+    final figures = (figuresAsync.valueOrNull ?? [])
         .where((p) => p.regionId == region.id)
         .toList();
     final stories = MockCultureStoriesData.stories
@@ -181,7 +186,7 @@ class _RegionDetailScreenState extends ConsumerState<RegionDetailScreen> {
     final riddles = MockCultureChallengesData.riddles
         .where((r) => r.regionId == region.id)
         .toList();
-    final villes = MockCultureStage1Data.villes
+    final villes = (villesAsync.valueOrNull ?? [])
         .where((v) => v.regionId == region.id)
         .toList();
 

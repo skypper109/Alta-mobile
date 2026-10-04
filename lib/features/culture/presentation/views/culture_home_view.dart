@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/controllers/culture_passport_controller.dart';
-import '../../core/datasources/mock_culture_stage1_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
@@ -39,12 +39,38 @@ class CultureHomeView extends ConsumerWidget {
     final borderCol =
         isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
-    final featured = MockCultureStage1Data.featuredItem;
-    final recommendations = [
-      ...MockCultureStage1Data.personnages,
-      ...MockCultureStage1Data.monuments,
-      ...MockCultureStage1Data.villes,
-    ].where((item) => item.matchesRegion(activeRegion?.id)).take(4).toList();
+    final featuredAsync = ref.watch(cultureFeaturedItemProvider);
+    final figuresAsync = ref.watch(cultureFiguresProvider);
+    final monumentsAsync = ref.watch(cultureMonumentsProvider);
+    final villesAsync = ref.watch(cultureVillesProvider);
+
+    final featured = featuredAsync.valueOrNull ??
+        const CultureItem(
+          id: 'featured_soundiata',
+          title: 'Soundiata Keïta & la Charte du Manden',
+          subtitle: 'Le fondateur de l\'Empire du Mali et la proclamation de 1236',
+          category: 'accueil',
+          subCategory: 'personnages',
+          description:
+              'Découvrez l\'épopée du Lion du Manden, sa victoire décisive à Kirina en 1235 et la proclamation de l\'une des premières déclarations des droits humains à Kouroukan Fouga.',
+          regionId: 'koulikoro',
+          regionName: 'Koulikoro',
+          tag: 'Épopée Majeure',
+          icon: Icons.shield_rounded,
+          imageUrl: 'assets/images/culture/personnages/soundiata.jpg',
+          isFeatured: true,
+          info: 'Lecture : 4 min',
+        );
+
+    final allItems = [
+      ...(figuresAsync.valueOrNull ?? []),
+      ...(monumentsAsync.valueOrNull ?? []),
+      ...(villesAsync.valueOrNull ?? []),
+    ];
+    final recommendations = allItems
+        .where((item) => item.matchesRegion(activeRegion?.id))
+        .take(4)
+        .toList();
 
     return CulturalAtmosphereCanvas(
       enableParticles: true,
@@ -372,7 +398,7 @@ class CultureHomeView extends ConsumerWidget {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    'VISION IA & HISTOIRE',
+                                    'DÉCOUVERTE & HISTOIRE',
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 9.5,
                                       fontWeight: FontWeight.w800,

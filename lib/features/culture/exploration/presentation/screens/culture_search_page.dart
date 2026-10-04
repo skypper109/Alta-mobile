@@ -782,7 +782,7 @@ class _CultureSearchPageState extends ConsumerState<CultureSearchPage>
                 fontWeight: FontWeight.w600,
                 color: subtitleColor)),
         const SizedBox(height: 4),
-        Text("Le Guide Culturel IA a peut-etre une reponse.",
+        Text("Le Guide Culturel a peut-être une réponse.",
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
                 fontSize: 11.5,

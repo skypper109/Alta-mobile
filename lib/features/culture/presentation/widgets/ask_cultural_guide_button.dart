@@ -56,7 +56,7 @@ class AskCulturalGuideButton extends StatelessWidget {
               ),
               child: const Center(
                 child: Icon(
-                  Icons.smart_toy_rounded,
+                  Icons.auto_stories_rounded,
                   size: 19,
                   color: CultureTheme.accentOrange,
                 ),
@@ -70,7 +70,7 @@ class AskCulturalGuideButton extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        'LE VIEUX SAGE IA',
+                        'LE VIEUX SAGE',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 9.5,
                           fontWeight: FontWeight.w800,
