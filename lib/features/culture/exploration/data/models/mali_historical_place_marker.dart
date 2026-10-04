@@ -899,9 +899,22 @@ abstract final class MaliHistoricalPlacesRegistry {
     return all.where((m) => m.regionId == regionId).toList();
   }
 
-  /// Recherche un lieu par son identifiant
+  /// Recherche un lieu par son identifiant ou scannerId
   static MaliHistoricalPlaceMarker? findById(String id) {
-    return all.where((m) => m.id == id).firstOrNull;
+    final cleanId = id.trim().toLowerCase();
+    return all.where((m) {
+      if (m.id == id || m.scannerId == id) return true;
+      final mClean = m.id.toLowerCase();
+      final sClean = (m.scannerId ?? '').toLowerCase();
+      if (mClean == cleanId || sClean == cleanId) return true;
+      final mBare = mClean.replaceAll('monument_', '').replaceAll('_', '');
+      final idBare = cleanId.replaceAll('monument_', '').replaceAll('_', '');
+      if (mBare == idBare) return true;
+      if (idBare.isNotEmpty && (mBare.contains(idBare) || idBare.contains(mBare))) {
+        return true;
+      }
+      return false;
+    }).firstOrNull;
   }
 }
 

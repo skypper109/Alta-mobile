@@ -62,6 +62,14 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     _layerType = widget.initialLayerType;
   }
 
+  MapCamera? get _safeCamera {
+    try {
+      return _mapController.camera;
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   void didUpdateWidget(covariant MaliInteractiveMap oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -69,10 +77,16 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     // Centrage cinématique fluide sur un monument sélectionné
     if (widget.selectedPlaceId != oldWidget.selectedPlaceId &&
         widget.selectedPlaceId != null) {
-      final place =
-          _allMarkers.where((m) => m.id == widget.selectedPlaceId).firstOrNull;
+      final place = _allMarkers
+          .where((m) =>
+              m.id == widget.selectedPlaceId ||
+              m.scannerId == widget.selectedPlaceId ||
+              m.id.replaceAll('monument_', '') ==
+                  widget.selectedPlaceId!.replaceAll('monument_', ''))
+          .firstOrNull;
       if (place != null) {
-        final currentZoom = _mapController.camera.zoom;
+        final camera = _safeCamera;
+        final currentZoom = camera?.zoom ?? 12.0;
         final targetZoom = currentZoom < 15.5 ? 16.5 : currentZoom;
         _animatedMapMove(place.latLng, targetZoom);
         return;
@@ -108,7 +122,16 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
   void _animatedMapMove(LatLng destLocation, double destZoom) {
     _cameraAnimController?.dispose();
 
-    final camera = _mapController.camera;
+    final camera = _safeCamera;
+    if (camera == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _safeCamera != null) {
+          _animatedMapMove(destLocation, destZoom);
+        }
+      });
+      return;
+    }
+
     final latTween = Tween<double>(
       begin: camera.center.latitude,
       end: destLocation.latitude,
@@ -155,16 +178,16 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
 
   void _zoomIn() {
     HapticFeedback.lightImpact();
-    final camera = _mapController.camera;
-    if (camera.zoom < 20.0) {
+    final camera = _safeCamera;
+    if (camera != null && camera.zoom < 20.0) {
       _animatedMapMove(camera.center, (camera.zoom + 1.2).clamp(4.0, 20.0));
     }
   }
 
   void _zoomOut() {
     HapticFeedback.lightImpact();
-    final camera = _mapController.camera;
-    if (camera.zoom > 4.5) {
+    final camera = _safeCamera;
+    if (camera != null && camera.zoom > 4.5) {
       _animatedMapMove(camera.center, (camera.zoom - 1.2).clamp(4.0, 20.0));
     }
   }
@@ -206,17 +229,23 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSatellite = _layerType == MaliMapLayerType.satellite;
 
-    // Détermine le centre initial
-    final initialCenter = widget.selectedPlaceId != null
+    // Détermine le centre et le zoom initiaux (avec zoom 16.5 sur le monument ciblé)
+    final selectedMarker = widget.selectedPlaceId != null
         ? _allMarkers
-                .where((m) => m.id == widget.selectedPlaceId)
-                .firstOrNull
-                ?.latLng ??
-            MaliRegionCoordinates.maliCenter
+            .where((m) =>
+                m.id == widget.selectedPlaceId ||
+                m.scannerId == widget.selectedPlaceId ||
+                m.id.replaceAll('monument_', '') ==
+                    widget.selectedPlaceId!.replaceAll('monument_', ''))
+            .firstOrNull
+        : null;
+
+    final initialCenter = selectedMarker != null
+        ? selectedMarker.latLng
         : MaliRegionCoordinates.getRegionCenter(widget.selectedRegionId);
 
-    final initialZoom = widget.selectedPlaceId != null
-        ? 11.5
+    final initialZoom = selectedMarker != null
+        ? 16.5
         : MaliRegionCoordinates.getRegionZoom(widget.selectedRegionId);
 
     return Container(
@@ -260,7 +289,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
             children: [
               // ── A. TUILES FOND DE CARTE HAUTE DÉFINITION & STABILITÉ ─────────
               if (isSatellite) ...[
-                // Vue Satellite Esri World Imagery (standard mondial, fluide, sans timeout ni blocage)
+                // Vue Satellite Esri World Imagery (fluide, sans timeout ni exception au débogueur)
                 TileLayer(
                   urlTemplate:
                       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -271,13 +300,14 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
                   maxZoom: 19.0,
                   keepBuffer: 3,
                   panBuffer: 1,
+                  tileProvider: NetworkTileProvider(
+                    silenceExceptions: true,
+                  ),
                   evictErrorTileStrategy: EvictErrorTileStrategy.none,
-                  errorTileCallback: (tile, error, stackTrace) {
-                    // Absorbe silencieusement les micro-coupures réseau sans bloquer le débogueur
-                  },
+                  errorTileCallback: (tile, error, stackTrace) {},
                 ),
               ] else ...[
-                // Vue Plan / Cartographie culturelle (CartoDB Voyager ou Dark Matter pour mode sombre)
+                // Vue Plan / Cartographie culturelle (CartoDB)
                 TileLayer(
                   urlTemplate: isDark
                       ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
@@ -289,12 +319,36 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
                   maxZoom: 20.0,
                   keepBuffer: 3,
                   panBuffer: 1,
+                  tileProvider: NetworkTileProvider(
+                    silenceExceptions: true,
+                  ),
                   evictErrorTileStrategy: EvictErrorTileStrategy.none,
-                  errorTileCallback: (tile, error, stackTrace) {
-                    // Absorbe silencieusement les micro-coupures réseau sans bloquer le débogueur
-                  },
+                  errorTileCallback: (tile, error, stackTrace) {},
                 ),
               ],
+
+              // ── B. DÉLIMITATIONS GÉOGRAPHIQUES RÉGIONALES DU MALI ────────────
+              PolygonLayer(
+                polygons: MaliGeoRegionsRegistry.allRegions.map((boundary) {
+                  final isSelected = widget.selectedRegionId == boundary.id;
+                  final isAnySelected = widget.selectedRegionId != null;
+
+                  return Polygon(
+                    points: boundary.polygon,
+                    color: isSelected
+                        ? boundary.color.withValues(alpha: isSatellite ? 0.32 : 0.24)
+                        : (isAnySelected
+                            ? boundary.color.withValues(alpha: isSatellite ? 0.05 : 0.03)
+                            : boundary.color.withValues(alpha: isSatellite ? 0.16 : 0.10)),
+                    borderColor: isSelected
+                        ? Colors.white
+                        : (isSatellite
+                            ? boundary.color.withValues(alpha: 0.90)
+                            : boundary.color.withValues(alpha: 0.70)),
+                    borderStrokeWidth: isSelected ? 2.8 : 1.5,
+                  );
+                }).toList(),
+              ),
 
               // ── B. CALQUE DES VILLES PRINCIPALES DU MALI ───────────────────
               MarkerLayer(

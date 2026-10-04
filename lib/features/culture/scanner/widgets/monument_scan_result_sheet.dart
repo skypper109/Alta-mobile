@@ -622,7 +622,11 @@ class _MonumentScanResultSheetState extends ConsumerState<MonumentScanResultShee
                           subtitleColor: subtitleColor,
                           onTap: () {
                             HapticFeedback.lightImpact();
-                            context.push('/culture/map');
+                            if (widget.isAudioPlaying) widget.onToggleAudio();
+                            context.push(
+                              '/culture/map?placeId=${target.id}&regionId=${target.regionId}',
+                              extra: target,
+                            );
                           },
                         ),
                         _buildActionCircle(

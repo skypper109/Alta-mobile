@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
@@ -195,7 +197,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                 ),
                 const SizedBox(height: 10),
 
-                // Localisation précise
+                // Localisation précise avec bouton Voir sur la carte
                 Row(
                   children: [
                     const Icon(
@@ -211,6 +213,48 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: subtitleColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        context.push(
+                          '/culture/map?placeId=${item.id}&regionId=${item.regionId}',
+                          extra: item.id,
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: CultureTheme.accentOrange
+                              .withValues(alpha: isDark ? 0.2 : 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: CultureTheme.accentOrange
+                                .withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.map_rounded,
+                              size: 12,
+                              color: CultureTheme.accentOrange,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Sur la carte',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                                color: CultureTheme.accentOrange,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

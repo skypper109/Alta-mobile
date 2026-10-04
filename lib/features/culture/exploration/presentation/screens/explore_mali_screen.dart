@@ -17,8 +17,13 @@ import '../widgets/mali_interactive_map.dart';
 /// Style Google/Apple Maps avec zoom intérieur, points rouges interactifs et fiches détaillées.
 class ExploreMaliScreen extends ConsumerStatefulWidget {
   final String? initialRegionId;
+  final String? initialPlaceId;
 
-  const ExploreMaliScreen({super.key, this.initialRegionId});
+  const ExploreMaliScreen({
+    super.key,
+    this.initialRegionId,
+    this.initialPlaceId,
+  });
 
   @override
   ConsumerState<ExploreMaliScreen> createState() => _ExploreMaliScreenState();
@@ -31,8 +36,32 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
   @override
   void initState() {
     super.initState();
-    // Par défaut, vue globale sur l'ensemble du Mali (Toutes les régions)
     _selectedRegionId = widget.initialRegionId;
+
+    if (widget.initialPlaceId != null) {
+      final place =
+          MaliHistoricalPlacesRegistry.findById(widget.initialPlaceId!);
+      if (place != null) {
+        _selectedPlace = place;
+        _selectedRegionId = place.regionId;
+      }
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ExploreMaliScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialPlaceId != oldWidget.initialPlaceId &&
+        widget.initialPlaceId != null) {
+      final place =
+          MaliHistoricalPlacesRegistry.findById(widget.initialPlaceId!);
+      if (place != null) {
+        setState(() {
+          _selectedPlace = place;
+          _selectedRegionId = place.regionId;
+        });
+      }
+    }
   }
 
   void _onRegionSelected(String? regionId) {
