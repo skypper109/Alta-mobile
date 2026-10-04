@@ -258,35 +258,40 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
               },
             ),
             children: [
-              // ── A. TUILES FOND DE CARTE GOOGLE MAPS HAUTE DÉFINITION ─────────
+              // ── A. TUILES FOND DE CARTE HAUTE DÉFINITION & STABILITÉ ─────────
               if (isSatellite) ...[
-                // Vue Satellite Google Maps Hybride (photographies réelles satellite + routes & repères)
+                // Vue Satellite Esri World Imagery (standard mondial, fluide, sans timeout ni blocage)
                 TileLayer(
                   urlTemplate:
-                      'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-                  subdomains: const ['0', '1', '2', '3'],
+                      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                  fallbackUrl:
+                      'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                   userAgentPackageName: 'com.alternia.det_mobile',
-                  maxNativeZoom: 20,
-                  maxZoom: 20.0,
-                  keepBuffer: 2,
+                  maxNativeZoom: 18,
+                  maxZoom: 19.0,
+                  keepBuffer: 3,
                   panBuffer: 1,
+                  evictErrorTileStrategy: EvictErrorTileStrategy.none,
                   errorTileCallback: (tile, error, stackTrace) {
-                    // Absorbe silencieusement les micro-coupures réseau
+                    // Absorbe silencieusement les micro-coupures réseau sans bloquer le débogueur
                   },
                 ),
               ] else ...[
-                // Vue Plan Google Maps officiel (haute lisibilité routière et urbaine)
+                // Vue Plan / Cartographie culturelle (CartoDB Voyager ou Dark Matter pour mode sombre)
                 TileLayer(
-                  urlTemplate:
-                      'https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-                  subdomains: const ['0', '1', '2', '3'],
+                  urlTemplate: isDark
+                      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+                  fallbackUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  subdomains: const ['a', 'b', 'c', 'd'],
                   userAgentPackageName: 'com.alternia.det_mobile',
-                  maxNativeZoom: 20,
+                  maxNativeZoom: 19,
                   maxZoom: 20.0,
-                  keepBuffer: 2,
+                  keepBuffer: 3,
                   panBuffer: 1,
+                  evictErrorTileStrategy: EvictErrorTileStrategy.none,
                   errorTileCallback: (tile, error, stackTrace) {
-                    // Absorbe silencieusement les micro-coupures réseau
+                    // Absorbe silencieusement les micro-coupures réseau sans bloquer le débogueur
                   },
                 ),
               ],
