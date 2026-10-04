@@ -1557,12 +1557,29 @@ abstract final class MonumentScanKnowledge {
     ),
   ];
 
-  /// Trouver un monument par son ID
+  /// Trouver un monument par son ID (robuste et tolérant aux variations d'identifiant)
   static MonumentScanTarget? findById(String id) {
+    if (id.isEmpty) return null;
+    final normalized = id.toLowerCase().trim();
     try {
-      return targets.firstWhere((t) => t.id == id);
+      return targets.firstWhere((t) {
+        final tId = t.id.toLowerCase();
+        if (tId == normalized) return true;
+        if (tId == 'monument_$normalized' || normalized == 'monument_$tId') {
+          return true;
+        }
+        if (tId.replaceAll('monument_', '') ==
+            normalized.replaceAll('monument_', '')) {
+          return true;
+        }
+        if (tId.replaceAll('_bamako', '') ==
+            normalized.replaceAll('_bamako', '')) {
+          return true;
+        }
+        return false;
+      });
     } catch (_) {
-      return null;
+      return matchByKeywords(id);
     }
   }
 

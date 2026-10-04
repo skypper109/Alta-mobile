@@ -410,7 +410,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Obélisque monumental soudanais étagé orné de frises géométriques mandingues au cœur du grand boulevard de la capitale.',
     keyFact: 'Flèche souveraine de 25m et flamme de la patrie',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_independance_bamako',
     scannerId: 'monument_independance_bamako',
     icon: Icons.flag_rounded,
   );
@@ -433,7 +433,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Tour cylindrique de 46 mètres inspirée de l\'écorce d\'un baobab protecteur, couronnée par le flambeau ardent de l\'unité africaine.',
     keyFact: 'Haute de 46m sur un grand rond-point verdoyant',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_tour_afrique_bamako',
     scannerId: 'monument_tour_afrique_bamako',
     icon: Icons.nature_rounded,
   );
@@ -456,7 +456,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Colombe métallique monumentale aux ailes ajourées en acier culminant sur un socle géométrique au grand carrefour de l\'ACI 2000.',
     keyFact: 'Envergure d\'acier de 12 mètres symbolisant la réconciliation',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_paix_bamako',
     scannerId: 'monument_paix_bamako',
     icon: Icons.flutter_dash_rounded,
   );
@@ -479,7 +479,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Statue de bronze figurant les soldats africains en uniforme sur un piédestal en pierre sculptée, réplique du monument de Reims.',
     keyFact: 'Bronze historique rendant hommage au courage des tirailleurs',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_armee_noire_bamako',
     scannerId: 'monument_armee_noire_bamako',
     icon: Icons.groups_rounded,
   );
@@ -502,7 +502,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Sculpture monumentale de l\'antilope Ciwara aux cornes recourbées et crinière ajourée, accueillant les voyageurs au Mali.',
     keyFact: 'Symbole universel de fertilité et d\'hospitalité mandingue',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_ciwara_senou_bamako',
     scannerId: 'monument_ciwara_senou_bamako',
     icon: Icons.pets_rounded,
   );
@@ -525,7 +525,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Chef-d\'œuvre en terre cuite stabilisée et colonnades sahéliennes, niché dans le parc national au pied de la colline du pouvoir.',
     keyFact: 'Abrite plus de 10 000 pièces préhistoriques et rituelles',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_musee_national_bamako',
     scannerId: 'monument_musee_national_bamako',
     icon: Icons.museum_rounded,
   );
@@ -548,7 +548,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Statue équestre impériale en bronze d\'Almamy Samory Touré sur son cheval cabré, veillant sur l\'entrée ouest de Bamako à Sébénikoro.',
     keyFact: 'Génie militaire et figure majeure de la résistance africaine',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_samory_toure_bamako',
     scannerId: 'monument_samory_toure_bamako',
     icon: Icons.shield_rounded,
   );
@@ -571,7 +571,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Stèle commémorative et flamme démocratique dominant les abords du fleuve Niger à la culée du Pont des Martyrs.',
     keyFact: 'Hommage solennel aux héros tombés pour l\'avènement de la liberté',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_martyrs_bamako',
     scannerId: 'monument_martyrs_bamako',
     icon: Icons.local_fire_department_rounded,
   );
@@ -594,7 +594,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Amphithéâtre à ciel ouvert et grand complexe des arts scéniques, temple des grands concerts et des contes de la parole sahélienne.',
     keyFact: 'Nommé en hommage à l\'illustre écrivain et sage Amadou Hampâté Bâ',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_palais_culture_bamako',
     scannerId: 'monument_palais_culture_bamako',
     icon: Icons.theater_comedy_rounded,
   );
@@ -617,7 +617,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Buste en bronze du père de l\'indépendance ghanéenne et théoricien des États-Unis d\'Afrique, érigé sur une stèle noire gravée.',
     keyFact: 'Rappelle l\'alliance historique de 1958 Mali-Ghana-Guinée',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_kwame_nkrumah_bamako',
     scannerId: 'monument_kwame_nkrumah_bamako',
     icon: Icons.public_rounded,
   );
@@ -640,7 +640,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Édifice majestueux en pierres de taille locales extrait des collines de Bamako, style néo-roman africain orné d\'un clocher en grès.',
     keyFact: 'Pierre angulaire posée en 1925 en plein cœur de Bamako',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_cathedrale_bamako',
     scannerId: 'monument_cathedrale_bamako',
     icon: Icons.church_rounded,
   );
@@ -663,7 +663,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Minarets blancs élancés, dômes et arcades islamiques dressés au centre commerçant le plus animé de la capitale malienne.',
     keyFact: 'Haut lieu de spiritualité et de prières collectives du vendredi',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_mosquee_bamako',
     scannerId: 'monument_mosquee_bamako',
     icon: Icons.mosque_rounded,
   );
@@ -686,7 +686,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Statue d\'art public célébrant Sogolon Kolonkan, figure féminine héroïque garante des savoirs occultes et de la diplomatie du Mandé.',
     keyFact: 'Célèbre le rôle fondamental des femmes dans l\'épopée mandingue',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_sogolon_bamako',
     scannerId: 'monument_sogolon_bamako',
     icon: Icons.woman_rounded,
   );
@@ -709,7 +709,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Dôme doré inspiré de la coupole du Rocher, rehaussé d\'arcades orientales et d\'un croissant commémoratif sur un rond-point moderne.',
     keyFact: 'Rappel des liens d\'amitié et de paix entre les peuples',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_al_quouds',
     scannerId: 'monument_al_quouds',
     icon: Icons.stars_rounded,
   );
@@ -732,7 +732,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Lettres monumentales en 3D « M A L I B A » aux couleurs nationales Vert, Jaune et Rouge incarnant l\'attachement de la jeunesse.',
     keyFact: 'Point photo civique et symbole populaire de l\'unité nationale',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_maliba_bamako',
     scannerId: 'monument_maliba_bamako',
     icon: Icons.emoji_flags_rounded,
   );
@@ -755,7 +755,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Obélisque monolithique en pierre érigé au carrefour urbain historique à proximité immédiate de la Place de la Liberté.',
     keyFact: 'Repère visuel séculaire dans l\'urbanisme de la capitale',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_obelisque_bamako',
     scannerId: 'monument_obelisque_bamako',
     icon: Icons.vertical_align_top_rounded,
   );
@@ -778,7 +778,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Vaste place circulaire arborée formant le carrefour institutionnel majeur de la capitale, bordée de fontaines et de verdure.',
     keyFact: 'Cœur battant historique et carrefour des grandes artères républicaines',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_Place_de_la_liberté',
     scannerId: 'monument_Place_de_la_liberté',
     icon: Icons.place_rounded,
   );
@@ -826,7 +826,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Vaste massif granitique parsemé d\'oueds, d\'oasis secrètes et de gravures rupestres millénaires retraçant la faune disparue du Sahara vert.',
     keyFact: 'Gravures rupestres millénaires & vallées rocheuses',
-    routePath: '/culture/monuments',
+    routePath: '/culture/monument/monument_adrar_ifoghas',
     scannerId: 'monument_adrar_ifoghas',
     icon: Icons.landscape_rounded,
   );
@@ -849,7 +849,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     description:
         'Palmeraie désertique et carrefour de la poésie targuie, du thé à la menthe rituel et des tentes en cuir d\'indigo.',
     keyFact: 'Tradition poétique & hospitalité des nomades',
-    routePath: '/culture/monuments',
+    routePath: '/culture/ville/ville_kidal',
     icon: Icons.night_shelter_rounded,
   );
 
