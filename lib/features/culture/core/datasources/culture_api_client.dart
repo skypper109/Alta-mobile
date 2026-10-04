@@ -114,7 +114,10 @@ class CultureApiClient {
       if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
         final data = res.data as Map<String, dynamic>;
         if (data['success'] == true && data['target'] != null) {
-          return MonumentScanResult.fromJson(data);
+          final result = MonumentScanResult.fromJson(data);
+          if (result.confidence >= 0.45) {
+            return result;
+          }
         }
       }
     } on DioException catch (dioErr) {

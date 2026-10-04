@@ -51,6 +51,33 @@ class _MonumentViewfinderOverlayState extends State<MonumentViewfinderOverlay>
   @override
   Widget build(BuildContext context) {
     final isAnalyzing = widget.scannerState.isAnalyzing;
+    final isUnrecognized = widget.scannerState.isUnrecognized;
+
+    final boxBorderColor = isUnrecognized
+        ? const Color(0xFFF59E0B)
+        : (isAnalyzing
+            ? CultureTheme.accentOrange
+            : Colors.white.withValues(alpha: 0.35));
+
+    final cornerColor = isUnrecognized
+        ? const Color(0xFFF59E0B)
+        : CultureTheme.accentOrange;
+
+    final statusDotColor = isUnrecognized
+        ? const Color(0xFFF59E0B)
+        : (isAnalyzing
+            ? CultureTheme.accentOrange
+            : const Color(0xFF10B981));
+
+    final statusBorderColor = isUnrecognized
+        ? const Color(0xFFF59E0B).withValues(alpha: 0.6)
+        : CultureTheme.accentOrange.withValues(alpha: 0.5);
+
+    final statusLabel = isUnrecognized
+        ? 'NON RECONNU (< 45%)'
+        : (isAnalyzing
+            ? 'RECHERCHE DU MONUMENT...'
+            : 'VISEZ UN MONUMENT');
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -71,9 +98,7 @@ class _MonumentViewfinderOverlayState extends State<MonumentViewfinderOverlay>
               height: boxSize,
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: isAnalyzing
-                      ? CultureTheme.accentOrange
-                      : Colors.white.withValues(alpha: 0.35),
+                  color: boxBorderColor,
                   width: 1.5,
                 ),
                 borderRadius: BorderRadius.circular(20),
@@ -81,10 +106,10 @@ class _MonumentViewfinderOverlayState extends State<MonumentViewfinderOverlay>
               child: Stack(
                 children: [
                   // Coins marqués (Corner brackets)
-                  _buildCorner(Alignment.topLeft),
-                  _buildCorner(Alignment.topRight),
-                  _buildCorner(Alignment.bottomLeft),
-                  _buildCorner(Alignment.bottomRight),
+                  _buildCorner(Alignment.topLeft, cornerColor),
+                  _buildCorner(Alignment.topRight, cornerColor),
+                  _buildCorner(Alignment.bottomLeft, cornerColor),
+                  _buildCorner(Alignment.bottomRight, cornerColor),
 
                   // Réticule central discret
                   Center(
@@ -94,7 +119,7 @@ class _MonumentViewfinderOverlayState extends State<MonumentViewfinderOverlay>
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: CultureTheme.accentOrange.withValues(alpha: 0.6),
+                          color: cornerColor.withValues(alpha: 0.6),
                           width: 1.2,
                         ),
                       ),
@@ -102,41 +127,42 @@ class _MonumentViewfinderOverlayState extends State<MonumentViewfinderOverlay>
                         child: Container(
                           width: 4,
                           height: 4,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: CultureTheme.accentOrange,
+                            color: cornerColor,
                           ),
                         ),
                       ),
                     ),
                   ),
 
-                  // ── FAISCEAU LASER VERTICAL ANIMÉ ─────────────────────────
-                  AnimatedBuilder(
-                    animation: _laserAnimation,
-                    builder: (context, child) {
-                      final topPos = boxSize * _laserAnimation.value;
-                      return Positioned(
-                        top: topPos,
-                        left: 12,
-                        right: 12,
-                        child: Container(
-                          height: 2.5,
-                          decoration: BoxDecoration(
-                            color: CultureTheme.accentOrange,
-                            boxShadow: [
-                              BoxShadow(
-                                color: CultureTheme.accentOrange
-                                    .withValues(alpha: 0.75),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                              ),
-                            ],
+                  // ── FAISCEAU LASER VERTICAL ANIMÉ (actif uniquement si pas en statut non reconnu) ──
+                  if (!isUnrecognized)
+                    AnimatedBuilder(
+                      animation: _laserAnimation,
+                      builder: (context, child) {
+                        final topPos = boxSize * _laserAnimation.value;
+                        return Positioned(
+                          top: topPos,
+                          left: 12,
+                          right: 12,
+                          child: Container(
+                            height: 2.5,
+                            decoration: BoxDecoration(
+                              color: CultureTheme.accentOrange,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: CultureTheme.accentOrange
+                                      .withValues(alpha: 0.75),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
                 ],
               ),
             ),
@@ -150,7 +176,7 @@ class _MonumentViewfinderOverlayState extends State<MonumentViewfinderOverlay>
                   color: Colors.black.withValues(alpha: 0.75),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: CultureTheme.accentOrange.withValues(alpha: 0.5),
+                    color: statusBorderColor,
                     width: 1.0,
                   ),
                 ),
@@ -162,16 +188,12 @@ class _MonumentViewfinderOverlayState extends State<MonumentViewfinderOverlay>
                       height: 8,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isAnalyzing
-                            ? CultureTheme.accentOrange
-                            : const Color(0xFF10B981),
+                        color: statusDotColor,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      isAnalyzing
-                          ? 'RECHERCHE DU MONUMENT...'
-                          : 'VISEZ UN MONUMENT',
+                      statusLabel,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
@@ -185,34 +207,35 @@ class _MonumentViewfinderOverlayState extends State<MonumentViewfinderOverlay>
             ),
 
             // ── INSTRUCTIONS AU BAS DU VISEUR ────────────────────────────────
-            Positioned(
-              bottom: (availableHeight - boxSize) / 2 - 44,
-              child: Container(
-                constraints: BoxConstraints(maxWidth: availableWidth * 0.85),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.70),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  widget.scannerState.currentStepMessage,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white.withValues(alpha: 0.95),
+            if (!isUnrecognized)
+              Positioned(
+                bottom: (availableHeight - boxSize) / 2 - 44,
+                child: Container(
+                  constraints: BoxConstraints(maxWidth: availableWidth * 0.85),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.70),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    widget.scannerState.currentStepMessage,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withValues(alpha: 0.95),
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         );
       },
     );
   }
 
-  Widget _buildCorner(Alignment alignment) {
+  Widget _buildCorner(Alignment alignment, [Color? color]) {
     const double length = 22;
     const double thickness = 3.5;
 
@@ -227,7 +250,7 @@ class _MonumentViewfinderOverlayState extends State<MonumentViewfinderOverlay>
         margin: const EdgeInsets.all(3),
         child: CustomPaint(
           painter: _CornerBracketPainter(
-            color: CultureTheme.accentOrange,
+            color: color ?? CultureTheme.accentOrange,
             isTop: isTop,
             isLeft: isLeft,
             thickness: thickness,

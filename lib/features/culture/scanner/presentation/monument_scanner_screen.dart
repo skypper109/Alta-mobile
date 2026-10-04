@@ -10,6 +10,7 @@ import '../controllers/monument_scanner_controller.dart';
 import '../models/monument_scan_models.dart';
 import '../widgets/monument_demo_targets_strip.dart';
 import '../widgets/monument_scan_result_sheet.dart';
+import '../widgets/monument_unrecognized_sheet.dart';
 import '../widgets/monument_viewfinder_overlay.dart';
 import '../widgets/culture_offline_packs_modal.dart';
 
@@ -229,7 +230,7 @@ class MonumentScannerScreen extends ConsumerWidget {
             ),
 
             // ── 4. BANDEAU DE DÉMONSTRATION DIRECTE & COMMANDES AU VRAI BAS ───
-            if (!scannerState.isRecognized)
+            if (!scannerState.isRecognized && !scannerState.isUnrecognized)
               Positioned(
                 left: 0,
                 right: 0,
@@ -340,6 +341,18 @@ class MonumentScannerScreen extends ConsumerWidget {
                   isAudioPlaying: scannerState.isAudioPlaying,
                   onToggleAudio: controller.toggleAudioNarration,
                   onResetScan: controller.reset,
+                ),
+              ),
+
+            // ── 6. FEUILLE QUAND LE MONUMENT N'EST PAS RECONNU (< 45%) ────────
+            if (scannerState.isUnrecognized)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: MonumentUnrecognizedSheet(
+                  onRetry: controller.reset,
+                  onPickGallery: controller.pickFromGallery,
                 ),
               ),
           ],

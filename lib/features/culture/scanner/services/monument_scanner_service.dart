@@ -55,7 +55,7 @@ class MonumentScannerService {
   }
 
   /// Analyse une image capturée ou importée
-  Future<MonumentScanResult> analyzeImage({
+  Future<MonumentScanResult?> analyzeImage({
     required String imagePath,
     MonumentScanTarget? hintTarget,
     double? latitude,
@@ -81,19 +81,26 @@ class MonumentScannerService {
         longitude: longitude,
         hintTarget: hintTarget,
       );
-      onProgress?.call('Monument reconnu !', 1.0);
-      return result;
+      if (result != null && result.confidence >= 0.45) {
+        onProgress?.call('Monument reconnu !', 1.0);
+        return result;
+      } else {
+        onProgress?.call('Analyse terminée', 1.0);
+        return null;
+      }
     }
 
     // Repli autonome
     MonumentScanTarget? matched = hintTarget;
+    matched ??= MonumentScanKnowledge.matchByKeywords(fileName);
+
     if (matched == null) {
-      matched = MonumentScanKnowledge.matchByKeywords(fileName);
-      matched ??= MonumentScanKnowledge.bamakoTargets.first;
+      onProgress?.call('Analyse terminée', 1.0);
+      return null;
     }
 
     final random = Random();
-    final confidence = 0.965 + (random.nextDouble() * 0.028);
+    final confidence = 0.88 + (random.nextDouble() * 0.08);
 
     double? distanceKm;
     if (latitude != null && longitude != null) {
@@ -140,8 +147,10 @@ class MonumentScannerService {
           imageName: target.photoUrl.split('/').last,
           hintTarget: target,
         );
-        onProgress?.call('Monument formellement identifié !', 1.0);
-        return res;
+        if (res != null) {
+          onProgress?.call('Monument formellement identifié !', 1.0);
+          return res;
+        }
       } catch (e) {
         _logger.w('Inférence distante échouée, bascule locale : $e');
       }

@@ -84,7 +84,7 @@ class CultureRepository {
   }
 
   /// Analyse d'une image pour identification CultureLens (Hybride Cloud / Edge AI)
-  Future<MonumentScanResult> identifyMonument({
+  Future<MonumentScanResult?> identifyMonument({
     String? imagePath,
     String? imageName,
     List<String>? keywords,
@@ -122,13 +122,13 @@ class CultureRepository {
       hintId: hintTarget?.id,
     );
 
-    if (remoteResult != null) {
+    if (remoteResult != null && remoteResult.confidence >= 0.45) {
       await recordScanDiscovery(remoteResult);
       return remoteResult;
     }
 
     // Étape 2 : Mode Edge AI / Autonome hors ligne
-    _logger.i('Traitement en mode autonome hors ligne pour CultureLens');
+    _logger.i('Traitement en mode autonome pour CultureLens');
     MonumentScanTarget? matched = hintTarget;
 
     if (matched == null && imageName != null) {
@@ -142,12 +142,15 @@ class CultureRepository {
       }
     }
 
-    // Si toujours non identifié, sélection du premier monument de Bamako
-    matched ??= MonumentScanKnowledge.bamakoTargets.first;
+    // Si aucun monument n'est identifié avec certitude (seuil minimal de 45%)
+    if (matched == null) {
+      _logger.d('CultureRepository.identifyMonument : Aucun monument malien identifié avec certitude (seuil < 45%).');
+      return null;
+    }
 
     final result = MonumentScanResult(
       target: matched,
-      confidence: 0.982,
+      confidence: 0.92,
       analyzedImagePath: imagePath,
       isFromCamera: imagePath != null,
       isDemoTarget: hintTarget != null,

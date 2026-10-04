@@ -129,13 +129,30 @@ class MonumentScannerController extends StateNotifier<ScannerState> {
         },
       );
 
-      _onRecognitionSuccess(result);
+      if (result != null && result.confidence >= 0.45) {
+        _onRecognitionSuccess(result);
+      } else {
+        _onRecognitionUnrecognized();
+      }
     } catch (e) {
       state = state.copyWith(
         status: ScannerStatus.error,
-        errorMessage: 'Erreur lors du traitement visuel : $e',
+        errorMessage: 'Désolé, une erreur est survenue lors de l\'analyse.',
       );
     }
+  }
+
+  /// Traitement si le monument n'a pas pu être reconnu (< 45% de certitude)
+  void _onRecognitionUnrecognized() {
+    CulturalHaptics.warning();
+
+    state = state.copyWith(
+      status: ScannerStatus.unrecognized,
+      progress: 1.0,
+      currentStepMessage:
+          'Désolé, ce monument ou lieu n\'a pas pu être reconnu.',
+      clearResult: true,
+    );
   }
 
   /// Traitement après reconnaissance réussie
