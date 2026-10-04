@@ -639,16 +639,20 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                           ],
                         ),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              item.info,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w500,
-                                color: subtitleColor,
+                            Expanded(
+                              child: Text(
+                                item.info,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: subtitleColor,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            const SizedBox(width: 4),
                             Icon(
                               Icons.arrow_forward_rounded,
                               size: 13,

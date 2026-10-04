@@ -18,6 +18,7 @@ class CultureApiClient {
               BaseOptions(
                 connectTimeout: const Duration(seconds: 3),
                 receiveTimeout: const Duration(seconds: 4),
+                validateStatus: (status) => status != null && status < 600,
               ),
             ),
         _logger = logger ?? Logger() {
@@ -39,9 +40,14 @@ class CultureApiClient {
             options: Options(
               sendTimeout: const Duration(milliseconds: 1500),
               receiveTimeout: const Duration(milliseconds: 1500),
+              responseType: ResponseType.json,
             ),
           );
-          if (res.statusCode == 200) {
+          if (res.statusCode == 200 &&
+              res.data is Map &&
+              ((res.data as Map)['status'] == 'online' ||
+                  (res.data as Map).containsKey('totalMonuments') ||
+                  (res.data as Map)['service'] != null)) {
             _activeBaseUrl = url;
             _logger.i('✅ Serveur CultureLens connecté sur : $url');
             return url;
@@ -75,8 +81,8 @@ class CultureApiClient {
             .map((json) => MonumentScanTarget.fromJson(json))
             .toList();
       }
-    } catch (e) {
-      _logger.w('CultureApiClient.fetchMonuments fallback local : $e');
+    } catch (_) {
+      _logger.d('CultureApiClient.fetchMonuments -> utilisation du cache local');
     }
     return [];
   }
@@ -240,8 +246,8 @@ class CultureApiClient {
       if (res.statusCode == 200 && res.data is List) {
         return (res.data as List).whereType<Map<String, dynamic>>().toList();
       }
-    } catch (e) {
-      _logger.d('CultureApiClient.fetchFigures fallback : $e');
+    } catch (_) {
+      _logger.d('CultureApiClient.fetchFigures -> utilisation du cache local');
     }
     return [];
   }
@@ -253,8 +259,8 @@ class CultureApiClient {
       if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
         return res.data as Map<String, dynamic>;
       }
-    } catch (e) {
-      _logger.d('CultureApiClient.fetchFigureDetail fallback : $e');
+    } catch (_) {
+      _logger.d('CultureApiClient.fetchFigureDetail -> utilisation du cache local');
     }
     return null;
   }
@@ -266,8 +272,8 @@ class CultureApiClient {
       if (res.statusCode == 200 && res.data is List) {
         return (res.data as List).whereType<Map<String, dynamic>>().toList();
       }
-    } catch (e) {
-      _logger.d('CultureApiClient.fetchPlaces fallback : $e');
+    } catch (_) {
+      _logger.d('CultureApiClient.fetchPlaces -> utilisation du cache local');
     }
     return [];
   }
@@ -279,8 +285,8 @@ class CultureApiClient {
       if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
         return res.data as Map<String, dynamic>;
       }
-    } catch (e) {
-      _logger.d('CultureApiClient.fetchPlaceDetail fallback : $e');
+    } catch (_) {
+      _logger.d('CultureApiClient.fetchPlaceDetail -> utilisation du cache local');
     }
     return null;
   }
@@ -292,8 +298,8 @@ class CultureApiClient {
       if (res.statusCode == 200 && res.data is List) {
         return (res.data as List).whereType<Map<String, dynamic>>().toList();
       }
-    } catch (e) {
-      _logger.d('CultureApiClient.fetchStories fallback : $e');
+    } catch (_) {
+      _logger.d('CultureApiClient.fetchStories -> utilisation du cache local');
     }
     return [];
   }
@@ -305,8 +311,8 @@ class CultureApiClient {
       if (res.statusCode == 200 && res.data is List) {
         return (res.data as List).whereType<Map<String, dynamic>>().toList();
       }
-    } catch (e) {
-      _logger.d('CultureApiClient.fetchProverbs fallback : $e');
+    } catch (_) {
+      _logger.d('CultureApiClient.fetchProverbs -> utilisation du cache local');
     }
     return [];
   }
