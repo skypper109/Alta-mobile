@@ -116,15 +116,34 @@ class MonumentScanTarget {
     final rawKeywords = json['keywords'] ?? json['mots_cles'] ?? [];
     final rawFeatures = json['detectionFeatures'] ?? json['caracteristiques_detection'] ?? [];
     final rawPhotos = json['galleryPhotos'] ?? json['realPhotos'];
+    final targetId = (json['id'] ?? '').toString();
 
     List<String> keywordsList = [];
     if (rawKeywords is List) {
       keywordsList = rawKeywords.map((e) => e.toString()).toList();
     }
 
+    String normalizePhoto(String p) {
+      final s = p.trim();
+      if (s.startsWith('/api/v1/culture/dataset-images/')) {
+        final rel = s.replaceFirst('/api/v1/culture/dataset-images/', '');
+        return 'assets/images/culture/monuments/$rel';
+      }
+      return s;
+    }
+
     List<String> photosList = [];
     if (rawPhotos is List) {
-      photosList = rawPhotos.map((e) => e.toString()).toList();
+      photosList = rawPhotos
+          .map((e) => normalizePhoto(e.toString()))
+          .where((e) => !e.toLowerCase().endsWith('.avif'))
+          .toList();
+    }
+
+    final rawPrimary = (json['photoUrl'] ?? json['photo_url'] ?? '').toString();
+    final primaryPhoto = rawPrimary.isNotEmpty ? normalizePhoto(rawPrimary) : '';
+    if (primaryPhoto.isNotEmpty && !photosList.contains(primaryPhoto)) {
+      photosList.insert(0, primaryPhoto);
     }
 
     List<ScanDetectionFeature> featuresList = [];
@@ -135,8 +154,13 @@ class MonumentScanTarget {
           .toList();
     }
 
+    final rawRoute = (json['routePath'] ?? json['route_path'] ?? '').toString();
+    final resolvedRoute = (rawRoute.isEmpty || rawRoute == '/culture/monuments')
+        ? (targetId.isNotEmpty ? '/culture/monument/$targetId' : '/culture/monuments')
+        : rawRoute;
+
     return MonumentScanTarget(
-      id: json['id'] ?? '',
+      id: targetId,
       name: json['name'] ?? json['nom'] ?? '',
       subtitle: json['subtitle'] ?? json['sous_titre'] ?? '',
       regionId: json['regionId'] ?? json['region_id'] ?? 'bamako',
@@ -145,7 +169,11 @@ class MonumentScanTarget {
       era: json['era'] ?? json['epoque'] ?? '',
       architectureStyle: json['architectureStyle'] ?? json['style_architectural'] ?? '',
       locationDetails: json['locationDetails'] ?? json['details_localisation'] ?? '',
-      photoUrl: json['photoUrl'] ?? json['photo_url'] ?? 'assets/images/culture/monuments/mosquee_djenne.jpg',
+      photoUrl: primaryPhoto.isNotEmpty
+          ? primaryPhoto
+          : (photosList.isNotEmpty
+              ? photosList.first
+              : 'assets/images/culture/monuments/mosquee_djenne.jpg'),
       tag: json['tag'] ?? 'Monument National',
       keywords: keywordsList,
       detectionFeatures: featuresList,
@@ -153,7 +181,7 @@ class MonumentScanTarget {
       historicalStory: json['historicalStory'] ?? json['recit_historique'] ?? '',
       audioNarrationText: json['audioNarrationText'] ?? json['narration_audio_texte'] ?? '',
       whyItMatters: json['whyItMatters'] ?? json['pourquoi_ce_lieu_compte'] ?? '',
-      routePath: json['routePath'] ?? json['route_path'] ?? '/culture/monuments',
+      routePath: resolvedRoute,
       latitude: (json['latitude'] as num?)?.toDouble() ?? 12.6392,
       longitude: (json['longitude'] as num?)?.toDouble() ?? -8.0029,
       unlockedBadge: json['unlockedBadge'] ?? json['badge_debloque'] ?? 'Pionnier du Patrimoine',

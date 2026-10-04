@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -526,7 +527,10 @@ class _MonumentScanResultSheetState extends ConsumerState<MonumentScanResultShee
                             onPressed: () {
                               HapticFeedback.mediumImpact();
                               if (widget.isAudioPlaying) widget.onToggleAudio();
-                              context.push(target.routePath);
+                              final targetRoute = target.id.isNotEmpty
+                                  ? '/culture/monument/${target.id}'
+                                  : target.routePath;
+                              context.push(targetRoute);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: CultureTheme.accentOrange,
@@ -762,16 +766,7 @@ class _MonumentScanResultSheetState extends ConsumerState<MonumentScanResultShee
               children: [
                 AspectRatio(
                   aspectRatio: 16 / 9,
-                  child: Image.asset(
-                    activePhoto,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: Colors.black26,
-                      child: const Center(
-                        child: Icon(Icons.broken_image_rounded, size: 40, color: Colors.white54),
-                      ),
-                    ),
-                  ),
+                  child: _buildPhotoWidget(activePhoto),
                 ),
                 // Gradient subtil pour la lisibilité
                 Positioned.fill(
@@ -875,14 +870,7 @@ class _MonumentScanResultSheetState extends ConsumerState<MonumentScanResultShee
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: Image.asset(
-                            p,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              color: Colors.black26,
-                              child: const Icon(Icons.image_not_supported_rounded, size: 16, color: Colors.white38),
-                            ),
-                          ),
+                          child: _buildPhotoWidget(p, width: 52, height: 52),
                         ),
                       ),
                     );
@@ -891,6 +879,109 @@ class _MonumentScanResultSheetState extends ConsumerState<MonumentScanResultShee
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPhotoWidget(
+    String photoPath, {
+    BoxFit fit = BoxFit.cover,
+    double? width,
+    double? height,
+  }) {
+    String resolved = photoPath.trim();
+    if (resolved.startsWith('/api/v1/culture/dataset-images/')) {
+      final rel = resolved.replaceFirst('/api/v1/culture/dataset-images/', '');
+      resolved = 'assets/images/culture/monuments/$rel';
+    }
+
+    if (resolved.startsWith('http://') || resolved.startsWith('https://')) {
+      return Image.network(
+        resolved,
+        fit: fit,
+        width: width,
+        height: height,
+        errorBuilder: (_, __, ___) => _buildFallbackImage(width, height),
+      );
+    }
+
+    if (resolved.startsWith('assets/')) {
+      return Image.asset(
+        resolved,
+        fit: fit,
+        width: width,
+        height: height,
+        errorBuilder: (_, __, ___) {
+          final fallbackPath = widget.result.target.photoUrl;
+          if (resolved != fallbackPath && fallbackPath.startsWith('assets/')) {
+            return Image.asset(
+              fallbackPath,
+              fit: fit,
+              width: width,
+              height: height,
+              errorBuilder: (_, __, ___) => _buildFallbackImage(width, height),
+            );
+          }
+          return _buildFallbackImage(width, height);
+        },
+      );
+    }
+
+    if (resolved.startsWith('/') || resolved.startsWith('file://')) {
+      final cleanPath = resolved.replaceFirst('file://', '');
+      final f = File(cleanPath);
+      if (f.existsSync()) {
+        return Image.file(
+          f,
+          fit: fit,
+          width: width,
+          height: height,
+          errorBuilder: (_, __, ___) => _buildFallbackImage(width, height),
+        );
+      }
+    }
+
+    return Image.asset(
+      resolved,
+      fit: fit,
+      width: width,
+      height: height,
+      errorBuilder: (_, __, ___) => _buildFallbackImage(width, height),
+    );
+  }
+
+  Widget _buildFallbackImage(double? width, double? height) {
+    return Container(
+      width: width,
+      height: height,
+      color: const Color(0xFF1E293B),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.account_balance_rounded,
+              size: 28,
+              color: CultureTheme.accentOrange,
+            ),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                widget.result.target.name,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white70,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
