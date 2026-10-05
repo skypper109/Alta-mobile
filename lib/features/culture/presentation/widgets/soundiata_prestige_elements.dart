@@ -590,11 +590,13 @@ class _SoundiataRoyalSealCelebrationState
 class SoundiataThemeSwitchButton extends StatelessWidget {
   final SoundiataReadingTheme currentTheme;
   final ValueChanged<SoundiataReadingTheme> onThemeChanged;
+  final bool isCompact;
 
   const SoundiataThemeSwitchButton({
     super.key,
     required this.currentTheme,
     required this.onThemeChanged,
+    this.isCompact = false,
   });
 
   @override
@@ -610,43 +612,53 @@ class SoundiataThemeSwitchButton extends StatelessWidget {
               : SoundiataReadingTheme.imperialDark,
         );
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: isImperial
-              ? const Color(0xFF1E293B)
-              : const Color(0xFFEFE8D3),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
-            width: 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 6,
+      child: Tooltip(
+        message: isImperial
+            ? 'Basculer en Parchemin Ancien'
+            : 'Basculer en Nuit Impériale',
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: isCompact
+              ? const EdgeInsets.all(8)
+              : const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: isImperial
+                ? const Color(0xFF1E293B)
+                : const Color(0xFFEFE8D3),
+            shape: isCompact ? BoxShape.circle : BoxShape.rectangle,
+            borderRadius: isCompact ? null : BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
+              width: 1.0,
             ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isImperial ? Icons.dark_mode_rounded : Icons.menu_book_rounded,
-              size: 13,
-              color: const Color(0xFFF59E0B),
-            ),
-            const SizedBox(width: 5),
-            Text(
-              isImperial ? 'Nuit Impériale' : 'Parchemin',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                color: isImperial ? Colors.white : const Color(0xFF291B0E),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 6,
               ),
-            ),
-          ],
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isImperial ? Icons.dark_mode_rounded : Icons.menu_book_rounded,
+                size: isCompact ? 16 : 13,
+                color: const Color(0xFFF59E0B),
+              ),
+              if (!isCompact) ...[
+                const SizedBox(width: 5),
+                Text(
+                  isImperial ? 'Nuit Impériale' : 'Parchemin',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: isImperial ? Colors.white : const Color(0xFF291B0E),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

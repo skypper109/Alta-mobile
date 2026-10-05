@@ -418,6 +418,7 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
                   // Bouton Sélecteur de Thème (Nuit Impériale / Parchemin Ancien)
                   SoundiataThemeSwitchButton(
                     currentTheme: _readingTheme,
+                    isCompact: MediaQuery.sizeOf(context).width < 410,
                     onThemeChanged: (theme) {
                       setState(() {
                         _readingTheme = theme;
@@ -596,7 +597,7 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
 
         // ── FLUX DE SCÈNES SCROLL-DRIVEN (LE LIVRE ANIMÉ) ───────────────────────
         SizedBox(
-          height: 620,
+          height: (MediaQuery.sizeOf(context).height * 0.74).clamp(520.0, 720.0),
           child: ListView.separated(
             controller: _bookScrollController,
             physics: const BouncingScrollPhysics(),
@@ -1021,19 +1022,15 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
     required Color accentColor,
     required bool isFromLeft,
   }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+    return Column(
+      crossAxisAlignment:
+          isFromLeft ? CrossAxisAlignment.start : CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (!isFromLeft) ...[
-          _buildCharacterTag(name, role, accentColor, CrossAxisAlignment.end),
-          const SizedBox(width: 8),
-        ],
-
         // Portrait 2D découpé
         Container(
-          width: 72,
-          height: 72,
+          width: 58,
+          height: 58,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
@@ -1043,12 +1040,12 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
             boxShadow: [
               BoxShadow(
                 color: accentColor.withValues(alpha: 0.4),
-                blurRadius: 12,
+                blurRadius: 10,
               ),
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.7),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
@@ -1059,16 +1056,18 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
               alignment: Alignment.topCenter,
               errorBuilder: (_, __, ___) => Container(
                 color: accentColor,
-                child: const Icon(Icons.person_rounded, color: Colors.white),
+                child: const Icon(Icons.person_rounded, color: Colors.white, size: 26),
               ),
             ),
           ),
         ),
-
-        if (isFromLeft) ...[
-          const SizedBox(width: 8),
-          _buildCharacterTag(name, role, accentColor, CrossAxisAlignment.start),
-        ],
+        const SizedBox(height: 5),
+        _buildCharacterTag(
+          name,
+          role,
+          accentColor,
+          isFromLeft ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+        ),
       ],
     );
   }
@@ -1080,7 +1079,8 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
     CrossAxisAlignment align,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      constraints: const BoxConstraints(maxWidth: 100),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(8),
@@ -1096,18 +1096,22 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
           Text(
             name,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 11.5,
+              fontSize: 10,
               fontWeight: FontWeight.w900,
               color: Colors.white,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           Text(
             role,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 9,
+              fontSize: 8,
               fontWeight: FontWeight.w700,
               color: accentColor,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

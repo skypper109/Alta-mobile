@@ -260,6 +260,10 @@ class _HistoricalFigureDetailScreenState
                           figure: item,
                           isDark: isDark,
                         ),
+                        if (item.keyFacts.isNotEmpty) ...[
+                          const SizedBox(height: 24),
+                          _buildKeyFactsSection(item, isDark),
+                        ],
                         const SizedBox(height: 24),
                       ] else ...[
                         // ── 🎬 THÉÂTRE DE SCÈNE DOCUMENTAIRE ANIMÉ (POUR AUTRES FIGURES) ──
@@ -268,15 +272,14 @@ class _HistoricalFigureDetailScreenState
                           isDark: isDark,
                         ),
                         const SizedBox(height: 24),
+
+                        // ── Vue d'Épopée Interactive (Audio, Parchemin, Chapitres, Faits Clés) ──
+                        SoundiataEpicStoryView(
+                          figure: item,
+                          isDark: isDark,
+                        ),
+                        const SizedBox(height: 24),
                       ],
-
-                      // ── Vue d'Épopée Interactive (Audio, Parchemin, Chapitres, Faits Clés) ──
-                      SoundiataEpicStoryView(
-                        figure: item,
-                        isDark: isDark,
-                      ),
-
-                      const SizedBox(height: 24),
 
                       // ── Bouton Guide Culturel IA Contextuel ─────────────────
                       AskCulturalGuideButton(
@@ -441,6 +444,110 @@ class _HistoricalFigureDetailScreenState
           ],
         ),
       ),
+    );
+  }
+
+  /// Repères historiques clés affichés de manière concise sans dupliquer l'épopée
+  Widget _buildKeyFactsSection(HistoricalFigureDetail item, bool isDark) {
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subtitleColor =
+        isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569);
+    final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
+    final borderCol =
+        isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              Icons.military_tech_rounded,
+              size: 20,
+              color: Color(0xFFF59E0B),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Repères Clés & Héritage',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: titleColor,
+                letterSpacing: -0.4,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final cardWidth = (constraints.maxWidth - 10) / 2;
+            return Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: item.keyFacts.map((fact) {
+                return SizedBox(
+                  width: cardWidth,
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: borderCol),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                              alpha: isDark ? 0.2 : 0.04),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            fact.icon,
+                            size: 18,
+                            color: const Color(0xFFF59E0B),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          fact.label.toUpperCase(),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            color: subtitleColor,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          fact.value,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w800,
+                            color: titleColor,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        ),
+      ],
     );
   }
 }

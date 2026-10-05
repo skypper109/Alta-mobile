@@ -242,34 +242,37 @@ class _SoundiataCinematicBookScreenState
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (ctx) => Container(
-        height: MediaQuery.of(ctx).size.height * 0.78,
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        decoration: const BoxDecoration(
-          color: Color(0xFF0F172A),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          border: Border(
-            top: BorderSide(color: Color(0xFFF59E0B), width: 1.5),
+      builder: (ctx) => SafeArea(
+        top: false,
+        child: Container(
+          height: MediaQuery.of(ctx).size.height * 0.78,
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          decoration: const BoxDecoration(
+            color: Color(0xFF0F172A),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border(
+              top: BorderSide(color: Color(0xFFF59E0B), width: 1.5),
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 44,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(2),
+          child: Column(
+            children: [
+              Container(
+                width: 44,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            const Expanded(
-              child: SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
-                child: KouroukanCharterAccordion(isDark: true),
+              const Expanded(
+                child: SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  child: KouroukanCharterAccordion(isDark: true),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -349,222 +352,243 @@ class _SoundiataCinematicBookScreenState
               },
             ),
 
-          // ── 2. BARRE SUPÉRIEURE FLOTTANTE ULTRA-DISCRÈTE ───────────────────
+          // ── 2. BARRE SUPÉRIEURE FLOTTANTE ULTRA-DISCRÈTE & RESPONSIVE ──────
           Positioned(
             top: topPadding > 0 ? topPadding + 8 : 16,
-            left: 16,
-            right: 16,
-            child: Row(
-              children: [
-                // Bouton Fermer le Plein Écran
-                GestureDetector(
-                  onTap: () {
-                    CulturalHaptics.cardPress();
-                    try {
-                      ref.read(narrationCoordinatorProvider.notifier).stop();
-                    } catch (_) {}
-                    Navigator.of(context).pop();
-                  },
-                  child: Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.65),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.25),
-                        width: 1.2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.4),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.close_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                ),
+            left: 14,
+            right: 14,
+            child: LayoutBuilder(
+              builder: (context, barConstraints) {
+                final barWidth = barConstraints.maxWidth;
+                final isUltraNarrow = barWidth < 340;
 
-                const SizedBox(width: 12),
-
-                // Cartouche central de l'Acte
-                Expanded(
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 7),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1E0E05).withValues(alpha: 0.85),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: const Color(0xFFF59E0B).withValues(alpha: 0.6),
-                          width: 1.0,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
-                            blurRadius: 10,
+                return Row(
+                  children: [
+                    // Bouton Fermer le Plein Écran
+                    GestureDetector(
+                      onTap: () {
+                        CulturalHaptics.cardPress();
+                        try {
+                          ref.read(narrationCoordinatorProvider.notifier).stop();
+                        } catch (_) {}
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.7),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.25),
+                            width: 1.2,
                           ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Color(0xFFF59E0B),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.4),
+                              blurRadius: 8,
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              '${currentChapter.actName} • ${currentChapter.title.split('&').first.trim().toUpperCase()}',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w900,
-                                color: const Color(0xFFF59E0B),
-                                letterSpacing: 0.8,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(width: 8),
-
-                // Bouton Thème de lecture (Nuit Impériale / Parchemin Ancien)
-                SoundiataThemeSwitchButton(
-                  currentTheme: _readingTheme,
-                  onThemeChanged: (theme) {
-                    setState(() {
-                      _readingTheme = theme;
-                    });
-                  },
-                ),
-
-                const SizedBox(width: 8),
-
-                // Bouton Autoplay (Ciné-Conteur automatique)
-                GestureDetector(
-                  onTap: _toggleAutoplay,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
-                    decoration: BoxDecoration(
-                      color: _isAutoplayEnabled
-                          ? const Color(0xFFF59E0B)
-                          : Colors.black.withValues(alpha: 0.65),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: _isAutoplayEnabled
-                            ? const Color(0xFFD97706)
-                            : Colors.white.withValues(alpha: 0.25),
-                        width: 1.2,
-                      ),
-                      boxShadow: _isAutoplayEnabled
-                          ? [
-                              BoxShadow(
-                                color: const Color(0xFFF59E0B).withValues(alpha: 0.45),
-                                blurRadius: 8,
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.auto_awesome_rounded,
-                          size: 13,
-                          color: _isAutoplayEnabled ? Colors.black : const Color(0xFFF59E0B),
+                          ],
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Auto',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w900,
-                            color: _isAutoplayEnabled ? Colors.black : Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(width: 8),
-
-                // Bouton Voix du Griot (Audio) avec Waveform animé
-                GestureDetector(
-                  onTap: _toggleNarration,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isCurrentlySpeaking
-                          ? const Color(0xFFF59E0B)
-                          : Colors.black.withValues(alpha: 0.65),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isCurrentlySpeaking
-                            ? const Color(0xFFF59E0B)
-                            : Colors.white.withValues(alpha: 0.25),
-                        width: 1.2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: isCurrentlySpeaking
-                              ? const Color(0xFFF59E0B).withValues(alpha: 0.4)
-                              : Colors.black.withValues(alpha: 0.4),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isCurrentlySpeaking
-                              ? Icons.volume_up_rounded
-                              : Icons.volume_mute_rounded,
-                          color: isCurrentlySpeaking ? Colors.black : Colors.white,
+                        child: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.white,
                           size: 18,
                         ),
-                        if (isCurrentlySpeaking) ...[
-                          const SizedBox(width: 6),
-                          const SoundiataWaveformVisualizer(
-                            isPlaying: true,
-                            activeColor: Colors.black,
-                            barCount: 3,
-                            maxHeight: 12,
-                            barWidth: 2.2,
-                          ),
-                        ],
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ],
+
+                    const SizedBox(width: 8),
+
+                    // Cartouche central compact (Acte + Numéro de page)
+                    Expanded(
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E0E05).withValues(alpha: 0.88),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: const Color(0xFFF59E0B).withValues(alpha: 0.6),
+                              width: 1.0,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
+                                blurRadius: 8,
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 5,
+                                height: 5,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Color(0xFFF59E0B),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  '${currentChapter.actName} • ${_currentPage + 1}/${_chapters.length}',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w900,
+                                    color: const Color(0xFFF59E0B),
+                                    letterSpacing: 0.6,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 6),
+
+                    // Bouton Thème de lecture (format compact icône)
+                    SoundiataThemeSwitchButton(
+                      currentTheme: _readingTheme,
+                      isCompact: true,
+                      onThemeChanged: (theme) {
+                        setState(() {
+                          _readingTheme = theme;
+                        });
+                      },
+                    ),
+
+                    const SizedBox(width: 6),
+
+                    // Bouton Autoplay (Ciné-Conteur automatique)
+                    GestureDetector(
+                      onTap: _toggleAutoplay,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isUltraNarrow ? 7 : 9,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _isAutoplayEnabled
+                              ? const Color(0xFFF59E0B)
+                              : Colors.black.withValues(alpha: 0.7),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: _isAutoplayEnabled
+                                ? const Color(0xFFD97706)
+                                : Colors.white.withValues(alpha: 0.25),
+                            width: 1.2,
+                          ),
+                          boxShadow: _isAutoplayEnabled
+                              ? [
+                                  BoxShadow(
+                                    color: const Color(0xFFF59E0B)
+                                        .withValues(alpha: 0.45),
+                                    blurRadius: 8,
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.auto_awesome_rounded,
+                              size: 13,
+                              color: _isAutoplayEnabled
+                                  ? Colors.black
+                                  : const Color(0xFFF59E0B),
+                            ),
+                            if (!isUltraNarrow) ...[
+                              const SizedBox(width: 4),
+                              Text(
+                                'Auto',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  color: _isAutoplayEnabled
+                                      ? Colors.black
+                                      : Colors.white,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 6),
+
+                    // Bouton Voix du Griot (Audio) avec Waveform animé
+                    GestureDetector(
+                      onTap: _toggleNarration,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isCurrentlySpeaking
+                              ? const Color(0xFFF59E0B)
+                              : Colors.black.withValues(alpha: 0.7),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: isCurrentlySpeaking
+                                ? const Color(0xFFF59E0B)
+                                : Colors.white.withValues(alpha: 0.25),
+                            width: 1.2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isCurrentlySpeaking
+                                  ? const Color(0xFFF59E0B).withValues(alpha: 0.4)
+                                  : Colors.black.withValues(alpha: 0.4),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isCurrentlySpeaking
+                                  ? Icons.volume_up_rounded
+                                  : Icons.volume_mute_rounded,
+                              color: isCurrentlySpeaking
+                                  ? Colors.black
+                                  : Colors.white,
+                              size: 17,
+                            ),
+                            if (isCurrentlySpeaking) ...[
+                              const SizedBox(width: 4),
+                              const SoundiataWaveformVisualizer(
+                                isPlaying: true,
+                                activeColor: Colors.black,
+                                barCount: 3,
+                                maxHeight: 11,
+                                barWidth: 2.0,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
 
           // ── 3. CONTRÔLES FLOTTANTS EN BAS (SCRUBBER & NAVIGATION) ───────────
           Positioned(
-            bottom: bottomPadding > 0 ? bottomPadding + 8 : 18,
-            left: 20,
-            right: 20,
+            bottom: bottomPadding > 0 ? bottomPadding + 6 : 14,
+            left: 16,
+            right: 16,
             child: Row(
               children: [
                 // Bouton Précédent
@@ -572,8 +596,8 @@ class _SoundiataCinematicBookScreenState
                   GestureDetector(
                     onTap: _previousPage,
                     child: Container(
-                      width: 44,
-                      height: 44,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.75),
                         shape: BoxShape.circle,
@@ -584,19 +608,19 @@ class _SoundiataCinematicBookScreenState
                       child: const Icon(
                         Icons.chevron_left_rounded,
                         color: Colors.white,
-                        size: 26,
+                        size: 24,
                       ),
                     ),
                   )
                 else
-                  const SizedBox(width: 44),
+                  const SizedBox(width: 40),
 
                 const Spacer(),
 
                 // Indicateurs d'actes (Points lumineux)
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(20),
@@ -619,9 +643,9 @@ class _SoundiataCinematicBookScreenState
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 250),
-                          margin: const EdgeInsets.symmetric(horizontal: 3.5),
-                          width: isSelected ? 22 : 6,
-                          height: 6,
+                          margin: const EdgeInsets.symmetric(horizontal: 3.0),
+                          width: isSelected ? 18 : 5,
+                          height: 5,
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? const Color(0xFFF59E0B)
@@ -650,8 +674,8 @@ class _SoundiataCinematicBookScreenState
                   GestureDetector(
                     onTap: _nextPage,
                     child: Container(
-                      width: 44,
-                      height: 44,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         color: const Color(0xFFF59E0B),
                         shape: BoxShape.circle,
@@ -666,7 +690,7 @@ class _SoundiataCinematicBookScreenState
                       child: const Icon(
                         Icons.chevron_right_rounded,
                         color: Colors.black,
-                        size: 26,
+                        size: 24,
                       ),
                     ),
                   )
@@ -675,12 +699,12 @@ class _SoundiataCinematicBookScreenState
                     onTap: _showRoyalSealModal,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
+                          horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
                         ),
-                        borderRadius: BorderRadius.circular(22),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
@@ -693,12 +717,12 @@ class _SoundiataCinematicBookScreenState
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(Icons.verified_rounded,
-                              size: 16, color: Colors.black),
-                          const SizedBox(width: 5),
+                              size: 15, color: Colors.black),
+                          const SizedBox(width: 4),
                           Text(
                             'Sceau Royal',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
+                              fontSize: 11,
                               fontWeight: FontWeight.w900,
                               color: Colors.black,
                             ),
@@ -748,9 +772,24 @@ class _SoundiataCinematicBookScreenState
     final double charLeftSlide = pageDelta * -180.0;
     final double charRightSlide = pageDelta * 180.0;
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenHeight = constraints.maxHeight;
+        final screenWidth = constraints.maxWidth;
+        final isShortScreen = screenHeight < 720;
+        final isCompactWidth = screenWidth < 380;
+        final charAvatarSize = isShortScreen ? 64.0 : 78.0;
+
+        // Positionnement dynamique : cartouche et personnages parfaitement étagés
+        final cartoucheBottom = 72.0;
+        final cartoucheMaxHeight = (screenHeight * 0.38).clamp(180.0, 260.0);
+        // Position du bas des personnages : toujours au-dessus du cartouche avec marge
+        final charBottom = math.max(cartoucheBottom + 215.0 + 8.0, screenHeight * 0.43);
+        final arrowBottom = charBottom + (charAvatarSize * 0.38);
+
+        return Stack(
+          fit: StackFit.expand,
+          children: [
         // ── 1. FOND DE SCÈNE EN PARALLAXE ─────────────────────────────────────
         Transform.translate(
           offset: Offset(parallaxX, 0),
@@ -796,13 +835,13 @@ class _SoundiataCinematicBookScreenState
           // Hotspots cliquables sur la carte plein écran
           Positioned.fill(
             child: LayoutBuilder(
-              builder: (context, constraints) {
-                final width = constraints.maxWidth;
-                final height = constraints.maxHeight;
+              builder: (context, mapConstraints) {
+                final width = mapConstraints.maxWidth;
+                final height = mapConstraints.maxHeight;
                 return Stack(
                   children: MandeCity.cities.map((city) {
                     final posX = city.relativeOffset.dx * width;
-                    final posY = city.relativeOffset.dy * (height * 0.48);
+                    final posY = city.relativeOffset.dy * (height * 0.42);
 
                     return Positioned(
                       left: posX - 22,
@@ -912,10 +951,10 @@ class _SoundiataCinematicBookScreenState
           Positioned(
             left: 0,
             right: 0,
-            bottom: 300,
+            bottom: arrowBottom,
             child: LayoutBuilder(
-              builder: (context, constraints) {
-                final arenaWidth = constraints.maxWidth;
+              builder: (context, arrowConstraints) {
+                final arenaWidth = arrowConstraints.maxWidth;
                 return AnimatedBuilder(
                   animation: _kirinaArrowController,
                   builder: (context, _) {
@@ -945,22 +984,23 @@ class _SoundiataCinematicBookScreenState
         // Personnage de gauche (Soundiata)
         if (chapter.leftCharImage != null)
           Positioned(
-            left: 20 + charLeftSlide,
-            bottom: 270,
+            left: 16 + charLeftSlide,
+            bottom: charBottom,
             child: _buildCinematicCharacter(
               name: chapter.leftCharName ?? 'Soundiata',
               role: chapter.leftCharRole ?? 'Héros',
               imagePath: chapter.leftCharImage!,
               accentColor: const Color(0xFFF59E0B),
               isFacingRight: true,
+              avatarSize: charAvatarSize,
             ),
           ),
 
         // Personnage de droite (Soumaoro / Alliés)
         if (chapter.rightCharImage != null)
           Positioned(
-            right: 20 - charRightSlide,
-            bottom: 270,
+            right: 16 - charRightSlide,
+            bottom: charBottom,
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 600),
               opacity: (chapter.isBattleScene && _kirinaSoumaoroDefeated)
@@ -976,14 +1016,15 @@ class _SoundiataCinematicBookScreenState
                       ? 'Soumaoro (En fuite)'
                       : (chapter.rightCharName ?? 'Adversaire'),
                   role: (chapter.isBattleScene && _kirinaSoumaoroDefeated)
-                    ? 'Roi-Sorcier Vaincu'
-                    : (chapter.rightCharRole ?? 'Sosso'),
+                      ? 'Roi-Sorcier Vaincu'
+                      : (chapter.rightCharRole ?? 'Sosso'),
                   imagePath: chapter.rightCharImage!,
                   accentColor:
                       (chapter.isBattleScene && _kirinaSoumaoroDefeated)
                           ? Colors.grey
                           : const Color(0xFFEF4444),
                   isFacingRight: false,
+                  avatarSize: charAvatarSize,
                 ),
               ),
             ),
@@ -991,11 +1032,12 @@ class _SoundiataCinematicBookScreenState
 
         // ── 6. CARTOUCHE NARRATIF AU BAS DE L'ÉCRAN AVEC MICRO-INTERACTIONS ──
         Positioned(
-          left: 18,
-          right: 18,
-          bottom: 78,
+          left: isCompactWidth ? 12 : 16,
+          right: isCompactWidth ? 12 : 16,
+          bottom: cartoucheBottom,
           child: Container(
-            padding: const EdgeInsets.all(16),
+            constraints: BoxConstraints(maxHeight: cartoucheMaxHeight),
+            padding: EdgeInsets.all(isCompactWidth ? 12 : 16),
             decoration: BoxDecoration(
               color: isParchment
                   ? themeColors.cardBackground
@@ -1017,10 +1059,12 @@ class _SoundiataCinematicBookScreenState
                 ),
               ],
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
                 // En-tête : Acte + Période + Badge d'ambiance sonore
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1270,9 +1314,12 @@ class _SoundiataCinematicBookScreenState
             ),
           ),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+},
+);
+}
 
   Widget _buildFlyingArrow() {
     return Container(
@@ -1325,6 +1372,7 @@ class _SoundiataCinematicBookScreenState
     required String imagePath,
     required Color accentColor,
     required bool isFacingRight,
+    double avatarSize = 78.0,
   }) {
     return Column(
       crossAxisAlignment:
@@ -1332,22 +1380,22 @@ class _SoundiataCinematicBookScreenState
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 84,
-          height: 84,
+          width: avatarSize,
+          height: avatarSize,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
               color: accentColor,
-              width: 2.5,
+              width: 2.2,
             ),
             boxShadow: [
               BoxShadow(
                 color: accentColor.withValues(alpha: 0.5),
-                blurRadius: 16,
+                blurRadius: 14,
               ),
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.8),
-                blurRadius: 10,
+                blurRadius: 8,
               ),
             ],
           ),
@@ -1358,14 +1406,15 @@ class _SoundiataCinematicBookScreenState
               alignment: Alignment.topCenter,
               errorBuilder: (_, __, ___) => Container(
                 color: accentColor,
-                child: const Icon(Icons.person_rounded, color: Colors.white),
+                child: const Icon(Icons.person_rounded, color: Colors.white, size: 28),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 5),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          constraints: const BoxConstraints(maxWidth: 110),
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.85),
             borderRadius: BorderRadius.circular(8),
@@ -1382,10 +1431,12 @@ class _SoundiataCinematicBookScreenState
               Text(
                 name,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
+                  fontSize: 10.5,
                   fontWeight: FontWeight.w900,
                   color: Colors.white,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               Text(
                 role,
@@ -1394,6 +1445,8 @@ class _SoundiataCinematicBookScreenState
                   fontWeight: FontWeight.w700,
                   color: accentColor,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
