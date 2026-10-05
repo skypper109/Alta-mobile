@@ -16,6 +16,7 @@ import '../../../../core/services/vivienne_tts_service.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/character_motion_hero.dart';
 import '../widgets/connected_contents_section.dart';
+import '../widgets/documentary_scene_player.dart';
 import '../widgets/passport_stamp_toast.dart';
 import '../widgets/soundiata_epic_story_view.dart';
 
@@ -252,6 +253,14 @@ class _HistoricalFigureDetailScreenState
                         const SizedBox(height: 12),
                       ],
 
+                      // ── 🎬 THÉÂTRE DE SCÈNE DOCUMENTAIRE ANIMÉ (2D MOTION DESIGN) ──
+                      DocumentaryScenePlayer(
+                        figure: item,
+                        isDark: isDark,
+                      ),
+
+                      const SizedBox(height: 24),
+
                       // ── Vue d'Épopée Interactive (Audio, Parchemin, Chapitres, Faits Clés) ──
                       SoundiataEpicStoryView(
                         figure: item,
@@ -286,7 +295,7 @@ class _HistoricalFigureDetailScreenState
               ],
             ),
 
-            // ── HEADER FIGÉ EN HAUT (RETOUR & FAVORI AU DÉFILEMENT) ───────────
+            // ── HEADER UNIQUE FIGÉ EN HAUT (AUCUNE DUPLICATION) ───────────────
             Positioned(
               top: 0,
               left: 0,
@@ -324,7 +333,7 @@ class _HistoricalFigureDetailScreenState
                 ),
                 child: Row(
                   children: [
-                    // Bouton Retour
+                    // Bouton Retour unique
                     _buildTopActionButton(
                       icon: Icons.arrow_back_rounded,
                       isDark: isDark,
@@ -338,25 +347,71 @@ class _HistoricalFigureDetailScreenState
                       },
                     ),
                     const SizedBox(width: 12),
-                    // Titre compact visible uniquement au scroll
+                    // Centre : Badge pill quand unscrolled, Nom du personnage quand scrolled
                     Expanded(
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 200),
-                        opacity: _isScrolled ? 1.0 : 0.0,
-                        child: Text(
-                          item.name,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 15.5,
-                            fontWeight: FontWeight.w800,
-                            color: titleColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
+                        child: _isScrolled
+                            ? Align(
+                                key: const ValueKey('header_title_scrolled'),
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  item.name,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 15.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: titleColor,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              )
+                            : Center(
+                                key: const ValueKey('header_pill_unscrolled'),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF1E0E05)
+                                        .withValues(alpha: 0.85),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: const Color(0xFFF59E0B)
+                                          .withValues(alpha: 0.6),
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 6,
+                                        height: 6,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Color(0xFFF59E0B),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        item.id.contains('soundiata')
+                                            ? 'ÉPOPÉE DU MANDEN'
+                                            : item.tag.toUpperCase(),
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 9.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: const Color(0xFFF59E0B),
+                                          letterSpacing: 0.8,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Bouton Favori
+                    // Bouton Favori unique
                     _buildTopActionButton(
                       icon: _isBookmarked
                           ? Icons.bookmark_rounded

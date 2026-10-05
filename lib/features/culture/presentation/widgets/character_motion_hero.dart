@@ -1,10 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/models/culture_detail_models.dart';
-import '../../immersive/services/cultural_haptics.dart';
 
 /// Composant Hero 2D Motion Design de classe mondiale pour les Grands Personnages du Mali.
 ///
@@ -306,128 +304,6 @@ class _CharacterMotionHeroState extends State<CharacterMotionHero>
                   ),
                 ),
               ),
-
-            // ── 7. BOUTONS SUPÉRIEURS (RETOUR & FAVORIS) ───────────────────────
-            Positioned(
-              top: topPadding > 0 ? topPadding + 10 : 16,
-              left: 16,
-              right: 16,
-              child: Row(
-                children: [
-                  // Bouton Retour avec haptique
-                  GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      if (widget.onBack != null) {
-                        widget.onBack!();
-                      } else {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.6),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: 1.2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.4),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.arrow_back_rounded,
-                        color: Colors.white,
-                        size: 21,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  // Badge Motion : "2D ÉPOPÉE HISTORIQUE"
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E0E05).withValues(alpha: 0.8),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: const Color(0xFFF59E0B).withValues(alpha: 0.6),
-                        width: 1.0,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color(0xFFF59E0B),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'ÉPOPÉE DU MANDEN',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFFF59E0B),
-                            letterSpacing: 1.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  // Bouton Favoris avec rebond
-                  GestureDetector(
-                    onTap: () {
-                      CulturalHaptics.bookmarkToggle(!widget.isBookmarked);
-                      widget.onToggleBookmark();
-                    },
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.6),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: 1.2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.4),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: AnimatedScale(
-                        scale: widget.isBookmarked ? 1.15 : 1.0,
-                        duration: const Duration(milliseconds: 200),
-                        child: Icon(
-                          widget.isBookmarked
-                              ? Icons.bookmark_rounded
-                              : Icons.bookmark_border_rounded,
-                          color: widget.isBookmarked
-                              ? const Color(0xFFF59E0B)
-                              : Colors.white,
-                          size: 21,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
 
             // ── 8. BANDEAU D'INFORMATIONS DU HÉROS AU BAS DU HERO ─────────────
             Positioned(

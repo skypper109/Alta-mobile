@@ -85,6 +85,7 @@ flutter:
     - assets/images/onboarding/
     - assets/images/culture/
     - assets/images/culture/personnages/
+    - assets/images/culture/scenes/
     - assets/images/culture/monuments/
     - assets/images/culture/monuments/monument_al_quouds/
     - assets/images/culture/monuments/monument_armee_noire_bamako/
