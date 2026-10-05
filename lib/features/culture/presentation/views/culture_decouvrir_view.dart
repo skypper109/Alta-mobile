@@ -299,20 +299,24 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
         break;
     }
 
+    final isSoundiata = categoryIndex == 0;
+
     return CulturalInteractiveCard(
       padding: EdgeInsets.zero,
       showSudaneseCorners: true,
       activeAccentColor: categoryColor,
       backgroundColor: cardBg,
-      borderRadius: 20,
+      borderRadius: 22,
       onTap: () {
+        CulturalHaptics.cardPress();
         context.push(heroRoute);
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── BANNIÈRE VISUELLE 2D HERO AVEC BADGES MOTION ───────────────────
           SizedBox(
-            height: 135,
+            height: isSoundiata ? 175 : 145,
             width: double.infinity,
             child: Stack(
               fit: StackFit.expand,
@@ -320,6 +324,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                 Image.asset(
                   heroImage,
                   fit: BoxFit.cover,
+                  alignment: isSoundiata ? Alignment.topCenter : Alignment.center,
                   errorBuilder: (_, __, ___) => Container(
                     color: categoryColor.withValues(alpha: 0.15),
                     child: Center(
@@ -328,83 +333,179 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                     ),
                   ),
                 ),
+                // Voile cinématique
                 Container(
-                  color: Colors.black.withValues(alpha: 0.35),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.25),
+                        Colors.black.withValues(alpha: 0.65),
+                      ],
+                    ),
+                  ),
                 ),
+                // Badge Haut-Gauche
                 Positioned(
-                  top: 10,
+                  top: 12,
                   left: 12,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3.5),
+                        horizontal: 10, vertical: 4.5),
                     decoration: BoxDecoration(
-                      color: categoryColor,
-                      borderRadius: BorderRadius.circular(6),
+                      color: isSoundiata ? const Color(0xFFF59E0B) : categoryColor,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isSoundiata ? const Color(0xFFF59E0B) : categoryColor)
+                              .withValues(alpha: 0.4),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    child: Text(
-                      heroTag,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: 0.6,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isSoundiata) ...[
+                          const Icon(Icons.shield_rounded, size: 12, color: Colors.black),
+                          const SizedBox(width: 4),
+                        ],
+                        Text(
+                          heroTag,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w900,
+                            color: isSoundiata ? Colors.black : Colors.white,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Badge Période Haut-Droit
+                if (isSoundiata)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.65),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Text(
+                        '1190 – 1255',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFFF59E0B),
+                        ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
+          // ── CONTENU ÉDITORIAL & CTA ─────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  heroTitle,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15.5,
-                    fontWeight: FontWeight.w800,
-                    color: titleColor,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        heroTitle,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900,
+                          color: titleColor,
+                          letterSpacing: -0.4,
+                        ),
+                      ),
+                    ),
+                    if (isSoundiata)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '2D ÉPOPÉE',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFFF59E0B),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 4),
                 Text(
                   heroSubtitle,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
                     color: categoryColor,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Text(
                   heroDescription,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
+                    fontSize: 11.5,
                     color: subtitleColor,
-                    height: 1.35,
+                    height: 1.45,
+                    fontWeight: FontWeight.w400,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text(
-                      'Explorer la fiche complète',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: categoryColor,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: categoryColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: categoryColor.withValues(alpha: 0.3),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 13,
-                      color: categoryColor,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            isSoundiata ? 'Explorer l\'Épopée Sacrée' : 'Explorer la fiche',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w800,
+                              color: categoryColor,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 13,
+                            color: categoryColor,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -564,6 +665,45 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                       Container(
                         color: Colors.black.withValues(alpha: 0.28),
                       ),
+                      // Badge Héros / 2D en haut à gauche
+                      if (categoryRoute == 'personnage')
+                        Positioned(
+                          top: 7,
+                          left: 7,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2.5),
+                            decoration: BoxDecoration(
+                              color: item.id.contains('soundiata')
+                                  ? const Color(0xFFF59E0B)
+                                  : Colors.black.withValues(alpha: 0.65),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (item.id.contains('soundiata')) ...[
+                                  const Icon(Icons.auto_awesome_rounded,
+                                      size: 9, color: Colors.black),
+                                  const SizedBox(width: 3),
+                                ],
+                                Text(
+                                  item.id.contains('soundiata')
+                                      ? '2D ÉPOPÉE'
+                                      : item.tag.toUpperCase(),
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 8.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: item.id.contains('soundiata')
+                                        ? Colors.black
+                                        : Colors.white,
+                                    letterSpacing: 0.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       // Badge région en haut à droite
                       Positioned(
                         top: 7,

@@ -8,6 +8,7 @@ import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
+import '../widgets/culture_audio_listen_badge.dart';
 import '../widgets/region_filter_pill.dart';
 
 /// Écran immersif — Grands Personnages Historiques du Mali
@@ -244,9 +245,17 @@ class _PersonnageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
-    final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
-    final hasImage = item.imageUrl != null && item.imageUrl!.isNotEmpty;
+    final isSoundiata = item.id.contains('soundiata');
     final heroTag = 'personnage_list_${item.id}';
+    final hasImage = item.imageUrl != null && item.imageUrl!.isNotEmpty;
+
+    // Bordure premium avec accentuation or pour Soundiata
+    final borderCol = isSoundiata
+        ? const Color(0xFFF59E0B).withValues(alpha: isDark ? 0.45 : 0.35)
+        : (isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder);
+
+    final speechNarrative =
+        '${item.title}. ${item.subtitle}. Époque : ${item.info}. ${item.description}';
 
     return GestureDetector(
       onTap: () {
@@ -256,13 +265,18 @@ class _PersonnageCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: borderCol),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: borderCol,
+            width: isSoundiata ? 1.6 : 1.0,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 3),
+              color: isSoundiata
+                  ? const Color(0xFFF59E0B).withValues(alpha: isDark ? 0.16 : 0.08)
+                  : Colors.black.withValues(alpha: isDark ? 0.22 : 0.05),
+              blurRadius: isSoundiata ? 16 : 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -270,124 +284,241 @@ class _PersonnageCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Bandeau supérieur coloré avec Portrait (Hero) ───────────────────
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
-              decoration: BoxDecoration(
-                color: _accent.withValues(alpha: isDark ? 0.12 : 0.07),
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(19)),
-                border: Border(
-                  bottom: BorderSide(
-                    color: _accent.withValues(alpha: 0.15),
-                  ),
-                ),
-              ),
-              child: Row(
+            // ── VITRINE CINÉMATIQUE DU PERSONNAGE (2D HERO SHOWCASE) ──────────
+            SizedBox(
+              height: 190,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  // Portrait photographique authentique
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: _accent,
-                        width: 2.2,
+                  // Portrait d'art 2D plein format
+                  if (hasImage)
+                    Hero(
+                      tag: heroTag,
+                      child: Image.asset(
+                        item.imageUrl!,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildInitialAvatar(),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _accent.withValues(alpha: 0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
+                    )
+                  else
+                    _buildInitialAvatar(),
+
+                  // Scrim dégradé supérieur pour contraster les badges
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 70,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.65),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Scrim dégradé inférieur pour détacher le titre et les mérites
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: 110,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.75),
+                            Colors.black.withValues(alpha: 0.95),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // ── BADGES HAUT : TAG & ÉPOQUE ──────────────────────────────
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    right: 12,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Badge Rôle / Statut
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: isSoundiata
+                                ? const Color(0xFFF59E0B)
+                                : _accent,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: (isSoundiata
+                                        ? const Color(0xFFF59E0B)
+                                        : _accent)
+                                    .withValues(alpha: 0.4),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isSoundiata
+                                    ? Icons.shield_rounded
+                                    : item.icon,
+                                size: 12,
+                                color: isSoundiata ? Colors.black : Colors.white,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                isSoundiata
+                                    ? 'LE LION DU MANDÉ'
+                                    : item.tag.toUpperCase(),
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  color: isSoundiata
+                                      ? Colors.black
+                                      : Colors.white,
+                                  letterSpacing: 0.6,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Badge Chronologie / Époque
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 9, vertical: 4.5),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.65),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isSoundiata
+                                  ? const Color(0xFFF59E0B).withValues(alpha: 0.4)
+                                  : Colors.white.withValues(alpha: 0.15),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 11,
+                                color: isSoundiata
+                                    ? const Color(0xFFF59E0B)
+                                    : Colors.white70,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                item.info,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: isSoundiata
+                                      ? const Color(0xFFF59E0B)
+                                      : Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                    child: ClipOval(
-                      child: hasImage
-                          ? Hero(
-                              tag: heroTag,
-                              child: Image.asset(
-                                item.imageUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    _buildInitialAvatar(),
-                              ),
-                            )
-                          : _buildInitialAvatar(),
-                    ),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+
+                  // ── INFORMATIONS BAS DE PHOTO ──────────────────────────────
+                  Positioned(
+                    bottom: 12,
+                    left: 14,
+                    right: 14,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        // Badges tag + région
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3.5),
-                              decoration: BoxDecoration(
-                                color: _accent,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                item.tag.toUpperCase(),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                item.title,
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w800,
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.w900,
                                   color: Colors.white,
-                                  letterSpacing: 0.4,
+                                  letterSpacing: -0.4,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withValues(alpha: 0.8),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.location_on_rounded,
-                                  size: 11,
-                                  color: CultureTheme.accentOrange,
+                              const SizedBox(height: 2),
+                              Text(
+                                item.subtitle,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: isSoundiata
+                                      ? const Color(0xFFF59E0B)
+                                      : _accent,
                                 ),
-                                const SizedBox(width: 3),
-                                Text(
-                                  item.regionName,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: subtitleColor,
-                                  ),
-                                ),
-                              ],
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Badge Région compact
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.55),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.12),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        // Nom
-                        Text(
-                          item.title,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16.5,
-                            fontWeight: FontWeight.w800,
-                            color: titleColor,
-                            letterSpacing: -0.3,
-                            height: 1.2,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        // Titre / rôle
-                        Text(
-                          item.subtitle,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: _accent,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.location_on_rounded,
+                                size: 10,
+                                color: CultureTheme.accentOrange,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                item.regionName,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
@@ -396,7 +527,7 @@ class _PersonnageCard extends StatelessWidget {
               ),
             ),
 
-            // ── Corps storytelling ────────────────────────────────────────────
+            // ── CORPS ÉDITORIAL & ACTIONS ─────────────────────────────────────
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -409,65 +540,82 @@ class _PersonnageCard extends StatelessWidget {
                       color: subtitleColor,
                       height: 1.5,
                     ),
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 14),
-                  // Pied de carte : époque + action
-                  Row(
-                    children: [
-                      // Badge époque
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? CultureTheme.darkSurfaceAlt
-                              : const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isDark
-                                ? CultureTheme.darkBorder
-                                : CultureTheme.lightBorder,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.access_time_rounded,
-                              size: 11,
-                              color: subtitleColor,
-                            ),
-                            const SizedBox(width: 5),
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 160),
-                              child: Text(
-                                item.info,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: subtitleColor,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
+
+                  // Pill spécifique pour Soundiata avec mention de l'épopée 2D
+                  if (isSoundiata) ...[
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFFF59E0B).withValues(alpha: 0.25),
                         ),
                       ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.auto_awesome_rounded,
+                            size: 13,
+                            color: Color(0xFFF59E0B),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Motion 2D • Épopée de Kirina & Charte de 1236',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: isDark
+                                    ? const Color(0xFFFCD34D)
+                                    : const Color(0xFFB45309),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 14),
+
+                  // ── PIED DE CARTE : ÉCOUTE AUDIO & BOUTON EXPLORER ──────────
+                  Row(
+                    children: [
+                      // Badge d'écoute orale Griot
+                      CultureAudioListenBadge(
+                        contentId: item.id,
+                        speechText: speechNarrative,
+                        label: 'Écouter',
+                        compact: true,
+                        activeColor: isSoundiata
+                            ? const Color(0xFFF59E0B)
+                            : _accent,
+                      ),
+
                       const Spacer(),
-                      // CTA Découvrir
+
+                      // Bouton d'action immersif
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
+                            horizontal: 14, vertical: 8.5),
                         decoration: BoxDecoration(
-                          color: _accent,
+                          color: isSoundiata
+                              ? const Color(0xFFF59E0B)
+                              : _accent,
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
-                              color: _accent.withValues(alpha: 0.3),
-                              blurRadius: 6,
+                              color: (isSoundiata
+                                      ? const Color(0xFFF59E0B)
+                                      : _accent)
+                                  .withValues(alpha: 0.35),
+                              blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
                           ],
@@ -476,18 +624,20 @@ class _PersonnageCard extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'Découvrir',
+                              isSoundiata ? 'Explorer l\'Épopée 2D' : 'Découvrir',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
-                                color: Colors.white,
+                                color: isSoundiata ? Colors.black : Colors.white,
                               ),
                             ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 13,
-                              color: Colors.white,
+                            const SizedBox(width: 5),
+                            Icon(
+                              isSoundiata
+                                  ? Icons.play_circle_fill_rounded
+                                  : Icons.arrow_forward_rounded,
+                              size: 14,
+                              color: isSoundiata ? Colors.black : Colors.white,
                             ),
                           ],
                         ),
@@ -510,8 +660,8 @@ class _PersonnageCard extends StatelessWidget {
         child: Text(
           item.title.isNotEmpty ? item.title[0].toUpperCase() : '?',
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
+            fontSize: 26,
+            fontWeight: FontWeight.w900,
             color: Colors.white,
           ),
         ),
