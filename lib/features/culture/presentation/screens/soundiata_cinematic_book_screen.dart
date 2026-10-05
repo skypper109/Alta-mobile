@@ -9,6 +9,7 @@ import '../../immersive/services/cultural_haptics.dart';
 import '../widgets/soundiata_living_book_view.dart';
 import '../widgets/soundiata_interactive_elements.dart';
 import '../widgets/soundiata_audio_elements.dart';
+import '../widgets/soundiata_prestige_elements.dart';
 
 /// 🎬 ÉCRAN CINÉMATIQUE PLEIN ÉCRAN — LE LIVRE VIVANT DE SOUNDIATA KEÏTA
 /// Expérience immersive 100% plein écran avec :
@@ -19,6 +20,8 @@ import '../widgets/soundiata_audio_elements.dart';
 /// - Tiroir modal interactif de la Charte de Kouroukan Fouga (1236)
 /// - Ambiance sonore contextuelle (Soundscapes mandingues)
 /// - Mode Autoplay Ciné-Conteur avec synchronisation vocale et ondes dorées
+/// - Moteur de particules atmosphériques multi-actes (Étape 4)
+/// - Thèmes Nuit Impériale / Parchemin Ancien & Sceau Royal (Étape 4)
 class SoundiataCinematicBookScreen extends ConsumerStatefulWidget {
   final HistoricalFigureDetail? figure;
 
@@ -40,6 +43,7 @@ class _SoundiataCinematicBookScreenState
   double _pageOffset = 0.0;
   bool _isSpeaking = false;
   bool _isAutoplayEnabled = false;
+  SoundiataReadingTheme _readingTheme = SoundiataReadingTheme.imperialDark;
 
   late final AnimationController _pulseController;
   late final AnimationController _dustController;
@@ -159,8 +163,36 @@ class _SoundiataCinematicBookScreenState
               _speakCurrentChapter();
             }
           });
+        } else if (_isAutoplayEnabled && mounted && _currentPage == _chapters.length - 1) {
+          _showRoyalSealModal();
         }
       },
+    );
+  }
+
+  void _showRoyalSealModal() {
+    CulturalHaptics.celebration();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        child: SoundiataRoyalSealCelebration(
+          isDark: _readingTheme == SoundiataReadingTheme.imperialDark,
+          onReplay: () {
+            Navigator.of(ctx).pop();
+            _pageController.animateToPage(
+              0,
+              duration: const Duration(milliseconds: 700),
+              curve: Curves.easeInOutCubic,
+            );
+          },
+          onLaunchFullscreen: () {
+            Navigator.of(ctx).pop();
+          },
+        ),
+      ),
     );
   }
 
@@ -413,6 +445,18 @@ class _SoundiataCinematicBookScreenState
 
                 const SizedBox(width: 8),
 
+                // Bouton Thème de lecture (Nuit Impériale / Parchemin Ancien)
+                SoundiataThemeSwitchButton(
+                  currentTheme: _readingTheme,
+                  onThemeChanged: (theme) {
+                    setState(() {
+                      _readingTheme = theme;
+                    });
+                  },
+                ),
+
+                const SizedBox(width: 8),
+
                 // Bouton Autoplay (Ciné-Conteur automatique)
                 GestureDetector(
                   onTap: _toggleAutoplay,
@@ -601,7 +645,7 @@ class _SoundiataCinematicBookScreenState
 
                 const Spacer(),
 
-                // Bouton Suivant
+                // Bouton Suivant ou Sceau Royal final
                 if (_currentPage < _chapters.length - 1)
                   GestureDetector(
                     onTap: _nextPage,
@@ -628,29 +672,35 @@ class _SoundiataCinematicBookScreenState
                   )
                 else
                   GestureDetector(
-                    onTap: () {
-                      CulturalHaptics.celebration();
-                      Navigator.of(context).pop();
-                    },
+                    onTap: _showRoyalSealModal,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF10B981),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+                        ),
                         borderRadius: BorderRadius.circular(22),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.check_rounded,
-                              size: 16, color: Colors.white),
-                          const SizedBox(width: 4),
+                          const Icon(Icons.verified_rounded,
+                              size: 16, color: Colors.black),
+                          const SizedBox(width: 5),
                           Text(
-                            'Fin',
+                            'Sceau Royal',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.black,
                             ),
                           ),
                         ],
@@ -689,6 +739,9 @@ class _SoundiataCinematicBookScreenState
     required double pageOffset,
     required bool isCurrentlySpeaking,
   }) {
+    final isParchment = _readingTheme == SoundiataReadingTheme.ancientParchment;
+    final themeColors = SoundiataThemeColors.of(_readingTheme);
+
     // Calcul de parallaxe continue en temps réel
     final double pageDelta = index - pageOffset;
     final double parallaxX = pageDelta * 60.0;
@@ -841,15 +894,18 @@ class _SoundiataCinematicBookScreenState
           ),
         ],
 
-        // Couche de poussière dorée pour Kirina
-        if (chapter.isBattleScene)
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _BattlefieldDustPainter(
+        // ── 3B. MOTEUR DE PARTICULES ATMOSPHÉRIQUES MULTI-ACTES (ÉTAPE 4) ──
+        Positioned.fill(
+          child: AnimatedBuilder(
+            animation: _dustController,
+            builder: (context, _) => CustomPaint(
+              painter: SoundiataAtmospherePainter(
                 progress: _dustController.value,
+                type: SoundiataAtmosphereType.forChapter(chapter.number),
               ),
             ),
           ),
+        ),
 
         // ── 4. FLÈCHE BLANCHE VOLANTE EN PLEIN ÉCRAN (KIRINA 1235) ────────────
         if (chapter.isBattleScene && _kirinaArrowFired)
@@ -920,8 +976,8 @@ class _SoundiataCinematicBookScreenState
                       ? 'Soumaoro (En fuite)'
                       : (chapter.rightCharName ?? 'Adversaire'),
                   role: (chapter.isBattleScene && _kirinaSoumaoroDefeated)
-                      ? 'Roi-Sorcier Vaincu'
-                      : (chapter.rightCharRole ?? 'Sosso'),
+                    ? 'Roi-Sorcier Vaincu'
+                    : (chapter.rightCharRole ?? 'Sosso'),
                   imagePath: chapter.rightCharImage!,
                   accentColor:
                       (chapter.isBattleScene && _kirinaSoumaoroDefeated)
@@ -941,17 +997,21 @@ class _SoundiataCinematicBookScreenState
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF0E1322).withValues(alpha: 0.94),
+              color: isParchment
+                  ? themeColors.cardBackground
+                  : const Color(0xFF0E1322).withValues(alpha: 0.94),
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: chapter.isBattleScene
-                    ? const Color(0xFFF59E0B).withValues(alpha: 0.6)
-                    : const Color(0xFFF59E0B).withValues(alpha: 0.3),
+                color: isParchment
+                    ? themeColors.border
+                    : (chapter.isBattleScene
+                        ? const Color(0xFFF59E0B).withValues(alpha: 0.6)
+                        : const Color(0xFFF59E0B).withValues(alpha: 0.3)),
                 width: 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.6),
+                  color: Colors.black.withValues(alpha: isParchment ? 0.25 : 0.6),
                   blurRadius: 18,
                   offset: const Offset(0, 4),
                 ),
@@ -974,7 +1034,7 @@ class _SoundiataCinematicBookScreenState
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 15,
                               fontWeight: FontWeight.w900,
-                              color: Colors.white,
+                              color: themeColors.textPrimary,
                               letterSpacing: -0.3,
                             ),
                           ),
@@ -984,7 +1044,7 @@ class _SoundiataCinematicBookScreenState
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFFF59E0B),
+                              color: themeColors.goldAccent,
                             ),
                           ),
                         ],
@@ -993,7 +1053,7 @@ class _SoundiataCinematicBookScreenState
                     const SizedBox(width: 8),
                     SoundiataSoundscapeBadge(
                       chapterNumber: chapter.number,
-                      isDark: true,
+                      isDark: !isParchment,
                     ),
                   ],
                 ),
@@ -1006,7 +1066,9 @@ class _SoundiataCinematicBookScreenState
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFFE2E8F0),
+                    color: isParchment
+                        ? themeColors.textPrimary
+                        : const Color(0xFFE2E8F0),
                     height: 1.45,
                   ),
                   maxLines: 3,
@@ -1018,8 +1080,9 @@ class _SoundiataCinematicBookScreenState
                 // Citation synchronisée avec l'audio en direct (Waveform + Glow)
                 SoundiataSynchronizedQuote(
                   quote: chapter.highlightQuote,
-                  isActivelySpeaking: isCurrentlySpeaking && _currentPage == index,
-                  isDark: true,
+                  isActivelySpeaking:
+                      isCurrentlySpeaking && _currentPage == index,
+                  isDark: !isParchment,
                 ),
 
                 // ── DÉCLENCHEURS DE MICRO-INTERACTIONS TACTILES ───────────────
@@ -1392,37 +1455,5 @@ class _AnimatedTradeRoutesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _AnimatedTradeRoutesPainter oldDelegate) =>
-      oldDelegate.progress != progress;
-}
-
-/// Peintre de poussière dorée et étincelles de la Bataille de Kirina (Section 6)
-class _BattlefieldDustPainter extends CustomPainter {
-  final double progress;
-
-  _BattlefieldDustPainter({required this.progress});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rand = math.Random(42);
-    final dustPaint = Paint()..style = PaintingStyle.fill;
-
-    for (int i = 0; i < 28; i++) {
-      final baseX = rand.nextDouble() * size.width;
-      final baseY = rand.nextDouble() * size.height;
-      final speed = 0.5 + rand.nextDouble();
-      final currentY = (baseY - (progress * speed * size.height)) % size.height;
-      final currentX = baseX + (math.sin(progress * 2 * math.pi + i) * 12);
-      final radius = 1.0 + (rand.nextDouble() * 2.2);
-
-      dustPaint.color = const Color(0xFFF59E0B).withValues(
-        alpha: 0.15 + (rand.nextDouble() * 0.4),
-      );
-
-      canvas.drawCircle(Offset(currentX, currentY), radius, dustPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _BattlefieldDustPainter oldDelegate) =>
       oldDelegate.progress != progress;
 }

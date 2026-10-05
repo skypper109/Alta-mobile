@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +10,7 @@ import '../../immersive/services/cultural_haptics.dart';
 import 'culture_audio_listen_badge.dart';
 import 'soundiata_interactive_elements.dart';
 import 'soundiata_audio_elements.dart';
+import 'soundiata_prestige_elements.dart';
 
 /// Données narratives d'une section du Livre Vivant de Soundiata
 class SoundiataBookChapter {
@@ -86,6 +86,7 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
   int _activeChapterIndex = 0;
   double _scrollProgress = 0.0;
   bool _isAutoplayActive = false;
+  SoundiataReadingTheme _readingTheme = SoundiataReadingTheme.imperialDark;
 
   // Contrôleurs d'animations cinématiques
   late final AnimationController _pulseController;
@@ -332,10 +333,11 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
 
   @override
   Widget build(BuildContext context) {
-    final isDark = widget.isDark;
-    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final borderCol =
-        isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
+    final isParchment = _readingTheme == SoundiataReadingTheme.ancientParchment;
+    final themeColors = SoundiataThemeColors.of(_readingTheme);
+    final isDark = !isParchment && widget.isDark;
+    final titleColor = themeColors.textPrimary;
+    final borderCol = themeColors.border;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,10 +346,14 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF140D07) : const Color(0xFFFFFBEB),
+            color: isParchment
+                ? themeColors.cardBackground
+                : (isDark ? const Color(0xFF140D07) : const Color(0xFFFFFBEB)),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
+              color: isParchment
+                  ? themeColors.border
+                  : const Color(0xFFF59E0B).withValues(alpha: 0.4),
               width: 1.2,
             ),
             boxShadow: [
@@ -409,14 +415,26 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
                       ],
                     ),
                   ),
+                  // Bouton Sélecteur de Thème (Nuit Impériale / Parchemin Ancien)
+                  SoundiataThemeSwitchButton(
+                    currentTheme: _readingTheme,
+                    onThemeChanged: (theme) {
+                      setState(() {
+                        _readingTheme = theme;
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 8),
                   // Indicateur de progression du scroll
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.6),
+                      color: isParchment
+                          ? themeColors.cardBackgroundAlt
+                          : Colors.black.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
+                        color: themeColors.goldAccent.withValues(alpha: 0.5),
                       ),
                     ),
                     child: Text(
@@ -424,7 +442,7 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w900,
-                        color: const Color(0xFFF59E0B),
+                        color: themeColors.goldAccent,
                       ),
                     ),
                   ),
@@ -439,7 +457,7 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
                   backgroundColor:
                       (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08),
                   valueColor:
-                      const AlwaysStoppedAnimation<Color>(Color(0xFFF59E0B)),
+                      AlwaysStoppedAnimation<Color>(themeColors.goldAccent),
                 ),
               ),
             ],
@@ -578,13 +596,24 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
 
         // ── FLUX DE SCÈNES SCROLL-DRIVEN (LE LIVRE ANIMÉ) ───────────────────────
         SizedBox(
-          height: 600,
+          height: 620,
           child: ListView.separated(
             controller: _bookScrollController,
             physics: const BouncingScrollPhysics(),
-            itemCount: chapters.length,
+            itemCount: chapters.length + 1,
             separatorBuilder: (_, __) => const SizedBox(height: 24),
             itemBuilder: (context, index) {
+              if (index == chapters.length) {
+                // ── ÉTAPE 4 : SCEAU ROYAL ET CÉRÉMONIE DE COMPLÉTION ──
+                return SoundiataRoyalSealCelebration(
+                  isDark: isDark,
+                  onReplay: () => _scrollToChapter(0),
+                  onLaunchFullscreen: () {
+                    CulturalHaptics.celebration();
+                    context.push('/culture/soundiata-book');
+                  },
+                );
+              }
               final chapter = chapters[index];
               return _buildScrollDrivenChapterScene(
                 chapter: chapter,
@@ -592,6 +621,7 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
                 isDark: isDark,
                 borderCol: borderCol,
                 titleColor: titleColor,
+                themeColors: themeColors,
               );
             },
           ),
@@ -607,13 +637,14 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
     required bool isDark,
     required Color borderCol,
     required Color titleColor,
+    required SoundiataThemeColors themeColors,
   }) {
+    final isParchment = _readingTheme == SoundiataReadingTheme.ancientParchment;
     final narration = ref.watch(narrationCoordinatorProvider);
     final isActivelySpeaking = narration.isSpeaking &&
         narration.activeContentId == 'soundiata_book_chap_${chapter.number}';
-    final subtitleColor =
-        isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-    final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
+    final subtitleColor = themeColors.textSecondary;
+    final cardBg = themeColors.cardBackground;
 
     return Container(
       decoration: BoxDecoration(
@@ -675,22 +706,25 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
                   ),
                 ),
 
-                // 3. Couche vectorielle spéciale pour la CARTE DU MANDÉ (Section 3)
+                // 3. MOTEUR DE PARTICULES ATMOSPHÉRIQUES MULTI-ACTES (ÉTAPE 4)
+                Positioned.fill(
+                  child: AnimatedBuilder(
+                    animation: _dustController,
+                    builder: (context, _) => CustomPaint(
+                      painter: SoundiataAtmospherePainter(
+                        progress: _dustController.value,
+                        type: SoundiataAtmosphereType.forChapter(chapter.number),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 4. Couche vectorielle spéciale pour la CARTE DU MANDÉ (Section 3)
                 if (chapter.isMapScene)
                   Positioned.fill(
                     child: CustomPaint(
                       painter: _AnimatedTradeRoutesPainter(
                         progress: _pulseController.value,
-                      ),
-                    ),
-                  ),
-
-                // 4. Couche spéciale particules de bataille pour KIRINA (Section 6)
-                if (chapter.isBattleScene)
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: _BattlefieldDustPainter(
-                        progress: _dustController.value,
                       ),
                     ),
                   ),
@@ -955,7 +989,9 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
                       decoration: BoxDecoration(
                         color: isDark
                             ? CultureTheme.darkSurfaceAlt
-                            : const Color(0xFFF1F5F9),
+                            : (isParchment
+                                ? themeColors.cardBackgroundAlt
+                                : const Color(0xFFF1F5F9)),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -1130,37 +1166,5 @@ class _AnimatedTradeRoutesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _AnimatedTradeRoutesPainter oldDelegate) =>
-      oldDelegate.progress != progress;
-}
-
-/// Peintre de poussière dorée et étincelles de la Bataille de Kirina (Section 6)
-class _BattlefieldDustPainter extends CustomPainter {
-  final double progress;
-
-  _BattlefieldDustPainter({required this.progress});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rand = math.Random(42);
-    final dustPaint = Paint()..style = PaintingStyle.fill;
-
-    for (int i = 0; i < 28; i++) {
-      final baseX = rand.nextDouble() * size.width;
-      final baseY = rand.nextDouble() * size.height;
-      final speed = 0.5 + rand.nextDouble();
-      final currentY = (baseY - (progress * speed * size.height)) % size.height;
-      final currentX = baseX + (math.sin(progress * 2 * math.pi + i) * 12);
-      final radius = 1.0 + (rand.nextDouble() * 2.2);
-
-      dustPaint.color = const Color(0xFFF59E0B).withValues(
-        alpha: 0.15 + (rand.nextDouble() * 0.4),
-      );
-
-      canvas.drawCircle(Offset(currentX, currentY), radius, dustPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _BattlefieldDustPainter oldDelegate) =>
       oldDelegate.progress != progress;
 }
