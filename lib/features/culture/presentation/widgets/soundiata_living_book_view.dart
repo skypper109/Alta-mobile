@@ -475,7 +475,7 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
           },
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
@@ -498,13 +498,17 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Lancer l\'Épopée en Plein Écran Cinématique',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.black,
-                    letterSpacing: -0.2,
+                Flexible(
+                  child: Text(
+                    'Lancer l\'Épopée en Plein Écran',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.black,
+                      letterSpacing: -0.2,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -890,39 +894,35 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Titre du chapitre + Badge d'ambiance sonore
+                // Titre sur toute la largeur (évite le passage à la ligne mot par mot)
+                Text(
+                  chapter.title,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: titleColor,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(height: 6),
+
+                // Ligne secondaire : Période à gauche + Badge d'ambiance à droite
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            chapter.title,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: titleColor,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            chapter.period,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFFF59E0B),
-                            ),
-                          ),
-                        ],
+                    Text(
+                      chapter.period,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFFF59E0B),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    SoundiataSoundscapeBadge(
-                      chapterNumber: chapter.number,
-                      isDark: isDark,
+                    const Spacer(),
+                    Flexible(
+                      child: SoundiataSoundscapeBadge(
+                        chapterNumber: chapter.number,
+                        isDark: isDark,
+                      ),
                     ),
                   ],
                 ),

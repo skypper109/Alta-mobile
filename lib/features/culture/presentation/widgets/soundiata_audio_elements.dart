@@ -205,6 +205,7 @@ class SoundiataSoundscapeBadge extends StatelessWidget {
     final soundscape = SoundiataSoundscape.forChapter(chapterNumber);
 
     return Container(
+      constraints: const BoxConstraints(maxWidth: 190),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF141926) : const Color(0xFFF8FAFC),

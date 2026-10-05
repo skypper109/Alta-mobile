@@ -739,6 +739,9 @@ class _SoundiataCinematicBookScreenState
           AnimatedBuilder(
             animation: _kirinaFlashController,
             builder: (context, _) {
+              if (!_kirinaFlashController.isAnimating) {
+                return const SizedBox.shrink();
+              }
               final opacity = (1.0 - _kirinaFlashController.value) * 0.75;
               if (opacity <= 0.01) return const SizedBox.shrink();
               return Positioned.fill(
@@ -1065,39 +1068,47 @@ class _SoundiataCinematicBookScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                // En-tête : Acte + Période + Badge d'ambiance sonore
+                // Titre sur toute la largeur (affichage naturel sans saut de ligne forcé)
+                Text(
+                  chapter.title,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: isCompactWidth ? 14.5 : 16,
+                    fontWeight: FontWeight.w900,
+                    color: themeColors.textPrimary,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(height: 6),
+
+                // Ligne secondaire : Période à gauche + Ambiance sonore à droite
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            chapter.title,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w900,
-                              color: themeColors.textPrimary,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            chapter.period,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: themeColors.goldAccent,
-                            ),
-                          ),
-                        ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        chapter.period,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: themeColors.goldAccent,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    SoundiataSoundscapeBadge(
-                      chapterNumber: chapter.number,
-                      isDark: !isParchment,
+                    const Spacer(),
+                    Flexible(
+                      child: SoundiataSoundscapeBadge(
+                        chapterNumber: chapter.number,
+                        isDark: !isParchment,
+                      ),
                     ),
                   ],
                 ),
