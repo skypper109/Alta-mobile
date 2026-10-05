@@ -1,12 +1,14 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/models/culture_detail_models.dart';
+import '../../immersive/controllers/narration_coordinator.dart';
 import '../../immersive/services/cultural_haptics.dart';
-import '../../../../core/services/vivienne_tts_service.dart';
 import '../widgets/soundiata_living_book_view.dart';
 import '../widgets/soundiata_interactive_elements.dart';
+import '../widgets/soundiata_audio_elements.dart';
 
 /// 🎬 ÉCRAN CINÉMATIQUE PLEIN ÉCRAN — LE LIVRE VIVANT DE SOUNDIATA KEÏTA
 /// Expérience immersive 100% plein écran avec :
@@ -15,8 +17,9 @@ import '../widgets/soundiata_interactive_elements.dart';
 /// - Tracé vectoriel animé de la Carte du Manden avec cités interactives cliquables
 /// - Choc stylisé de Kirina avec tir interactif de la flèche d'ergot blanc
 /// - Tiroir modal interactif de la Charte de Kouroukan Fouga (1236)
-/// - Contrôleur de narration vocale du Griot
-class SoundiataCinematicBookScreen extends StatefulWidget {
+/// - Ambiance sonore contextuelle (Soundscapes mandingues)
+/// - Mode Autoplay Ciné-Conteur avec synchronisation vocale et ondes dorées
+class SoundiataCinematicBookScreen extends ConsumerStatefulWidget {
   final HistoricalFigureDetail? figure;
 
   const SoundiataCinematicBookScreen({
@@ -25,16 +28,18 @@ class SoundiataCinematicBookScreen extends StatefulWidget {
   });
 
   @override
-  State<SoundiataCinematicBookScreen> createState() =>
+  ConsumerState<SoundiataCinematicBookScreen> createState() =>
       _SoundiataCinematicBookScreenState();
 }
 
 class _SoundiataCinematicBookScreenState
-    extends State<SoundiataCinematicBookScreen> with TickerProviderStateMixin {
+    extends ConsumerState<SoundiataCinematicBookScreen>
+    with TickerProviderStateMixin {
   late final PageController _pageController;
   int _currentPage = 0;
   double _pageOffset = 0.0;
   bool _isSpeaking = false;
+  bool _isAutoplayEnabled = false;
 
   late final AnimationController _pulseController;
   late final AnimationController _dustController;
@@ -95,7 +100,7 @@ class _SoundiataCinematicBookScreenState
       if (newPage != _currentPage) {
         _currentPage = newPage;
         CulturalHaptics.tabSwitch();
-        if (_isSpeaking) {
+        if (_isSpeaking || _isAutoplayEnabled) {
           _speakCurrentChapter();
         }
       }
@@ -104,12 +109,12 @@ class _SoundiataCinematicBookScreenState
 
   void _toggleNarration() {
     CulturalHaptics.audioToggle();
-    if (_isSpeaking) {
-      try {
-        VivienneTtsService.instance.stop();
-      } catch (_) {}
+    final narration = ref.read(narrationCoordinatorProvider);
+    if (narration.isSpeaking) {
+      ref.read(narrationCoordinatorProvider.notifier).stop();
       setState(() {
         _isSpeaking = false;
+        _isAutoplayEnabled = false;
       });
     } else {
       setState(() {
@@ -119,13 +124,44 @@ class _SoundiataCinematicBookScreenState
     }
   }
 
+  void _toggleAutoplay() {
+    CulturalHaptics.celebration();
+    setState(() {
+      _isAutoplayEnabled = !_isAutoplayEnabled;
+    });
+    if (_isAutoplayEnabled) {
+      setState(() {
+        _isSpeaking = true;
+      });
+      _speakCurrentChapter();
+    } else {
+      ref.read(narrationCoordinatorProvider.notifier).stop();
+      setState(() {
+        _isSpeaking = false;
+      });
+    }
+  }
+
   void _speakCurrentChapter() {
     final chapter = _chapters[_currentPage];
     final text =
         '${chapter.actName} : ${chapter.title}. ${chapter.location}, ${chapter.period}. ${chapter.narrative}. ${chapter.highlightQuote}';
-    try {
-      VivienneTtsService.instance.speak(text);
-    } catch (_) {}
+    final contentId = 'soundiata_cinematic_chap_${chapter.number}';
+
+    ref.read(narrationCoordinatorProvider.notifier).speak(
+      text,
+      contentId: contentId,
+      onComplete: () {
+        if (_isAutoplayEnabled && mounted && _currentPage < _chapters.length - 1) {
+          _nextPage();
+          Future.delayed(const Duration(milliseconds: 700), () {
+            if (_isAutoplayEnabled && mounted) {
+              _speakCurrentChapter();
+            }
+          });
+        }
+      },
+    );
   }
 
   void _triggerKirinaImpact() {
@@ -210,7 +246,7 @@ class _SoundiataCinematicBookScreenState
   @override
   void dispose() {
     try {
-      VivienneTtsService.instance.stop();
+      ref.read(narrationCoordinatorProvider.notifier).stop();
     } catch (_) {}
     _pageController.removeListener(_onPageScroll);
     _pageController.dispose();
@@ -244,6 +280,8 @@ class _SoundiataCinematicBookScreenState
 
   @override
   Widget build(BuildContext context) {
+    final narration = ref.watch(narrationCoordinatorProvider);
+    final isCurrentlySpeaking = narration.isSpeaking;
     final currentChapter = _chapters[_currentPage];
     final topPadding = MediaQuery.paddingOf(context).top;
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
@@ -274,6 +312,7 @@ class _SoundiataCinematicBookScreenState
                   chapter: _chapters[index],
                   index: index,
                   pageOffset: _pageOffset,
+                  isCurrentlySpeaking: isCurrentlySpeaking,
                 );
               },
             ),
@@ -290,7 +329,7 @@ class _SoundiataCinematicBookScreenState
                   onTap: () {
                     CulturalHaptics.cardPress();
                     try {
-                      VivienneTtsService.instance.stop();
+                      ref.read(narrationCoordinatorProvider.notifier).stop();
                     } catch (_) {}
                     Navigator.of(context).pop();
                   },
@@ -372,40 +411,104 @@ class _SoundiataCinematicBookScreenState
                   ),
                 ),
 
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
 
-                // Bouton Voix du Griot (Audio)
+                // Bouton Autoplay (Ciné-Conteur automatique)
+                GestureDetector(
+                  onTap: _toggleAutoplay,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: _isAutoplayEnabled
+                          ? const Color(0xFFF59E0B)
+                          : Colors.black.withValues(alpha: 0.65),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: _isAutoplayEnabled
+                            ? const Color(0xFFD97706)
+                            : Colors.white.withValues(alpha: 0.25),
+                        width: 1.2,
+                      ),
+                      boxShadow: _isAutoplayEnabled
+                          ? [
+                              BoxShadow(
+                                color: const Color(0xFFF59E0B).withValues(alpha: 0.45),
+                                blurRadius: 8,
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.auto_awesome_rounded,
+                          size: 13,
+                          color: _isAutoplayEnabled ? Colors.black : const Color(0xFFF59E0B),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Auto',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w900,
+                            color: _isAutoplayEnabled ? Colors.black : Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                // Bouton Voix du Griot (Audio) avec Waveform animé
                 GestureDetector(
                   onTap: _toggleNarration,
                   child: Container(
-                    width: 42,
-                    height: 42,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
-                      color: _isSpeaking
+                      color: isCurrentlySpeaking
                           ? const Color(0xFFF59E0B)
                           : Colors.black.withValues(alpha: 0.65),
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: _isSpeaking
+                        color: isCurrentlySpeaking
                             ? const Color(0xFFF59E0B)
                             : Colors.white.withValues(alpha: 0.25),
                         width: 1.2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: _isSpeaking
+                          color: isCurrentlySpeaking
                               ? const Color(0xFFF59E0B).withValues(alpha: 0.4)
                               : Colors.black.withValues(alpha: 0.4),
                           blurRadius: 10,
                         ),
                       ],
                     ),
-                    child: Icon(
-                      _isSpeaking
-                          ? Icons.volume_up_rounded
-                          : Icons.volume_mute_rounded,
-                      color: _isSpeaking ? Colors.black : Colors.white,
-                      size: 20,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isCurrentlySpeaking
+                              ? Icons.volume_up_rounded
+                              : Icons.volume_mute_rounded,
+                          color: isCurrentlySpeaking ? Colors.black : Colors.white,
+                          size: 18,
+                        ),
+                        if (isCurrentlySpeaking) ...[
+                          const SizedBox(width: 6),
+                          const SoundiataWaveformVisualizer(
+                            isPlaying: true,
+                            activeColor: Colors.black,
+                            barCount: 3,
+                            maxHeight: 12,
+                            barWidth: 2.2,
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
@@ -584,6 +687,7 @@ class _SoundiataCinematicBookScreenState
     required SoundiataBookChapter chapter,
     required int index,
     required double pageOffset,
+    required bool isCurrentlySpeaking,
   }) {
     // Calcul de parallaxe continue en temps réel
     final double pageDelta = index - pageOffset;
@@ -857,26 +961,39 @@ class _SoundiataCinematicBookScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // En-tête : Acte + Période
+                // En-tête : Acte + Période + Badge d'ambiance sonore
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      chapter.title,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: -0.3,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            chapter.title,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            chapter.period,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFFF59E0B),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      chapter.period,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFFF59E0B),
-                      ),
+                    const SizedBox(width: 8),
+                    SoundiataSoundscapeBadge(
+                      chapterNumber: chapter.number,
+                      isDark: true,
                     ),
                   ],
                 ),
@@ -898,29 +1015,11 @@ class _SoundiataCinematicBookScreenState
 
                 const SizedBox(height: 8),
 
-                // Citation en exergue
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      left: BorderSide(
-                        color: Color(0xFFF59E0B),
-                        width: 3.0,
-                      ),
-                    ),
-                  ),
-                  child: Text(
-                    chapter.highlightQuote,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 10.5,
-                      fontStyle: FontStyle.italic,
-                      color: const Color(0xFFFCD34D),
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                // Citation synchronisée avec l'audio en direct (Waveform + Glow)
+                SoundiataSynchronizedQuote(
+                  quote: chapter.highlightQuote,
+                  isActivelySpeaking: isCurrentlySpeaking && _currentPage == index,
+                  isDark: true,
                 ),
 
                 // ── DÉCLENCHEURS DE MICRO-INTERACTIONS TACTILES ───────────────

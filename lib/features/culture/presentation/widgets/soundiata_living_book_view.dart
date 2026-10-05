@@ -1,13 +1,16 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/models/culture_detail_models.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../immersive/controllers/narration_coordinator.dart';
 import '../../immersive/services/cultural_haptics.dart';
 import 'culture_audio_listen_badge.dart';
 import 'soundiata_interactive_elements.dart';
+import 'soundiata_audio_elements.dart';
 
 /// Données narratives d'une section du Livre Vivant de Soundiata
 class SoundiataBookChapter {
@@ -58,7 +61,8 @@ class SoundiataBookChapter {
 /// - Carte ancienne du Mandé avec routes vectorielles qui se tracent au scroll
 /// - Choc stylisé de Kirina (silhouettes, poussière, secousses, confrontation)
 /// - Révélation progressive du texte et synchronisation audio
-class SoundiataLivingBookView extends StatefulWidget {
+/// - Visualiseur audio d'ondes & mode Autoplay Ciné-Conteur
+class SoundiataLivingBookView extends ConsumerStatefulWidget {
   final HistoricalFigureDetail figure;
   final bool isDark;
 
@@ -72,15 +76,16 @@ class SoundiataLivingBookView extends StatefulWidget {
       _SoundiataLivingBookViewState.chapters;
 
   @override
-  State<SoundiataLivingBookView> createState() =>
+  ConsumerState<SoundiataLivingBookView> createState() =>
       _SoundiataLivingBookViewState();
 }
 
-class _SoundiataLivingBookViewState extends State<SoundiataLivingBookView>
+class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookView>
     with TickerProviderStateMixin {
   late final ScrollController _bookScrollController;
   int _activeChapterIndex = 0;
   double _scrollProgress = 0.0;
+  bool _isAutoplayActive = false;
 
   // Contrôleurs d'animations cinématiques
   late final AnimationController _pulseController;
@@ -256,8 +261,58 @@ class _SoundiataLivingBookViewState extends State<SoundiataLivingBookView>
     }
   }
 
+  void _playChapterNarration(int index) {
+    if (index < 0 || index >= chapters.length) return;
+    final chapter = chapters[index];
+    final text =
+        '${chapter.actName} : ${chapter.title}. ${chapter.location}, ${chapter.period}. ${chapter.narrative}. ${chapter.highlightQuote}';
+    final contentId = 'soundiata_book_chap_${chapter.number}';
+
+    ref.read(narrationCoordinatorProvider.notifier).speak(
+      text,
+      contentId: contentId,
+      onComplete: () {
+        if (_isAutoplayActive && mounted && index < chapters.length - 1) {
+          _scrollToChapter(index + 1);
+          Future.delayed(const Duration(milliseconds: 700), () {
+            if (_isAutoplayActive && mounted) {
+              _playChapterNarration(index + 1);
+            }
+          });
+        }
+      },
+    );
+  }
+
+  void _toggleAutoplay() {
+    setState(() {
+      _isAutoplayActive = !_isAutoplayActive;
+    });
+    if (_isAutoplayActive) {
+      CulturalHaptics.celebration();
+      _playChapterNarration(_activeChapterIndex);
+    } else {
+      ref.read(narrationCoordinatorProvider.notifier).stop();
+    }
+  }
+
+  void _toggleMasterPlay() {
+    final narration = ref.read(narrationCoordinatorProvider);
+    if (narration.isSpeaking) {
+      ref.read(narrationCoordinatorProvider.notifier).stop();
+      if (_isAutoplayActive) {
+        setState(() => _isAutoplayActive = false);
+      }
+    } else {
+      _playChapterNarration(_activeChapterIndex);
+    }
+  }
+
   @override
   void dispose() {
+    try {
+      ref.read(narrationCoordinatorProvider.notifier).stop();
+    } catch (_) {}
     _bookScrollController.removeListener(_onBookScroll);
     _bookScrollController.dispose();
     _pulseController.dispose();
@@ -496,7 +551,30 @@ class _SoundiataLivingBookViewState extends State<SoundiataLivingBookView>
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
+
+        // ── BARRE AUDIO MAÎTRE (ÉTAPE 3 : AMBIANCE & NARRATEUR) ───────────────
+        SoundiataMasterAudioBar(
+          activeChapterIndex: _activeChapterIndex,
+          totalChapters: chapters.length,
+          activeChapterTitle: chapters[_activeChapterIndex].title,
+          isAutoplayEnabled: _isAutoplayActive,
+          onToggleAutoplay: _toggleAutoplay,
+          onTogglePlay: _toggleMasterPlay,
+          onPreviousChapter: () {
+            if (_activeChapterIndex > 0) {
+              _scrollToChapter(_activeChapterIndex - 1);
+            }
+          },
+          onNextChapter: () {
+            if (_activeChapterIndex < chapters.length - 1) {
+              _scrollToChapter(_activeChapterIndex + 1);
+            }
+          },
+          isDark: isDark,
+        ),
+
+        const SizedBox(height: 14),
 
         // ── FLUX DE SCÈNES SCROLL-DRIVEN (LE LIVRE ANIMÉ) ───────────────────────
         SizedBox(
@@ -530,6 +608,9 @@ class _SoundiataLivingBookViewState extends State<SoundiataLivingBookView>
     required Color borderCol,
     required Color titleColor,
   }) {
+    final narration = ref.watch(narrationCoordinatorProvider);
+    final isActivelySpeaking = narration.isSpeaking &&
+        narration.activeContentId == 'soundiata_book_chap_${chapter.number}';
     final subtitleColor =
         isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
@@ -539,15 +620,19 @@ class _SoundiataLivingBookViewState extends State<SoundiataLivingBookView>
         color: cardBg,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: chapter.isBattleScene
-              ? const Color(0xFFF59E0B).withValues(alpha: 0.6)
-              : borderCol,
-          width: chapter.isBattleScene ? 1.6 : 1.0,
+          color: isActivelySpeaking
+              ? const Color(0xFFF59E0B)
+              : (chapter.isBattleScene
+                  ? const Color(0xFFF59E0B).withValues(alpha: 0.6)
+                  : borderCol),
+          width: isActivelySpeaking ? 2.0 : (chapter.isBattleScene ? 1.6 : 1.0),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
-            blurRadius: 16,
+            color: isActivelySpeaking
+                ? const Color(0xFFF59E0B).withValues(alpha: 0.28)
+                : Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+            blurRadius: isActivelySpeaking ? 22 : 16,
             offset: const Offset(0, 5),
           ),
         ],
@@ -770,27 +855,41 @@ class _SoundiataLivingBookViewState extends State<SoundiataLivingBookView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Titre du chapitre
-                Text(
-                  chapter.title,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: titleColor,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-
-                const SizedBox(height: 4),
-
-                // Époque
-                Text(
-                  chapter.period,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFFF59E0B),
-                  ),
+                // Titre du chapitre + Badge d'ambiance sonore
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            chapter.title,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: titleColor,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            chapter.period,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFFF59E0B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    SoundiataSoundscapeBadge(
+                      chapterNumber: chapter.number,
+                      isDark: isDark,
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 10),
@@ -808,31 +907,11 @@ class _SoundiataLivingBookViewState extends State<SoundiataLivingBookView>
 
                 const SizedBox(height: 12),
 
-                // Citation historique mise en exergue
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF59E0B).withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                    border: const Border(
-                      left: BorderSide(
-                        color: Color(0xFFF59E0B),
-                        width: 3.5,
-                      ),
-                    ),
-                  ),
-                  child: Text(
-                    chapter.highlightQuote,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11.5,
-                      fontStyle: FontStyle.italic,
-                      color: isDark
-                          ? const Color(0xFFFCD34D)
-                          : const Color(0xFFB45309),
-                      height: 1.45,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                // Citation synchronisée avec l'audio en direct (Waveform + Glow)
+                SoundiataSynchronizedQuote(
+                  quote: chapter.highlightQuote,
+                  isActivelySpeaking: isActivelySpeaking,
+                  isDark: isDark,
                 ),
 
                 // ── MICRO-INTERACTIONS TACTILES ÉTAPE 2 ────────────────────────
