@@ -1,11 +1,13 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/models/culture_detail_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/services/cultural_haptics.dart';
 import 'culture_audio_listen_badge.dart';
+import 'soundiata_interactive_elements.dart';
 
 /// Données narratives d'une section du Livre Vivant de Soundiata
 class SoundiataBookChapter {
@@ -65,6 +67,9 @@ class SoundiataLivingBookView extends StatefulWidget {
     required this.figure,
     required this.isDark,
   });
+
+  static List<SoundiataBookChapter> getChapters() =>
+      _SoundiataLivingBookViewState.chapters;
 
   @override
   State<SoundiataLivingBookView> createState() =>
@@ -388,6 +393,59 @@ class _SoundiataLivingBookViewState extends State<SoundiataLivingBookView>
 
         const SizedBox(height: 12),
 
+        // ── BOUTON PLEIN ÉCRAN CINÉMATIQUE ────────────────────────────────────
+        GestureDetector(
+          onTap: () {
+            CulturalHaptics.celebration();
+            context.push('/culture/soundiata-book');
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.fullscreen_rounded,
+                  color: Colors.black,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Lancer l\'Épopée en Plein Écran Cinématique',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Colors.black,
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 14),
+
         // ── BARRE DE PROGRESSION & SÉLECTEUR RAPIDE PAR ACTES ─────────────────
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -442,7 +500,7 @@ class _SoundiataLivingBookViewState extends State<SoundiataLivingBookView>
 
         // ── FLUX DE SCÈNES SCROLL-DRIVEN (LE LIVRE ANIMÉ) ───────────────────────
         SizedBox(
-          height: 520,
+          height: 600,
           child: ListView.separated(
             controller: _bookScrollController,
             physics: const BouncingScrollPhysics(),
@@ -776,6 +834,23 @@ class _SoundiataLivingBookViewState extends State<SoundiataLivingBookView>
                     ),
                   ),
                 ),
+
+                // ── MICRO-INTERACTIONS TACTILES ÉTAPE 2 ────────────────────────
+                if (chapter.isMapScene) ...[
+                  const SizedBox(height: 14),
+                  MandeInteractiveMapWidget(isDark: isDark),
+                  const SizedBox(height: 14),
+                ],
+                if (chapter.isBattleScene) ...[
+                  const SizedBox(height: 14),
+                  KirinaBattleArenaWidget(isDark: isDark),
+                  const SizedBox(height: 14),
+                ],
+                if (chapter.isCharterScene) ...[
+                  const SizedBox(height: 14),
+                  KouroukanCharterAccordion(isDark: isDark),
+                  const SizedBox(height: 14),
+                ],
 
                 const SizedBox(height: 14),
 

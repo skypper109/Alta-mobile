@@ -26,6 +26,7 @@ import '../../features/culture/presentation/screens/monument_detail_screen.dart'
 import '../../features/culture/presentation/screens/place_detail_screen.dart';
 import '../../features/culture/presentation/screens/quiz_culture_screen.dart';
 import '../../features/culture/presentation/screens/riddle_screen.dart';
+import '../../features/culture/presentation/screens/soundiata_cinematic_book_screen.dart';
 import '../../features/culture/presentation/views/culture_passport_view.dart';
 import '../../features/culture/presentation/screens/story_detail_screen.dart';
 import '../../features/culture/presentation/screens/story_reader_screen.dart';
@@ -246,6 +247,22 @@ GoRouter appRouter(Ref ref) {
         path: '/culture/monuments',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const CultureMonumentsScreen(),
+      ),
+
+      // ── Culture : Livre Interactif Animé de Soundiata Keïta ─────────────
+      GoRoute(
+        path: '/culture/soundiata-book',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const SoundiataCinematicBookScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: CurveTween(curve: Curves.easeInOut).animate(animation),
+              child: child,
+            );
+          },
+        ),
       ),
 
       // ── Culture Étape 3 : Fiches Immersives de Consultation ──────────────
