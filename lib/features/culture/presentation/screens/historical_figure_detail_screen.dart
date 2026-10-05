@@ -19,6 +19,7 @@ import '../widgets/connected_contents_section.dart';
 import '../widgets/documentary_scene_player.dart';
 import '../widgets/passport_stamp_toast.dart';
 import '../widgets/soundiata_epic_story_view.dart';
+import '../widgets/soundiata_living_book_view.dart';
 
 /// Fiche de consultation immersive d'un Grand Personnage Historique
 /// Sublimée avec du Motion Design 2D de classe mondiale (Soundiata Keïta, Mansa Moussa, etc.)
@@ -253,13 +254,21 @@ class _HistoricalFigureDetailScreenState
                         const SizedBox(height: 12),
                       ],
 
-                      // ── 🎬 THÉÂTRE DE SCÈNE DOCUMENTAIRE ANIMÉ (2D MOTION DESIGN) ──
-                      DocumentaryScenePlayer(
-                        figure: item,
-                        isDark: isDark,
-                      ),
-
-                      const SizedBox(height: 24),
+                      // ── 📖 LIVRE INTERACTIF ANIMÉ SCROLL-DRIVEN (SOUNDIATA KEÏTA) ──
+                      if (item.id.contains('soundiata')) ...[
+                        SoundiataLivingBookView(
+                          figure: item,
+                          isDark: isDark,
+                        ),
+                        const SizedBox(height: 24),
+                      ] else ...[
+                        // ── 🎬 THÉÂTRE DE SCÈNE DOCUMENTAIRE ANIMÉ (POUR AUTRES FIGURES) ──
+                        DocumentaryScenePlayer(
+                          figure: item,
+                          isDark: isDark,
+                        ),
+                        const SizedBox(height: 24),
+                      ],
 
                       // ── Vue d'Épopée Interactive (Audio, Parchemin, Chapitres, Faits Clés) ──
                       SoundiataEpicStoryView(
