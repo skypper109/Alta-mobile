@@ -859,6 +859,12 @@ abstract final class MonumentScanKnowledge {
         'assets/images/culture/monuments/monument_mosquee_djenne/dje_2.webp',
         'assets/images/culture/monuments/monument_mosquee_djenne/dje_3.webp',
         'assets/images/culture/monuments/monument_mosquee_djenne/dje_4.webp',
+        'assets/images/culture/monuments/monument_mosquee_djenne/dje_5.webp',
+        'assets/images/culture/monuments/monument_mosquee_djenne/dje_6.jpg',
+        'assets/images/culture/monuments/monument_mosquee_djenne/dje_7.webp',
+        'assets/images/culture/monuments/monument_mosquee_djenne/dje_8.webp',
+        'assets/images/culture/monuments/monument_mosquee_djenne/dje_9.webp',
+        'assets/images/culture/monuments/monument_mosquee_djenne/dje_10.webp',
       ],
       tag: 'Patrimoine Mondial UNESCO',
       latitude: 13.9056,
@@ -1523,9 +1529,9 @@ abstract final class MonumentScanKnowledge {
       era: 'Érigée à l\'époque coloniale, rénovée en 1970 avec l\'Arabie Saoudite',
       architectureStyle: 'Style islamique contemporain à minarets élancés et arcades blanches',
       locationDetails: 'Quartier Dabanani, Centre commercial de Bamako',
-      photoUrl: 'assets/images/culture/monuments/mosquee_djingareyber.jpg',
+      photoUrl: 'assets/images/culture/monuments/mosquee_bamako.jpg',
       galleryPhotos: [
-        'assets/images/culture/monuments/mosquee_djingareyber.jpg',
+        'assets/images/culture/monuments/mosquee_bamako.jpg',
       ],
       tag: 'Architecture Religieuse (1970)',
       latitude: 12.6520,
@@ -1561,6 +1567,13 @@ abstract final class MonumentScanKnowledge {
   static MonumentScanTarget? findById(String id) {
     if (id.isEmpty) return null;
     final normalized = id.toLowerCase().trim();
+    if (normalized == 'monument_djenne' ||
+        normalized == 'djenne' ||
+        normalized == 'mosquee_djenne') {
+      try {
+        return targets.firstWhere((t) => t.id == 'monument_mosquee_djenne');
+      } catch (_) {}
+    }
     try {
       return targets.firstWhere((t) {
         final tId = t.id.toLowerCase();

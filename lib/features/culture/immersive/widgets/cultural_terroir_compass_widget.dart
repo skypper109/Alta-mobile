@@ -80,7 +80,7 @@ class _CulturalTerroirCompassWidgetState
       title: 'Royaumes du Sud',
       subtitle: 'Sikasso & Ségou',
       cities: 'Le Tata Héroïque • Les 4444 Balanzans',
-      photoUrl: 'assets/images/culture/villes/djenne_mosquee.jpg',
+      photoUrl: 'assets/images/culture/villes/sikasso_ville.jpg',
       icon: Icons.military_tech_rounded,
       accentColor: CultureTheme.accentOrange,
       highlightFact: 'Terre des fiers rois du Kénédougou et de l\'Empire bambara.',

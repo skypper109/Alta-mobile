@@ -173,7 +173,7 @@ class MonumentScanTarget {
           ? primaryPhoto
           : (photosList.isNotEmpty
               ? photosList.first
-              : 'assets/images/culture/monuments/mosquee_djenne.jpg'),
+              : 'assets/images/culture/monuments/monument_mosquee_djenne/dje_1.webp'),
       tag: json['tag'] ?? 'Monument National',
       keywords: keywordsList,
       detectionFeatures: featuresList,

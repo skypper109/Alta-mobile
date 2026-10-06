@@ -186,7 +186,7 @@ class ConnectedContentsSection extends StatelessWidget {
     }
     final id = item.id.toLowerCase();
     if (id.contains('djenne') && id.contains('mosquee')) {
-      return 'assets/images/culture/monuments/mosquee_djenne.jpg';
+      return 'assets/images/culture/monuments/monument_mosquee_djenne/dje_1.webp';
     }
     if (id.contains('tata')) return 'assets/images/culture/monuments/tata_sikasso.jpg';
     if (id.contains('askia') && id.contains('tombeau')) return 'assets/images/culture/monuments/tombeau_askia.jpg';

@@ -587,16 +587,36 @@ class CultureRepository {
           EditorialStoryChapter(title: 'Histoire & Origine', content: target.historicalStory),
           EditorialStoryChapter(title: 'Secrets & Mystères', content: target.secretsAndMysteries),
         ],
-        connectedItems: [
-          const ConnectedItemRef(
-            id: 'ville_bamako',
-            title: 'Bamako',
-            subtitle: 'La Cité des Trois Caïmans',
-            type: ConnectedItemType.ville,
-            tag: 'Capitale',
-            regionName: 'Bamako',
-          ),
-        ],
+        connectedItems: target.id == 'monument_mosquee_djenne' ||
+                target.regionId == 'mopti'
+            ? [
+                const ConnectedItemRef(
+                  id: 'ville_djenne',
+                  title: 'Djenné',
+                  subtitle: 'La Cité Millénaire du Bani',
+                  type: ConnectedItemType.ville,
+                  tag: 'UNESCO',
+                  regionName: 'Mopti',
+                ),
+                const ConnectedItemRef(
+                  id: 'monument_djingareyber',
+                  title: 'Mosquée Djingareyber',
+                  subtitle: 'Joyau en banco de Tombouctou',
+                  type: ConnectedItemType.monument,
+                  tag: 'UNESCO',
+                  regionName: 'Tombouctou',
+                ),
+              ]
+            : [
+                const ConnectedItemRef(
+                  id: 'ville_bamako',
+                  title: 'Bamako',
+                  subtitle: 'La Cité des Trois Caïmans',
+                  type: ConnectedItemType.ville,
+                  tag: 'Capitale',
+                  regionName: 'Bamako',
+                ),
+              ],
       );
     }
     return null;

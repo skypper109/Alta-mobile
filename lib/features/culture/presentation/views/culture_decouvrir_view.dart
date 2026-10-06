@@ -282,8 +282,9 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
         heroTitle = 'Grande Mosquée de Djenné';
         heroSubtitle = 'Chef-d\'œuvre d\'architecture en banco du Sahel';
         heroTag = 'PATRIMOINE MONDIAL UNESCO';
-        heroImage = 'assets/images/culture/monuments/djenne.jpg';
-        heroRoute = '/culture/monument/monument_djenne';
+        heroImage =
+            'assets/images/culture/monuments/monument_mosquee_djenne/dje_1.webp';
+        heroRoute = '/culture/monument/monument_mosquee_djenne';
         heroDescription =
             'Le plus grand édifice en terre crue au monde, symbole de la ferveur communautaire et du crépissage annuel.';
         break;

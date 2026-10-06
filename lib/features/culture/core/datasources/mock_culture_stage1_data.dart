@@ -452,7 +452,8 @@ abstract final class MockCultureStage1Data {
       regionName: 'Mopti',
       tag: 'Monument UNESCO',
       icon: Icons.museum_rounded,
-      imageUrl: 'assets/images/culture/monuments/mosquee_djenne.jpg',
+      imageUrl:
+          'assets/images/culture/monuments/monument_mosquee_djenne/dje_1.webp',
       info: 'Architecture Banco',
     ),
     CultureItem(

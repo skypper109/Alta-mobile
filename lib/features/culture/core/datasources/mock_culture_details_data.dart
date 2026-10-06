@@ -613,7 +613,8 @@ abstract final class MockCultureDetailsData {
       regionId: 'mopti',
       regionName: 'Mopti',
       tag: 'Patrimoine Mondial UNESCO (1988)',
-      photoUrl: 'assets/images/culture/monuments/mosquee_djenne.jpg',
+      photoUrl:
+          'assets/images/culture/monuments/monument_mosquee_djenne/dje_1.webp',
       photoCredits:
           'Photographie réelle du sanctuaire de Djenné • Cliché Patrimoine UNESCO',
       locationDetails:

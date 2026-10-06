@@ -108,18 +108,19 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
       xpEarned: 40,
     ),
     PassportEntry(
-      id: 'monument_djenne',
+      id: 'monument_mosquee_djenne',
       type: PassportItemType.monument,
       title: 'Grande Mosquée de Djenné',
       subtitle: 'Plus grand édifice en terre crue (banco) au monde',
       regionId: 'mopti',
       regionName: 'Mopti',
-      photoUrl: 'assets/images/culture/monuments/mosquee_djenne.jpg',
+      photoUrl:
+          'assets/images/culture/monuments/monument_mosquee_djenne/dje_1.webp',
       tag: 'Architecture Banco',
       discoveredAt: DateTime.now().subtract(const Duration(days: 4)),
       culturalQuote:
           '« Chaque année, la fête du Crépissage rassemble toute la communauté du Djoliba. »',
-      targetRoute: '/culture/monument/monument_djenne',
+      targetRoute: '/culture/monument/monument_mosquee_djenne',
       xpEarned: 40,
     ),
 

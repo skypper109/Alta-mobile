@@ -153,7 +153,8 @@ abstract final class MaliHistoricalPlacesRegistry {
     category: HistoricalPlaceCategory.unesco,
     tag: 'UNESCO (1988)',
     era: 'Architecture Soudano-Sahélienne',
-    photoUrl: 'assets/images/culture/monuments/mosquee_djenne.jpg',
+    photoUrl:
+        'assets/images/culture/monuments/monument_mosquee_djenne/dje_1.webp',
     description:
         'Le plus grand édifice en terre crue au monde. Chaque année, la fête sacrée du crépissage rassemble toute la ville dans une liesse populaire.',
     keyFact: '100% banco bio-climatique, 3 000 fidèles',
@@ -659,7 +660,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     category: HistoricalPlaceCategory.monument,
     tag: 'Architecture Religieuse (1970)',
     era: 'Rénovée en 1970 au cœur de Dabanani',
-    photoUrl: 'assets/images/culture/monuments/mosquee_djingareyber.jpg',
+    photoUrl: 'assets/images/culture/monuments/mosquee_bamako.jpg',
     description:
         'Minarets blancs élancés, dômes et arcades islamiques dressés au centre commerçant le plus animé de la capitale malienne.',
     keyFact: 'Haut lieu de spiritualité et de prières collectives du vendredi',

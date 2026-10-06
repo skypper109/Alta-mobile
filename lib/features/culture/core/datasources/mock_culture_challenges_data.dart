@@ -331,7 +331,8 @@ abstract final class MockCultureChallengesData {
       timeMinutes: 5,
       icon: Icons.museum_rounded,
       themeColor: CultureTheme.primaryBlue,
-      photoUrl: 'assets/images/culture/monuments/mosquee_djenne.jpg',
+      photoUrl:
+          'assets/images/culture/monuments/monument_mosquee_djenne/dje_1.webp',
       stampBadgeTitle: 'Sceau d\'Or des Bâtisseurs Soudanais',
       questions: [
         CultureQuizQuestion(
