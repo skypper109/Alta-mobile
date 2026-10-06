@@ -555,30 +555,29 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
       children: [
         // ── EN-TÊTE DE SECTION DOCUMENTAIRE ───────────────────────────────────
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
-                    ),
+            Expanded(
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.movie_filter_rounded,
-                        size: 14,
-                        color: Color(0xFFF59E0B),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.movie_filter_rounded,
+                      size: 14,
+                      color: Color(0xFFF59E0B),
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
                         'RÉCIT DOCUMENTAIRE ANIMÉ',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
@@ -586,12 +585,15 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                           color: const Color(0xFFF59E0B),
                           letterSpacing: 0.8,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
+            const SizedBox(width: 8),
             // Bouton Rejouer l'animation de scène
             GestureDetector(
               onTap: () {
@@ -618,7 +620,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'Rejouer la scène',
+                      'Rejouer',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -1049,24 +1051,26 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                 Row(
                   children: [
                     // Badge d'écoute orale de la scène
-                    CultureAudioListenBadge(
-                      contentId: '${widget.figure.id}_scene_$_currentSceneIndex',
-                      speechText:
-                          '${scene.actTitle}. ${scene.periodLocation}. ${scene.narrative}',
-                      label: 'Écouter la scène',
-                      compact: true,
-                      activeColor: const Color(0xFFF59E0B),
+                    Flexible(
+                      child: CultureAudioListenBadge(
+                        contentId: '${widget.figure.id}_scene_$_currentSceneIndex',
+                        speechText:
+                            '${scene.actTitle}. ${scene.periodLocation}. ${scene.narrative}',
+                        label: 'Écouter',
+                        compact: true,
+                        activeColor: const Color(0xFFF59E0B),
+                      ),
                     ),
 
-                    const Spacer(),
+                    const SizedBox(width: 8),
 
                     // Bouton Scène Précédente
-                    if (_currentSceneIndex > 0)
+                    if (_currentSceneIndex > 0) ...[
                       GestureDetector(
                         onTap: () => _goToScene(_currentSceneIndex - 1),
                         child: Container(
-                          width: 38,
-                          height: 38,
+                          width: 36,
+                          height: 36,
                           decoration: BoxDecoration(
                             color: isDark
                                 ? CultureTheme.darkSurfaceAlt
@@ -1081,8 +1085,8 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                           ),
                         ),
                       ),
-
-                    if (_currentSceneIndex > 0) const SizedBox(width: 8),
+                      const SizedBox(width: 8),
+                    ],
 
                     // Bouton Scène Suivante
                     if (_currentSceneIndex < _scenes.length - 1)
@@ -1090,7 +1094,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                         onTap: () => _goToScene(_currentSceneIndex + 1),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 9),
+                              horizontal: 12, vertical: 8.5),
                           decoration: BoxDecoration(
                             color: const Color(0xFFF59E0B),
                             borderRadius: BorderRadius.circular(10),
@@ -1107,14 +1111,14 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Scène Suivante',
+                                'Suivant',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800,
                                   color: Colors.black,
                                 ),
                               ),
-                              const SizedBox(width: 5),
+                              const SizedBox(width: 4),
                               const Icon(
                                 Icons.arrow_forward_rounded,
                                 size: 14,
@@ -1127,7 +1131,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                     else
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
+                            horizontal: 10, vertical: 8),
                         decoration: BoxDecoration(
                           color: const Color(0xFF10B981).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
@@ -1140,9 +1144,9 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                               size: 14,
                               color: Color(0xFF10B981),
                             ),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 4),
                             Text(
-                              'Fin de l\'Épopée',
+                              'Fin',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w800,
