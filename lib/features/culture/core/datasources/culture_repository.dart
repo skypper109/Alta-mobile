@@ -122,7 +122,7 @@ class CultureRepository {
       hintId: hintTarget?.id,
     );
 
-    if (remoteResult != null && remoteResult.confidence >= 0.45) {
+    if (remoteResult != null && remoteResult.confidence >= 0.58) {
       await recordScanDiscovery(remoteResult);
       return remoteResult;
     }
@@ -132,7 +132,14 @@ class CultureRepository {
     MonumentScanTarget? matched = hintTarget;
 
     if (matched == null && imageName != null) {
-      matched = MonumentScanKnowledge.matchByKeywords(imageName);
+      final normName = imageName.toLowerCase();
+      if (!normName.startsWith('image_picker') &&
+          !normName.startsWith('scaled_') &&
+          !normName.startsWith('camera') &&
+          !normName.startsWith('photo') &&
+          !normName.startsWith('img_')) {
+        matched = MonumentScanKnowledge.matchByKeywords(imageName);
+      }
     }
 
     if (matched == null && keywords != null && keywords.isNotEmpty) {

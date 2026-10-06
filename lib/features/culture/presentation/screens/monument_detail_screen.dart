@@ -161,12 +161,16 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                     children: [
                       const Icon(Icons.location_on_rounded, size: 12, color: CultureTheme.accentOrange),
                       const SizedBox(width: 4),
-                      Text(
-                        'Région active : ${activeRegion.nom}',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: CultureTheme.accentOrange,
+                      Expanded(
+                        child: Text(
+                          'Région active : ${activeRegion.nom}',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: CultureTheme.accentOrange,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -378,12 +382,14 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                             color: CultureTheme.accentOrange,
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            'Pourquoi ce monument est important',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          Expanded(
+                            child: Text(
+                              'Pourquoi ce monument est important',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
                             ),
                           ),
                         ],

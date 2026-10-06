@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/models/culture_passport_models.dart';
@@ -50,6 +51,12 @@ class MonumentScannerController extends StateNotifier<ScannerState> {
       return;
     }
 
+    await _processImagePath(path);
+  }
+
+  /// Analyse directe d'une photo capturée depuis le flux caméra intégré
+  Future<void> scanCapturedPath(String path) async {
+    HapticFeedback.heavyImpact();
     await _processImagePath(path);
   }
 
@@ -107,20 +114,41 @@ class MonumentScannerController extends StateNotifier<ScannerState> {
     }
   }
 
-  /// Traitement du chemin d'image sélectionné
+  /// Traitement du chemin d'image sélectionné avec géolocalisation réelle
   Future<void> _processImagePath(String imagePath) async {
     state = state.copyWith(
       status: ScannerStatus.analyzing,
       selectedImagePath: imagePath,
       progress: 0.15,
-      currentStepMessage: 'Initialisation de l\'analyse...',
+      currentStepMessage: 'Acquisition des coordonnées GPS & analyse...',
       clearResult: true,
       clearError: true,
     );
 
+    double? lat;
+    double? lon;
+    try {
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 4),
+        ),
+      );
+      lat = pos.latitude;
+      lon = pos.longitude;
+    } catch (_) {
+      try {
+        final last = await Geolocator.getLastKnownPosition();
+        lat = last?.latitude;
+        lon = last?.longitude;
+      } catch (_) {}
+    }
+
     try {
       final result = await _service.analyzeImage(
         imagePath: imagePath,
+        latitude: lat,
+        longitude: lon,
         onProgress: (stepMessage, progress) {
           state = state.copyWith(
             currentStepMessage: stepMessage,
@@ -129,7 +157,7 @@ class MonumentScannerController extends StateNotifier<ScannerState> {
         },
       );
 
-      if (result != null && result.confidence >= 0.45) {
+      if (result != null && result.confidence >= 0.55) {
         _onRecognitionSuccess(result);
       } else {
         _onRecognitionUnrecognized();

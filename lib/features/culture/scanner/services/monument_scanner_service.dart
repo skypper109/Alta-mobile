@@ -81,7 +81,7 @@ class MonumentScannerService {
         longitude: longitude,
         hintTarget: hintTarget,
       );
-      if (result != null && result.confidence >= 0.45) {
+      if (result != null && result.confidence >= 0.58) {
         onProgress?.call('Monument reconnu !', 1.0);
         return result;
       } else {
@@ -90,9 +90,16 @@ class MonumentScannerService {
       }
     }
 
-    // Repli autonome
+    // Repli autonome : SEULEMENT si cible explicite de démo ou slug exact
     MonumentScanTarget? matched = hintTarget;
-    matched ??= MonumentScanKnowledge.matchByKeywords(fileName);
+    if (matched == null &&
+        !fileName.startsWith('image_picker') &&
+        !fileName.startsWith('scaled_') &&
+        !fileName.startsWith('camera') &&
+        !fileName.startsWith('photo') &&
+        !fileName.startsWith('img_')) {
+      matched = MonumentScanKnowledge.matchByKeywords(fileName);
+    }
 
     if (matched == null) {
       onProgress?.call('Analyse terminée', 1.0);

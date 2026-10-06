@@ -1593,19 +1593,31 @@ abstract final class MonumentScanKnowledge {
         .toList();
   }
 
-  /// Recherche par mots-clés ou proximité textuelle
+  /// Recherche par mots-clés ou proximité textuelle (stricte)
   static MonumentScanTarget? matchByKeywords(String query) {
     final clean = query.toLowerCase().trim();
-    if (clean.isEmpty) return null;
+    if (clean.isEmpty || clean.length < 4) return null;
+
+    // Ignorer impérativement les préfixes techniques de fichiers caméra / galerie
+    if (clean.startsWith('image_picker') ||
+        clean.startsWith('scaled_') ||
+        clean.startsWith('img_') ||
+        clean.startsWith('camera') ||
+        clean.startsWith('photo') ||
+        clean.startsWith('capture') ||
+        clean.startsWith('screenshot') ||
+        clean.startsWith('frame_')) {
+      return null;
+    }
 
     for (final target in targets) {
       if (target.id.toLowerCase() == clean ||
-          target.name.toLowerCase().contains(clean) ||
-          target.subtitle.toLowerCase().contains(clean)) {
+          target.name.toLowerCase() == clean) {
         return target;
       }
       for (final kw in target.keywords) {
-        if (clean.contains(kw) || kw.contains(clean)) {
+        final cleanKw = kw.toLowerCase().trim();
+        if (cleanKw.length >= 4 && clean == cleanKw) {
           return target;
         }
       }

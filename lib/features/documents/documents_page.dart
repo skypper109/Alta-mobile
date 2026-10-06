@@ -34,6 +34,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
   File? _scannedImageFile;
   String? _extractedOcrText;
   String? _detectedSubject;
+  String? _invalidDocReason;
   late final AnimationController _pulseCtrl;
 
   // Historique personnel des devoirs et exercices scannés par l'élève
@@ -100,6 +101,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
       _scannedFileName = null;
       _scannedImageFile = null;
       _extractedOcrText = null;
+      _invalidDocReason = null;
       _currentStep = 0;
     });
   }
@@ -124,6 +126,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
         _scannedImageFile = File(picked.path);
         _extractedOcrText = null;
         _detectedSubject = null;
+        _invalidDocReason = null;
         _socraticSteps = [];
       });
 
@@ -133,12 +136,9 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
 
       for (final url in _candidateBaseUrls) {
         try {
-          final activeSub = ref.read(activeSubjectProvider) ??
-              (userPrefs.subjects.isNotEmpty
-                  ? userPrefs.subjects.first
-                  : 'Général');
+          final activeSub = ref.read(activeSubjectProvider);
           final formData = FormData.fromMap({
-            'subject': activeSub,
+            if (activeSub != null) 'subject': activeSub,
             'level': userPrefs.studentClassId,
             'image': MultipartFile.fromBytes(bytes, filename: picked.name),
           });
@@ -153,16 +153,36 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
           );
 
           if (res.statusCode == 200 && res.data is Map) {
-            final hints = (res.data['hints'] as List<dynamic>? ?? []);
-            final ocrText = res.data['extracted_text'] as String?;
-            final subject = res.data['subject'] as String? ?? 'Général';
+            final data = res.data as Map<String, dynamic>;
+            final status = data['status'] as String? ?? 'success';
+            final isValid = data['is_valid'] as bool? ?? (status == 'success');
+            final ocrText = data['extracted_text'] as String?;
+            final subject = data['subject'] as String? ?? 'Général';
 
+            // Document illisible ou non conforme au programme scolaire
+            if (!isValid || status == 'unreadable' || status == 'not_curriculum') {
+              final message = data['message'] as String? ??
+                  'Document non reconnu comme un exercice scolaire du programme.';
+              if (mounted) {
+                setState(() {
+                  _invalidDocReason = message;
+                  _extractedOcrText = ocrText;
+                  _detectedSubject = subject;
+                  _socraticSteps = [];
+                  _isProcessing = false;
+                });
+              }
+              success = true;
+              break;
+            }
+
+            final hints = (data['hints'] as List<dynamic>? ?? []);
             if (hints.isNotEmpty) {
               final parsedSteps = <Map<String, String>>[];
               for (var i = 0; i < hints.length; i++) {
                 final h = hints[i] as Map<String, dynamic>;
                 parsedSteps.add({
-                  'title':
+                  'title': h['title'] as String? ??
                       'Étape ${i + 1} • ${(h['type'] as String? ?? 'Raisonnement').toUpperCase()}',
                   'content': h['text'] as String? ??
                       h['content'] as String? ??
@@ -189,6 +209,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                   _socraticSteps = parsedSteps;
                   _extractedOcrText = ocrText;
                   _detectedSubject = subject;
+                  _invalidDocReason = null;
                   _isProcessing = false;
                   _currentStep = 0;
                   _history.insert(0, newDocItem);
@@ -210,7 +231,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-                'Le serveur AlternIA  a pas répondu. Vérifiez que vous etes bien connectés à internet.'),
+                'Le serveur AlternIA n\'a pas répondu. Vérifiez que vous êtes bien connecté à internet.'),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -226,6 +247,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
       _scannedFileName = doc.name;
       _detectedSubject = doc.subject;
       _extractedOcrText = doc.ocrText;
+      _invalidDocReason = null;
       _scannedImageFile =
           (doc.imagePath != null && File(doc.imagePath!).existsSync())
               ? File(doc.imagePath!)
@@ -404,6 +426,129 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                   Text(
                     'Extraction du texte par OCR et résolution guidée (${userPrefs.classFullLabel})',
                     style: DetTextStyles.bodySm.copyWith(color: textSec),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: DetSizes.xl),
+          ] else if (_invalidDocReason != null) ...[
+            Container(
+              padding: const EdgeInsets.all(DetSizes.lg),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: DetSizes.borderRadiusLg,
+                border: Border.all(
+                  color: const Color(0xFFF59E0B),
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.warning_amber_rounded,
+                          color: Color(0xFFF59E0B),
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Document non conforme',
+                              style: DetTextStyles.headingSm.copyWith(
+                                color: const Color(0xFFF59E0B),
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              _scannedFileName ?? 'Fichier scanné',
+                              style: DetTextStyles.caption.copyWith(
+                                color: textSec,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  if (_scannedImageFile != null &&
+                      _scannedImageFile!.existsSync()) ...[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.file(
+                        _scannedImageFile!,
+                        height: 140,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  Text(
+                    _invalidDocReason!,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      height: 1.5,
+                      color: textPri,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (_extractedOcrText != null &&
+                      _extractedOcrText!.trim().isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.3)
+                            : Colors.grey.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'TEXTE EXTRAIT PAR OCR :',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: textSec,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _extractedOcrText!,
+                            maxLines: 4,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.firaCode(
+                              fontSize: 11,
+                              color: textPri,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  DetButton(
+                    label: 'Scanner un autre exercice',
+                    icon: Icons.refresh_rounded,
+                    onPressed: () =>
+                        _pickAndAnalyzeDocument(ImageSource.camera),
                   ),
                 ],
               ),
