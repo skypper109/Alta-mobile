@@ -355,53 +355,60 @@ class _PersonnageCard extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Badge Rôle / Statut
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: isSoundiata
-                                ? const Color(0xFFF59E0B)
-                                : _accent,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: (isSoundiata
-                                        ? const Color(0xFFF59E0B)
-                                        : _accent)
-                                    .withValues(alpha: 0.4),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                isSoundiata
-                                    ? Icons.shield_rounded
-                                    : item.icon,
-                                size: 12,
-                                color: isSoundiata ? Colors.black : Colors.white,
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                isSoundiata
-                                    ? 'LE LION DU MANDÉ'
-                                    : item.tag.toUpperCase(),
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  color: isSoundiata
-                                      ? Colors.black
-                                      : Colors.white,
-                                  letterSpacing: 0.6,
+                        // Badge Rôle / Statut (Flexible anti-débordement)
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: isSoundiata
+                                  ? const Color(0xFFF59E0B)
+                                  : _accent,
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: (isSoundiata
+                                          ? const Color(0xFFF59E0B)
+                                          : _accent)
+                                      .withValues(alpha: 0.4),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  isSoundiata
+                                      ? Icons.shield_rounded
+                                      : item.icon,
+                                  size: 12,
+                                  color: isSoundiata ? Colors.black : Colors.white,
+                                ),
+                                const SizedBox(width: 5),
+                                Flexible(
+                                  child: Text(
+                                    isSoundiata
+                                        ? 'LE LION DU MANDÉ'
+                                        : item.tag.toUpperCase(),
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w900,
+                                      color: isSoundiata
+                                          ? Colors.black
+                                          : Colors.white,
+                                      letterSpacing: 0.6,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
+                        const SizedBox(width: 8),
 
                         // Badge Chronologie / Époque
                         Container(
@@ -472,6 +479,8 @@ class _PersonnageCard extends StatelessWidget {
                                     ),
                                   ],
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 2),
                               Text(

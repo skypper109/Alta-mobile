@@ -18,15 +18,15 @@ class CharacterMotionHero extends StatefulWidget {
   final String? heroTag;
   final VoidCallback? onBack;
   final bool isBookmarked;
-  final VoidCallback onToggleBookmark;
+  final VoidCallback? onToggleBookmark;
 
   const CharacterMotionHero({
     super.key,
     required this.figure,
     this.heroTag,
     this.onBack,
-    required this.isBookmarked,
-    required this.onToggleBookmark,
+    this.isBookmarked = false,
+    this.onToggleBookmark,
   });
 
   @override
@@ -453,8 +453,11 @@ class _CharacterMotionHeroState extends State<CharacterMotionHero>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Badges Région & Rôle
-                      Row(
+                      // Badges Région & Rôle (Wrap responsive anti-débordement)
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -494,7 +497,6 @@ class _CharacterMotionHeroState extends State<CharacterMotionHero>
                               ],
                             ),
                           ),
-                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 9,
@@ -527,7 +529,6 @@ class _CharacterMotionHeroState extends State<CharacterMotionHero>
                               ],
                             ),
                           ),
-                          const SizedBox(width: 8),
                           // Période de règne / vie
                           Text(
                             widget.figure.period,
@@ -542,22 +543,27 @@ class _CharacterMotionHeroState extends State<CharacterMotionHero>
 
                       const SizedBox(height: 6),
 
-                      // Grand Nom du Héros
-                      Text(
-                        widget.figure.name,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 27,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: -0.8,
-                          height: 1.1,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withValues(alpha: 0.9),
-                              blurRadius: 20,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+                      // Grand Nom du Héros (Adaptatif et anti-débordement)
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          widget.figure.name,
+                          maxLines: 1,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: (size.width * 0.068).clamp(21.0, 27.0),
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: -0.8,
+                            height: 1.1,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withValues(alpha: 0.9),
+                                blurRadius: 20,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
 
@@ -566,8 +572,10 @@ class _CharacterMotionHeroState extends State<CharacterMotionHero>
                       // Titre Honorifique (ex: Bâtisseur de l'Empire du Mali)
                       Text(
                         widget.figure.titleHonorifique,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14.5,
+                          fontSize: (size.width * 0.038).clamp(12.0, 14.5),
                           fontWeight: FontWeight.w700,
                           color: config.primaryAccent.withValues(alpha: 0.92),
                           letterSpacing: 0.2,

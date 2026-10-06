@@ -855,13 +855,17 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
                       child: AnimatedBuilder(
                         animation: _pulseController,
                         builder: (context, child) {
+                          final screenW = MediaQuery.sizeOf(context).width;
+                          final isCompact = screenW < 360;
                           final scale =
-                              0.94 + (_pulseController.value * 0.12);
+                              (0.94 + (_pulseController.value * 0.12)) *
+                                  (isCompact ? 0.85 : 1.0);
                           return Transform.scale(
                             scale: scale,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 11, vertical: 6),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: isCompact ? 8 : 11,
+                                  vertical: isCompact ? 4 : 6),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF1E0E05)
                                     .withValues(alpha: 0.94),
@@ -1050,6 +1054,10 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
             3.2;
     final sheenProgress = ((pulseProgress * 1.5) % 1.0);
 
+    final screenW = MediaQuery.sizeOf(context).width;
+    final cardWidth = (screenW * 0.22).clamp(70.0, 86.0);
+    final cardPortraitHeight = cardWidth * 0.98;
+
     return Transform(
       transform: Matrix4.identity()
         ..setEntry(3, 2, 0.002) // Perspective 3D
@@ -1060,7 +1068,7 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
       child: GestureDetector(
         onTap: () => CulturalHaptics.cardPress(),
         child: Container(
-          width: 86,
+          width: cardWidth,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
@@ -1087,7 +1095,7 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
             children: [
               // Portrait 2.5D en relief avec reflet spéculaire et badge
               SizedBox(
-                height: 84,
+                height: cardPortraitHeight,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [

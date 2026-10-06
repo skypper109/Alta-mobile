@@ -546,6 +546,9 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
     final borderCol =
         isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final theaterHeight = (screenWidth * 0.68).clamp(240.0, 290.0);
+    final isDual = scene.opponentCharImage != null || scene.isConfrontation;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -719,162 +722,173 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
 
         // ── 🎬 LE THÉÂTRE DE SCÈNE DOCUMENTAIRE (CANVAS & MOTION CHARACTERS) ───
         Container(
-          height: 250,
+          height: theaterHeight,
           width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: scene.isConfrontation
-                  ? const Color(0xFFF59E0B).withValues(alpha: 0.6)
-                  : borderCol,
-              width: scene.isConfrontation ? 1.6 : 1.0,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // 1. Décor d'arrière-plan avec zoom cinématique Ken Burns
-              AnimatedBuilder(
-                animation: _kenBurnsController,
-                builder: (context, child) {
-                  final scale = 1.0 + (_kenBurnsController.value * 0.08);
-                  return Transform.scale(
-                    scale: scale,
-                    child: Image.asset(
-                      scene.bgImagePath,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: const Color(0xFF0F172A),
-                      ),
-                    ),
-                  );
-                },
-              ),
-
-              // 2. Filtre dégradé théâtral pour la lisibilité
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withValues(alpha: 0.55),
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.85),
-                      Colors.black.withValues(alpha: 0.98),
-                    ],
-                    stops: const [0.0, 0.35, 0.75, 1.0],
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: scene.isConfrontation
+                      ? const Color(0xFFF59E0B).withValues(alpha: 0.6)
+                      : borderCol,
+                  width: scene.isConfrontation ? 1.6 : 1.0,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
                   ),
-                ),
+                ],
               ),
+              clipBehavior: Clip.antiAlias,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // 1. Décor d'arrière-plan avec zoom cinématique Ken Burns
+                  AnimatedBuilder(
+                    animation: _kenBurnsController,
+                    builder: (context, child) {
+                      final scale = 1.0 + (_kenBurnsController.value * 0.08);
+                      return Transform.scale(
+                        scale: scale,
+                        child: Image.asset(
+                          scene.bgImagePath,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: const Color(0xFF0F172A),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
 
-              // 3. Indicateur de scène / Acte en haut
-              Positioned(
-                top: 12,
-                left: 12,
-                right: 12,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.65),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
-                        ),
-                      ),
-                      child: Text(
-                        scene.actTitle,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFFF59E0B),
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.65),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        scene.periodLocation,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // 4. PERSONNAGE PRINCIPAL : PLAN 2.5D GLISSE DEPUIS LA GAUCHE !
-              Positioned(
-                left: scene.isConfrontation ? 10 : 20,
-                bottom: 12,
-                child: SlideTransition(
-                  position: _primarySlideAnimation,
-                  child: FadeTransition(
-                    opacity: _primaryFadeAnimation,
-                    child: ScaleTransition(
-                      scale: _primaryScaleAnimation,
-                      child: AnimatedBuilder(
-                        animation: _clashPulseController,
-                        builder: (context, _) => _buildCharacterFigure(
-                          name: scene.primaryCharName,
-                          role: scene.primaryCharRole,
-                          imagePath: scene.primaryCharImage,
-                          accentColor: scene.primaryColor ?? const Color(0xFFF59E0B),
-                          isFacingRight: true,
-                          isLarge: !scene.isConfrontation && scene.opponentCharImage == null,
-                          pulseProgress: _clashPulseController.value,
-                        ),
+                  // 2. Filtre dégradé théâtral pour la lisibilité
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.55),
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.85),
+                          Colors.black.withValues(alpha: 0.98),
+                        ],
+                        stops: const [0.0, 0.35, 0.75, 1.0],
                       ),
                     ),
                   ),
-                ),
-              ),
 
-              // 5. PERSONNAGE OPPOSANT OU ALLIÉ : GLISSE DEPUIS LA DROITE !
-              if (scene.opponentCharImage != null)
-                Positioned(
-                  right: 10,
-                  bottom: 12,
-                  child: SlideTransition(
-                    position: _opponentSlideAnimation,
-                    child: FadeTransition(
-                      opacity: _opponentFadeAnimation,
-                      child: AnimatedBuilder(
-                        animation: _clashPulseController,
-                        builder: (context, _) => _buildCharacterFigure(
-                          name: scene.opponentCharName!,
-                          role: scene.opponentCharRole ?? (scene.isConfrontation ? 'Adversaire' : 'Allié'),
-                          imagePath: scene.opponentCharImage!,
-                          accentColor: scene.opponentColor ?? (scene.isConfrontation ? const Color(0xFFEF4444) : const Color(0xFF3B82F6)),
-                          isFacingRight: false,
-                          isLarge: false,
-                          pulseProgress: _clashPulseController.value,
+                  // 3. Indicateur de scène / Acte en haut
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    right: 12,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.65),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: Text(
+                              scene.actTitle,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFFF59E0B),
+                                letterSpacing: 0.6,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.65),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              scene.periodLocation,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white70,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 4. PERSONNAGE PRINCIPAL : PLAN 2.5D GLISSE DEPUIS LA GAUCHE !
+                  Positioned(
+                    left: scene.isConfrontation ? 8 : 14,
+                    bottom: 10,
+                    child: SlideTransition(
+                      position: _primarySlideAnimation,
+                      child: FadeTransition(
+                        opacity: _primaryFadeAnimation,
+                        child: ScaleTransition(
+                          scale: _primaryScaleAnimation,
+                          child: AnimatedBuilder(
+                            animation: _clashPulseController,
+                            builder: (context, _) => _buildCharacterFigure(
+                              name: scene.primaryCharName,
+                              role: scene.primaryCharRole,
+                              imagePath: scene.primaryCharImage,
+                              accentColor: scene.primaryColor ?? const Color(0xFFF59E0B),
+                              isFacingRight: true,
+                              isLarge: !isDual,
+                              isDual: isDual,
+                              pulseProgress: _clashPulseController.value,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
+
+                  // 5. PERSONNAGE OPPOSANT OU ALLIÉ : GLISSE DEPUIS LA DROITE !
+                  if (scene.opponentCharImage != null)
+                    Positioned(
+                      right: 8,
+                      bottom: 10,
+                      child: SlideTransition(
+                        position: _opponentSlideAnimation,
+                        child: FadeTransition(
+                          opacity: _opponentFadeAnimation,
+                          child: AnimatedBuilder(
+                            animation: _clashPulseController,
+                            builder: (context, _) => _buildCharacterFigure(
+                              name: scene.opponentCharName!,
+                              role: scene.opponentCharRole ?? (scene.isConfrontation ? 'Adversaire' : 'Allié'),
+                              imagePath: scene.opponentCharImage!,
+                              accentColor: scene.opponentColor ?? (scene.isConfrontation ? const Color(0xFFEF4444) : const Color(0xFF3B82F6)),
+                              isFacingRight: false,
+                              isLarge: false,
+                              isDual: isDual,
+                              pulseProgress: _clashPulseController.value,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
 
               // 6. Arc de tension cinématique vectorielle pour les scènes de confrontation
               if (scene.isConfrontation)
@@ -898,13 +912,17 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                     child: AnimatedBuilder(
                       animation: _clashPulseController,
                       builder: (context, child) {
-                        final pulse = 0.95 + (_clashPulseController.value * 0.12);
+                        final screenW = MediaQuery.sizeOf(context).width;
+                        final isCompact = screenW < 360;
+                        final pulse = (0.95 + (_clashPulseController.value * 0.12)) *
+                            (isCompact ? 0.85 : 1.0);
                         final accent = scene.primaryColor ?? const Color(0xFFF59E0B);
                         return Transform.scale(
                           scale: pulse,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: isCompact ? 7 : 10,
+                                vertical: isCompact ? 4 : 5),
                             decoration: BoxDecoration(
                               color: const Color(0xFF1E0E05)
                                   .withValues(alpha: 0.9),
@@ -925,18 +943,20 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                               children: [
                                 Icon(
                                   Icons.flash_on_rounded,
-                                  size: 14,
+                                  size: isCompact ? 12 : 14,
                                   color: accent,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   scene.confrontationBadgeText ?? 'CHOC HISTORIQUE',
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 10,
+                                    fontSize: isCompact ? 9 : 10,
                                     fontWeight: FontWeight.w900,
                                     color: accent,
                                     letterSpacing: 0.8,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
@@ -1150,15 +1170,111 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
     required Color accentColor,
     required bool isFacingRight,
     required bool isLarge,
+    required bool isDual,
     required double pulseProgress,
   }) {
-    final double cardWidth = isLarge ? 88.0 : 76.0;
-    final double cardHeight = isLarge ? 104.0 : 90.0;
+    final double cardWidth = isLarge ? 88.0 : (isDual ? 72.0 : 80.0);
+    final double cardHeight = isLarge ? 104.0 : (isDual ? 86.0 : 96.0);
     final tiltAngle = isFacingRight ? 0.08 : -0.08;
     final floatY =
         math.sin(pulseProgress * 2 * math.pi + (isFacingRight ? 0.0 : math.pi)) *
             2.8;
     final sheenProgress = ((pulseProgress * 1.5) % 1.0);
+
+    final cardWidget = Container(
+      width: cardWidth,
+      height: cardHeight,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.9),
+          width: 1.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withValues(alpha: 0.4),
+            blurRadius: 16,
+            spreadRadius: 1,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.8),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            imagePath,
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
+            errorBuilder: (_, __, ___) => Container(
+              color: accentColor.withValues(alpha: 0.25),
+              child: const Icon(Icons.person_rounded,
+                  color: Colors.white, size: 28),
+            ),
+          ),
+          // Dégradé de contraste cinématique
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.75),
+                ],
+                stops: const [0.45, 1.0],
+              ),
+            ),
+          ),
+          // Balayage spéculaire lumineux
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment(-2.0 + (sheenProgress * 4.0), -1.0),
+                  end: Alignment(-1.0 + (sheenProgress * 4.0), 1.0),
+                  colors: [
+                    Colors.transparent,
+                    Colors.white.withValues(alpha: 0.26),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.5, 1.0],
+                ),
+              ),
+            ),
+          ),
+          // Badge héroïque / icône de camp
+          Positioned(
+            top: 5,
+            right: isFacingRight ? 5 : null,
+            left: isFacingRight ? null : 5,
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.85),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: accentColor,
+                  width: 1.1,
+                ),
+              ),
+              child: Icon(
+                isFacingRight
+                    ? Icons.shield_rounded
+                    : Icons.flash_on_rounded,
+                size: 10,
+                color: accentColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
 
     return Transform(
       transform: Matrix4.identity()
@@ -1167,119 +1283,51 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
         ..rotateZ(isFacingRight ? -0.015 : 0.015)
         ..setTranslationRaw(0.0, floatY, 0.0),
       alignment: isFacingRight ? Alignment.bottomLeft : Alignment.bottomRight,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (!isFacingRight) ...[
-            _buildCharacterLabel(
-                name, role, accentColor, CrossAxisAlignment.end),
-            const SizedBox(width: 8),
-          ],
-
-          // Carte 2.5D en relief avec reflet spéculaire
-          Container(
-            width: cardWidth,
-            height: cardHeight,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: accentColor.withValues(alpha: 0.9),
-                width: 1.8,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: accentColor.withValues(alpha: 0.4),
-                  blurRadius: 16,
-                  spreadRadius: 1,
-                ),
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.8),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Stack(
-              fit: StackFit.expand,
+      child: isDual
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: isFacingRight
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.end,
               children: [
-                Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topCenter,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: accentColor.withValues(alpha: 0.25),
-                    child: const Icon(Icons.person_rounded,
-                        color: Colors.white, size: 28),
-                  ),
-                ),
-                // Dégradé de contraste cinématique
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.75),
-                      ],
-                      stops: const [0.45, 1.0],
-                    ),
-                  ),
-                ),
-                // Balayage spéculaire lumineux
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment(-2.0 + (sheenProgress * 4.0), -1.0),
-                        end: Alignment(-1.0 + (sheenProgress * 4.0), 1.0),
-                        colors: [
-                          Colors.transparent,
-                          Colors.white.withValues(alpha: 0.26),
-                          Colors.transparent,
-                        ],
-                        stops: const [0.0, 0.5, 1.0],
-                      ),
-                    ),
-                  ),
-                ),
-                // Badge héroïque / icône de camp
-                Positioned(
-                  top: 5,
-                  right: isFacingRight ? 5 : null,
-                  left: isFacingRight ? null : 5,
-                  child: Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.85),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: accentColor,
-                        width: 1.1,
-                      ),
-                    ),
-                    child: Icon(
-                      isFacingRight
-                          ? Icons.shield_rounded
-                          : Icons.flash_on_rounded,
-                      size: 10,
-                      color: accentColor,
-                    ),
-                  ),
+                cardWidget,
+                const SizedBox(height: 4),
+                _buildCharacterLabel(
+                  name,
+                  role,
+                  accentColor,
+                  isFacingRight ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+                  maxWidth: cardWidth + 20,
                 ),
               ],
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (!isFacingRight) ...[
+                  _buildCharacterLabel(
+                    name,
+                    role,
+                    accentColor,
+                    CrossAxisAlignment.end,
+                    maxWidth: 110,
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                cardWidget,
+                if (isFacingRight) ...[
+                  const SizedBox(width: 8),
+                  _buildCharacterLabel(
+                    name,
+                    role,
+                    accentColor,
+                    CrossAxisAlignment.start,
+                    maxWidth: 110,
+                  ),
+                ],
+              ],
             ),
-          ),
-
-          if (isFacingRight) ...[
-            const SizedBox(width: 8),
-            _buildCharacterLabel(
-                name, role, accentColor, CrossAxisAlignment.start),
-          ],
-        ],
-      ),
     );
   }
 
@@ -1287,10 +1335,12 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
     String name,
     String role,
     Color accentColor,
-    CrossAxisAlignment align,
-  ) {
+    CrossAxisAlignment align, {
+    double? maxWidth,
+  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      constraints: maxWidth != null ? BoxConstraints(maxWidth: maxWidth) : null,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(10),
@@ -1312,17 +1362,19 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
           Text(
             name,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 12.0,
+              fontSize: 11.0,
               fontWeight: FontWeight.w900,
               color: Colors.white,
               letterSpacing: -0.2,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 1),
           Text(
             role,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 9.0,
+              fontSize: 8.5,
               fontWeight: FontWeight.w700,
               color: accentColor,
             ),

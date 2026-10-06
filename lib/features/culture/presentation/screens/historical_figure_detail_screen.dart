@@ -17,8 +17,8 @@ import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/character_motion_hero.dart';
 import '../widgets/connected_contents_section.dart';
 import '../widgets/documentary_scene_player.dart';
+import '../widgets/historical_sacred_parchment_card.dart';
 import '../widgets/passport_stamp_toast.dart';
-import '../widgets/soundiata_epic_story_view.dart';
 import '../widgets/soundiata_living_book_view.dart';
 
 /// Fiche de consultation immersive d'un Grand Personnage Historique
@@ -254,32 +254,33 @@ class _HistoricalFigureDetailScreenState
                         const SizedBox(height: 12),
                       ],
 
-                      // ── 📖 LIVRE INTERACTIF ANIMÉ SCROLL-DRIVEN (SOUNDIATA KEÏTA) ──
-                      if (item.id.contains('soundiata')) ...[
+                      // ── 1. NARRATION VIVANTE ADAPTÉE AU PERSONNAGE ──
+                      if (item.id.contains('soundiata'))
                         SoundiataLivingBookView(
                           figure: item,
                           isDark: isDark,
-                        ),
-                        if (item.keyFacts.isNotEmpty) ...[
-                          const SizedBox(height: 24),
-                          _buildKeyFactsSection(item, isDark),
-                        ],
-                        const SizedBox(height: 24),
-                      ] else ...[
-                        // ── 🎬 THÉÂTRE DE SCÈNE DOCUMENTAIRE ANIMÉ (POUR AUTRES FIGURES) ──
+                        )
+                      else
                         DocumentaryScenePlayer(
                           figure: item,
                           isDark: isDark,
                         ),
-                        const SizedBox(height: 24),
 
-                        // ── Vue d'Épopée Interactive (Audio, Parchemin, Chapitres, Faits Clés) ──
-                        SoundiataEpicStoryView(
-                          figure: item,
-                          isDark: isDark,
-                        ),
+                      const SizedBox(height: 24),
+
+                      // ── 2. PARCHEMIN SACRÉ & DÉCRET HISTORIQUE FONDOTEUR ──
+                      HistoricalSacredParchmentCard(
+                        figure: item,
+                        isDark: isDark,
+                      ),
+
+                      // ── 3. REPÈRES CLÉS & HÉRITAGE (GRILLE ÉLEVÉE ET RESPONSIVE) ──
+                      if (item.keyFacts.isNotEmpty) ...[
                         const SizedBox(height: 24),
+                        _buildKeyFactsSection(item, isDark),
                       ],
+
+                      const SizedBox(height: 24),
 
                       // ── Bouton Guide Culturel IA Contextuel ─────────────────
                       AskCulturalGuideButton(
@@ -405,15 +406,19 @@ class _HistoricalFigureDetailScreenState
                                         ),
                                       ),
                                       const SizedBox(width: 6),
-                                      Text(
-                                        item.id.contains('soundiata')
-                                            ? 'ÉPOPÉE DU MANDEN'
-                                            : item.tag.toUpperCase(),
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 9.5,
-                                          fontWeight: FontWeight.w800,
-                                          color: const Color(0xFFF59E0B),
-                                          letterSpacing: 0.8,
+                                      Flexible(
+                                        child: Text(
+                                          item.id.contains('soundiata')
+                                              ? 'ÉPOPÉE DU MANDEN'
+                                              : item.tag.toUpperCase(),
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 9.5,
+                                            fontWeight: FontWeight.w800,
+                                            color: const Color(0xFFF59E0B),
+                                            letterSpacing: 0.8,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
                                     ],
@@ -481,7 +486,10 @@ class _HistoricalFigureDetailScreenState
         const SizedBox(height: 14),
         LayoutBuilder(
           builder: (context, constraints) {
-            final cardWidth = (constraints.maxWidth - 10) / 2;
+            final isVeryNarrow = constraints.maxWidth < 340;
+            final cardWidth = isVeryNarrow
+                ? constraints.maxWidth
+                : (constraints.maxWidth - 10) / 2;
             return Wrap(
               spacing: 10,
               runSpacing: 10,
@@ -528,6 +536,8 @@ class _HistoricalFigureDetailScreenState
                             color: subtitleColor,
                             letterSpacing: 0.8,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -538,6 +548,8 @@ class _HistoricalFigureDetailScreenState
                             color: titleColor,
                             letterSpacing: -0.2,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
