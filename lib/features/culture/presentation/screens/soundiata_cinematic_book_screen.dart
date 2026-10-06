@@ -785,9 +785,9 @@ class _SoundiataCinematicBookScreenState
 
         // Positionnement dynamique : cartouche et personnages parfaitement étagés
         final cartoucheBottom = 72.0;
-        final cartoucheMaxHeight = (screenHeight * 0.38).clamp(180.0, 260.0);
+        final cartoucheMaxHeight = (screenHeight * 0.44).clamp(210.0, 320.0);
         // Position du bas des personnages : toujours au-dessus du cartouche avec marge
-        final charBottom = math.max(cartoucheBottom + 215.0 + 8.0, screenHeight * 0.43);
+        final charBottom = math.max(cartoucheBottom + 230.0 + 8.0, screenHeight * 0.45);
         final arrowBottom = charBottom + (charAvatarSize * 0.38);
 
         return Stack(
@@ -1115,7 +1115,7 @@ class _SoundiataCinematicBookScreenState
 
                 const SizedBox(height: 6),
 
-                // Texte narratif
+                // Texte narratif complet (sans coupure ni pointillés)
                 Text(
                   chapter.narrative,
                   style: GoogleFonts.plusJakartaSans(
@@ -1126,8 +1126,6 @@ class _SoundiataCinematicBookScreenState
                         : const Color(0xFFE2E8F0),
                     height: 1.45,
                   ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
                 ),
 
                 const SizedBox(height: 8),

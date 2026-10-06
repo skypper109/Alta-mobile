@@ -417,82 +417,7 @@ class _CharacterMotionHeroState extends State<CharacterMotionHero>
                   ),
                 ),
 
-                // ── BOUTONS SUPÉRIEURS (RETOUR & ENREGISTRER) ────────────────
-                Positioned(
-                  top: topPadding + 10,
-                  left: 16,
-                  right: 16,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Bouton Retour
-                      _buildGlassActionButton(
-                        icon: Icons.arrow_back_rounded,
-                        onTap: () {
-                          if (widget.onBack != null) {
-                            widget.onBack!();
-                          } else {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                      ),
 
-                      // Badge central interactif 2.5D Motion
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF070B14).withValues(alpha: 0.75),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
-                            width: 1.0,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFF59E0B)
-                                  .withValues(alpha: 0.2),
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.threesixty_rounded,
-                              size: 13,
-                              color: Color(0xFFF59E0B),
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              '2.5D MOTION PARALLAX',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w900,
-                                color: const Color(0xFFFDE68A),
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Bouton Favoris / Bookmark
-                      _buildGlassActionButton(
-                        icon: widget.isBookmarked
-                            ? Icons.bookmark_rounded
-                            : Icons.bookmark_border_rounded,
-                        iconColor: widget.isBookmarked
-                            ? const Color(0xFFF59E0B)
-                            : Colors.white,
-                        onTap: widget.onToggleBookmark,
-                      ),
-                    ],
-                  ),
-                ),
 
                 // ── PLAN 6 : TITRE, TAGS & ÉDITORIAL DU HÉROS ────────────────
                 Positioned(
@@ -634,39 +559,7 @@ class _CharacterMotionHeroState extends State<CharacterMotionHero>
     );
   }
 
-  Widget _buildGlassActionButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    Color? iconColor,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.55),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.25),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.35),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Icon(
-          icon,
-          color: iconColor ?? Colors.white,
-          size: 20,
-        ),
-      ),
-    );
-  }
+
 }
 
 /// Peintre de rayons lumineux volumétriques (God Rays)
