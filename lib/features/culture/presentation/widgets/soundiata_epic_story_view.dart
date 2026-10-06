@@ -53,7 +53,6 @@ class _SoundiataEpicStoryViewState extends State<SoundiataEpicStoryView>
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
     final borderCol =
         isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
-    final isSoundiata = item.id == 'perso_soundiata';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,14 +130,9 @@ class _SoundiataEpicStoryViewState extends State<SoundiataEpicStoryView>
 
         const SizedBox(height: 24),
 
-        // ── 3. PARCHEMIN SACRÉ DE LA CHARTE DE KOUROUKAN FOUGA (1236) ────────
-        if (isSoundiata) ...[
-          _buildKouroukanFougaParchment(isDark),
-          const SizedBox(height: 28),
-        ] else if (item.citationHistorique != null) ...[
-          _buildHistoricalQuoteBanner(isDark, item.citationHistorique!),
-          const SizedBox(height: 24),
-        ],
+        // ── 3. PARCHEMIN SACRÉ HISTORIQUE TAILLÉ SUR MESURE ──────────────────
+        _buildSacredCharacterParchment(isDark),
+        const SizedBox(height: 28),
 
         // ── 4. LES 4 CHAPITRES INTERACTIFS DE L'ÉPOPÉE ───────────────────────
         if (item.chapters.isNotEmpty) ...[
@@ -440,8 +434,67 @@ class _SoundiataEpicStoryViewState extends State<SoundiataEpicStoryView>
     );
   }
 
-  // ── PARCHEMIN SACRÉ DE KOUROUKAN FOUGA (1236) ──────────────────────────────
-  Widget _buildKouroukanFougaParchment(bool isDark) {
+  // ── PARCHEMIN SACRÉ HISTORIQUE TAILLÉ SUR MESURE ──────────────────────────
+  Widget _buildSacredCharacterParchment(bool isDark) {
+    final figId = widget.figure.id;
+    String badgeText = 'HISTOIRE • MÉMOIRE';
+    String titleText = 'DÉCLARATION HISTORIQUE';
+    String quoteText = widget.figure.citationHistorique ??
+        '« L\'histoire est le guide des générations futures. »';
+    String subtitleText =
+        '— Parole mémorable de ${widget.figure.name}, transmise par la tradition orale et les archives.';
+    Color accentColor = const Color(0xFFF59E0B);
+
+    if (figId.contains('soundiata')) {
+      badgeText = 'UNESCO • 1236';
+      titleText = 'CHARTE DE KOUROUKAN FOUGA';
+      quoteText =
+          '« Toute vie humaine est une vie. Le tort fait à autrui demande réparation. Respectez l\'étranger, l\'aîné et la femme. »';
+      subtitleText =
+          '— Proclamée par Soundiata Keïta à Kangaba (1236). Première constitution des droits fondamentaux de l\'humanité.';
+      accentColor = const Color(0xFFF59E0B);
+    } else if (figId.contains('mansa_moussa')) {
+      badgeText = 'UNESCO • 1324';
+      titleText = 'PARCHEMIN DE L\'ÂGE D\'OR • TOMBOUCTOU';
+      quoteText =
+          '« Le savoir est la lumière de l\'empire ; les savants sont les gardiens de notre avenir. »';
+      subtitleText =
+          '— Mansa Moussa lors de la fondation de la Mosquée Djingareyber et de l\'essor de l\'Université de Sankoré (1327).';
+      accentColor = const Color(0xFFF59E0B);
+    } else if (figId.contains('babemba')) {
+      badgeText = 'KÉNÉDOUGOU • 1898';
+      titleText = 'SERMENT DU TATA DE SIKASSO';
+      quoteText =
+          '« Sayon te malo ye ! La mort plutôt que la honte ! Nul ennemi ne verra Babemba captif. »';
+      subtitleText =
+          '— Babemba Traoré lors du siège de Sikasso (1er Mai 1898). Symbole éternel de la dignité et du refus de la soumission.';
+      accentColor = const Color(0xFFDC2626);
+    } else if (figId.contains('askia_mohammed')) {
+      badgeText = 'SONGHOÏ • 1493';
+      titleText = 'CODE DE JUSTICE & SAVOIR DE GAO';
+      quoteText =
+          '« L\'encre des savants est plus précieuse que le sang des martyrs. Protégez les manuscrits de nos sages. »';
+      subtitleText =
+          '— Proclamé par Askia le Grand à Gao. Apogée des sciences, du droit équitable et de la civilisation songhoï.';
+      accentColor = const Color(0xFF0D9488);
+    } else if (figId.contains('biton')) {
+      badgeText = 'SÉGOU-KORO • 1712';
+      titleText = 'PACTE DES 4 444 BALANZANS';
+      quoteText =
+          '« L\'union fait la vigueur du bras ; la loyauté partagée au Tôn brise toute division. »';
+      subtitleText =
+          '— Biton Mamary Coulibaly, fondateur du Royaume Bambara de Ségou et maître des flottes du Djoliba.';
+      accentColor = const Color(0xFF059669);
+    } else if (figId.contains('modibo_keita')) {
+      badgeText = 'BAMAKO • 1960';
+      titleText = 'PROCLAMATION D\'INDÉPENDANCE DU MALI';
+      quoteText =
+          '« En ce jour mémorable du 22 septembre 1960, le Mali renaît à l\'histoire libre, fier et souverain ! »';
+      subtitleText =
+          '— Modibo Keïta, Père de la Nation et artisan visionnaire de l\'indépendance et du panafricanisme (OUA).';
+      accentColor = const Color(0xFF10B981);
+    }
+
     return AnimatedBuilder(
       animation: _shimmerController,
       builder: (context, child) {
@@ -453,25 +506,25 @@ class _SoundiataEpicStoryViewState extends State<SoundiataEpicStoryView>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: isDark
-                  ? const [
-                      Color(0xFF261507),
-                      Color(0xFF1E1005),
-                      Color(0xFF2C1808),
+                  ? [
+                      const Color(0xFF1F1206),
+                      const Color(0xFF170C03),
+                      const Color(0xFF241508),
                     ]
-                  : const [
-                      Color(0xFFFFFBEB),
-                      Color(0xFFFEF3C7),
-                      Color(0xFFFFFBEB),
+                  : [
+                      const Color(0xFFFFFBEB),
+                      const Color(0xFFFEF3C7),
+                      const Color(0xFFFFFBEB),
                     ],
             ),
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
-              color: const Color(0xFFF59E0B).withValues(alpha: 0.6),
+              color: accentColor.withValues(alpha: 0.65),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                color: accentColor.withValues(alpha: 0.2),
                 blurRadius: 20,
                 offset: const Offset(0, 6),
               ),
@@ -483,13 +536,14 @@ class _SoundiataEpicStoryViewState extends State<SoundiataEpicStoryView>
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF59E0B),
+                      color: accentColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      'UNESCO • 1236',
+                      badgeText,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 9.5,
                         fontWeight: FontWeight.w900,
@@ -499,65 +553,50 @@ class _SoundiataEpicStoryViewState extends State<SoundiataEpicStoryView>
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    'CHARTE DE KOUROUKAN FOUGA',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFFF59E0B),
-                      letterSpacing: 0.8,
+                  Expanded(
+                    child: Text(
+                      titleText,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: accentColor,
+                        letterSpacing: 0.8,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               Text(
-                '« Toute vie humaine est une vie. Le tort fait à autrui demande réparation. Respectez l\'étranger, l\'aîné et la femme. »',
+                quoteText,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14.5,
                   fontWeight: FontWeight.w700,
                   fontStyle: FontStyle.italic,
-                  color: isDark ? const Color(0xFFFEF3C7) : const Color(0xFF78350F),
+                  color: isDark
+                      ? const Color(0xFFFEF3C7)
+                      : const Color(0xFF78350F),
                   height: 1.5,
                 ),
               ),
               const SizedBox(height: 10),
               Text(
-                '— Proclamée par Soundiata Keïta à Kangaba (1236). Première constitution des droits fondamentaux de l\'humanité.',
+                subtitleText,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w500,
-                  color: isDark ? const Color(0xFFD4AF37) : const Color(0xFF92400E),
+                  color: isDark
+                      ? const Color(0xFFD4AF37)
+                      : const Color(0xFF92400E),
+                  height: 1.4,
                 ),
               ),
             ],
           ),
         );
       },
-    );
-  }
-
-  Widget _buildHistoricalQuoteBanner(bool isDark, String quote) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF59E0B).withValues(alpha: isDark ? 0.12 : 0.08),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
-        ),
-      ),
-      child: Text(
-        quote,
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 13.5,
-          fontStyle: FontStyle.italic,
-          fontWeight: FontWeight.w600,
-          color: isDark ? Colors.white : const Color(0xFF1E293B),
-          height: 1.5,
-        ),
-      ),
     );
   }
 

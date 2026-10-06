@@ -983,19 +983,23 @@ class _SoundiataCinematicBookScreenState
             ),
           ),
 
-        // ── 5. PERSONNAGES 2D ANIMÉS PAR LE SCROLL (GAUCHE & DROITE) ──────────
+        // ── 5. PERSONNAGES 2.5D EN RELIEF ANIMÉS PAR LE SCROLL ───────────────
         // Personnage de gauche (Soundiata)
         if (chapter.leftCharImage != null)
           Positioned(
             left: 16 + charLeftSlide,
             bottom: charBottom,
-            child: _buildCinematicCharacter(
-              name: chapter.leftCharName ?? 'Soundiata',
-              role: chapter.leftCharRole ?? 'Héros',
-              imagePath: chapter.leftCharImage!,
-              accentColor: const Color(0xFFF59E0B),
-              isFacingRight: true,
-              avatarSize: charAvatarSize,
+            child: AnimatedBuilder(
+              animation: _pulseController,
+              builder: (context, _) => _buildCinematicCharacter(
+                name: chapter.leftCharName ?? 'Soundiata',
+                role: chapter.leftCharRole ?? 'Héros',
+                imagePath: chapter.leftCharImage!,
+                accentColor: const Color(0xFFF59E0B),
+                isFacingRight: true,
+                avatarSize: charAvatarSize,
+                pulseProgress: _pulseController.value,
+              ),
             ),
           ),
 
@@ -1014,20 +1018,24 @@ class _SoundiataCinematicBookScreenState
                 scale: (chapter.isBattleScene && _kirinaSoumaoroDefeated)
                     ? 0.85
                     : 1.0,
-                child: _buildCinematicCharacter(
-                  name: (chapter.isBattleScene && _kirinaSoumaoroDefeated)
-                      ? 'Soumaoro (En fuite)'
-                      : (chapter.rightCharName ?? 'Adversaire'),
-                  role: (chapter.isBattleScene && _kirinaSoumaoroDefeated)
-                      ? 'Roi-Sorcier Vaincu'
-                      : (chapter.rightCharRole ?? 'Sosso'),
-                  imagePath: chapter.rightCharImage!,
-                  accentColor:
-                      (chapter.isBattleScene && _kirinaSoumaoroDefeated)
-                          ? Colors.grey
-                          : const Color(0xFFEF4444),
-                  isFacingRight: false,
-                  avatarSize: charAvatarSize,
+                child: AnimatedBuilder(
+                  animation: _pulseController,
+                  builder: (context, _) => _buildCinematicCharacter(
+                    name: (chapter.isBattleScene && _kirinaSoumaoroDefeated)
+                        ? 'Soumaoro (En fuite)'
+                        : (chapter.rightCharName ?? 'Adversaire'),
+                    role: (chapter.isBattleScene && _kirinaSoumaoroDefeated)
+                        ? 'Roi-Sorcier Vaincu'
+                        : (chapter.rightCharRole ?? 'Sosso'),
+                    imagePath: chapter.rightCharImage!,
+                    accentColor:
+                        (chapter.isBattleScene && _kirinaSoumaoroDefeated)
+                            ? Colors.grey
+                            : const Color(0xFFEF4444),
+                    isFacingRight: false,
+                    avatarSize: charAvatarSize,
+                    pulseProgress: _pulseController.value,
+                  ),
                 ),
               ),
             ),
@@ -1382,85 +1390,170 @@ class _SoundiataCinematicBookScreenState
     required Color accentColor,
     required bool isFacingRight,
     double avatarSize = 78.0,
+    double pulseProgress = 0.5,
   }) {
-    return Column(
-      crossAxisAlignment:
-          isFacingRight ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: avatarSize,
-          height: avatarSize,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: accentColor,
-              width: 2.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: accentColor.withValues(alpha: 0.5),
-                blurRadius: 14,
+    final double cardWidth = avatarSize;
+    final double cardHeight = avatarSize * 1.18;
+    final tiltAngle = isFacingRight ? 0.08 : -0.08;
+    final floatY =
+        math.sin(pulseProgress * 2 * math.pi + (isFacingRight ? 0.0 : math.pi)) *
+            2.5;
+    final sheenProgress = ((pulseProgress * 1.5) % 1.0);
+
+    return Transform(
+      transform: Matrix4.identity()
+        ..setEntry(3, 2, 0.002)
+        ..rotateY(tiltAngle)
+        ..rotateZ(isFacingRight ? -0.015 : 0.015)
+        ..setTranslationRaw(0.0, floatY, 0.0),
+      alignment: isFacingRight ? Alignment.bottomLeft : Alignment.bottomRight,
+      child: Column(
+        crossAxisAlignment:
+            isFacingRight ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: cardWidth,
+            height: cardHeight,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: accentColor.withValues(alpha: 0.9),
+                width: 1.8,
               ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.8),
-                blurRadius: 8,
-              ),
-            ],
-          ),
-          child: ClipOval(
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-              errorBuilder: (_, __, ___) => Container(
-                color: accentColor,
-                child: const Icon(Icons.person_rounded, color: Colors.white, size: 28),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 5),
-        Container(
-          constraints: const BoxConstraints(maxWidth: 110),
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.85),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: accentColor.withValues(alpha: 0.4),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: isFacingRight
-                ? CrossAxisAlignment.start
-                : CrossAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                name,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: accentColor.withValues(alpha: 0.45),
+                  blurRadius: 16,
+                  spreadRadius: 1,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                role,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 8.5,
-                  fontWeight: FontWeight.w700,
-                  color: accentColor,
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.8),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+              ],
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: accentColor.withValues(alpha: 0.25),
+                    child: const Icon(Icons.person_rounded,
+                        color: Colors.white, size: 28),
+                  ),
+                ),
+                // Gradient contraste
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.75),
+                      ],
+                      stops: const [0.45, 1.0],
+                    ),
+                  ),
+                ),
+                // Reflet spéculaire
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment(-2.0 + (sheenProgress * 4.0), -1.0),
+                        end: Alignment(-1.0 + (sheenProgress * 4.0), 1.0),
+                        colors: [
+                          Colors.transparent,
+                          Colors.white.withValues(alpha: 0.26),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+                // Badge de rôle héroïque
+                Positioned(
+                  top: 4,
+                  right: isFacingRight ? 4 : null,
+                  left: isFacingRight ? null : 4,
+                  child: Container(
+                    padding: const EdgeInsets.all(2.5),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.85),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: accentColor,
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Icon(
+                      isFacingRight
+                          ? Icons.shield_rounded
+                          : Icons.flash_on_rounded,
+                      size: 9,
+                      color: accentColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 5),
+          Container(
+            constraints: const BoxConstraints(maxWidth: 110),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: accentColor.withValues(alpha: 0.45),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  blurRadius: 6,
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: isFacingRight
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  name,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  role,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w700,
+                    color: accentColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

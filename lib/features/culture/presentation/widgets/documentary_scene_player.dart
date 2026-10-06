@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -21,6 +22,9 @@ class DocuSceneData {
   final String? opponentCharRole;
   final String? opponentCharImage;
   final bool isConfrontation;
+  final String? confrontationBadgeText;
+  final Color? primaryColor;
+  final Color? opponentColor;
 
   const DocuSceneData({
     required this.index,
@@ -36,6 +40,9 @@ class DocuSceneData {
     this.opponentCharRole,
     this.opponentCharImage,
     this.isConfrontation = false,
+    this.confrontationBadgeText,
+    this.primaryColor,
+    this.opponentColor,
   });
 }
 
@@ -144,9 +151,9 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
   }
 
   void _initScenes() {
-    final isSoundiata = widget.figure.id.contains('soundiata');
+    final figId = widget.figure.id;
 
-    if (isSoundiata) {
+    if (figId.contains('soundiata')) {
       _scenes = [
         const DocuSceneData(
           index: 0,
@@ -160,6 +167,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
           primaryCharName: 'Soundiata Keïta',
           primaryCharRole: 'Jeune Prince du Manden',
           primaryCharImage: 'assets/images/culture/personnages/soundiata.jpg',
+          primaryColor: Color(0xFFF59E0B),
         ),
         const DocuSceneData(
           index: 1,
@@ -173,6 +181,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
           primaryCharName: 'Soundiata Keïta',
           primaryCharRole: 'Général & Libérateur en Exil',
           primaryCharImage: 'assets/images/culture/personnages/soundiata.jpg',
+          primaryColor: Color(0xFFF59E0B),
         ),
         const DocuSceneData(
           index: 2,
@@ -191,6 +200,9 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
           opponentCharImage:
               'assets/images/culture/personnages/soumaoro_kante.jpg',
           isConfrontation: true,
+          confrontationBadgeText: 'CHOC DE KIRINA (1235)',
+          primaryColor: Color(0xFFF59E0B),
+          opponentColor: Color(0xFFEF4444),
         ),
         const DocuSceneData(
           index: 3,
@@ -204,10 +216,262 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
           primaryCharName: 'Mansa Soundiata',
           primaryCharRole: 'Fondateur de l\'Empire du Mali',
           primaryCharImage: 'assets/images/culture/personnages/soundiata.jpg',
+          primaryColor: Color(0xFFF59E0B),
+        ),
+      ];
+    } else if (figId.contains('mansa_moussa')) {
+      _scenes = [
+        const DocuSceneData(
+          index: 0,
+          actTitle: 'ACTE I : L\'AVÈNEMENT & L\'EMPIRE D\'OR',
+          periodLocation: '1312 • Cité Impériale & Fleuve Niger',
+          narrative:
+              'Petit-neveu de Soundiata Keïta, Kankou Moussa monte sur le trône après le voyage océanique du Mansa Aboubakri II. Sous son règne d\'une prospérité éclatante, l\'Empire du Mali s\'étend sur plus de 3 000 kilomètres, reliant l\'Atlantique au Sahara et fédérant 24 grandes métropoles régionales.',
+          keyQuote:
+              '« Le savoir et la concorde sont les deux colonnes qui soutiennent la puissance du Mali. »',
+          bgImagePath: 'assets/images/culture/villes/tombouctou_ville.jpg',
+          primaryCharName: 'Mansa Moussa',
+          primaryCharRole: 'Souverain d\'Or & Bâtisseur',
+          primaryCharImage: 'assets/images/culture/personnages/mansa_moussa.jpg',
+          primaryColor: Color(0xFFF59E0B),
+        ),
+        const DocuSceneData(
+          index: 1,
+          actTitle: 'ACTE II : LE GRAND PÈLERINAGE DE 1324',
+          periodLocation: '1324 • Traversée du Sahara & Le Caire',
+          narrative:
+              'À la tête d\'une caravane de 60 000 dignitaires, gardes et lettrés avec 80 dromadaires portant chacun de l\'or pur, Mansa Moussa traverse Le Caire vers La Mecque. Sa générosité légendaire marque le monde méditerranéen et place le Mali au sommet des cartes universelles.',
+          keyQuote:
+              '« La splendeur du Mali brille sous le soleil pour honorer la foi, le savoir et l\'humanité. »',
+          bgImagePath: 'assets/images/culture/villes/gao_dune_rose.jpg',
+          primaryCharName: 'Mansa Moussa',
+          primaryCharRole: 'Pèlerin Impérial du Mali',
+          primaryCharImage: 'assets/images/culture/personnages/mansa_moussa.jpg',
+          opponentCharName: 'Dignitaires du Caire',
+          opponentCharRole: 'Cour Mamelouke d\'Égypte',
+          opponentCharImage: 'assets/images/culture/personnages/mansa_moussa.jpg',
+          primaryColor: Color(0xFFF59E0B),
+          opponentColor: Color(0xFF0EA5E9),
+        ),
+        const DocuSceneData(
+          index: 2,
+          actTitle: 'ACTE III : TOMBOUCTOU, CITÉ DU SAVOIR & DJINGAREYBER',
+          periodLocation: '1327 • Tombouctou la Mystérieuse',
+          narrative:
+              'De retour de La Mecque, Mansa Moussa invite l\'architecte et poète andalou Abou Ishaq es-Sahéli à concevoir la Mosquée Djingareyber en terre crue et torons de palmier. L\'Université de Sankoré attire des docteurs en droit, astronomie et médecine venus de tout le monde connu.',
+          keyQuote:
+              '« Le savoir est la lumière de l\'empire ; les savants sont les gardiens de notre avenir. »\n— Mansa Moussa, 1327',
+          bgImagePath: 'assets/images/culture/villes/tombouctou_ville.jpg',
+          primaryCharName: 'Mansa Moussa',
+          primaryCharRole: 'Mécène Universel & Bâtisseur',
+          primaryCharImage: 'assets/images/culture/personnages/mansa_moussa.jpg',
+          opponentCharName: 'Abou Ishaq es-Sahéli',
+          opponentCharRole: 'Maître Architecte Andalous',
+          opponentCharImage: 'assets/images/culture/personnages/mansa_moussa.jpg',
+          primaryColor: Color(0xFFF59E0B),
+          opponentColor: Color(0xFF10B981),
+        ),
+      ];
+    } else if (figId.contains('babemba')) {
+      _scenes = [
+        const DocuSceneData(
+          index: 0,
+          actTitle: 'ACTE I : L\'HÉRITAGE DU KÉNÉDOUGOU & TIÉBA',
+          periodLocation: '1893 • Sikasso, Cité des Guerriers',
+          narrative:
+              'Succédant à son frère illustre Tiéba Traoré en 1893, Babemba prend les rênes du Royaume du Kénédougou. Chef d\'État visionnaire et stratège hors pair, il renforce la discipline militaire et refuse catégoriquement toute capitulation face aux colonnes d\'invasion coloniale.',
+          keyQuote:
+              '« Le Kénédougou a été bâti par le sang et le fer des braves ; nul traité déloyal ne viendra éteindre notre flamme. »',
+          bgImagePath: 'assets/images/culture/villes/sikasso_ville.jpg',
+          primaryCharName: 'Babemba Traoré',
+          primaryCharRole: 'Roi du Kénédougou',
+          primaryCharImage: 'assets/images/culture/personnages/babemba_traore.jpg',
+          primaryColor: Color(0xFFDC2626),
+        ),
+        const DocuSceneData(
+          index: 1,
+          actTitle: 'ACTE II : LE SIÈGE HÉROÏQUE DU TATA DE SIKASSO',
+          periodLocation: 'Avril 1898 • Remparts Inviolables du Tata',
+          narrative:
+              'Entourée d\'une triple muraille de terre crue de 9 kilomètres de pourtour et de 6 mètres de haut, la forteresse du Tata subit le pilonnage intensif de l\'artillerie lourde. Pendant des semaines de combats acharnés, Babemba galvanise ses soldats qui repoussent héroïquement chaque assaut.',
+          keyQuote:
+              '« Les obus peuvent éventrer la terre du Tata, mais le cœur d\'un Traoré ne pliera jamais ! »',
+          bgImagePath: 'assets/images/culture/monuments/monument_tata_sikasso/tat1.jpg',
+          primaryCharName: 'Babemba Traoré',
+          primaryCharRole: 'Commandant Suprême du Tata',
+          primaryCharImage: 'assets/images/culture/personnages/babemba_traore.jpg',
+          opponentCharName: 'Forces Coloniales',
+          opponentCharRole: 'Artillerie du Siège de 1898',
+          opponentCharImage: 'assets/images/culture/personnages/babemba_traore.jpg',
+          isConfrontation: true,
+          confrontationBadgeText: 'SIÈGE DU TATA (1898)',
+          primaryColor: Color(0xFFDC2626),
+          opponentColor: Color(0xFF991B1B),
+        ),
+        const DocuSceneData(
+          index: 2,
+          actTitle: 'ACTE III : LE SACRIFICE DE LA DIGNITÉ SUPRÊME',
+          periodLocation: '1er Mai 1898 • Palais Royal de Sikasso',
+          narrative:
+              'Le 1er mai 1898, constatant la brèche ouverte dans les défenses par l\'ennemi supérieur en nombre, Babemba choisit l\'immortalité plutôt que l\'infamie d\'une reddition. Il ordonne à son fidèle chef de garde de l\'abattre, inscrivant sa devise dans le marbre de la conscience nationale.',
+          keyQuote:
+              '« Sayon te malo ye ! La mort plutôt que la honte ! »\n— Babemba Traoré, Héros de la Dignité Nationale',
+          bgImagePath: 'assets/images/culture/villes/sikasso_ville.jpg',
+          primaryCharName: 'Babemba Traoré',
+          primaryCharRole: 'Héros Immortel de la Dignité',
+          primaryCharImage: 'assets/images/culture/personnages/babemba_traore.jpg',
+          primaryColor: Color(0xFFDC2626),
+        ),
+      ];
+    } else if (figId.contains('askia_mohammed')) {
+      _scenes = [
+        const DocuSceneData(
+          index: 0,
+          actTitle: 'ACTE I : L\'AVÈNEMENT DE LA DYNASTIE DES ASKIA',
+          periodLocation: '1493 • Gao, Capitale de l\'Empire Songhoï',
+          narrative:
+              'Grand général et administrateur avisé, Mohammed Touré accède au pouvoir en 1493 et fonde la prestigieuse dynastie des Askia. Il dote l\'Empire Songhoï d\'une administration centralisée moderne, de ministères sectoriels et d\'une armée de métier garantissant la paix sur le fleuve.',
+          keyQuote:
+              '« L\'ordre, la justice équitable et la foi unissent les peuples du Songhoï d\'un rivage à l\'autre. »',
+          bgImagePath: 'assets/images/culture/villes/gao_dune_rose.jpg',
+          primaryCharName: 'Askia Mohammed',
+          primaryCharRole: 'Grand Réformateur Songhoï',
+          primaryCharImage: 'assets/images/culture/personnages/askia_mohammed.jpg',
+          primaryColor: Color(0xFF0D9488),
+        ),
+        const DocuSceneData(
+          index: 1,
+          actTitle: 'ACTE II : LE TRIANGLE DU SAVOIR : GAO, TOMBOUCTOU, DJENNÉ',
+          periodLocation: '1497 • Flottille Impériale & Écoles Coraniques',
+          narrative:
+              'Askia le Grand place les savants, juristes et astronomes au cœur de la gouvernance impériale. Il finance largement les universités de Tombouctou et de Gao, transformant le Sahel en phare intellectuel où convergent manuscrits rares et penseurs de tout le continent.',
+          keyQuote:
+              '« L\'encre des savants est plus précieuse que le sang des martyrs. Protégez les manuscrits de nos sages. »',
+          bgImagePath: 'assets/images/culture/villes/tombouctou_ville.jpg',
+          primaryCharName: 'Askia le Grand',
+          primaryCharRole: 'Protecteur des Savants & Écoles',
+          primaryCharImage: 'assets/images/culture/personnages/askia_mohammed.jpg',
+          opponentCharName: 'Cadis & Érudits',
+          opponentCharRole: 'Gardiens du Droit & du Savoir',
+          opponentCharImage: 'assets/images/culture/personnages/askia_mohammed.jpg',
+          primaryColor: Color(0xFF0D9488),
+          opponentColor: Color(0xFFD97706),
+        ),
+        const DocuSceneData(
+          index: 2,
+          actTitle: 'ACTE III : L\'ÉDIFICATION DU TOMBEAU PYRAMIDAL DE GAO',
+          periodLocation: '1495 • Cité Millénaire de Gao',
+          narrative:
+              'De retour de son pèlerinage avec de la terre sainte, Askia Mohammed fait ériger le chef-d\'œuvre monumental du Tombeau des Askia à Gao. Cette pyramide à degrés de 17 mètres, percée de torons en bois et de minarets, s\'impose comme un joyau impérissable de l\'architecture sahélienne en terre crue.',
+          keyQuote:
+              '« Que ce sanctuaire de terre et d\'acacia traverse les siècles pour rappeler la foi et la puissance de Gao. »',
+          bgImagePath: 'assets/images/culture/monuments/monument_tombeau_askia/tomb1.jpg',
+          primaryCharName: 'Askia Mohammed',
+          primaryCharRole: 'Bâtisseur du Patrimoine Mondial',
+          primaryCharImage: 'assets/images/culture/personnages/askia_mohammed.jpg',
+          primaryColor: Color(0xFF0D9488),
+        ),
+      ];
+    } else if (figId.contains('biton')) {
+      _scenes = [
+        const DocuSceneData(
+          index: 0,
+          actTitle: 'ACTE I : L\'ASSOCIATION DES TÔN & LA JEUNESSE',
+          periodLocation: '1712 • Ségou-Koro, Bords du Djoliba',
+          narrative:
+              'Mamary Coulibaly transforme l\'association fraternelle de chasse et d\'entraide agricole (le Tôn) en une organisation sociopolitique unie. Élu chef incontesté (Biton), il fédère les jeunes guerriers autour de règles d\'honneur et de solidarité inébranlables.',
+          keyQuote:
+              '« L\'union fait la vigueur du bras ; la loyauté partagée au Tôn brise toute division. »',
+          bgImagePath: 'assets/images/culture/villes/segou_koro.jpg',
+          primaryCharName: 'Biton Mamary Coulibaly',
+          primaryCharRole: 'Fondateur du Royaume Bambara',
+          primaryCharImage: 'assets/images/culture/personnages/biton_coulibaly.jpg',
+          primaryColor: Color(0xFF059669),
+        ),
+        const DocuSceneData(
+          index: 1,
+          actTitle: 'ACTE II : LA PUISSANCE DES TÔNJONS & LA FLOTTE DU FLEUVE',
+          periodLocation: '1720 • Bords du Fleuve Niger, Ségou',
+          narrative:
+              'Biton Coulibaly crée la toute première armée de métier permanente de la région : les Tônjons. Allié aux pêcheurs Somono qui lui fournissent une formidable flottille de pirogues blindées, il s\'assure le contrôle total du fleuve Niger de Bamako jusqu\'aux portes de Djenné.',
+          keyQuote:
+              '« Nos pirogues tracent la loi sur le Djoliba ; la justice et la force de Ségou règnent sur les flots. »',
+          bgImagePath: 'assets/images/culture/villes/segou_koro.jpg',
+          primaryCharName: 'Biton Coulibaly',
+          primaryCharRole: 'Roi & Commandant Suprême',
+          primaryCharImage: 'assets/images/culture/personnages/biton_coulibaly.jpg',
+          opponentCharName: 'Guerriers Tônjons',
+          opponentCharRole: 'Armée Permanente de Ségou',
+          opponentCharImage: 'assets/images/culture/personnages/biton_coulibaly.jpg',
+          primaryColor: Color(0xFF059669),
+          opponentColor: Color(0xFF1E3A8A),
+        ),
+        const DocuSceneData(
+          index: 2,
+          actTitle: 'ACTE III : LA CITÉ ROYALE DES 4 444 BALANZANS',
+          periodLocation: '1730 • Capitale Mythique de Ségou',
+          narrative:
+              'Sous l\'égide de Biton, Ségou s\'épanouit comme un grand centre de culture agraire et de métallurgie traditionnelle. Protégée par les 4 444 arbres Balanzans sacrés, la dynastie Coulibaly ancre l\'identité bambara au cœur de la mémoire vivante du Mali.',
+          keyQuote:
+              '« Les racines des balanzans puisent dans l\'éternité de notre terre ; ainsi demeure l\'honneur de notre peuple. »',
+          bgImagePath: 'assets/images/culture/villes/segou_koro.jpg',
+          primaryCharName: 'Biton Coulibaly',
+          primaryCharRole: 'Maître Éternel de Ségou',
+          primaryCharImage: 'assets/images/culture/personnages/biton_coulibaly.jpg',
+          primaryColor: Color(0xFF059669),
+        ),
+      ];
+    } else if (figId.contains('modibo_keita')) {
+      _scenes = [
+        const DocuSceneData(
+          index: 0,
+          actTitle: 'ACTE I : LA LUTTE ANTI-COLONIALE & L\'US-RDA',
+          periodLocation: '1946 • Bamako, Soudan Français',
+          narrative:
+              'Instituteur dévoué et homme de culture rigoureux, Modibo Keïta fonde l\'Union Soudanaise-RDA. Porté par un idéal d\'émancipation et de justice sociale, il parcourt les cercles et villages pour éveiller la conscience nationale et organiser la résistance politique face au système colonial.',
+          keyQuote:
+              '« La liberté ne s\'octroie pas dans la facilité, elle s\'arrache par la conscience et l\'union sacrée de tout un peuple. »',
+          bgImagePath: 'assets/images/culture/monuments/monument_tour_afrique_bamako/tour.jpg',
+          primaryCharName: 'Modibo Keïta',
+          primaryCharRole: 'Tribun & Militant Panafricaniste',
+          primaryCharImage: 'assets/images/culture/personnages/modibo_keita.jpg',
+          primaryColor: Color(0xFF10B981),
+        ),
+        const DocuSceneData(
+          index: 1,
+          actTitle: 'ACTE II : LA PROCLAMATION DE L\'INDÉPENDANCE DU MALI',
+          periodLocation: '22 Septembre 1960 • Bamako',
+          narrative:
+              'Le 22 septembre 1960, devant les représentants du peuple et du monde entier, Modibo Keïta proclame solennellement la République du Mali souveraine et indépendante. Il redonne au pays le nom glorieux de l\'Empire médiéval de Soundiata et enracine la fierté nationale.',
+          keyQuote:
+              '« En ce jour mémorable du 22 septembre 1960, le Mali renaît à l\'histoire libre, fier et souverain ! »\n— Modibo Keïta',
+          bgImagePath: 'assets/images/culture/monuments/monument_tour_afrique_bamako/tour1.jpg',
+          primaryCharName: 'Modibo Keïta',
+          primaryCharRole: 'Premier Président de la République',
+          primaryCharImage: 'assets/images/culture/personnages/modibo_keita.jpg',
+          opponentCharName: 'Le Peuple Malien',
+          opponentCharRole: 'Nation Unie et Souveraine',
+          opponentCharImage: 'assets/images/culture/personnages/modibo_keita.jpg',
+          primaryColor: Color(0xFF10B981),
+          opponentColor: Color(0xFFF59E0B),
+        ),
+        const DocuSceneData(
+          index: 2,
+          actTitle: 'ACTE III : LE PÈRE FONDATEUR DE L\'OUA & LE PANAFRICANISME',
+          periodLocation: '1963 • Addis-Abeba & Bamako',
+          narrative:
+              'Cofondateur visionnaire de l\'Organisation de l\'Unité Africaine (OUA) en 1963 à Addis-Abeba, Modibo Keïta défend inlassablement l\'intégration continentale, le non-alignement positif et la dignité des peuples d\'Afrique, s\'inscrivant parmi les plus grands hommes d\'État du XXe siècle.',
+          keyQuote:
+              '« L\'Afrique ne sera véritablement respectée que lorsqu\'elle parlera d\'une seule et même voix unie et fraternelle. »',
+          bgImagePath: 'assets/images/culture/monuments/monument_tour_afrique_bamako/tour.jpg',
+          primaryCharName: 'Modibo Keïta',
+          primaryCharRole: 'Père de la Nation & Bâtisseur de l\'OUA',
+          primaryCharImage: 'assets/images/culture/personnages/modibo_keita.jpg',
+          primaryColor: Color(0xFF10B981),
         ),
       ];
     } else {
-      // Scènes générées à partir des chapitres de la figure historique
+      // Scènes générées à partir des chapitres de la figure historique avec fallback élégant
       _scenes = widget.figure.chapters.asMap().entries.map((entry) {
         final idx = entry.key;
         final chap = entry.value;
@@ -224,6 +488,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
           primaryCharName: widget.figure.name,
           primaryCharRole: widget.figure.titleHonorifique,
           primaryCharImage: widget.figure.photoUrl,
+          primaryColor: const Color(0xFFF59E0B),
         );
       }).toList();
 
@@ -240,6 +505,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
             primaryCharName: widget.figure.name,
             primaryCharRole: widget.figure.titleHonorifique,
             primaryCharImage: widget.figure.photoUrl,
+            primaryColor: const Color(0xFFF59E0B),
           ),
         ];
       }
@@ -558,7 +824,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                 ),
               ),
 
-              // 4. PERSONNAGE PRINCIPAL (SOUNDIATA) : GLISSE DEPUIS LA GAUCHE !
+              // 4. PERSONNAGE PRINCIPAL : PLAN 2.5D GLISSE DEPUIS LA GAUCHE !
               Positioned(
                 left: scene.isConfrontation ? 10 : 20,
                 bottom: 12,
@@ -568,21 +834,25 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                     opacity: _primaryFadeAnimation,
                     child: ScaleTransition(
                       scale: _primaryScaleAnimation,
-                      child: _buildCharacterFigure(
-                        name: scene.primaryCharName,
-                        role: scene.primaryCharRole,
-                        imagePath: scene.primaryCharImage,
-                        accentColor: const Color(0xFFF59E0B),
-                        isFacingRight: true,
-                        isLarge: !scene.isConfrontation,
+                      child: AnimatedBuilder(
+                        animation: _clashPulseController,
+                        builder: (context, _) => _buildCharacterFigure(
+                          name: scene.primaryCharName,
+                          role: scene.primaryCharRole,
+                          imagePath: scene.primaryCharImage,
+                          accentColor: scene.primaryColor ?? const Color(0xFFF59E0B),
+                          isFacingRight: true,
+                          isLarge: !scene.isConfrontation && scene.opponentCharImage == null,
+                          pulseProgress: _clashPulseController.value,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
 
-              // 5. PERSONNAGE OPPOSANT (SOUMAORO KANTÉ) : GLISSE DEPUIS LA DROITE !
-              if (scene.isConfrontation && scene.opponentCharImage != null)
+              // 5. PERSONNAGE OPPOSANT OU ALLIÉ : GLISSE DEPUIS LA DROITE !
+              if (scene.opponentCharImage != null)
                 Positioned(
                   right: 10,
                   bottom: 12,
@@ -590,19 +860,38 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                     position: _opponentSlideAnimation,
                     child: FadeTransition(
                       opacity: _opponentFadeAnimation,
-                      child: _buildCharacterFigure(
-                        name: scene.opponentCharName!,
-                        role: scene.opponentCharRole ?? 'Adversaire',
-                        imagePath: scene.opponentCharImage!,
-                        accentColor: const Color(0xFFEF4444),
-                        isFacingRight: false,
-                        isLarge: false,
+                      child: AnimatedBuilder(
+                        animation: _clashPulseController,
+                        builder: (context, _) => _buildCharacterFigure(
+                          name: scene.opponentCharName!,
+                          role: scene.opponentCharRole ?? (scene.isConfrontation ? 'Adversaire' : 'Allié'),
+                          imagePath: scene.opponentCharImage!,
+                          accentColor: scene.opponentColor ?? (scene.isConfrontation ? const Color(0xFFEF4444) : const Color(0xFF3B82F6)),
+                          isFacingRight: false,
+                          isLarge: false,
+                          pulseProgress: _clashPulseController.value,
+                        ),
                       ),
                     ),
                   ),
                 ),
 
-              // 6. Symbole de confrontation centrale pour Kirina
+              // 6. Arc de tension cinématique vectorielle pour les scènes de confrontation
+              if (scene.isConfrontation)
+                Positioned.fill(
+                  child: AnimatedBuilder(
+                    animation: _clashPulseController,
+                    builder: (context, _) => CustomPaint(
+                      painter: _DocumentaryDuelTensionPainter(
+                        progress: _clashPulseController.value,
+                        primaryColor: scene.primaryColor ?? const Color(0xFFF59E0B),
+                        opponentColor: scene.opponentColor ?? const Color(0xFFEF4444),
+                      ),
+                    ),
+                  ),
+                ),
+
+              // 7. Symbole de confrontation centrale stylisé
               if (scene.isConfrontation)
                 Positioned.fill(
                   child: Center(
@@ -610,6 +899,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                       animation: _clashPulseController,
                       builder: (context, child) {
                         final pulse = 0.95 + (_clashPulseController.value * 0.12);
+                        final accent = scene.primaryColor ?? const Color(0xFFF59E0B);
                         return Transform.scale(
                           scale: pulse,
                           child: Container(
@@ -620,13 +910,12 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                                   .withValues(alpha: 0.9),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: const Color(0xFFF59E0B),
+                                color: accent,
                                 width: 1.5,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFFF59E0B)
-                                      .withValues(alpha: 0.4),
+                                  color: accent.withValues(alpha: 0.4),
                                   blurRadius: 14,
                                 ),
                               ],
@@ -634,18 +923,18 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.flash_on_rounded,
                                   size: 14,
-                                  color: Color(0xFFF59E0B),
+                                  color: accent,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'CHOC DE KIRINA',
+                                  scene.confrontationBadgeText ?? 'CHOC HISTORIQUE',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w900,
-                                    color: const Color(0xFFF59E0B),
+                                    color: accent,
                                     letterSpacing: 0.8,
                                   ),
                                 ),
@@ -853,7 +1142,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
     );
   }
 
-  /// Figure 2D découpée avec son cartouche de nom documentaire
+  /// Figure en relief 2.5D avec perspective 3D, reflet spéculaire dynamique, ombre portée et cartouche documentaire
   Widget _buildCharacterFigure({
     required String name,
     required String role,
@@ -861,61 +1150,136 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
     required Color accentColor,
     required bool isFacingRight,
     required bool isLarge,
+    required double pulseProgress,
   }) {
-    final double avatarSize = isLarge ? 88.0 : 72.0;
+    final double cardWidth = isLarge ? 88.0 : 76.0;
+    final double cardHeight = isLarge ? 104.0 : 90.0;
+    final tiltAngle = isFacingRight ? 0.08 : -0.08;
+    final floatY =
+        math.sin(pulseProgress * 2 * math.pi + (isFacingRight ? 0.0 : math.pi)) *
+            2.8;
+    final sheenProgress = ((pulseProgress * 1.5) % 1.0);
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (!isFacingRight) ...[
-          // Pour l'opposant à droite, le texte est à gauche de son avatar
-          _buildCharacterLabel(name, role, accentColor, CrossAxisAlignment.end),
-          const SizedBox(width: 8),
-        ],
+    return Transform(
+      transform: Matrix4.identity()
+        ..setEntry(3, 2, 0.002) // Perspective 3D
+        ..rotateY(tiltAngle)
+        ..rotateZ(isFacingRight ? -0.015 : 0.015)
+        ..setTranslationRaw(0.0, floatY, 0.0),
+      alignment: isFacingRight ? Alignment.bottomLeft : Alignment.bottomRight,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!isFacingRight) ...[
+            _buildCharacterLabel(
+                name, role, accentColor, CrossAxisAlignment.end),
+            const SizedBox(width: 8),
+          ],
 
-        // Portrait 2D rond découpé avec bordure d'aura
-        Container(
-          width: avatarSize,
-          height: avatarSize,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: accentColor,
-              width: 2.4,
+          // Carte 2.5D en relief avec reflet spéculaire
+          Container(
+            width: cardWidth,
+            height: cardHeight,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: accentColor.withValues(alpha: 0.9),
+                width: 1.8,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: accentColor.withValues(alpha: 0.4),
+                  blurRadius: 16,
+                  spreadRadius: 1,
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.8),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            boxShadow: [
-              BoxShadow(
-                color: accentColor.withValues(alpha: 0.45),
-                blurRadius: 14,
-                spreadRadius: 2,
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.6),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: ClipOval(
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-              errorBuilder: (_, __, ___) => Container(
-                color: accentColor,
-                child: const Icon(Icons.person_rounded, color: Colors.white),
-              ),
+            clipBehavior: Clip.antiAlias,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: accentColor.withValues(alpha: 0.25),
+                    child: const Icon(Icons.person_rounded,
+                        color: Colors.white, size: 28),
+                  ),
+                ),
+                // Dégradé de contraste cinématique
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.75),
+                      ],
+                      stops: const [0.45, 1.0],
+                    ),
+                  ),
+                ),
+                // Balayage spéculaire lumineux
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment(-2.0 + (sheenProgress * 4.0), -1.0),
+                        end: Alignment(-1.0 + (sheenProgress * 4.0), 1.0),
+                        colors: [
+                          Colors.transparent,
+                          Colors.white.withValues(alpha: 0.26),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+                // Badge héroïque / icône de camp
+                Positioned(
+                  top: 5,
+                  right: isFacingRight ? 5 : null,
+                  left: isFacingRight ? null : 5,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.85),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: accentColor,
+                        width: 1.1,
+                      ),
+                    ),
+                    child: Icon(
+                      isFacingRight
+                          ? Icons.shield_rounded
+                          : Icons.flash_on_rounded,
+                      size: 10,
+                      color: accentColor,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
 
-        if (isFacingRight) ...[
-          const SizedBox(width: 8),
-          // Pour Soundiata à gauche, le texte est à droite de son avatar
-          _buildCharacterLabel(name, role, accentColor, CrossAxisAlignment.start),
+          if (isFacingRight) ...[
+            const SizedBox(width: 8),
+            _buildCharacterLabel(
+                name, role, accentColor, CrossAxisAlignment.start),
+          ],
         ],
-      ],
+      ),
     );
   }
 
@@ -928,16 +1292,16 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.8),
+        color: Colors.black.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: accentColor.withValues(alpha: 0.4),
+          color: accentColor.withValues(alpha: 0.5),
           width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
-            blurRadius: 6,
+            color: Colors.black.withValues(alpha: 0.5),
+            blurRadius: 8,
           ),
         ],
       ),
@@ -948,7 +1312,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
           Text(
             name,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 12.5,
+              fontSize: 12.0,
               fontWeight: FontWeight.w900,
               color: Colors.white,
               letterSpacing: -0.2,
@@ -958,7 +1322,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
           Text(
             role,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 9.5,
+              fontSize: 9.0,
               fontWeight: FontWeight.w700,
               color: accentColor,
             ),
@@ -969,4 +1333,66 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
       ),
     );
   }
+}
+
+/// Peintre d'arc de tension cinématique entre deux figures historiques
+class _DocumentaryDuelTensionPainter extends CustomPainter {
+  final double progress;
+  final Color primaryColor;
+  final Color opponentColor;
+
+  _DocumentaryDuelTensionPainter({
+    required this.progress,
+    required this.primaryColor,
+    required this.opponentColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final startOffset = Offset(88, size.height - 58);
+    final endOffset = Offset(size.width - 88, size.height - 58);
+    final midX = size.width * 0.5;
+    final midY = (size.height * 0.46) - (math.sin(progress * math.pi) * 10);
+
+    final arcPath = Path()
+      ..moveTo(startOffset.dx, startOffset.dy)
+      ..quadraticBezierTo(midX, midY, endOffset.dx, endOffset.dy);
+
+    final glowPaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          primaryColor.withValues(alpha: 0.65),
+          opponentColor.withValues(alpha: 0.65),
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.8
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+    canvas.drawPath(arcPath, glowPaint);
+
+    final corePaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          Colors.white,
+          primaryColor,
+          opponentColor,
+          Colors.white,
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6;
+    canvas.drawPath(arcPath, corePaint);
+
+    final shockRadius = 12 + (progress * 14);
+    final shockAlpha = ((1.0 - progress) * 0.6).clamp(0.0, 1.0);
+    final shockPaint = Paint()
+      ..color = primaryColor.withValues(alpha: shockAlpha)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.3;
+    canvas.drawCircle(Offset(midX, size.height * 0.48), shockRadius, shockPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _DocumentaryDuelTensionPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
