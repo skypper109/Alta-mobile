@@ -70,5 +70,11 @@
 	<string>AlternIA a besoin de votre microphone pour poser vos questions à l'avatar en direct.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>AlternIA utilise la reconnaissance vocale pour retranscrire vos questions au professeur.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>AlternIA utilise la caméra pour scanner et identifier les monuments du patrimoine malien.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>AlternIA a besoin d'accéder à vos photos pour analyser un monument de votre galerie.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>AlternIA utilise votre position pour authentifier avec précision les monuments et trésors du patrimoine malien à proximité.</string>
 </dict>
 </plist>

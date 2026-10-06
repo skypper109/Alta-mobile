@@ -62,6 +62,14 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     _layerType = widget.initialLayerType;
   }
 
+  MapCamera? get _safeCamera {
+    try {
+      return _mapController.camera;
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   void didUpdateWidget(covariant MaliInteractiveMap oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -69,10 +77,16 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     // Centrage cinématique fluide sur un monument sélectionné
     if (widget.selectedPlaceId != oldWidget.selectedPlaceId &&
         widget.selectedPlaceId != null) {
-      final place =
-          _allMarkers.where((m) => m.id == widget.selectedPlaceId).firstOrNull;
+      final place = _allMarkers
+          .where((m) =>
+              m.id == widget.selectedPlaceId ||
+              m.scannerId == widget.selectedPlaceId ||
+              m.id.replaceAll('monument_', '') ==
+                  widget.selectedPlaceId!.replaceAll('monument_', ''))
+          .firstOrNull;
       if (place != null) {
-        final currentZoom = _mapController.camera.zoom;
+        final camera = _safeCamera;
+        final currentZoom = camera?.zoom ?? 12.0;
         final targetZoom = currentZoom < 15.5 ? 16.5 : currentZoom;
         _animatedMapMove(place.latLng, targetZoom);
         return;
@@ -108,7 +122,16 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
   void _animatedMapMove(LatLng destLocation, double destZoom) {
     _cameraAnimController?.dispose();
 
-    final camera = _mapController.camera;
+    final camera = _safeCamera;
+    if (camera == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _safeCamera != null) {
+          _animatedMapMove(destLocation, destZoom);
+        }
+      });
+      return;
+    }
+
     final latTween = Tween<double>(
       begin: camera.center.latitude,
       end: destLocation.latitude,
@@ -155,16 +178,16 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
 
   void _zoomIn() {
     HapticFeedback.lightImpact();
-    final camera = _mapController.camera;
-    if (camera.zoom < 20.0) {
+    final camera = _safeCamera;
+    if (camera != null && camera.zoom < 20.0) {
       _animatedMapMove(camera.center, (camera.zoom + 1.2).clamp(4.0, 20.0));
     }
   }
 
   void _zoomOut() {
     HapticFeedback.lightImpact();
-    final camera = _mapController.camera;
-    if (camera.zoom > 4.5) {
+    final camera = _safeCamera;
+    if (camera != null && camera.zoom > 4.5) {
       _animatedMapMove(camera.center, (camera.zoom - 1.2).clamp(4.0, 20.0));
     }
   }
@@ -206,17 +229,23 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSatellite = _layerType == MaliMapLayerType.satellite;
 
-    // Détermine le centre initial
-    final initialCenter = widget.selectedPlaceId != null
+    // Détermine le centre et le zoom initiaux (avec zoom 16.5 sur le monument ciblé)
+    final selectedMarker = widget.selectedPlaceId != null
         ? _allMarkers
-                .where((m) => m.id == widget.selectedPlaceId)
-                .firstOrNull
-                ?.latLng ??
-            MaliRegionCoordinates.maliCenter
+            .where((m) =>
+                m.id == widget.selectedPlaceId ||
+                m.scannerId == widget.selectedPlaceId ||
+                m.id.replaceAll('monument_', '') ==
+                    widget.selectedPlaceId!.replaceAll('monument_', ''))
+            .firstOrNull
+        : null;
+
+    final initialCenter = selectedMarker != null
+        ? selectedMarker.latLng
         : MaliRegionCoordinates.getRegionCenter(widget.selectedRegionId);
 
-    final initialZoom = widget.selectedPlaceId != null
-        ? 11.5
+    final initialZoom = selectedMarker != null
+        ? 16.5
         : MaliRegionCoordinates.getRegionZoom(widget.selectedRegionId);
 
     return Container(
@@ -260,24 +289,26 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
             children: [
               // ── A. TUILES FOND DE CARTE HAUTE DÉFINITION & STABILITÉ ─────────
               if (isSatellite) ...[
-                // Vue Satellite Esri World Imagery (standard mondial, fluide, sans timeout ni blocage)
+                // Vue Satellite Google Maps Hybrid (haute résolution sub-métrique sans filigrane 'not yet available')
                 TileLayer(
                   urlTemplate:
-                      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                      'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+                  subdomains: const ['0', '1', '2', '3'],
                   fallbackUrl:
-                      'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                   userAgentPackageName: 'com.alternia.det_mobile',
-                  maxNativeZoom: 18,
-                  maxZoom: 19.0,
+                  maxNativeZoom: 19,
+                  maxZoom: 20.0,
                   keepBuffer: 3,
                   panBuffer: 1,
+                  tileProvider: NetworkTileProvider(
+                    silenceExceptions: true,
+                  ),
                   evictErrorTileStrategy: EvictErrorTileStrategy.none,
-                  errorTileCallback: (tile, error, stackTrace) {
-                    // Absorbe silencieusement les micro-coupures réseau sans bloquer le débogueur
-                  },
+                  errorTileCallback: (tile, error, stackTrace) {},
                 ),
               ] else ...[
-                // Vue Plan / Cartographie culturelle (CartoDB Voyager ou Dark Matter pour mode sombre)
+                // Vue Plan / Cartographie culturelle (CartoDB)
                 TileLayer(
                   urlTemplate: isDark
                       ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
@@ -289,10 +320,11 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
                   maxZoom: 20.0,
                   keepBuffer: 3,
                   panBuffer: 1,
+                  tileProvider: NetworkTileProvider(
+                    silenceExceptions: true,
+                  ),
                   evictErrorTileStrategy: EvictErrorTileStrategy.none,
-                  errorTileCallback: (tile, error, stackTrace) {
-                    // Absorbe silencieusement les micro-coupures réseau sans bloquer le débogueur
-                  },
+                  errorTileCallback: (tile, error, stackTrace) {},
                 ),
               ],
 
@@ -435,10 +467,9 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: (isDark || isSatellite
-                  ? const Color(0xFF0F172A)
-                  : Colors.white)
-              .withValues(alpha: 0.94),
+          color:
+              (isDark || isSatellite ? const Color(0xFF0F172A) : Colors.white)
+                  .withValues(alpha: 0.94),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSatellite
@@ -466,7 +497,7 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
             ),
             const SizedBox(width: 6),
             Text(
-              isSatellite ? 'Google Satellite' : 'Google Plan',
+              isSatellite ? 'Satellite' : 'Plan',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w800,
@@ -483,13 +514,11 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
 
   // ── COMMANDES FLOTTANTES ZOOM IN / OUT / BAMAKO / RECENTRER ────────────────
   Widget _buildZoomControls(bool isDark, bool isSatellite) {
-    final bgColor = (isDark || isSatellite
-            ? const Color(0xFF0F172A)
-            : Colors.white)
-        .withValues(alpha: 0.94);
-    final borderCol = isDark || isSatellite
-        ? Colors.white24
-        : const Color(0xFFE8ECF2);
+    final bgColor =
+        (isDark || isSatellite ? const Color(0xFF0F172A) : Colors.white)
+            .withValues(alpha: 0.94);
+    final borderCol =
+        isDark || isSatellite ? Colors.white24 : const Color(0xFFE8ECF2);
     final iconColor =
         isDark || isSatellite ? Colors.white : const Color(0xFF1E284A);
 
@@ -586,15 +615,12 @@ class _MaliInteractiveMapState extends State<MaliInteractiveMap>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: (isDark || isSatellite
-                ? const Color(0xFF0F172A)
-                : Colors.white)
+        color: (isDark || isSatellite ? const Color(0xFF0F172A) : Colors.white)
             .withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark || isSatellite
-              ? Colors.white24
-              : const Color(0xFFE8ECF2),
+          color:
+              isDark || isSatellite ? Colors.white24 : const Color(0xFFE8ECF2),
           width: 1.0,
         ),
         boxShadow: const [

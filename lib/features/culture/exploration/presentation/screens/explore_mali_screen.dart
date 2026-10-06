@@ -17,8 +17,13 @@ import '../widgets/mali_interactive_map.dart';
 /// Style Google/Apple Maps avec zoom intérieur, points rouges interactifs et fiches détaillées.
 class ExploreMaliScreen extends ConsumerStatefulWidget {
   final String? initialRegionId;
+  final String? initialPlaceId;
 
-  const ExploreMaliScreen({super.key, this.initialRegionId});
+  const ExploreMaliScreen({
+    super.key,
+    this.initialRegionId,
+    this.initialPlaceId,
+  });
 
   @override
   ConsumerState<ExploreMaliScreen> createState() => _ExploreMaliScreenState();
@@ -31,8 +36,32 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
   @override
   void initState() {
     super.initState();
-    // Par défaut, vue globale sur l'ensemble du Mali (Toutes les régions)
     _selectedRegionId = widget.initialRegionId;
+
+    if (widget.initialPlaceId != null) {
+      final place =
+          MaliHistoricalPlacesRegistry.findById(widget.initialPlaceId!);
+      if (place != null) {
+        _selectedPlace = place;
+        _selectedRegionId = place.regionId;
+      }
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ExploreMaliScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialPlaceId != oldWidget.initialPlaceId &&
+        widget.initialPlaceId != null) {
+      final place =
+          MaliHistoricalPlacesRegistry.findById(widget.initialPlaceId!);
+      if (place != null) {
+        setState(() {
+          _selectedPlace = place;
+          _selectedRegionId = place.regionId;
+        });
+      }
+    }
   }
 
   void _onRegionSelected(String? regionId) {
@@ -66,7 +95,31 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
 
   void _navigateToPlaceDetail(MaliHistoricalPlaceMarker place) {
     HapticFeedback.mediumImpact();
-    context.push(place.routePath);
+
+    // 1. Si la route déclarée pointe déjà directement vers une fiche détaillée spécifique
+    if (place.routePath.isNotEmpty &&
+        place.routePath != '/culture/monuments') {
+      context.push(place.routePath);
+      return;
+    }
+
+    // 2. Déterminer l'identifiant cible du monument ou lieu
+    final targetId = place.scannerId ?? place.id;
+
+    // 3. Si c'est une ville ou un terroir
+    if (place.id.startsWith('ville_')) {
+      context.push('/culture/ville/${place.id}');
+      return;
+    }
+
+    // 4. Si c'est un personnage
+    if (place.id.startsWith('perso_')) {
+      context.push('/culture/personnage/${place.id}');
+      return;
+    }
+
+    // 5. Par défaut : ouvrir la fiche détaillée du monument
+    context.push('/culture/monument/$targetId');
   }
 
   void _openScannerForPlace(MaliHistoricalPlaceMarker place) {
@@ -617,91 +670,95 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
           const SizedBox(height: 10),
 
           // ── Rangée 2 : Photographie réelle + Titre & Descriptif ────────────
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Photo du monument
-              Container(
-                width: 92,
-                height: 84,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: borderCol),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: Image.asset(
-                    place.photoUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: const Color(0xFFE53935).withValues(alpha: 0.1),
-                      child: const Icon(
-                        Icons.account_balance_rounded,
-                        color: Color(0xFFE53935),
-                        size: 30,
+          InkWell(
+            onTap: () => _navigateToPlaceDetail(place),
+            borderRadius: BorderRadius.circular(15),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Photo du monument
+                Container(
+                  width: 92,
+                  height: 84,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: borderCol),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.asset(
+                      place.photoUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: const Color(0xFFE53935).withValues(alpha: 0.1),
+                        child: const Icon(
+                          Icons.account_balance_rounded,
+                          color: Color(0xFFE53935),
+                          size: 30,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
+                const SizedBox(width: 12),
 
-              // Contenu textuel
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      place.fullName,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        color: titleColor,
-                        letterSpacing: -0.3,
-                        height: 1.15,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 3),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.schedule_rounded,
-                          size: 11,
-                          color: Color(0xFFDF6E21),
+                // Contenu textuel
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        place.fullName,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: titleColor,
+                          letterSpacing: -0.3,
+                          height: 1.15,
                         ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            place.era,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFFDF6E21),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.schedule_rounded,
+                            size: 11,
+                            color: Color(0xFFDF6E21),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      place.description,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: subtitleColor,
-                        height: 1.3,
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              place.era,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFFDF6E21),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                      const SizedBox(height: 3),
+                      Text(
+                        place.description,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: subtitleColor,
+                          height: 1.3,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
           const SizedBox(height: 10),

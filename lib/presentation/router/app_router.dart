@@ -219,7 +219,28 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/culture/map',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const ExploreMaliScreen(),
+        builder: (context, state) {
+          final extra = state.extra;
+          String? initialRegionId = state.uri.queryParameters['regionId'];
+          String? initialPlaceId = state.uri.queryParameters['placeId'] ??
+              state.uri.queryParameters['monumentId'];
+
+          if (extra is Map<String, dynamic>) {
+            initialRegionId ??= extra['regionId'] as String?;
+            initialPlaceId ??=
+                (extra['placeId'] ?? extra['monumentId']) as String?;
+          } else if (extra is String) {
+            initialPlaceId ??= extra;
+          } else if (extra is MonumentScanTarget) {
+            initialPlaceId ??= extra.id;
+            initialRegionId ??= extra.regionId;
+          }
+
+          return ExploreMaliScreen(
+            initialRegionId: initialRegionId,
+            initialPlaceId: initialPlaceId,
+          );
+        },
       ),
       GoRoute(
         path: '/culture/scanner',
