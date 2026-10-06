@@ -208,6 +208,7 @@ class _EducationSetupScreenState extends ConsumerState<EducationSetupScreen> {
                           size: 26,
                           fontSize: 14,
                           showText: true,
+                          textColor: Colors.white,
                           iaColor: AppColors.secondary,
                         ),
 

@@ -188,6 +188,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           size: 22,
                           fontSize: 13,
                           showText: true,
+                          textColor: Colors.white,
                         ),
                       ),
 

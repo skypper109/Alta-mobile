@@ -336,6 +336,7 @@ class _UniverseGatewayScreenState extends ConsumerState<UniverseGatewayScreen>
                 size: 20,
                 fontSize: 12,
                 showText: true,
+                textColor: Colors.white,
               ),
             ),
           ],
