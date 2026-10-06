@@ -606,20 +606,9 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
           child: ListView.separated(
             controller: _bookScrollController,
             physics: const BouncingScrollPhysics(),
-            itemCount: chapters.length + 1,
+            itemCount: chapters.length,
             separatorBuilder: (_, __) => const SizedBox(height: 24),
             itemBuilder: (context, index) {
-              if (index == chapters.length) {
-                // ── ÉTAPE 4 : SCEAU ROYAL ET CÉRÉMONIE DE COMPLÉTION ──
-                return SoundiataRoyalSealCelebration(
-                  isDark: isDark,
-                  onReplay: () => _scrollToChapter(0),
-                  onLaunchFullscreen: () {
-                    CulturalHaptics.celebration();
-                    context.push('/culture/soundiata-book');
-                  },
-                );
-              }
               final chapter = chapters[index];
               return _buildScrollDrivenChapterScene(
                 chapter: chapter,
