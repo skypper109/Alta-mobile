@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -679,19 +680,31 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
         children: [
           // ── COUCHE 1 : LE THÉÂTRE DE LA SCÈNE (PARALLAXE + PERSONNAGES 2D) ──
           SizedBox(
-            height: 230,
+            height: 255,
             width: double.infinity,
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // 1. Décor d'arrière-plan avec mouvement cinématographique
-                Image.asset(
-                  chapter.bgImage,
-                  fit: BoxFit.cover,
-                  alignment: Alignment.center,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: const Color(0xFF0F172A),
-                  ),
+                // 1. Décor d'arrière-plan avec mouvement cinématographique (drift & steadycam zoom)
+                AnimatedBuilder(
+                  animation: _dustController,
+                  builder: (context, _) {
+                    final driftX =
+                        math.sin(_dustController.value * 2 * math.pi) * 0.04;
+                    final zoomScale = 1.05 +
+                        math.cos(_dustController.value * 2 * math.pi) * 0.02;
+                    return Transform.scale(
+                      scale: zoomScale,
+                      child: Image.asset(
+                        chapter.bgImage,
+                        fit: BoxFit.cover,
+                        alignment: Alignment(driftX, 0),
+                        errorBuilder: (_, __, ___) => Container(
+                          color: const Color(0xFF0F172A),
+                        ),
+                      ),
+                    );
+                  },
                 ),
 
                 // 2. Filtre de contraste théâtral
@@ -711,7 +724,7 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
                   ),
                 ),
 
-                // 3. MOTEUR DE PARTICULES ATMOSPHÉRIQUES MULTI-ACTES (ÉTAPE 4)
+                // 3. MOTEUR ATMOSPHÉRIQUE CINÉMATIQUE SANS PARTICULES DORÉES
                 Positioned.fill(
                   child: AnimatedBuilder(
                     animation: _dustController,
@@ -800,61 +813,79 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
                   ),
                 ),
 
-                // 6. PERSONNAGE PRINCIPAL : APPARAÎT DEPUIS LA GAUCHE !
+                // 6. PERSONNAGE PRINCIPAL : PLAN 2.5D HÉROÏQUE DEPUIS LA GAUCHE !
                 if (chapter.leftCharImage != null)
                   Positioned(
-                    left: 14,
-                    bottom: 12,
-                    child: _buildAnimatedCharacterCard(
-                      name: chapter.leftCharName ?? 'Soundiata',
-                      role: chapter.leftCharRole ?? 'Héros',
-                      imagePath: chapter.leftCharImage!,
-                      accentColor: const Color(0xFFF59E0B),
-                      isFromLeft: true,
+                    left: 12,
+                    bottom: 10,
+                    child: AnimatedBuilder(
+                      animation: _pulseController,
+                      builder: (context, _) => _buildAnimatedCharacterCard(
+                        name: chapter.leftCharName ?? 'Soundiata',
+                        role: chapter.leftCharRole ?? 'Héros',
+                        imagePath: chapter.leftCharImage!,
+                        accentColor: const Color(0xFFF59E0B),
+                        isFromLeft: true,
+                        pulseProgress: _pulseController.value,
+                      ),
                     ),
                   ),
 
-                // 7. PERSONNAGE ADVERSE : APPARAÎT DEPUIS LA DROITE (Exil & Kirina) !
+                // 7. PERSONNAGE ADVERSE : PLAN 2.5D HÉROÏQUE DEPUIS LA DROITE (Exil & Kirina) !
                 if (chapter.rightCharImage != null)
                   Positioned(
-                    right: 14,
-                    bottom: 12,
-                    child: _buildAnimatedCharacterCard(
-                      name: chapter.rightCharName ?? 'Adversaire',
-                      role: chapter.rightCharRole ?? 'Sosso',
-                      imagePath: chapter.rightCharImage!,
-                      accentColor: const Color(0xFFEF4444),
-                      isFromLeft: false,
+                    right: 12,
+                    bottom: 10,
+                    child: AnimatedBuilder(
+                      animation: _pulseController,
+                      builder: (context, _) => _buildAnimatedCharacterCard(
+                        name: chapter.rightCharName ?? 'Adversaire',
+                        role: chapter.rightCharRole ?? 'Sosso',
+                        imagePath: chapter.rightCharImage!,
+                        accentColor: const Color(0xFFEF4444),
+                        isFromLeft: false,
+                        pulseProgress: _pulseController.value,
+                      ),
                     ),
                   ),
 
-                // 8. Choc central animé pour la bataille de Kirina
-                if (chapter.isBattleScene)
+                // 8. Choc central animé pour la bataille de Kirina (arc énergétique duel 2.5D + impact)
+                if (chapter.isBattleScene) ...[
+                  Positioned.fill(
+                    child: AnimatedBuilder(
+                      animation: _pulseController,
+                      builder: (context, _) => CustomPaint(
+                        painter: _KirinaDuelTensionPainter(
+                          progress: _pulseController.value,
+                        ),
+                      ),
+                    ),
+                  ),
                   Positioned.fill(
                     child: Center(
                       child: AnimatedBuilder(
                         animation: _pulseController,
                         builder: (context, child) {
                           final scale =
-                              0.92 + (_pulseController.value * 0.14);
+                              0.94 + (_pulseController.value * 0.12);
                           return Transform.scale(
                             scale: scale,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 6),
+                                  horizontal: 11, vertical: 6),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF1E0E05)
-                                    .withValues(alpha: 0.92),
+                                    .withValues(alpha: 0.94),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: const Color(0xFFF59E0B),
-                                  width: 1.5,
+                                  width: 1.6,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: const Color(0xFFF59E0B)
-                                        .withValues(alpha: 0.5),
-                                    blurRadius: 16,
+                                        .withValues(alpha: 0.6),
+                                    blurRadius: 18,
                                   ),
                                 ],
                               ),
@@ -884,6 +915,7 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
                       ),
                     ),
                   ),
+                ],
               ],
             ),
           ),
@@ -1014,109 +1046,229 @@ class _SoundiataLivingBookViewState extends ConsumerState<SoundiataLivingBookVie
     );
   }
 
-  /// Carte du personnage animée avec découpe 2D et cartouche documentaire
+  /// Carte du personnage animée en relief 2.5D avec perspective, reflet spéculaire et micro-haptique
   Widget _buildAnimatedCharacterCard({
     required String name,
     required String role,
     required String imagePath,
     required Color accentColor,
     required bool isFromLeft,
+    required double pulseProgress,
   }) {
-    return Column(
-      crossAxisAlignment:
-          isFromLeft ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Portrait 2D découpé
-        Container(
-          width: 58,
-          height: 58,
+    final tiltAngle = isFromLeft ? 0.08 : -0.08;
+    final floatY =
+        math.sin(pulseProgress * 2 * math.pi + (isFromLeft ? 0.0 : math.pi)) *
+            3.2;
+    final sheenProgress = ((pulseProgress * 1.5) % 1.0);
+
+    return Transform(
+      transform: Matrix4.identity()
+        ..setEntry(3, 2, 0.002) // Perspective 3D
+        ..rotateY(tiltAngle)
+        ..rotateZ(isFromLeft ? -0.02 : 0.02)
+        ..setTranslationRaw(0.0, floatY, 0.0),
+      alignment: isFromLeft ? Alignment.bottomLeft : Alignment.bottomRight,
+      child: GestureDetector(
+        onTap: () => CulturalHaptics.cardPress(),
+        child: Container(
+          width: 86,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: accentColor,
-              width: 2.2,
+              color: accentColor.withValues(alpha: 0.85),
+              width: 1.6,
             ),
             boxShadow: [
               BoxShadow(
-                color: accentColor.withValues(alpha: 0.4),
-                blurRadius: 10,
+                color: accentColor.withValues(alpha: 0.35),
+                blurRadius: 14,
+                spreadRadius: 1,
               ),
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.7),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
+                color: Colors.black.withValues(alpha: 0.8),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: ClipOval(
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-              errorBuilder: (_, __, ___) => Container(
-                color: accentColor,
-                child: const Icon(Icons.person_rounded, color: Colors.white, size: 26),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Portrait 2.5D en relief avec reflet spéculaire et badge
+              SizedBox(
+                height: 84,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(
+                      imagePath,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: accentColor.withValues(alpha: 0.3),
+                        child: const Icon(Icons.person_rounded,
+                            color: Colors.white, size: 28),
+                      ),
+                    ),
+                    // Dégradé de contraste
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.8),
+                          ],
+                          stops: const [0.4, 1.0],
+                        ),
+                      ),
+                    ),
+                    // Reflet spéculaire lumineux traversant
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin:
+                                Alignment(-2.0 + (sheenProgress * 4.0), -1.0),
+                            end: Alignment(-1.0 + (sheenProgress * 4.0), 1.0),
+                            colors: [
+                              Colors.transparent,
+                              Colors.white.withValues(alpha: 0.24),
+                              Colors.transparent,
+                            ],
+                            stops: const [0.0, 0.5, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Badge héroïque / icône de camp
+                    Positioned(
+                      top: 4,
+                      right: isFromLeft ? 4 : null,
+                      left: isFromLeft ? null : 4,
+                      child: Container(
+                        padding: const EdgeInsets.all(2.5),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.8),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: accentColor,
+                            width: 1.0,
+                          ),
+                        ),
+                        child: Icon(
+                          isFromLeft
+                              ? Icons.shield_rounded
+                              : Icons.local_fire_department_rounded,
+                          size: 10,
+                          color: accentColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+              // Cartouche documentaire incrusté
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+                color: Colors.black.withValues(alpha: 0.94),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: isFromLeft
+                      ? CrossAxisAlignment.start
+                      : CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      name,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      role,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 7.5,
+                        fontWeight: FontWeight.w700,
+                        color: accentColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 5),
-        _buildCharacterTag(
-          name,
-          role,
-          accentColor,
-          isFromLeft ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-        ),
-      ],
+      ),
     );
+  }
+}
+
+/// Peintre d'arc énergétique et de tension du duel épique de Kirina (1235)
+class _KirinaDuelTensionPainter extends CustomPainter {
+  final double progress;
+
+  _KirinaDuelTensionPainter({required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final startOffset = Offset(95, size.height - 65);
+    final endOffset = Offset(size.width - 95, size.height - 65);
+    final midX = size.width * 0.5;
+    final midY = (size.height * 0.48) - (math.sin(progress * math.pi) * 12);
+
+    // Trajectoire en arc électrique entre Soundiata et Soumaoro
+    final arcPath = Path()
+      ..moveTo(startOffset.dx, startOffset.dy)
+      ..quadraticBezierTo(midX, midY, endOffset.dx, endOffset.dy);
+
+    // Halo d'énergie cinétique
+    final glowPaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          const Color(0xFFF59E0B).withValues(alpha: 0.65),
+          const Color(0xFFEF4444).withValues(alpha: 0.65),
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4.2
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+    canvas.drawPath(arcPath, glowPaint);
+
+    // Faisceau central de tension
+    final corePaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          const Color(0xFFFEF08A),
+          const Color(0xFFFCA5A5),
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8;
+    canvas.drawPath(arcPath, corePaint);
+
+    // Onde de choc circulaire au centre d'impact
+    final shockRadius = 14 + (progress * 18);
+    final shockAlpha = ((1.0 - progress) * 0.65).clamp(0.0, 1.0);
+    final shockPaint = Paint()
+      ..color = const Color(0xFFF59E0B).withValues(alpha: shockAlpha)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4;
+    canvas.drawCircle(Offset(midX, size.height * 0.5), shockRadius, shockPaint);
   }
 
-  Widget _buildCharacterTag(
-    String name,
-    String role,
-    Color accentColor,
-    CrossAxisAlignment align,
-  ) {
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 100),
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: accentColor.withValues(alpha: 0.4),
-          width: 1.0,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: align,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            name,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(
-            role,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 8,
-              fontWeight: FontWeight.w700,
-              color: accentColor,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
+  @override
+  bool shouldRepaint(covariant _KirinaDuelTensionPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
 
 /// Peintre vectoriel pour les routes et cités de la Carte Ancienne du Mandé (Section 3)

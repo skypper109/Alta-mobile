@@ -124,125 +124,233 @@ class SoundiataAtmospherePainter extends CustomPainter {
   }
 
   void _paintDawnEmbers(Canvas canvas, Size size) {
-    final rand = math.Random(101);
-    final paint = Paint()..style = PaintingStyle.fill;
+    // 1. Voiles de brume d'aube mandingue (vagues volumétriques horizontales)
+    for (int i = 0; i < 3; i++) {
+      final waveOffset = (progress * (0.2 + i * 0.15)) % 1.0;
+      final yBase = size.height * (0.55 + i * 0.15);
+      final mistPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Colors.transparent,
+            const Color(0xFFF59E0B).withValues(alpha: 0.12 - (i * 0.03)),
+            const Color(0xFFD97706).withValues(alpha: 0.18 - (i * 0.04)),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.35, 0.65, 1.0],
+        ).createShader(Rect.fromLTWH(0, yBase - 30, size.width, 60))
+        ..style = PaintingStyle.fill;
 
-    for (int i = 0; i < 22; i++) {
-      final baseX = rand.nextDouble() * size.width;
-      final baseY = rand.nextDouble() * size.height;
-      final speed = 0.4 + rand.nextDouble() * 0.6;
-      final currentY = (baseY - (progress * speed * size.height)) % size.height;
-      final currentX = baseX + math.sin(progress * 2 * math.pi + i) * 10;
-      final radius = 1.0 + rand.nextDouble() * 2.0;
+      final path = Path();
+      path.moveTo(0, yBase);
+      for (double x = 0; x <= size.width; x += 30) {
+        final relX = (x / size.width + waveOffset) * 2 * math.pi;
+        final waveY = yBase + math.sin(relX + i) * (8 + i * 4);
+        path.lineTo(x, waveY);
+      }
+      path.lineTo(size.width, size.height);
+      path.lineTo(0, size.height);
+      path.close();
 
-      final alpha = (0.2 + 0.6 * math.sin(progress * math.pi + i)).clamp(0.0, 1.0);
-      paint.color = const Color(0xFFF59E0B).withValues(alpha: alpha);
-      canvas.drawCircle(Offset(currentX, currentY), radius, paint);
+      canvas.drawPath(path, mistPaint);
     }
   }
 
   void _paintCaravanDust(Canvas canvas, Size size) {
-    final rand = math.Random(202);
-    final paint = Paint()..style = PaintingStyle.fill;
+    // 2. Traînées aérodynamiques du vent Harmattan (vecteurs cinétiques épurés)
+    final windPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
-    for (int i = 0; i < 26; i++) {
-      final baseX = rand.nextDouble() * size.width;
-      final baseY = rand.nextDouble() * size.height;
-      final speed = 0.5 + rand.nextDouble() * 0.8;
-      // Dérive horizontale vers la droite (vent d'Est)
-      final currentX = (baseX + (progress * speed * size.width)) % size.width;
-      final currentY = baseY + math.cos(progress * 2 * math.pi + i) * 6;
-      final radius = 0.8 + rand.nextDouble() * 1.8;
+    for (int i = 0; i < 7; i++) {
+      final speed = 0.5 + (i * 0.12);
+      final streamProgress = (progress * speed + (i * 0.17)) % 1.0;
+      final y = size.height * (0.2 + (i * 0.11));
+      final startX = (streamProgress * (size.width + 120)) - 60;
+      final length = 60.0 + (i * 14.0);
 
-      paint.color = const Color(0xFFFCD34D).withValues(
-        alpha: 0.15 + (rand.nextDouble() * 0.35),
+      final alpha = (math.sin(streamProgress * math.pi) * 0.32).clamp(0.0, 1.0);
+      windPaint.strokeWidth = 1.2 + (i % 3) * 0.6;
+      windPaint.shader = LinearGradient(
+        colors: [
+          Colors.transparent,
+          const Color(0xFFFCD34D).withValues(alpha: alpha),
+          Colors.transparent,
+        ],
+      ).createShader(Rect.fromLTWH(startX, y, length, 4));
+
+      final path = Path();
+      path.moveTo(startX, y);
+      path.quadraticBezierTo(
+        startX + (length * 0.5),
+        y - 4 + math.sin(progress * 2 * math.pi + i) * 6,
+        startX + length,
+        y,
       );
-      canvas.drawCircle(Offset(currentX, currentY), radius, paint);
+      canvas.drawPath(path, windPaint);
     }
   }
 
   void _paintSacredLeaves(Canvas canvas, Size size) {
-    final rand = math.Random(303);
-    final paint = Paint()
-      ..color = const Color(0xFFF59E0B).withValues(alpha: 0.45)
+    // 3. Feuilles sacrées du baobab en vrille perspective 3D (yaw + pitch)
+    final leafPaint = Paint()..style = PaintingStyle.fill;
+    final shadowPaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.25)
       ..style = PaintingStyle.fill;
 
-    for (int i = 0; i < 14; i++) {
-      final baseX = rand.nextDouble() * size.width;
-      final baseY = rand.nextDouble() * size.height;
-      final speed = 0.3 + rand.nextDouble() * 0.5;
-      final currentY = (baseY + (progress * speed * size.height)) % size.height;
-      final currentX = baseX + math.sin(progress * 2 * math.pi + i) * 18;
+    for (int i = 0; i < 6; i++) {
+      final t = (progress * 0.4 + (i * 0.16)) % 1.0;
+      final x = (size.width * 0.15) + (i * (size.width * 0.14)) +
+          math.sin(t * 2 * math.pi + i) * 25;
+      final y = t * size.height;
+
+      // Rotation et perspective 3D
+      final angle = (t * 2 * math.pi * 1.5) + (i * 1.2);
+      final flip3D = math.cos(angle); // Simule le retournement en profondeur 3D
+      final leafScale = (0.7 + (i % 3) * 0.25) * flip3D.abs().clamp(0.25, 1.0);
 
       canvas.save();
-      canvas.translate(currentX, currentY);
-      canvas.rotate(progress * 2 * math.pi + (i * 0.6));
-      // Forme de petite feuille ovale sacrée
+      canvas.translate(x, y);
+      canvas.rotate(math.sin(angle) * 0.5);
+
+      // Ombre portée en profondeur
+      canvas.save();
+      canvas.translate(3, 4);
+      canvas.scale(leafScale, 0.7);
       canvas.drawOval(
-        Rect.fromCenter(center: Offset.zero, width: 8, height: 4),
-        paint,
+        Rect.fromCenter(center: Offset.zero, width: 14, height: 6),
+        shadowPaint,
       );
+      canvas.restore();
+
+      // Corps de la feuille sacrée
+      canvas.scale(leafScale, 1.0);
+      leafPaint.color = flip3D > 0
+          ? const Color(0xFFD97706).withValues(alpha: 0.6)
+          : const Color(0xFFB45309).withValues(alpha: 0.75);
+
+      final leafPath = Path()
+        ..moveTo(-8, 0)
+        ..quadraticBezierTo(0, -5, 8, 0)
+        ..quadraticBezierTo(0, 5, -8, 0)
+        ..close();
+      canvas.drawPath(leafPath, leafPaint);
+
+      // Nervure centrale
+      final veinPaint = Paint()
+        ..color = const Color(0xFFFEF3C7).withValues(alpha: 0.5)
+        ..strokeWidth = 0.8
+        ..style = PaintingStyle.stroke;
+      canvas.drawLine(const Offset(-7, 0), const Offset(7, 0), veinPaint);
+
       canvas.restore();
     }
   }
 
   void _paintKirinaTempest(Canvas canvas, Size size) {
-    final rand = math.Random(404);
-    final dustPaint = Paint()..style = PaintingStyle.fill;
+    // 4. Fracas d'éclairs de Kirina (arcs énergétiques vectoriels et flash d'orage)
+    final flashCycle = (math.sin(progress * 4 * math.pi)).clamp(0.0, 1.0);
 
-    for (int i = 0; i < 30; i++) {
-      final baseX = rand.nextDouble() * size.width;
-      final baseY = rand.nextDouble() * size.height;
-      final speed = 0.8 + rand.nextDouble() * 1.0;
-      final currentY = (baseY - (progress * speed * size.height)) % size.height;
-      final currentX = baseX + math.sin(progress * 4 * math.pi + i) * 14;
-      final radius = 1.0 + rand.nextDouble() * 2.5;
+    // Éclat d'orage ambiant
+    if (flashCycle > 0.75) {
+      final ambientAlpha = ((flashCycle - 0.75) / 0.25 * 0.18).clamp(0.0, 1.0);
+      final flashPaint = Paint()
+        ..color = const Color(0xFFFEF08A).withValues(alpha: ambientAlpha)
+        ..style = PaintingStyle.fill;
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), flashPaint);
+    }
 
-      dustPaint.color = const Color(0xFFF59E0B).withValues(
-        alpha: 0.2 + (rand.nextDouble() * 0.5),
-      );
-      canvas.drawCircle(Offset(currentX, currentY), radius, dustPaint);
+    // Arc d'éclair vectoriel foudroyant
+    final boltPhase = ((progress * 3) % 1.0);
+    if (boltPhase < 0.35) {
+      final boltAlpha = (math.sin((boltPhase / 0.35) * math.pi) * 0.9).clamp(0.0, 1.0);
+      final boltPaint = Paint()
+        ..color = const Color(0xFFFDE047).withValues(alpha: boltAlpha)
+        ..strokeWidth = 2.2
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.miter;
+
+      final glowPaint = Paint()
+        ..color = const Color(0xFFF59E0B).withValues(alpha: boltAlpha * 0.5)
+        ..strokeWidth = 5.0
+        ..style = PaintingStyle.stroke
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+
+      final boltPath = Path()
+        ..moveTo(size.width * 0.62, 0)
+        ..lineTo(size.width * 0.56, size.height * 0.28)
+        ..lineTo(size.width * 0.60, size.height * 0.32)
+        ..lineTo(size.width * 0.52, size.height * 0.65)
+        ..lineTo(size.width * 0.55, size.height * 0.68)
+        ..lineTo(size.width * 0.48, size.height * 0.95);
+
+      canvas.drawPath(boltPath, glowPaint);
+      canvas.drawPath(boltPath, boltPaint);
     }
   }
 
   void _paintCelestialRays(Canvas canvas, Size size) {
+    // 5. Faisceaux volumétriques célestes et halo anamorphique (Kouroukan Fouga)
+    final sweep = math.sin(progress * 2 * math.pi) * (size.width * 0.08);
+
     final rayPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          const Color(0xFFF59E0B).withValues(alpha: 0.18 + (math.sin(progress * math.pi) * 0.08)),
+          const Color(0xFFFDE68A).withValues(alpha: 0.22),
+          const Color(0xFFF59E0B).withValues(alpha: 0.08),
           Colors.transparent,
         ],
+        stops: const [0.0, 0.4, 1.0],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;
 
-    // Faisceaux célestes en éventail sous le feuillage
+    // Faisceaux volumétriques amples
     final rayPath = Path()
-      ..moveTo(size.width * 0.45, 0)
-      ..lineTo(size.width * 0.1, size.height)
-      ..lineTo(size.width * 0.35, size.height)
+      ..moveTo((size.width * 0.5) + sweep, 0)
+      ..lineTo(size.width * 0.05, size.height)
+      ..lineTo(size.width * 0.30, size.height)
       ..close()
-      ..moveTo(size.width * 0.55, 0)
-      ..lineTo(size.width * 0.65, size.height)
-      ..lineTo(size.width * 0.9, size.height)
+      ..moveTo((size.width * 0.5) + sweep, 0)
+      ..lineTo(size.width * 0.45, size.height)
+      ..lineTo(size.width * 0.70, size.height)
+      ..close()
+      ..moveTo((size.width * 0.5) + sweep, 0)
+      ..lineTo(size.width * 0.78, size.height)
+      ..lineTo(size.width * 0.98, size.height)
       ..close();
 
     canvas.drawPath(rayPath, rayPaint);
 
-    // Pollen doré descendant lentement
-    final rand = math.Random(505);
-    final pollenPaint = Paint()..style = PaintingStyle.fill;
-    for (int i = 0; i < 18; i++) {
-      final baseX = rand.nextDouble() * size.width;
-      final baseY = rand.nextDouble() * size.height;
-      final currentY = (baseY + (progress * 0.3 * size.height)) % size.height;
-      final currentX = baseX + math.sin(progress * math.pi + i) * 8;
-      pollenPaint.color = const Color(0xFFFCD34D).withValues(
-        alpha: 0.25 + (rand.nextDouble() * 0.4),
-      );
-      canvas.drawCircle(Offset(currentX, currentY), 1.4, pollenPaint);
-    }
+    // Flare horizontal anamorphique central
+    final flareY = size.height * 0.38;
+    final flarePaint = Paint()
+      ..shader = RadialGradient(
+        center: Alignment.center,
+        radius: 0.5,
+        colors: [
+          const Color(0xFFFEF3C7).withValues(alpha: 0.35),
+          const Color(0xFFF59E0B).withValues(alpha: 0.12),
+          Colors.transparent,
+        ],
+      ).createShader(Rect.fromCenter(
+        center: Offset(size.width * 0.5 + sweep * 0.5, flareY),
+        width: size.width * 0.85,
+        height: 16,
+      ))
+      ..style = PaintingStyle.fill;
+
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(size.width * 0.5 + sweep * 0.5, flareY),
+        width: size.width * 0.85,
+        height: 14,
+      ),
+      flarePaint,
+    );
   }
 
   @override
