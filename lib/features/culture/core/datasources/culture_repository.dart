@@ -122,7 +122,7 @@ class CultureRepository {
       hintId: hintTarget?.id,
     );
 
-    if (remoteResult != null && remoteResult.confidence >= 0.58) {
+    if (remoteResult != null && remoteResult.confidence >= 0.45) {
       await recordScanDiscovery(remoteResult);
       return remoteResult;
     }
