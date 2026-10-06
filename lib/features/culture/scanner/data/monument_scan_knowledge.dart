@@ -1118,7 +1118,7 @@ abstract final class MonumentScanKnowledge {
 
     // 17. PLACE DE LA LIBERTÉ
     MonumentScanTarget(
-      id: 'monument_Place_de_la_liberté',
+      id: 'monument_Place_de_la_liberte',
       name: 'Place de la Liberté',
       subtitle: 'Le Cœur Civique et Historique de la Capitale',
       regionId: 'bamako',
@@ -1129,12 +1129,12 @@ abstract final class MonumentScanKnowledge {
           'Esplanade circulaire pavée, perspectives urbaines coloniales et néo-soudanaises',
       locationDetails: 'Place de la Liberté, Centre-ville, Commune III, Bamako',
       photoUrl:
-          'assets/images/culture/monuments/monument_Place_de_la_liberté/lib1.jpg',
+          'assets/images/culture/monuments/monument_Place_de_la_liberte/lib1.jpg',
       galleryPhotos: [
-        'assets/images/culture/monuments/monument_Place_de_la_liberté/lib1.jpg',
-        'assets/images/culture/monuments/monument_Place_de_la_liberté/lib2.jpg',
-        'assets/images/culture/monuments/monument_Place_de_la_liberté/lib3.jpg',
-        'assets/images/culture/monuments/monument_Place_de_la_liberté/lib10.jpg',
+        'assets/images/culture/monuments/monument_Place_de_la_liberte/lib1.jpg',
+        'assets/images/culture/monuments/monument_Place_de_la_liberte/lib2.jpg',
+        'assets/images/culture/monuments/monument_Place_de_la_liberte/lib3.jpg',
+        'assets/images/culture/monuments/monument_Place_de_la_liberte/lib10.jpg',
       ],
       tag: 'Cœur Historique & Citoyen',
       latitude: 12.6514,

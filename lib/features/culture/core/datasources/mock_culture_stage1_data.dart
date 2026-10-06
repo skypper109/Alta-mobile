@@ -424,7 +424,7 @@ abstract final class MockCultureStage1Data {
       info: 'Bamako · Centre-ville',
     ),
     CultureItem(
-      id: 'monument_Place_de_la_liberté',
+      id: 'monument_Place_de_la_liberte',
       title: 'Place de la Liberté',
       subtitle: 'Esplanade Circulaire & Cœur Battant',
       category: 'decouvrir',
@@ -435,7 +435,7 @@ abstract final class MockCultureStage1Data {
       regionName: 'Bamako',
       tag: 'Urbanisme & Histoire',
       icon: Icons.nature_people_rounded,
-      imageUrl: 'assets/images/culture/monuments/monument_Place_de_la_liberté/lib1.jpg',
+      imageUrl: 'assets/images/culture/monuments/monument_Place_de_la_liberte/lib1.jpg',
       info: 'Bamako · Centre-ville',
     ),
 

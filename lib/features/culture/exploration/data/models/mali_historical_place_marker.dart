@@ -762,7 +762,7 @@ abstract final class MaliHistoricalPlacesRegistry {
 
   static const MaliHistoricalPlaceMarker placeDeLaLiberte =
       MaliHistoricalPlaceMarker(
-    id: 'monument_Place_de_la_liberté',
+    id: 'monument_Place_de_la_liberte',
     name: 'Place Liberté',
     fullName: 'Place de la Liberté de Bamako',
     subtitle: 'Urbanisme & Cœur Battant de la République',
@@ -774,12 +774,12 @@ abstract final class MaliHistoricalPlacesRegistry {
     category: HistoricalPlaceCategory.monument,
     tag: 'Urbanisme & Histoire',
     era: 'Esplanade centrale de Bamako',
-    photoUrl: 'assets/images/culture/monuments/monument_Place_de_la_liberté/lib10.jpg',
+    photoUrl: 'assets/images/culture/monuments/monument_Place_de_la_liberte/lib10.jpg',
     description:
         'Vaste place circulaire arborée formant le carrefour institutionnel majeur de la capitale, bordée de fontaines et de verdure.',
     keyFact: 'Cœur battant historique et carrefour des grandes artères républicaines',
-    routePath: '/culture/monument/monument_Place_de_la_liberté',
-    scannerId: 'monument_Place_de_la_liberté',
+    routePath: '/culture/monument/monument_Place_de_la_liberte',
+    scannerId: 'monument_Place_de_la_liberte',
     icon: Icons.place_rounded,
   );
 
