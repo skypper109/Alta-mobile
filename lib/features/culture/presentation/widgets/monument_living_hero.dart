@@ -8,6 +8,7 @@ import '../../immersive/services/cultural_haptics.dart';
 import '../../scanner/data/monument_scan_knowledge.dart';
 import '../../scanner/models/monument_scan_models.dart';
 import '../../scanner/widgets/monument_3d_viewer_modal.dart';
+import 'monument_3d_interactive_stage.dart';
 
 /// Ambiance lumineuse sahélienne pour le monument
 enum MonumentSunAtmosphere {
@@ -21,9 +22,15 @@ enum MonumentSunAtmosphere {
   const MonumentSunAtmosphere(this.label, this.icon, this.accent);
 }
 
+/// Mode d'affichage du Monument Hero
+enum LivingHeroMode {
+  model3D,
+  photosHD,
+}
+
 /// Hero photographique et interactif multi-angles pour les monuments
-/// - Galerie HD tactile swipable (tous les clichés authentiques du dataset)
-/// - Accès direct au modèle 3D polygonal rotatif
+/// - Exploration 3D interactive 360° en temps réel intégrée directement
+/// - Galerie HD tactile swipable (tous les clichés authentiques sans signature)
 /// - Ambiances lumineuses du Sahel avec poussières d'or en suspension
 /// - Mode plein écran avec zoom haute fidélité
 class MonumentLivingHero extends StatefulWidget {
@@ -50,17 +57,25 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
   int _currentPage = 0;
   MonumentSunAtmosphere _atmosphere = MonumentSunAtmosphere.crepuscule;
   late final List<String> _photos;
+  late final MonumentScanTarget _target;
+  late LivingHeroMode _heroMode;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
 
+    // Récupérer la cible de scan du monument
+    _target = widget.scanTarget ??
+        MonumentScanKnowledge.findById(widget.monument.id) ??
+        MonumentScanKnowledge.targets.firstWhere(
+          (t) => t.id.contains('djenne'),
+          orElse: () => MonumentScanKnowledge.targets.first,
+        );
+
     // Récupérer toutes les photos réelles du dataset
-    final target = widget.scanTarget ??
-        MonumentScanKnowledge.findById(widget.monument.id);
-    if (target != null && target.galleryPhotos.isNotEmpty) {
-      _photos = target.galleryPhotos;
+    if (_target.galleryPhotos.isNotEmpty) {
+      _photos = _target.galleryPhotos;
     } else if (widget.monument.photoUrl.isNotEmpty) {
       _photos = [widget.monument.photoUrl];
     } else {
@@ -68,6 +83,10 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
         'assets/images/culture/monuments/monument_mosquee_djenne/dje_1.webp'
       ];
     }
+
+    // Par défaut, afficher directement le Modèle 3D immersif pour la Mosquée de Djenné
+    final isDjenne = widget.monument.id.toLowerCase().contains('djenne');
+    _heroMode = isDjenne ? LivingHeroMode.model3D : LivingHeroMode.model3D;
 
     _particlesController = AnimationController(
       vsync: this,
@@ -92,14 +111,7 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
 
   void _open3DViewer() {
     CulturalHaptics.stamp();
-    final target = widget.scanTarget ??
-        MonumentScanKnowledge.findById(widget.monument.id) ??
-        MonumentScanKnowledge.targets.firstWhere(
-          (t) => t.id.contains('djenne'),
-          orElse: () => MonumentScanKnowledge.targets.first,
-        );
-
-    Monument3DViewerModal.show(context, target);
+    Monument3DViewerModal.show(context, _target);
   }
 
   void _openFullscreenGallery(int initialIndex) {
@@ -119,7 +131,7 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.sizeOf(context).height;
-    final heroHeight = (screenHeight * 0.44).clamp(320.0, 420.0);
+    final heroHeight = (screenHeight * 0.46).clamp(340.0, 440.0);
 
     return SizedBox(
       height: heroHeight,
@@ -127,126 +139,177 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // ── 1. GALERIE D'IMAGES RÉELLES AVEC SWIPE ─────────────────────────
-          Hero(
-            tag: widget.heroTag ?? 'monument_hero_${widget.monument.id}',
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _photos.length,
-              onPageChanged: (idx) {
-                CulturalHaptics.tabSwitch();
-                setState(() => _currentPage = idx);
-              },
-              itemBuilder: (context, index) {
-                final photo = _photos[index];
-                return GestureDetector(
-                  onTap: () => _openFullscreenGallery(index),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.asset(
-                        photo,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: const Color(0xFF1E293B),
-                          child: const Center(
-                            child: Icon(
-                              Icons.museum_rounded,
-                              size: 64,
-                              color: Color(0xFFF59E0B),
+          // ── CONTENU PRINCIPAL SELON LE MODE ACTIF ─────────────────────────
+          if (_heroMode == LivingHeroMode.model3D) ...[
+            // SCÈNE 3D INTERACTIVE EMBARQUÉE
+            Monument3DInteractiveStage(
+              target: _target,
+              height: heroHeight,
+              showHeader: false,
+              onExpandFullscreen: _open3DViewer,
+            ),
+          ] else ...[
+            // ── GALERIE D'IMAGES RÉELLES AVEC SWIPE ─────────────────────────
+            Hero(
+              tag: widget.heroTag ?? 'monument_hero_${widget.monument.id}',
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _photos.length,
+                onPageChanged: (idx) {
+                  CulturalHaptics.tabSwitch();
+                  setState(() => _currentPage = idx);
+                },
+                itemBuilder: (context, index) {
+                  final photo = _photos[index];
+                  return GestureDetector(
+                    onTap: () => _openFullscreenGallery(index),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.asset(
+                          photo,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: const Color(0xFF1E293B),
+                            child: const Center(
+                              child: Icon(
+                                Icons.museum_rounded,
+                                size: 64,
+                                color: Color(0xFFF59E0B),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      // Filtre atmosphérique teinté
-                      _buildAtmosphereOverlay(),
+                        // Filtre atmosphérique teinté
+                        _buildAtmosphereOverlay(),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // ── PARTICULES DE POUSSIÈRE D'ARGILE SAHÉLIENNE ────────────────
+            IgnorePointer(
+              child: AnimatedBuilder(
+                animation: _particlesController,
+                builder: (context, _) {
+                  return CustomPaint(
+                    painter: _LivingHeroDustPainter(
+                      progress: _particlesController.value,
+                      atmosphere: _atmosphere,
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // ── DÉGRADÉ DE CONTIQUITÉ INFÉRIEURE ────────────────────────────
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.4, 0.75, 1.0],
+                    colors: [
+                      Colors.black.withValues(alpha: 0.45),
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.55),
+                      Colors.black.withValues(alpha: 0.95),
                     ],
                   ),
-                );
-              },
-            ),
-          ),
-
-          // ── 2. PARTICULES DE POUSSIÈRE D'ARGILE SAHÉLIENNE ────────────────
-          IgnorePointer(
-            child: AnimatedBuilder(
-              animation: _particlesController,
-              builder: (context, _) {
-                return CustomPaint(
-                  painter: _LivingHeroDustPainter(
-                    progress: _particlesController.value,
-                    atmosphere: _atmosphere,
-                  ),
-                );
-              },
-            ),
-          ),
-
-          // ── 3. DÉGRADÉ DE CONTIQUITÉ INFÉRIEURE ────────────────────────────
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: const [0.0, 0.4, 0.75, 1.0],
-                  colors: [
-                    Colors.black.withValues(alpha: 0.45),
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.55),
-                    Colors.black.withValues(alpha: 0.95),
-                  ],
                 ),
+              ),
+            ),
+          ],
+
+          // ── SÉLECTEUR DE MODE [3D 360° | PHOTOS HD] (EN HAUT À GAUCHE) ───
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            left: 16,
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.72),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: CultureTheme.accentOrange.withValues(alpha: 0.5),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildModeTab(
+                    mode: LivingHeroMode.model3D,
+                    label: '3D 360°',
+                    icon: Icons.view_in_ar_rounded,
+                  ),
+                  _buildModeTab(
+                    mode: LivingHeroMode.photosHD,
+                    label: 'Photos HD (${_photos.length})',
+                    icon: Icons.photo_camera_back_rounded,
+                  ),
+                ],
               ),
             ),
           ),
 
-          // ── 4. BOUTONS D'INTERACTION SUPÉRIEURS ────────────────────────────
+          // ── BOUTONS D'INTERACTION SUPÉRIEURS DROITE ────────────────────────
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             right: 16,
             child: Row(
               children: [
-                // Sélecteur d'ambiance solaire
-                GestureDetector(
-                  onTap: _nextAtmosphere,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.55),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: _atmosphere.accent.withValues(alpha: 0.6),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _atmosphere.accent.withValues(alpha: 0.25),
-                          blurRadius: 8,
+                if (_heroMode == LivingHeroMode.photosHD) ...[
+                  // Sélecteur d'ambiance solaire
+                  GestureDetector(
+                    onTap: _nextAtmosphere,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.55),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: _atmosphere.accent.withValues(alpha: 0.6),
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(_atmosphere.icon,
-                            size: 13, color: _atmosphere.accent),
-                        const SizedBox(width: 5),
-                        Text(
-                          _atmosphere.label,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: _atmosphere.accent.withValues(alpha: 0.25),
+                            blurRadius: 8,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(_atmosphere.icon,
+                              size: 13, color: _atmosphere.accent),
+                          const SizedBox(width: 5),
+                          Text(
+                            _atmosphere.label,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
+                  const SizedBox(width: 8),
+                ],
 
-                // Bouton Modèle 3D Interactif
+                // Bouton Modèle 3D Plein Écran
                 GestureDetector(
                   onTap: _open3DViewer,
                   child: Container(
@@ -269,13 +332,13 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(
-                          Icons.view_in_ar_rounded,
-                          size: 13,
+                          Icons.fullscreen_rounded,
+                          size: 14,
                           color: Colors.white,
                         ),
-                        const SizedBox(width: 5),
+                        const SizedBox(width: 4),
                         Text(
-                          'Modèle 3D',
+                          'Plein écran',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
@@ -373,8 +436,8 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
                       ),
                     ),
 
-                    // Badge Compteur Photos Réelles
-                    if (_photos.length > 1)
+                    // Badge Compteur Photos Réelles ou Statut 3D
+                    if (_heroMode == LivingHeroMode.photosHD && _photos.length > 1)
                       GestureDetector(
                         onTap: () => _openFullscreenGallery(_currentPage),
                         child: Container(
@@ -407,13 +470,44 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
                             ],
                           ),
                         ),
+                      )
+                    else if (_heroMode == LivingHeroMode.model3D)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4.5),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.65),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: CultureTheme.accentOrange.withValues(alpha: 0.35),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.touch_app_rounded,
+                              size: 11,
+                              color: CultureTheme.accentOrange,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '360° Tactile • Touchez les pins',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: CultureTheme.accentOrange,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                   ],
                 ),
                 const SizedBox(height: 6),
 
-                // Indicateurs discrets de pagination (petits points)
-                if (_photos.length > 1)
+                // Indicateurs discrets de pagination (en mode photos)
+                if (_heroMode == LivingHeroMode.photosHD && _photos.length > 1)
                   Row(
                     children: List.generate(_photos.length, (idx) {
                       final isSelected = idx == _currentPage;
@@ -435,6 +529,55 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildModeTab({
+    required LivingHeroMode mode,
+    required String label,
+    required IconData icon,
+  }) {
+    final isSelected = _heroMode == mode;
+    return GestureDetector(
+      onTap: () {
+        CulturalHaptics.tabSwitch();
+        setState(() => _heroMode = mode);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isSelected ? CultureTheme.accentOrange : Colors.transparent,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.45),
+                    blurRadius: 8,
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 13,
+              color: isSelected ? Colors.black : Colors.white70,
+            ),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 10.5,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                color: isSelected ? Colors.black : Colors.white70,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

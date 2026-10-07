@@ -68,6 +68,10 @@ class Monument3DViewerModal extends StatefulWidget {
     );
   }
 
+  static List<Architectural3DHotspot> getHotspotsForTarget(MonumentScanTarget target) {
+    return _Monument3DViewerModalState.getHotspotsForTarget(target);
+  }
+
   @override
   State<Monument3DViewerModal> createState() => _Monument3DViewerModalState();
 }
@@ -118,7 +122,7 @@ class _Monument3DViewerModalState extends State<Monument3DViewerModal>
     super.dispose();
   }
 
-  List<Architectural3DHotspot> _getHotspotsForTarget(MonumentScanTarget target) {
+  static List<Architectural3DHotspot> getHotspotsForTarget(MonumentScanTarget target) {
     final id = target.id.toLowerCase();
     if (id.contains('independance')) {
       return const [
@@ -535,23 +539,53 @@ class _Monument3DViewerModalState extends State<Monument3DViewerModal>
       return const [
         Architectural3DHotspot(
           x: 0,
-          y: -85,
-          z: 15,
+          y: -115,
+          z: 38,
           title: 'Minaret Central & Œuf d\'Autruche',
-          subtitle: 'Symbole de fertilité et de pureté',
+          subtitle: 'Symbole sacré de fertilité et de pureté',
           description:
-              'Sommet conique surmonté d\'un œuf d\'autruche blanc protecteur selon la tradition architecturale soudanaise.',
+              'Tour culminante dominant le parvis de Djenné, couronnée d\'un véritable œuf d\'autruche blanc immaculé protégeant la cité contre la foudre.',
           icon: Icons.egg_rounded,
         ),
         Architectural3DHotspot(
-          x: -25,
-          y: -15,
-          z: 32,
-          title: 'Torons en Bois de Palmier',
+          x: -26,
+          y: -5,
+          z: 46,
+          title: 'Torons en Bois de Palmier Rônier',
           subtitle: 'Échafaudages rituels permanents',
           description:
-              'Poutres de rônier saillantes servant d\'appui aux maçons lors de la grande fête sacrée du crépissage annuel.',
+              'Poutres de rônier imputrescibles et inattaquables par les termites, servant d\'appui aux maçons Barey Ton lors de la fête sacrée du Crépissage.',
           icon: Icons.carpenter_rounded,
+        ),
+        Architectural3DHotspot(
+          x: 40,
+          y: -85,
+          z: 38,
+          title: 'Minaret Est & Contreforts Étagés',
+          subtitle: 'Orientation vers la Mecque (Qibla)',
+          description:
+              'La façade orientale est flanquée de tours pyramidales et d\'une colonnade de contreforts coniques couronnés de pinacles soudanais.',
+          icon: Icons.temple_buddhist_rounded,
+        ),
+        Architectural3DHotspot(
+          x: 0,
+          y: 75,
+          z: 48,
+          title: 'Plateforme Surélevée en Banco',
+          subtitle: 'Terrasse protectrice contre les crues',
+          description:
+              'Élevée à 3 mètres au-dessus du sol du marché sur une colline artificielle (Togere) pour préserver le sanctuaire des crues du fleuve Bani.',
+          icon: Icons.waves_rounded,
+        ),
+        Architectural3DHotspot(
+          x: 0,
+          y: 35,
+          z: -25,
+          title: 'Cour Intérieure (Sahn) & 90 Piliers',
+          subtitle: 'Sanctuaire bio-climatique à 22°C',
+          description:
+              'Vaste cour entourée d\'arcades menant à la salle hypostyle où 90 piliers massifs en banco maintiennent la fraîcheur même sous 45°C à l\'extérieur.',
+          icon: Icons.wb_sunny_outlined,
         ),
       ];
     } else if (id.contains('askia')) {
@@ -722,7 +756,7 @@ class _Monument3DViewerModalState extends State<Monument3DViewerModal>
   Widget build(BuildContext context) {
     final target = widget.target;
     final size = MediaQuery.of(context).size;
-    final hotspots = _getHotspotsForTarget(target);
+    final hotspots = getHotspotsForTarget(target);
 
     return Container(
       height: size.height * 0.92,
@@ -1505,11 +1539,11 @@ class _Monument3DViewerModalState extends State<Monument3DViewerModal>
 }
 
 /// Peintre du podestat circulaire et de l'ombre d'occlusion ambiante
-class _PedestalShadowPainter extends CustomPainter {
+class MonumentPedestalShadowPainter extends CustomPainter {
   final double rotX;
   final double scale;
 
-  _PedestalShadowPainter({required this.rotX, required this.scale});
+  MonumentPedestalShadowPainter({required this.rotX, required this.scale});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1551,12 +1585,13 @@ class _PedestalShadowPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _PedestalShadowPainter oldDelegate) =>
+  bool shouldRepaint(covariant MonumentPedestalShadowPainter oldDelegate) =>
       oldDelegate.rotX != rotX || oldDelegate.scale != scale;
 }
+typedef _PedestalShadowPainter = MonumentPedestalShadowPainter;
 
 /// Peintre volumétrique 3D réaliste calculant la géométrie, normales et éclairage Phong
-class _RealisticMonument3DPainter extends CustomPainter {
+class MonumentRealistic3DPainter extends CustomPainter {
   final MonumentScanTarget target;
   final double rotX;
   final double rotY;
@@ -1565,7 +1600,7 @@ class _RealisticMonument3DPainter extends CustomPainter {
   final LightingEnvironment lighting;
   final bool showWireframe;
 
-  _RealisticMonument3DPainter({
+  MonumentRealistic3DPainter({
     required this.target,
     required this.rotX,
     required this.rotY,
@@ -2459,35 +2494,94 @@ class _RealisticMonument3DPainter extends CustomPainter {
     return faces;
   }
 
-  /// ── 18. Grande Mosquée de Djenné ───────────────────────────────────────────
+  /// ── 18. Grande Mosquée de Djenné (Chef-d'œuvre Soudano-Sahélien) ─────────────
   List<PolygonFace3D> _buildMosqueeDjenneFaces() {
     final List<PolygonFace3D> faces = [];
-    const bancoColor = Color(0xFFB58852);
-    const darkBanco = Color(0xFF8B6538);
-    const toronColor = Color(0xFF3E2723);
+    const bancoLight = Color(0xFFC4955B); // Banco ocre ensoleillé
+    const bancoMedium = Color(0xFFBA8C55); // Banco moyen
+    const bancoDark = Color(0xFF8B6538); // Base & parties ombrées
+    const bancoPlatform = Color(0xFF78552D); // Plateforme surélevée
+    const toronColor = Color(0xFF332012); // Poutres de rônier foncées
+    const eggColor = Color(0xFFFFFBEB); // Œufs d'autruche sacrés blancs ivoire
 
-    // Plateforme surélevée
-    faces.addAll(_buildBox(cx: 0, cy: 95, cz: 0, w: 130, h: 20, d: 90, color: darkBanco));
+    // 1. Plateforme surélevée (Terrasse de Djenné - protection contre le Bani)
+    faces.addAll(_buildBox(cx: 0, cy: 92, cz: 0, w: 144, h: 16, d: 110, color: bancoPlatform));
+    faces.addAll(_buildBox(cx: 0, cy: 82, cz: 2, w: 136, h: 12, d: 104, color: bancoDark));
+    // Escaliers d'accès monumentaux sur le parvis
+    faces.addAll(_buildBox(cx: 0, cy: 90, cz: 56, w: 34, h: 10, d: 12, color: bancoMedium));
 
-    // Façade monumentale
-    faces.addAll(_buildBox(cx: 0, cy: 45, cz: 0, w: 105, h: 80, d: 65, color: bancoColor));
+    // 2. Corps principal du sanctuaire (Salle hypostyle)
+    faces.addAll(_buildBox(cx: 0, cy: 40, cz: -5, w: 112, h: 72, d: 74, color: bancoMedium));
+    // Façade orientale monumentale (Mur de la Qibla)
+    faces.addAll(_buildBox(cx: 0, cy: 35, cz: 33, w: 108, h: 78, d: 14, color: bancoLight));
 
-    // Minaret Central
-    faces.addAll(_buildPyramidFrustum(yBottom: 25, yTop: -90, wBottom: 24, wTop: 15, color: bancoColor));
-    faces.addAll(_buildBox(cx: 0, cy: -96, cz: 0, w: 7, h: 10, d: 7, color: Colors.white));
+    // 3. MINARET CENTRAL CULMINANT (Façade Est)
+    faces.addAll(_buildPyramidFrustum(cx: 0, cz: 38, yBottom: 25, yTop: -85, wBottom: 22, wTop: 14, color: bancoLight));
+    faces.addAll(_buildPyramidFrustum(cx: 0, cz: 38, yBottom: -85, yTop: -108, wBottom: 14, wTop: 8, color: bancoMedium));
+    faces.addAll(_buildPyramidFrustum(cx: 0, cz: 38, yBottom: -108, yTop: -118, wBottom: 8, wTop: 3, color: bancoDark));
+    // Œuf d'autruche blanc immaculé couronnant le sommet
+    faces.addAll(_buildBox(cx: 0, cy: -122, cz: 38, w: 6, h: 8, d: 6, color: eggColor));
 
-    // Minaret Ouest
-    faces.addAll(_buildPyramidFrustum(yBottom: 25, yTop: -80, wBottom: 20, wTop: 13, color: bancoColor));
-    faces.addAll(_buildBox(cx: -38, cy: -86, cz: 0, w: 6, h: 8, d: 6, color: Colors.white));
+    // 4. MINARET OUEST (Tour latérale gauche)
+    faces.addAll(_buildPyramidFrustum(cx: -40, cz: 38, yBottom: 25, yTop: -72, wBottom: 19, wTop: 12, color: bancoLight));
+    faces.addAll(_buildPyramidFrustum(cx: -40, cz: 38, yBottom: -72, yTop: -94, wBottom: 12, wTop: 7, color: bancoMedium));
+    faces.addAll(_buildPyramidFrustum(cx: -40, cz: 38, yBottom: -94, yTop: -102, wBottom: 7, wTop: 3, color: bancoDark));
+    faces.addAll(_buildBox(cx: -40, cy: -106, cz: 38, w: 5.5, h: 7, d: 5.5, color: eggColor));
 
-    // Minaret Est
-    faces.addAll(_buildPyramidFrustum(yBottom: 25, yTop: -80, wBottom: 20, wTop: 13, color: bancoColor));
-    faces.addAll(_buildBox(cx: 38, cy: -86, cz: 0, w: 6, h: 8, d: 6, color: Colors.white));
+    // 5. MINARET EST (Tour latérale droite)
+    faces.addAll(_buildPyramidFrustum(cx: 40, cz: 38, yBottom: 25, yTop: -72, wBottom: 19, wTop: 12, color: bancoLight));
+    faces.addAll(_buildPyramidFrustum(cx: 40, cz: 38, yBottom: -72, yTop: -94, wBottom: 12, wTop: 7, color: bancoMedium));
+    faces.addAll(_buildPyramidFrustum(cx: 40, cz: 38, yBottom: -94, yTop: -102, wBottom: 7, wTop: 3, color: bancoDark));
+    faces.addAll(_buildBox(cx: 40, cy: -106, cz: 38, w: 5.5, h: 7, d: 5.5, color: eggColor));
 
-    // Torons de palmier saillants
-    faces.addAll(_buildBox(cx: -18, cy: -15, cz: 36, w: 3, h: 3, d: 14, color: toronColor));
-    faces.addAll(_buildBox(cx: 18, cy: -15, cz: 36, w: 3, h: 3, d: 14, color: toronColor));
-    faces.addAll(_buildBox(cx: 0, cy: -45, cz: 36, w: 3, h: 3, d: 14, color: toronColor));
+    // 6. SÉRIE DE CONTREFORTS CONIQUES RYTHMIQUES (Piliers engagés le long de la façade)
+    final buttressPositions = [-53.0, -26.0, -13.0, 13.0, 26.0, 53.0];
+    for (final bx in buttressPositions) {
+      final isCorner = bx.abs() > 45;
+      final yTop = isCorner ? -45.0 : -38.0;
+      faces.addAll(_buildPyramidFrustum(cx: bx, cz: 40, yBottom: 60, yTop: yTop, wBottom: 9, wTop: 5.5, color: bancoLight));
+      // Pinacle pyramidal soudanais au sommet de chaque contrefort
+      faces.addAll(_buildPyramidFrustum(cx: bx, cz: 40, yBottom: yTop, yTop: yTop - 10, wBottom: 5.5, wTop: 1.5, color: bancoDark));
+    }
+
+    // 7. CRÉNEAUX SOUDANAIS PYRAMIDAUX SUR LA LIGNE DE TOITURE
+    final crenelPositions = [-47.0, -34.0, -20.0, -7.0, 7.0, 20.0, 34.0, 47.0];
+    for (final crx in crenelPositions) {
+      faces.addAll(_buildPyramidFrustum(cx: crx, cz: 38, yBottom: -2, yTop: -12, wBottom: 5, wTop: 1.5, color: bancoMedium));
+    }
+
+    // 8. TORONS DE PALMIER RÔNIER SAILLANTS (Échafaudages rituels du Crépissage)
+    // Torons du Minaret Central (4 directions à plusieurs hauteurs)
+    for (final ty in [-25.0, -50.0, -75.0, -98.0]) {
+      faces.addAll(_buildBox(cx: 0, cy: ty, cz: 48, w: 3, h: 3, d: 12, color: toronColor));
+      faces.addAll(_buildBox(cx: -10, cy: ty, cz: 38, w: 10, h: 3, d: 3, color: toronColor));
+      faces.addAll(_buildBox(cx: 10, cy: ty, cz: 38, w: 10, h: 3, d: 3, color: toronColor));
+    }
+    // Torons des Tours Latérales
+    for (final ty in [-20.0, -45.0, -70.0, -88.0]) {
+      // Ouest
+      faces.addAll(_buildBox(cx: -40, cy: ty, cz: 47, w: 2.8, h: 2.8, d: 11, color: toronColor));
+      faces.addAll(_buildBox(cx: -48, cy: ty, cz: 38, w: 9, h: 2.8, d: 2.8, color: toronColor));
+      // Est
+      faces.addAll(_buildBox(cx: 40, cy: ty, cz: 47, w: 2.8, h: 2.8, d: 11, color: toronColor));
+      faces.addAll(_buildBox(cx: 48, cy: ty, cz: 38, w: 9, h: 2.8, d: 2.8, color: toronColor));
+    }
+    // Torons de la façade et des contreforts
+    for (final bx in [-26.0, -13.0, 13.0, 26.0]) {
+      faces.addAll(_buildBox(cx: bx, cy: -5, cz: 46, w: 2.5, h: 2.5, d: 10, color: toronColor));
+      faces.addAll(_buildBox(cx: bx, cy: 20, cz: 46, w: 2.5, h: 2.5, d: 10, color: toronColor));
+    }
+
+    // 9. COUR INTÉRIEURE (Sahn) & MURS D'ENCEINTE OUEST
+    faces.addAll(_buildBox(cx: -54, cy: 45, cz: -30, w: 6, h: 60, d: 48, color: bancoMedium));
+    faces.addAll(_buildBox(cx: 54, cy: 45, cz: -30, w: 6, h: 60, d: 48, color: bancoMedium));
+    faces.addAll(_buildBox(cx: 0, cy: 45, cz: -52, w: 112, h: 60, d: 6, color: bancoMedium));
+    // Sol de la cour intérieure
+    faces.addAll(_buildBox(cx: 0, cy: 74, cz: -28, w: 100, h: 4, d: 44, color: const Color(0xFFD4B07B)));
+
+    // 10. Portails d'accès nord & sud
+    faces.addAll(_buildBox(cx: -54, cy: 55, cz: 10, w: 8, h: 28, d: 16, color: const Color(0xFF4A3423)));
+    faces.addAll(_buildBox(cx: 54, cy: 55, cz: 10, w: 8, h: 28, d: 16, color: const Color(0xFF4A3423)));
 
     return faces;
   }
@@ -2733,6 +2827,8 @@ class _RealisticMonument3DPainter extends CustomPainter {
     required double wBottom,
     required double wTop,
     required Color color,
+    double cx = 0.0,
+    double cz = 0.0,
   }) {
     final hb = wBottom / 2;
     final ht = wTop / 2;
@@ -2741,40 +2837,40 @@ class _RealisticMonument3DPainter extends CustomPainter {
       // Devant (+Z)
       PolygonFace3D(
         vertices: [
-          [-ht, yTop, ht],
-          [ht, yTop, ht],
-          [hb, yBottom, hb],
-          [-hb, yBottom, hb],
+          [cx - ht, yTop, cz + ht],
+          [cx + ht, yTop, cz + ht],
+          [cx + hb, yBottom, cz + hb],
+          [cx - hb, yBottom, cz + hb],
         ],
         baseColor: color,
       ),
       // Derrière (-Z)
       PolygonFace3D(
         vertices: [
-          [ht, yTop, -ht],
-          [-ht, yTop, -ht],
-          [-hb, yBottom, -hb],
-          [hb, yBottom, -hb],
+          [cx + ht, yTop, cz - ht],
+          [cx - ht, yTop, cz - ht],
+          [cx - hb, yBottom, cz - hb],
+          [cx + hb, yBottom, cz - hb],
         ],
         baseColor: color,
       ),
       // Gauche (-X)
       PolygonFace3D(
         vertices: [
-          [-ht, yTop, -ht],
-          [-ht, yTop, ht],
-          [-hb, yBottom, hb],
-          [-hb, yBottom, -hb],
+          [cx - ht, yTop, cz - ht],
+          [cx - ht, yTop, cz + ht],
+          [cx - hb, yBottom, cz + hb],
+          [cx - hb, yBottom, cz - hb],
         ],
         baseColor: color,
       ),
       // Droite (+X)
       PolygonFace3D(
         vertices: [
-          [ht, yTop, ht],
-          [ht, yTop, -ht],
-          [hb, yBottom, -hb],
-          [hb, yBottom, hb],
+          [cx + ht, yTop, cz + ht],
+          [cx + ht, yTop, cz - ht],
+          [cx + hb, yBottom, cz - hb],
+          [cx + hb, yBottom, cz + hb],
         ],
         baseColor: color,
       ),
@@ -2821,7 +2917,7 @@ class _RealisticMonument3DPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _RealisticMonument3DPainter oldDelegate) {
+  bool shouldRepaint(covariant MonumentRealistic3DPainter oldDelegate) {
     return oldDelegate.rotX != rotX ||
         oldDelegate.rotY != rotY ||
         oldDelegate.scale != scale ||
@@ -2830,6 +2926,7 @@ class _RealisticMonument3DPainter extends CustomPainter {
         oldDelegate.showWireframe != showWireframe;
   }
 }
+typedef _RealisticMonument3DPainter = MonumentRealistic3DPainter;
 
 class _ProjectedPolygon {
   final List<Offset> points;
@@ -2846,11 +2943,11 @@ class _ProjectedPolygon {
 }
 
 /// Peintre de poussières atmosphériques et particules de lumière sahéliennes
-class _AtmosphericDustPainter extends CustomPainter {
+class MonumentAtmosphericDustPainter extends CustomPainter {
   final double progress;
   final LightingEnvironment lighting;
 
-  _AtmosphericDustPainter({required this.progress, required this.lighting});
+  MonumentAtmosphericDustPainter({required this.progress, required this.lighting});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -2875,5 +2972,6 @@ class _AtmosphericDustPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _AtmosphericDustPainter oldDelegate) => true;
+  bool shouldRepaint(covariant MonumentAtmosphericDustPainter oldDelegate) => true;
 }
+typedef _AtmosphericDustPainter = MonumentAtmosphericDustPainter;
