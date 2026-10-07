@@ -14,8 +14,7 @@ import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/connected_contents_section.dart';
 import '../widgets/culture_audio_listen_badge.dart';
 import '../widgets/monument_living_hero.dart';
-import '../widgets/monument_bio_climatic_discovery_card.dart';
-import '../widgets/monument_crepissage_ritual_card.dart';
+import '../widgets/monument_guided_tour_view.dart';
 import '../../../../core/services/vivienne_tts_service.dart';
 import '../widgets/culture_detail_sticky_header.dart';
 import '../widgets/passport_stamp_toast.dart';
@@ -357,11 +356,8 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
 
                 const SizedBox(height: 20),
 
-                // ── 2. CARTE BIO-CLIMATIQUE & ANATOMIE DES BÂTISSEURS ───────────
-                MonumentBioClimaticDiscoveryCard(monument: item),
-
-                // ── 3. RITUEL PARTICIPATIF DU CRÉPISSAGE SACRÉ ────────────────
-                MonumentCrepissageRitualCard(monument: item),
+                // ── 2. VISITE GUIDÉE IMMERSIVE PAS-À-PAS DU MONUMENT ──────────
+                MonumentGuidedTourView(monument: item),
 
                 // ── POURQUOI CE MONUMENT EST IMPORTANT ────────────────────────
                 Container(
