@@ -11,9 +11,11 @@ import '../../core/models/culture_detail_models.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../widgets/ask_cultural_guide_button.dart';
-import '../widgets/authentic_photo_hero.dart';
 import '../widgets/connected_contents_section.dart';
 import '../widgets/culture_audio_listen_badge.dart';
+import '../widgets/monument_living_hero.dart';
+import '../widgets/monument_bio_climatic_discovery_card.dart';
+import '../widgets/monument_crepissage_ritual_card.dart';
 import '../../../../core/services/vivienne_tts_service.dart';
 import '../widgets/culture_detail_sticky_header.dart';
 import '../widgets/passport_stamp_toast.dart';
@@ -136,17 +138,11 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
               controller: _scrollController,
               physics: const BouncingScrollPhysics(),
               slivers: [
-                // ── 1. GRANDE PHOTOGRAPHIE DU MONUMENT (HERO) ──────────────────────
+                // ── 1. HERO VIVANT DU MONUMENT (MULTI-ANGLES & 3D) ─────────────────
                 SliverToBoxAdapter(
-                  child: AuthenticPhotoHero(
-                    photoUrl: item.photoUrl,
-                    photoCredits: item.photoCredits,
-                    tag: item.tag,
-                    regionName: item.regionName,
-                    subtitleInfo: item.era,
-                    accentColor: CultureTheme.accentOrange,
+                  child: MonumentLivingHero(
+                    monument: item,
                     heroTag: widget.heroTag ?? 'culture_monument_${item.id}',
-                    showTopActions: false, // Actions gérées par le sticky header
                   ),
                 ),
 
@@ -360,6 +356,12 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                 ),
 
                 const SizedBox(height: 20),
+
+                // ── 2. CARTE BIO-CLIMATIQUE & ANATOMIE DES BÂTISSEURS ───────────
+                MonumentBioClimaticDiscoveryCard(monument: item),
+
+                // ── 3. RITUEL PARTICIPATIF DU CRÉPISSAGE SACRÉ ────────────────
+                MonumentCrepissageRitualCard(monument: item),
 
                 // ── POURQUOI CE MONUMENT EST IMPORTANT ────────────────────────
                 Container(
