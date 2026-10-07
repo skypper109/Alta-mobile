@@ -125,7 +125,7 @@ abstract final class MonumentGuidedTourRegistry {
             title: 'La Terrasse du Bani & La Mémoire des Bâtisseurs',
             subtitle: 'Apothéose de la visite',
             photoUrl:
-                'assets/images/culture/monuments/monument_mosquee_djenne/dje_3.webp',
+                'assets/images/culture/monuments/monument_mosquee_djenne/dje_7.webp',
             locationBadge: 'Station 5 • Toit-Terrasse & Panorama sur le Fleuve',
             guideSpeech:
                 'Nous terminons notre visite sur la terrasse supérieure. Face à vous, les méandres du fleuve Bani et les toits ocre de Djenné. Cette mosquée n\'est pas un monument du passé : c\'est un pacte vivant entre une communauté, son fleuve et sa mémoire.',

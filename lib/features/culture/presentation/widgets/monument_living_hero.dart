@@ -131,7 +131,7 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.sizeOf(context).height;
-    final heroHeight = (screenHeight * 0.46).clamp(340.0, 440.0);
+    final heroHeight = (screenHeight * 0.48).clamp(380.0, 460.0);
 
     return SizedBox(
       height: heroHeight,
@@ -224,49 +224,54 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
             ),
           ],
 
-          // ── SÉLECTEUR DE MODE [3D 360° | PHOTOS HD] (EN HAUT À GAUCHE) ───
+          // ── SÉLECTEUR DE MODE [3D 360° | PHOTOS RÉELLES] (SOUS LA BARRE STICKY) ───
           Positioned(
-            top: MediaQuery.of(context).padding.top + 10,
-            left: 16,
-            child: Container(
-              padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.72),
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(
-                  color: CultureTheme.accentOrange.withValues(alpha: 0.5),
-                  width: 1.2,
+            top: MediaQuery.of(context).padding.top + 52,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(3.5),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.82),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.55),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      blurRadius: 12,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.4),
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildModeTab(
-                    mode: LivingHeroMode.model3D,
-                    label: '3D 360°',
-                    icon: Icons.view_in_ar_rounded,
-                  ),
-                  _buildModeTab(
-                    mode: LivingHeroMode.photosHD,
-                    label: 'Photos HD (${_photos.length})',
-                    icon: Icons.photo_camera_back_rounded,
-                  ),
-                ],
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildModeTab(
+                      mode: LivingHeroMode.model3D,
+                      label: '3D 360°',
+                      icon: Icons.view_in_ar_rounded,
+                    ),
+                    _buildModeTab(
+                      mode: LivingHeroMode.photosHD,
+                      label: 'Photos Réelles (${_photos.length})',
+                      icon: Icons.photo_camera_back_rounded,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
 
-          // ── BOUTONS D'INTERACTION SUPÉRIEURS DROITE ────────────────────────
+          // ── BOUTONS D'INTERACTION SECONDAIRES FLOTTANTS ────────────────────
           Positioned(
-            top: MediaQuery.of(context).padding.top + 10,
+            bottom: 56,
             right: 16,
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 if (_heroMode == LivingHeroMode.photosHD) ...[
                   // Sélecteur d'ambiance solaire
@@ -276,14 +281,14 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.55),
+                        color: Colors.black.withValues(alpha: 0.72),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: _atmosphere.accent.withValues(alpha: 0.6),
+                          color: _atmosphere.accent.withValues(alpha: 0.7),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: _atmosphere.accent.withValues(alpha: 0.25),
+                            color: _atmosphere.accent.withValues(alpha: 0.3),
                             blurRadius: 8,
                           ),
                         ],
@@ -306,50 +311,49 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                ],
-
-                // Bouton Modèle 3D Plein Écran
-                GestureDetector(
-                  onTap: _open3DViewer,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 11, vertical: 6),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFD97706), Color(0xFFF59E0B)],
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
+                ] else ...[
+                  // Bouton Modèle 3D Plein Écran
+                  GestureDetector(
+                    onTap: _open3DViewer,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFD97706), Color(0xFFF59E0B)],
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.fullscreen_rounded,
-                          size: 14,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Plein écran',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: 0.3,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFF59E0B).withValues(alpha: 0.45),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.fullscreen_rounded,
+                            size: 15,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Plein écran 3D',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
