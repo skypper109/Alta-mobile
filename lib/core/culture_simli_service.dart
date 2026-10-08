@@ -8,7 +8,7 @@ class CultureAlternIAService {
   final Dio _dio;
   final _logger = Logger();
 
-  List<String> get _candidateUrls => AltaApiConfig.candidateBaseUrls;
+  List<String> get candidateUrls => AltaApiConfig.candidateBaseUrls;
 
   /// Face ID Simli officiel du Vieux Sage (Griot Ancestral)
   static const String simliSageFaceId = 'c295e3a2-ed11-48d5-a1bd-ff42ac7eac73';
@@ -22,54 +22,99 @@ class CultureAlternIAService {
   /// Chemin de l'image photoréaliste locale du Vieux Sage (visage officiel Simli)
   static const String defaultSageImagePath = 'assets/images/culture/griot_sage.jpg';
 
-  /// Teste la connectivité avec le serveur backend (api.alterniamali.com)
-  Future<bool> checkServerHealth() async {
-    for (final baseUrl in _candidateUrls) {
+  // ── Cache de connectivité pour réactivité immédiate sans freeze ────────────
+  static String? _cachedActiveBaseUrl;
+  static DateTime? _lastHealthCheckTime;
+  static bool _lastHealthStatus = false;
+
+  /// Teste rapidement si le serveur backend est joignable (timeout 1.5s)
+  Future<String?> getActiveBaseUrlFast() async {
+    final now = DateTime.now();
+    if (_cachedActiveBaseUrl != null &&
+        _lastHealthCheckTime != null &&
+        now.difference(_lastHealthCheckTime!).inSeconds < 30 &&
+        _lastHealthStatus) {
+      return _cachedActiveBaseUrl;
+    }
+
+    // Tester en priorité le cache ou l'URL officielle
+    final priorityUrls = [
+      if (_cachedActiveBaseUrl != null) _cachedActiveBaseUrl!,
+      AltaApiConfig.serverBaseUrl,
+      'http://127.0.0.1:8000',
+      'http://10.0.2.2:8000',
+      'http://172.20.10.14:8000',
+    ];
+
+    for (final baseUrl in priorityUrls) {
       try {
         final res = await _dio.get(
           '$baseUrl/api/health',
-          options: Options(connectTimeout: const Duration(seconds: 3)),
+          options: Options(
+            connectTimeout: const Duration(milliseconds: 1500),
+            receiveTimeout: const Duration(milliseconds: 1500),
+          ),
         );
-        if (res.statusCode == 200) return true;
+        if (res.statusCode == 200) {
+          _cachedActiveBaseUrl = baseUrl;
+          _lastHealthCheckTime = now;
+          _lastHealthStatus = true;
+          return baseUrl;
+        }
       } catch (_) {}
     }
-    return false;
+
+    _lastHealthCheckTime = now;
+    _lastHealthStatus = false;
+    return null;
   }
 
-  /// Demande au backend de générer une vidéo LivePortrait pour le Vieux Sage
+  /// Teste la connectivité avec le serveur backend
+  Future<bool> checkServerHealth() async {
+    final url = await getActiveBaseUrlFast();
+    return url != null;
+  }
+
+  /// Demande au backend de générer une vidéo LivePortrait/Simli pour le Vieux Sage
+  /// Retourne null immédiatement si le backend n'est pas lancé, sans bloquer le téléphone.
   Future<String?> generateSageVideo({
     required String text,
     String? subject,
   }) async {
-    for (final baseUrl in _candidateUrls) {
-      try {
-        _logger.i('[AlternIA] Génération vidéo pour "$text"');
-        final response = await _dio.post(
-          '$baseUrl/api/avatars/generate-video',
-          data: {
-            'question': text,
-            'phrase': text,
-            'matiere': subject ?? 'Culture Malienne',
-            'voice': defaultVoice,
-            'faceId': defaultFaceId,
-          },
-          options: Options(
-            connectTimeout: const Duration(seconds: 6),
-            receiveTimeout: const Duration(seconds: 60),
-          ),
-        );
-
-        if (response.statusCode == 200 && response.data is Map) {
-          final data = response.data as Map<String, dynamic>;
-          if (data['status'] == 'success' && data['video_url'] != null) {
-            final rawUrl = data['video_url'].toString();
-            return rawUrl.startsWith('http') ? rawUrl : '$baseUrl$rawUrl';
-          }
-        }
-      } catch (e) {
-        _logger.w('[CultureAlternIA] Échec sur $baseUrl : $e');
-      }
+    final activeUrl = await getActiveBaseUrlFast();
+    if (activeUrl == null) {
+      _logger.d('[CultureAlternIA] Backend hors-ligne : passage en mode avatar local immédiat.');
+      return null;
     }
+
+    try {
+      _logger.i('[AlternIA] Requête vidéo sur $activeUrl pour "$text"');
+      final response = await _dio.post(
+        '$activeUrl/api/avatars/generate-video',
+        data: {
+          'question': text,
+          'phrase': text,
+          'matiere': subject ?? 'Culture Malienne',
+          'voice': defaultVoice,
+          'faceId': defaultFaceId,
+        },
+        options: Options(
+          connectTimeout: const Duration(seconds: 4),
+          receiveTimeout: const Duration(seconds: 18),
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data is Map) {
+        final data = response.data as Map<String, dynamic>;
+        if (data['status'] == 'success' && data['video_url'] != null) {
+          final rawUrl = data['video_url'].toString();
+          return rawUrl.startsWith('http') ? rawUrl : '$activeUrl$rawUrl';
+        }
+      }
+    } catch (e) {
+      _logger.w('[CultureAlternIA] Échec génération vidéo sur $activeUrl : $e');
+    }
+
     return null;
   }
 }
