@@ -29,11 +29,15 @@ class HomeScreen extends ConsumerWidget {
     final firstName = rawName.isNotEmpty ? rawName.split(' ').first : 'Élève';
 
     final textColor = isDark ? AppColors.textPrimary : const Color(0xFF0F172A);
+    final textMuted =
+        isDark ? AppColors.textSecondary : const Color(0xFF475569);
+    final borderCol = isDark ? AppColors.border : const Color(0xFFE2E8F0);
+    final cardBg = isDark ? AppColors.surface : Colors.white;
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20,
-            125), // Bottom padding prevents clipping under floating nav
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 125),
         children: [
           // ── 1. GREETING BANNER ──────────────────────────────────────────
           Row(
@@ -51,20 +55,18 @@ class HomeScreen extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
-              // const Icon(Icons.waving_hand_rounded, color: AppColors.accent, size: 22),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color:
-                      AppColors.primary.withValues(alpha: isDark ? 0.18 : 0.1),
+                      AppColors.primary.withValues(alpha: isDark ? 0.2 : 0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isDark
-                        ? AppColors.primary.withValues(alpha: 0.4)
-                        : AppColors.primary.withValues(alpha: 0.25),
+                        ? AppColors.primary.withValues(alpha: 0.45)
+                        : AppColors.primary.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Text(
@@ -81,7 +83,7 @@ class HomeScreen extends ConsumerWidget {
 
           const SizedBox(height: 16),
 
-          // ── 3. QUICK STATS PILL ROW (CONNECTÉ AU BACKEND) ─────────────
+          // ── 2. QUICK STATS PILL ROW (RÉEL ET CONNECTÉ AU BACKEND) ──────
           Row(
             children: [
               Expanded(
@@ -104,47 +106,60 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: _TeenStatBadge(
-                  label: 'Séances',
-                  value: gamification.seances,
-                  icon: Icons.school_rounded,
-                  color: AppColors.primaryLight,
+                  label: 'Pièces',
+                  value: gamification.coins,
+                  icon: Icons.monetization_on_rounded,
+                  color: AppColors.accentLight,
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
 
-          // ── 4. HERO BANNER BOÎTIER ALTERNIA ─────────────────────────────
+          // ── 3. HERO BANNER BOÎTIER ALTERNIA (SOLIDE, SANS DÉGRADÉ) ──────
           GestureDetector(
-            onTap: () => showDeviceModalSheet(context),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              showDeviceModalSheet(context);
+            },
             child: Container(
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.circular(22),
+                color:
+                    isDark ? const Color(0xFF131D31) : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isConnected
+                      ? AppColors.secondary.withValues(alpha: 0.55)
+                      : AppColors.primary.withValues(alpha: 0.35),
+                  width: 1.4,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.35),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
+                    color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                    blurRadius: 14,
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(11),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
+                      color: isConnected
+                          ? AppColors.secondary.withValues(alpha: 0.15)
+                          : AppColors.primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(
                       isConnected
                           ? Icons.router_rounded
                           : Icons.wifi_tethering_rounded,
-                      size: 26,
-                      color: isConnected ? AppColors.secondary : Colors.white,
+                      size: 24,
+                      color:
+                          isConnected ? AppColors.secondary : AppColors.primary,
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -157,19 +172,19 @@ class HomeScreen extends ConsumerWidget {
                               ? 'Boîtier AlterniA Connecté'
                               : 'Boîtier AlterniA',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16,
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: textColor,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           isConnected
                               ? 'Wi-Fi local • $deviceName'
-                              : 'Appairer ou utiliser le Cloud IA',
+                              : 'Mode Cloud IA • Toucher pour appairer',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 11.5,
+                            color: textMuted,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -179,18 +194,26 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                     decoration: BoxDecoration(
-                      color:
-                          isConnected ? AppColors.secondary : AppColors.accent,
-                      borderRadius: BorderRadius.circular(20),
+                      color: isConnected
+                          ? AppColors.success.withValues(alpha: 0.15)
+                          : (isDark
+                              ? AppColors.surfaceAlt
+                              : const Color(0xFFE2E8F0)),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isConnected
+                            ? AppColors.success.withValues(alpha: 0.4)
+                            : borderCol,
+                      ),
                     ),
                     child: Text(
                       isConnected ? 'EN LIGNE' : 'HORS-LIGNE',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10,
+                        fontSize: 9.5,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: isConnected ? AppColors.success : textMuted,
                       ),
                     ),
                   ),
@@ -199,9 +222,248 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
 
+          const SizedBox(height: 22),
+
+          // ── 4. NOUVEAUTÉS MAJEURES : DUEL & PODCASTS ALTERNIA ────────────
+          DetSectionHeader(
+            title: 'Entraînement & Podcasts',
+            actionLabel: 'Classement',
+            onAction: () {
+              HapticFeedback.selectionClick();
+              context.push('/education/duel/leaderboard');
+            },
+          ),
+          const SizedBox(height: 12),
+
+          Row(
+            children: [
+              // CARTE 1 : DUEL SCOLAIRE
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    context.push('/education/duel');
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.45),
+                        width: 1.4,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black
+                              .withValues(alpha: isDark ? 0.2 : 0.04),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.sports_esports_rounded,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '+250 XP',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Duel Scolaire',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Défie l\'IA ou des camarades en direct.',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            color: textMuted,
+                            height: 1.3,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Text(
+                              'Entrer dans l\'arène',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 13,
+                              color: AppColors.primary,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // CARTE 2 : PODCASTS DE RÉVISION
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    context.push('/education/podcasts');
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.secondary.withValues(alpha: 0.45),
+                        width: 1.4,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black
+                              .withValues(alpha: isDark ? 0.2 : 0.04),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.secondary.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.headphones_rounded,
+                                color: AppColors.secondary,
+                                size: 20,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.secondary.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'AUDIO IA',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.secondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Podcasts de Cours',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Résumés audio par chapitre en mains libres.',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            color: textMuted,
+                            height: 1.3,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Text(
+                              'Écouter les cours',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.secondary,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 13,
+                              color: AppColors.secondary,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
           const SizedBox(height: 24),
 
-          // ── 5. VOS MATIÈRES (CARDS DE SUGGESTIONS GRID FOR TEENS) ────────
+          // ── 5. VOS MATIÈRES (PROGRAMME MALIEN) ──────────────────────────
           DetSectionHeader(
             title: 'Programmes (${userState.classShortLabel})',
           ),
@@ -370,49 +632,6 @@ class HomeScreen extends ConsumerWidget {
 
           const SizedBox(height: 24),
 
-          // ── 6.B NOUVEAUTÉS INNOVATION ÉDUCATION ALTERNIA ───────────────
-          DetSectionHeader(
-            title: 'Entraînement & Podcasts AlterniA',
-            actionLabel: 'Classement',
-            onAction: () {
-              HapticFeedback.selectionClick();
-              context.push('/education/duel/leaderboard');
-            },
-          ),
-          const SizedBox(height: 14),
-
-          Row(
-            children: [
-              Expanded(
-                child: _TeenSuggestionCard(
-                  title: 'Duel Scolaire',
-                  subtitle: 'Défie l\'IA ou tes camarades',
-                  icon: Icons.sports_esports_rounded,
-                  color: AltaColors.accent,
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    context.push('/education/duel');
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _TeenSuggestionCard(
-                  title: 'Podcasts de Cours',
-                  subtitle: 'Révision audio mains libres',
-                  icon: Icons.headphones_rounded,
-                  color: AltaColors.secondary,
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    context.push('/education/podcasts');
-                  },
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
           // ── 7. PATRIMOINE & CULTURE DU MALI ────────────────────────────
           DetSectionHeader(
             title: 'Patrimoine & Culture Malienne',
@@ -459,7 +678,7 @@ class HomeScreen extends ConsumerWidget {
           // Footer Logo
           const Center(
             child: Opacity(
-              opacity: 0.5,
+              opacity: 0.6,
               child: AlterniaLogo(size: 24, showText: true),
             ),
           ),
@@ -496,7 +715,7 @@ class _TeenStatBadge extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: isDark ? 0.15 : 0.12),
+              color: color.withValues(alpha: isDark ? 0.18 : 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 18, color: color),
@@ -517,10 +736,12 @@ class _TeenStatBadge extends StatelessWidget {
                 Text(
                   value,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
+                    fontSize: 13.5,
                     fontWeight: FontWeight.bold,
                     color: textColor,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -559,7 +780,7 @@ class _TeenSuggestionCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: isDark ? 0.15 : 0.12),
+              color: color.withValues(alpha: isDark ? 0.18 : 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 20, color: color),

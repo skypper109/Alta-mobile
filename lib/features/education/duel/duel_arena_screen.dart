@@ -71,7 +71,8 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
       duration: const Duration(milliseconds: 1000),
     )..repeat(reverse: true);
 
-    if (widget.initialQuestions != null && widget.initialQuestions!.isNotEmpty) {
+    if (widget.initialQuestions != null &&
+        widget.initialQuestions!.isNotEmpty) {
       _questions = widget.initialQuestions!;
       _isLoadingQuestions = false;
       _startTimer();
@@ -212,11 +213,11 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
     final coinsGained = playerWon ? 50 : (isDraw ? 25 : 15);
 
     ref.read(gamificationProvider.notifier).addDuelReward(
-      xpGained: xpGained,
-      coinsGained: coinsGained,
-      subject: widget.subject,
-      won: playerWon,
-    );
+          xpGained: xpGained,
+          coinsGained: coinsGained,
+          subject: widget.subject,
+          won: playerWon,
+        );
 
     showModalBottomSheet(
       context: context,
@@ -304,7 +305,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
     final timerProgress = _secondsRemaining / _questionDuration;
     final timerColor = _secondsRemaining <= 4
         ? Colors.redAccent
-        : (_secondsRemaining <= 8 ? AltaColors.accent : AltaColors.secondary);
+        : (_secondsRemaining <= 8 ? AltaColors.primary : AltaColors.secondary);
 
     return Scaffold(
       backgroundColor: bg,
@@ -321,7 +322,8 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
           decoration: BoxDecoration(
             color: AltaColors.primary.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AltaColors.primary.withValues(alpha: 0.3)),
+            border:
+                Border.all(color: AltaColors.primary.withValues(alpha: 0.3)),
           ),
           child: Text(
             '${widget.subject} • Question ${_currentIndex + 1}/${_questions.length}',
@@ -365,7 +367,8 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                                 const SizedBox(width: 8),
                                 Flexible(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         widget.playerName,
@@ -430,7 +433,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                                       Text(
                                         '$_opponentScore pts',
                                         style: GoogleFonts.spaceMono(
-                                          color: AltaColors.accent,
+                                          color: AltaColors.primary,
                                           fontWeight: FontWeight.w800,
                                           fontSize: 13,
                                         ),
@@ -441,7 +444,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                                 const SizedBox(width: 8),
                                 CircleAvatar(
                                   radius: 17,
-                                  backgroundColor: AltaColors.accent,
+                                  backgroundColor: AltaColors.primary,
                                   child: Icon(
                                     widget.mode == DuelMode.vsAi
                                         ? Icons.smart_toy_rounded
@@ -499,7 +502,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: AltaColors.accent.withValues(alpha: 0.12),
+                              color: AltaColors.primary.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
@@ -507,7 +510,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: AltaColors.accent,
+                                color: AltaColors.primary,
                               ),
                             ),
                           ),
@@ -626,9 +629,10 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: borderColor,
-                                  width: (isSelected || (isCorrect && _answered))
-                                      ? 1.8
-                                      : 1.0,
+                                  width:
+                                      (isSelected || (isCorrect && _answered))
+                                          ? 1.8
+                                          : 1.0,
                                 ),
                               ),
                               child: Row(
@@ -638,7 +642,8 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                                     height: 28,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: borderColor.withValues(alpha: 0.15),
+                                      color:
+                                          borderColor.withValues(alpha: 0.15),
                                     ),
                                     alignment: Alignment.center,
                                     child: Text(
@@ -664,7 +669,9 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                                   if (_answered && isCorrect)
                                     const Icon(Icons.check_circle_rounded,
                                         color: Colors.green, size: 20)
-                                  else if (_answered && isSelected && !isCorrect)
+                                  else if (_answered &&
+                                      isSelected &&
+                                      !isCorrect)
                                     const Icon(Icons.cancel_rounded,
                                         color: Colors.redAccent, size: 20),
                                 ],
@@ -693,7 +700,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                             Row(
                               children: [
                                 const Icon(Icons.lightbulb_outline_rounded,
-                                    color: AltaColors.accent, size: 18),
+                                    color: AltaColors.primary, size: 18),
                                 const SizedBox(width: 6),
                                 Text(
                                   'Explication Pédagogique :',
@@ -721,7 +728,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: AltaColors.accent,
+                                  color: AltaColors.primary,
                                 ),
                               ),
                             ],
@@ -733,8 +740,8 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                                   backgroundColor: AltaColors.primary,
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12)),
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 10),
                                 ),
                                 onPressed: _nextQuestion,
                                 child: Text(
@@ -811,8 +818,7 @@ class _DuelVictoryModal extends ConsumerWidget {
       actionText = 'Rejouer';
     } else if (didWin) {
       resultTitle = 'Victoire Éclatante';
-      resultSubtitle =
-          'Tu as remporté ce duel sur le programme de $subject.';
+      resultSubtitle = 'Tu as remporté ce duel sur le programme de $subject.';
       resultIcon = Icons.emoji_events_rounded;
       resultColor = AltaColors.secondary;
       actionText = 'Rejouer';
@@ -821,7 +827,7 @@ class _DuelVictoryModal extends ConsumerWidget {
       resultSubtitle =
           'Bel entraînement. Prends ta revanche pour surpasser $opponentName !';
       resultIcon = Icons.military_tech_rounded;
-      resultColor = AltaColors.accent;
+      resultColor = AltaColors.primary;
       actionText = 'Revanche';
     }
 
@@ -888,7 +894,9 @@ class _DuelVictoryModal extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight,
+              color: isDark
+                  ? AltaColors.surfaceAltDark
+                  : AltaColors.surfaceAltLight,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(color: AltaColors.borderDark),
             ),
@@ -941,22 +949,22 @@ class _DuelVictoryModal extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(
                             vertical: 10, horizontal: 10),
                         decoration: BoxDecoration(
-                          color: AltaColors.accent.withValues(alpha: 0.15),
+                          color: AltaColors.primary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AltaColors.accent),
+                          border: Border.all(color: AltaColors.primary),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Icon(Icons.monetization_on_rounded,
-                                color: AltaColors.accent, size: 20),
+                                color: AltaColors.primary, size: 20),
                             const SizedBox(width: 4),
                             Text(
                               '+$coinsReward Pièces',
                               style: GoogleFonts.spaceMono(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
-                                color: AltaColors.accent,
+                                color: AltaColors.primary,
                               ),
                             ),
                           ],
@@ -984,22 +992,26 @@ class _DuelVictoryModal extends ConsumerWidget {
             width: double.infinity,
             child: OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AltaColors.secondary.withValues(alpha: 0.5)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                side: BorderSide(
+                    color: AltaColors.secondary.withValues(alpha: 0.5)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const DuelLeaderboardScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const DuelLeaderboardScreen()),
                 );
               },
               icon: const Icon(Icons.leaderboard_rounded,
                   size: 18, color: AltaColors.secondary),
               label: const Text(
                 'Consulter le Classement National & Lycées',
-                style: TextStyle(color: AltaColors.secondary, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: AltaColors.secondary, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -1025,7 +1037,7 @@ class _DuelVictoryModal extends ConsumerWidget {
               Expanded(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AltaColors.accent,
+                    backgroundColor: AltaColors.primary,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                     padding: const EdgeInsets.symmetric(vertical: 12),

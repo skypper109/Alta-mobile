@@ -97,12 +97,12 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AltaColors.accent.withValues(alpha: 0.15),
+                color: AltaColors.primary.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.lock_rounded,
-                color: AltaColors.accent,
+                color: AltaColors.primary,
                 size: 38,
               ),
             ),
@@ -133,7 +133,7 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AltaColors.accent,
+                  backgroundColor: AltaColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -244,7 +244,7 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AltaColors.accent,
+              backgroundColor: AltaColors.primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
@@ -420,7 +420,8 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
                       decoration: InputDecoration(
                         hintText:
                             'Ex: Les Nombres Complexes, La Guerre Froide...',
-                        hintStyle: TextStyle(color: textSec.withValues(alpha: 0.5)),
+                        hintStyle:
+                            TextStyle(color: textSec.withValues(alpha: 0.5)),
                         filled: true,
                         fillColor: isDark
                             ? AltaColors.surfaceAltDark
@@ -466,7 +467,7 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AltaColors.accent,
+                          backgroundColor: AltaColors.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -491,7 +492,7 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
                             classLevel: classCtrl.text.trim(),
                           );
                         },
-                        icon: const Icon(Icons.bolt_rounded, size: 20),
+                        // icon: const Icon(Icons.bolt_rounded, size: 20),
                         label: const Text(
                           'Lancer la Génération IA',
                           style: TextStyle(
@@ -663,7 +664,7 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
                                   size: 13, color: AltaColors.secondary),
                               const SizedBox(width: 6),
                               Text(
-                                'MODE MAINS LIBRES & SOTRAMA',
+                                'MODE MAINS LIBRES',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
@@ -721,7 +722,7 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
                 color: cardBg,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: AltaColors.accent.withValues(alpha: 0.4),
+                  color: AltaColors.secondary.withValues(alpha: 0.4),
                   width: 1.5,
                 ),
               ),
@@ -736,12 +737,13 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: AltaColors.accent.withValues(alpha: 0.15),
+                              color:
+                                  AltaColors.secondary.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Icon(
                               Icons.auto_awesome_rounded,
-                              color: AltaColors.accent,
+                              color: AltaColors.secondary,
                               size: 20,
                             ),
                           ),
@@ -766,7 +768,7 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
                               : (_generationsCount >=
                                       PodcastService.maxFreeGenerations
                                   ? Colors.red.withValues(alpha: 0.15)
-                                  : AltaColors.accent.withValues(alpha: 0.15)),
+                                  : AltaColors.primary.withValues(alpha: 0.15)),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -781,7 +783,7 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
                                 : (_generationsCount >=
                                         PodcastService.maxFreeGenerations
                                     ? Colors.redAccent
-                                    : AltaColors.accent),
+                                    : AltaColors.secondary),
                           ),
                         ),
                       ),
@@ -801,7 +803,7 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AltaColors.accent,
+                        backgroundColor: AltaColors.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),

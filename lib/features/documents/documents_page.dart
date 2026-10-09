@@ -161,7 +161,9 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
             final subject = data['subject'] as String? ?? 'Général';
 
             // Document illisible ou non conforme au programme scolaire
-            if (!isValid || status == 'unreadable' || status == 'not_curriculum') {
+            if (!isValid ||
+                status == 'unreadable' ||
+                status == 'not_curriculum') {
               final message = data['message'] as String? ??
                   'Document non reconnu comme un exercice scolaire du programme.';
               if (mounted) {
@@ -286,26 +288,18 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'ESPACE ÉDUCATION',
-                style: GoogleFonts.plusJakartaSans(
-                  color: AltaColors.accent,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'Mes Devoirs & Scanner OCR',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: textPri,
-                ),
-              ),
-            ],
+            // children: [
+            //   Text(
+            //     'ESPACE DE TRAVAIL PERSONNEL',
+            //     style: GoogleFonts.plusJakartaSans(
+            //       color: AltaColors.accent,
+            //       fontSize: 10,
+            //       fontWeight: FontWeight.w700,
+            //       letterSpacing: 0.8,
+            //     ),
+            //   ),
+            //   const SizedBox(height: 2),
+            // ],
           ),
 
           // ── HUB D'ACTIVITÉS PÉDAGOGIQUES ALTERNIA ─────────────────────────
@@ -324,7 +318,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                       color: cardBg,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: AltaColors.accent.withValues(alpha: 0.4),
+                        color: AltaColors.primary.withValues(alpha: 0.4),
                         width: 1.5,
                       ),
                     ),
@@ -337,12 +331,13 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AltaColors.accent.withValues(alpha: 0.15),
+                                color:
+                                    AltaColors.primary.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
                                 Icons.sports_esports_rounded,
-                                color: AltaColors.accent,
+                                color: AltaColors.primary,
                                 size: 22,
                               ),
                             ),
@@ -350,7 +345,8 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 7, vertical: 3),
                               decoration: BoxDecoration(
-                                color: AltaColors.accent.withValues(alpha: 0.12),
+                                color:
+                                    AltaColors.primary.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -358,7 +354,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                                 style: GoogleFonts.spaceMono(
                                   fontSize: 9,
                                   fontWeight: FontWeight.bold,
-                                  color: AltaColors.accent,
+                                  color: AltaColors.primary,
                                 ),
                               ),
                             ),
@@ -392,14 +388,14 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
-                                color: AltaColors.accent,
+                                color: AltaColors.primary,
                               ),
                             ),
                             const SizedBox(width: 4),
                             const Icon(
                               Icons.arrow_forward_rounded,
                               size: 13,
-                              color: AltaColors.accent,
+                              color: AltaColors.primary,
                             ),
                           ],
                         ),
@@ -437,7 +433,8 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AltaColors.secondary.withValues(alpha: 0.15),
+                                color: AltaColors.secondary
+                                    .withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
@@ -450,7 +447,8 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 7, vertical: 3),
                               decoration: BoxDecoration(
-                                color: AltaColors.secondary.withValues(alpha: 0.12),
+                                color: AltaColors.secondary
+                                    .withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -647,7 +645,8 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                          color:
+                              const Color(0xFFF59E0B).withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(

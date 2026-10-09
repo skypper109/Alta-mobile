@@ -597,7 +597,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.leaderboard_rounded),
-            color: AltaColors.accent,
+            color: AltaColors.primary,
             tooltip: 'Classement National',
             onPressed: () {
               Navigator.push(
@@ -746,19 +746,20 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
               decoration: BoxDecoration(
                 color: _isOnline
                     ? AltaColors.primary.withValues(alpha: 0.1)
-                    : AltaColors.accent.withValues(alpha: 0.1),
+                    : AltaColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: _isOnline
                       ? AltaColors.primary.withValues(alpha: 0.3)
-                      : AltaColors.accent.withValues(alpha: 0.3),
+                      : AltaColors.primary.withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
                 children: [
                   Icon(
                     _isOnline ? Icons.wifi_rounded : Icons.wifi_off_rounded,
-                    color: _isOnline ? AltaColors.secondary : AltaColors.accent,
+                    color:
+                        _isOnline ? AltaColors.secondary : AltaColors.primary,
                     size: 16,
                   ),
                   const SizedBox(width: 10),
@@ -774,7 +775,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                         fontWeight: FontWeight.w600,
                         color: _isOnline
                             ? AltaColors.secondary
-                            : AltaColors.accent,
+                            : AltaColors.primary,
                       ),
                     ),
                   ),
@@ -836,7 +837,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                     subtitle: 'Génère un code PIN pour ton ami',
                     icon: Icons.vpn_key_rounded,
                     isSelected: _selectedMode == DuelMode.createRoomWithCode,
-                    color: AltaColors.accent,
+                    color: AltaColors.primary,
                     onTap: () {
                       HapticFeedback.selectionClick();
                       setState(
@@ -932,7 +933,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
               height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AltaColors.accent,
+                  backgroundColor: AltaColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),

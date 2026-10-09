@@ -219,7 +219,8 @@ class _DuelLeaderboardScreenState extends ConsumerState<DuelLeaderboardScreen> {
       if (_genderFilter == LeaderboardGenderFilter.boys && s.gender != 'M') {
         return false;
       }
-      if (_scope == LeaderboardScope.bySchool && _selectedSchool != 'Tous les lycées') {
+      if (_scope == LeaderboardScope.bySchool &&
+          _selectedSchool != 'Tous les lycées') {
         if (!s.school.toLowerCase().contains(_selectedSchool.toLowerCase())) {
           return false;
         }
@@ -233,7 +234,8 @@ class _DuelLeaderboardScreenState extends ConsumerState<DuelLeaderboardScreen> {
         backgroundColor: cardBg,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: textPri, size: 20),
+          icon:
+              Icon(Icons.arrow_back_ios_new_rounded, color: textPri, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
@@ -292,7 +294,9 @@ class _DuelLeaderboardScreenState extends ConsumerState<DuelLeaderboardScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight,
+                        color: isDark
+                            ? AltaColors.surfaceAltDark
+                            : AltaColors.surfaceAltLight,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: borderCol),
                       ),
@@ -339,32 +343,38 @@ class _DuelLeaderboardScreenState extends ConsumerState<DuelLeaderboardScreen> {
                       _GenderChip(
                         label: 'Tous',
                         icon: Icons.groups_rounded,
-                        isSelected: _genderFilter == LeaderboardGenderFilter.all,
+                        isSelected:
+                            _genderFilter == LeaderboardGenderFilter.all,
                         onTap: () {
                           HapticFeedback.selectionClick();
-                          setState(() => _genderFilter = LeaderboardGenderFilter.all);
+                          setState(() =>
+                              _genderFilter = LeaderboardGenderFilter.all);
                         },
                       ),
                       const SizedBox(width: 6),
                       _GenderChip(
                         label: 'Filles',
                         icon: Icons.female_rounded,
-                        isSelected: _genderFilter == LeaderboardGenderFilter.girls,
+                        isSelected:
+                            _genderFilter == LeaderboardGenderFilter.girls,
                         color: const Color(0xFFEC4899),
                         onTap: () {
                           HapticFeedback.selectionClick();
-                          setState(() => _genderFilter = LeaderboardGenderFilter.girls);
+                          setState(() =>
+                              _genderFilter = LeaderboardGenderFilter.girls);
                         },
                       ),
                       const SizedBox(width: 6),
                       _GenderChip(
                         label: 'Garçons',
                         icon: Icons.male_rounded,
-                        isSelected: _genderFilter == LeaderboardGenderFilter.boys,
+                        isSelected:
+                            _genderFilter == LeaderboardGenderFilter.boys,
                         color: const Color(0xFF3B82F6),
                         onTap: () {
                           HapticFeedback.selectionClick();
-                          setState(() => _genderFilter = LeaderboardGenderFilter.boys);
+                          setState(() =>
+                              _genderFilter = LeaderboardGenderFilter.boys);
                         },
                       ),
                     ],
@@ -466,8 +476,9 @@ class _DuelLeaderboardScreenState extends ConsumerState<DuelLeaderboardScreen> {
                   ),
                   TextButton.icon(
                     style: TextButton.styleFrom(
-                      foregroundColor: AltaColors.accent,
-                      backgroundColor: AltaColors.accent.withValues(alpha: 0.12),
+                      foregroundColor: AltaColors.primary,
+                      backgroundColor:
+                          AltaColors.primary.withValues(alpha: 0.12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -569,7 +580,9 @@ class _GenderChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? color
-              : (isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight),
+              : (isDark
+                  ? AltaColors.surfaceAltDark
+                  : AltaColors.surfaceAltLight),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -645,7 +658,9 @@ class _StudentRankTile extends StatelessWidget {
             decoration: BoxDecoration(
               color: isTop3
                   ? _rankColor().withValues(alpha: 0.18)
-                  : (isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight),
+                  : (isDark
+                      ? AltaColors.surfaceAltDark
+                      : AltaColors.surfaceAltLight),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isTop3 ? _rankColor() : Colors.transparent,

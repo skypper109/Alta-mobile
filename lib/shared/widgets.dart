@@ -137,8 +137,10 @@ class DetShellScaffold extends ConsumerWidget {
                             child: Center(
                               child: GestureDetector(
                                 onTap: () {
-                                  if (navigationShell.currentIndex != item.branchIndex) {
-                                    _onTabSelected(context, ref, item.branchIndex);
+                                  if (navigationShell.currentIndex !=
+                                      item.branchIndex) {
+                                    _onTabSelected(
+                                        context, ref, item.branchIndex);
                                   }
                                 },
                                 behavior: HitTestBehavior.opaque,
@@ -150,14 +152,19 @@ class DetShellScaffold extends ConsumerWidget {
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    gradient: isSelected ? AppColors.primaryGradient : null,
-                                    color: isSelected ? null : Colors.transparent,
+                                    gradient: isSelected
+                                        ? AppColors.primaryGradient
+                                        : null,
+                                    color:
+                                        isSelected ? null : Colors.transparent,
                                     borderRadius: BorderRadius.circular(24),
                                     boxShadow: isSelected
                                         ? [
                                             BoxShadow(
                                               color: AppColors.primary
-                                                  .withValues(alpha: isDark ? 0.4 : 0.25),
+                                                  .withValues(
+                                                      alpha:
+                                                          isDark ? 0.4 : 0.25),
                                               blurRadius: 10,
                                               offset: const Offset(0, 3),
                                             ),
@@ -169,7 +176,9 @@ class DetShellScaffold extends ConsumerWidget {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(
-                                        isSelected ? item.selectedIcon : item.icon,
+                                        isSelected
+                                            ? item.selectedIcon
+                                            : item.icon,
                                         size: 20,
                                         color: isSelected
                                             ? AppColors.secondary
@@ -401,12 +410,14 @@ class DetLoading extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.secondary),
+          const CircularProgressIndicator(
+              strokeWidth: 2.5, color: AppColors.secondary),
           if (message != null) ...[
             const SizedBox(height: 12),
             Text(
               message!,
-              style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 13),
+              style: GoogleFonts.plusJakartaSans(
+                  color: AppColors.textSecondary, fontSize: 13),
             ),
           ],
         ],
@@ -430,7 +441,8 @@ class DetErrorWidget extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 36, color: AppColors.error),
+              const Icon(Icons.error_outline_rounded,
+                  size: 36, color: AppColors.error),
               const SizedBox(height: 12),
               Text(
                 message,
@@ -480,13 +492,15 @@ class DetEmptyState extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               title,
-              style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.bold),
+              style: GoogleFonts.plusJakartaSans(
+                  fontSize: 16, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 6),
             Text(
               subtitle,
-              style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppColors.textSecondary),
+              style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13, color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
             if (action != null) ...[
@@ -516,9 +530,7 @@ class AlterniaAvatarTopBarButton extends StatelessWidget {
     final borderColor = isDark
         ? AppColors.secondary.withValues(alpha: 0.4)
         : AppColors.secondary.withValues(alpha: 0.5);
-    final textColor = isDark
-        ? AppColors.secondary
-        : const Color(0xFF0E7490);
+    final textColor = isDark ? AppColors.secondary : const Color(0xFF0E7490);
 
     return GestureDetector(
       onTap: () {
@@ -537,7 +549,8 @@ class AlterniaAvatarTopBarButton extends StatelessWidget {
           border: Border.all(color: borderColor, width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: AppColors.secondary.withValues(alpha: isDark ? 0.25 : 0.12),
+              color:
+                  AppColors.secondary.withValues(alpha: isDark ? 0.25 : 0.12),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -564,7 +577,7 @@ class AlterniaAvatarTopBarButton extends StatelessWidget {
             if (showLabel) ...[
               const SizedBox(width: 6),
               Text(
-                'Salon Live',
+                'Mon Prof',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
