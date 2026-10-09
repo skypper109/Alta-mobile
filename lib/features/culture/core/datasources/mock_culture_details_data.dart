@@ -440,8 +440,9 @@ abstract final class MockCultureDetailsData {
       regionId: 'bamako',
       regionName: 'Bamako',
       tag: 'Symbole National',
-      photoUrl: 'assets/images/culture/monuments/monument_independance.jpg',
-      photoCredits: 'Boulevard de l\'Indépendance, Bamako • Archives Nationales',
+      photoUrl:
+          'assets/images/culture/monuments/monument_independance_bamako/ind_24.jpg',
+      photoCredits: 'Boulevard de l\'Indépendance, Bamako • Cliché National Réel',
       locationDetails: 'Boulevard de l\'Indépendance, Centre-ville de Bamako',
       presentation:
           'Érigé au cœur de la capitale malienne, ce minaret laïque et élancé commémore l\'accession solennelle de la République du Mali à la pleine indépendance le 22 septembre 1960 sous la présidence de Modibo Keïta.',
@@ -499,8 +500,10 @@ abstract final class MockCultureDetailsData {
       regionId: 'bamako',
       regionName: 'Bamako',
       tag: 'Panafricanisme',
-      photoUrl: 'assets/images/culture/monuments/tour_afrique.jpg',
-      photoCredits: 'Rond-point de Faladié, Bamako • Cliché Ville de Bamako',
+      photoUrl:
+          'assets/images/culture/monuments/monument_tour_afrique_bamako/wm_tour_1.jpg',
+      photoCredits:
+          'Rgaudin • Wikimedia Commons (Domaine public)',
       locationDetails: 'Échangeur de Faladié, Rive droite du fleuve Niger, Bamako',
       presentation:
           'Haute de 46 mètres, la Tour de l\'Afrique est une spectaculaire tour cylindrique combinant la symbolique du baobab protecteur et du minaret sahélien, couronnée d\'un flambeau métallique.',
@@ -550,59 +553,6 @@ abstract final class MockCultureDetailsData {
       ],
     ),
 
-    MonumentDetail(
-      id: 'monument_paix_bamako',
-      name: 'Monument de la Paix',
-      subtitle: 'Colombe Métallique de la Réconciliation',
-      era: 'Érigé en 1996 · Flamme de la Paix',
-      regionId: 'bamako',
-      regionName: 'Bamako',
-      tag: 'Paix & Vivre-Ensemble',
-      photoUrl: 'assets/images/culture/monuments/monument_paix.jpg',
-      photoCredits: 'Rond-point de l\'ACI 2000, Hamdallaye, Bamako',
-      locationDetails: 'Carrefour Hamdallaye ACI 2000, Bamako',
-      presentation:
-          'Colombe monumentale en dentelle d\'acier aux ailes déployées vers le ciel, symbolisant l\'aspiration universelle des communautés maliennes à la concorde et à la paix durable.',
-      architectureAndMaterials:
-          'Structure ajourée en acier forgé et socle en marbre blanc de Sélinkegny.',
-      whyItMatters:
-          'Rappelle la Flamme de la Paix de Tombouctou (1996) et la valeur suprême du dialogue traditionnel et du vivre-ensemble.',
-      keyFacts: [
-        HistoricalKeyFact(
-          label: 'Symbole',
-          value: 'Colombe de la Paix',
-          icon: Icons.flutter_dash_rounded,
-        ),
-        HistoricalKeyFact(
-          label: 'Matériau',
-          value: 'Acier forgé & Marbre',
-          icon: Icons.architecture_rounded,
-        ),
-        HistoricalKeyFact(
-          label: 'Quartier',
-          value: 'Hamdallaye ACI 2000',
-          icon: Icons.location_pin,
-        ),
-      ],
-      chapters: [
-        EditorialStoryChapter(
-          title: 'Le Vœu Sacré de Concorde',
-          content:
-              'Ce monument célèbre le génie du dialogue intercommunautaire malien hérité de la Charte de Kouroukan Fouga et du cousinage à plaisanterie (Sinankunya).',
-        ),
-      ],
-      connectedItems: [
-        ConnectedItemRef(
-          id: 'ville_bamako',
-          title: 'Bamako',
-          subtitle: 'La Cité des Trois Caïmans',
-          type: ConnectedItemType.ville,
-          tag: 'Capitale',
-          regionName: 'Bamako',
-          icon: Icons.location_city_rounded,
-        ),
-      ],
-    ),
 
     // Grande Mosquée de Djenné
     MonumentDetail(
@@ -686,9 +636,10 @@ abstract final class MockCultureDetailsData {
       regionId: 'gao',
       regionName: 'Gao',
       tag: 'Patrimoine Mondial UNESCO (2004)',
-      photoUrl: 'assets/images/culture/monuments/tombeau_askia.jpg',
+      photoUrl:
+          'assets/images/culture/monuments/monument_tombeau_askia/wm_tomb_1.jpg',
       photoCredits:
-          'Photographie du complexe des Askia à Gao • Cliché Patrimoine Mondial',
+          'David Sessoms • Wikimedia Commons (CC BY-SA 2.0)',
       locationDetails: 'Quartier historique, Ville de Gao, Bord du Niger',
       presentation:
           'Le Tombeau des Askia est une impressionnante structure pyramidale à degrés en banco de 17 mètres de hauteur, entourée de deux mosquées à toit plat, d\'un cimetière historique et d\'un espace de prière en plein air.',
@@ -752,9 +703,10 @@ abstract final class MockCultureDetailsData {
       regionId: 'sikasso',
       regionName: 'Sikasso',
       tag: 'Monument National Historique',
-      photoUrl: 'assets/images/culture/monuments/tata_sikasso.jpg',
+      photoUrl:
+          'assets/images/culture/monuments/monument_tata_sikasso/wm_tata_1.jpg',
       photoCredits:
-          'Vestiges protégés du Tata de Sikasso • Cliché Direction Nationale du Patrimoine',
+          'Vestiges du Tata de Sikasso • Wikimedia Commons (CC BY-SA 4.0)',
       locationDetails: 'Pourtour historique de Sikasso, Colline du Mamelon',
       presentation:
           'Le Tata de Sikasso était une colossale muraille fortifiée en banco et pierres latéritiques longue de plus de 9 kilomètres, ceinturant toute la ville de Sikasso avec des tours de guet, des bastions défensifs et d\'épaisses portes fortifiées.',
@@ -818,9 +770,10 @@ abstract final class MockCultureDetailsData {
       regionId: 'tombouctou',
       regionName: 'Tombouctou',
       tag: 'Patrimoine Mondial UNESCO (1988)',
-      photoUrl: 'assets/images/culture/monuments/mosquee_djingareyber.jpg',
+      photoUrl:
+          'assets/images/culture/monuments/monument_djingareyber/wm_djin_1.jpg',
       photoCredits:
-          'Mosquée Djingareyber, Tombouctou • Cliché Patrimoine Mondial UNESCO',
+          'Upyernoz • Wikimedia Commons (CC BY 2.0)',
       locationDetails: 'Centre-ville de Tombouctou, Quartier Djingareyber',
       presentation:
           'La Mosquée Djingareyber est le plus ancien sanctuaire encore en activité à Tombouctou. Conçue entièrement en banco, bois de palmier et pierres de calcaire, elle frappe par la pureté de ses lignes et son minaret tronconique dominant la ville mystique.',
@@ -884,9 +837,10 @@ abstract final class MockCultureDetailsData {
       regionId: 'kayes',
       regionName: 'Kayes',
       tag: 'Site Historique National',
-      photoUrl: 'assets/images/culture/monuments/fort_medine.jpg',
+      photoUrl:
+          'assets/images/culture/monuments/monument_fort_medine/wm_med_1.jpg',
       photoCredits:
-          'Fort de Médine sur le fleuve Sénégal, Région de Kayes • Archives Patrimoine',
+          'Olivier Epron Olivierkeita • Wikimedia Commons (CC BY 3.0)',
       locationDetails: 'Médine, à 12 km de Kayes, au pied des chutes du Félou',
       presentation:
           'Situé au bord du majestueux fleuve Sénégal, le Fort de Médine est une forteresse de pierre témoin des grandes confrontations du XIXe siècle entre les royaumes locaux, l\'épopée d\'El Hadj Oumar Tall et les forces coloniales.',
@@ -937,11 +891,13 @@ abstract final class MockCultureDetailsData {
       regionId: 'tombouctou',
       regionName: 'Tombouctou',
       tag: 'Patrimoine Mondial UNESCO',
-      photoUrl: 'assets/images/culture/monuments/mosquee_sankore.jpg',
-      photoCredits: 'Mosquée de Sankoré, Tombouctou • Cliché Patrimoine UNESCO',
+      photoUrl:
+          'assets/images/culture/monuments/monument_sankore/wm_san_1.jpg',
+      photoCredits:
+          'Upyernoz • Wikimedia Commons (CC BY 2.0)',
       locationDetails: 'Quartier Sankoré, Ville de Tombouctou',
       presentation:
-          'Sankoré  était pas seulement une mosquée, mais l\'une des plus prestigieuses universités du monde médiéval. Plus de 25 000 étudiants y étudiaient simultanément le droit, l\'astronomie, la médecine, la logique et les mathématiques.',
+          'Sankoré n\'était pas seulement une mosquée, mais l\'une des plus prestigieuses universités du monde médiéval. Plus de 25 000 étudiants y étudiaient simultanément le droit, l\'astronomie, la médecine, la logique et les mathématiques.',
       architectureAndMaterials:
           'Construite en banco selon des proportions géométriques sacrées calquées sur la Kaaba, son minaret en gradins est l\'un des repères les plus admirés de Tombouctou.',
       whyItMatters:

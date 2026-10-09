@@ -429,7 +429,7 @@ class _Monument3DViewerModalState extends State<Monument3DViewerModal>
           title: 'Lettres Vert-Jaune-Rouge « MALIBA »',
           subtitle: 'Fierté patriotique et jeunesse républicaine',
           description:
-              'Typographie monumentale en 3D aux couleurs du drapeau national célébrant la grandeur du Mali.',
+              'Sculpture monumentale aux couleurs du drapeau national célébrant la grandeur du Mali.',
           icon: Icons.emoji_flags_rounded,
         ),
         Architectural3DHotspot(
@@ -805,7 +805,7 @@ class _Monument3DViewerModalState extends State<Monument3DViewerModal>
                       Row(
                         children: [
                           Text(
-                            'Modèle 3D',
+                            'Architecture Vivante',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -1052,8 +1052,8 @@ class _Monument3DViewerModalState extends State<Monument3DViewerModal>
                                     Expanded(
                                       child: Text(
                                         _isArMode
-                                            ? 'Mode AR actif : Dirigez la caméra vers un sol plat.'
-                                            : 'Mode 3D temps réel actif.',
+                                            ? 'Réalité augmentée active : Dirigez la caméra vers un sol plat.'
+                                            : 'Exploration interactive active.',
                                         style: GoogleFonts.plusJakartaSans(color: Colors.white),
                                       ),
                                     ),
@@ -1647,8 +1647,13 @@ class MonumentRealistic3DPainter extends CustomPainter {
         sumZ += z2;
 
         // Projection perspective
-        final double proj = (d / (d + z2)) * scale;
-        screenPoints.add(Offset(center.dx + x1 * proj, center.dy + y2 * proj));
+        final double denom = d + z2;
+        if (denom <= 20.0) continue;
+        final double proj = (d / denom) * scale;
+        final double sx = center.dx + x1 * proj;
+        final double sy = center.dy + y2 * proj;
+        if (!sx.isFinite || !sy.isFinite) continue;
+        screenPoints.add(Offset(sx, sy));
       }
 
       final double avgZ = sumZ / face.vertices.length;
@@ -2590,23 +2595,42 @@ class MonumentRealistic3DPainter extends CustomPainter {
   List<PolygonFace3D> _buildTombeauAskiaFaces() {
     final List<PolygonFace3D> faces = [];
     const adobeBanco = Color(0xFFA67B48);
+    const darkAdobe = Color(0xFF8B6032);
     const groundMud = Color(0xFF78552D);
     const branchColor = Color(0xFF3E2723);
+    const sanctuaryColor = Color(0xFF9E713E);
 
-    // Sol désertique
-    faces.addAll(_buildBox(cx: 0, cy: 95, cz: 0, w: 120, h: 18, d: 120, color: groundMud));
+    // 1. Sol désertique et plateforme funéraire
+    faces.addAll(_buildBox(cx: 0, cy: 95, cz: 0, w: 130, h: 18, d: 130, color: groundMud));
 
-    // Pyramide tronquée à 3 degrés
+    // 2. Pyramide tronquée à 3 degrés étagés
     faces.addAll(_buildPyramidFrustum(yBottom: 86, yTop: 35, wBottom: 95, wTop: 72, color: adobeBanco));
     faces.addAll(_buildPyramidFrustum(yBottom: 35, yTop: -20, wBottom: 72, wTop: 48, color: adobeBanco));
     faces.addAll(_buildPyramidFrustum(yBottom: -20, yTop: -80, wBottom: 48, wTop: 24, color: adobeBanco));
-    faces.addAll(_buildBox(cx: 0, cy: -86, cz: 0, w: 16, h: 12, d: 16, color: groundMud));
 
-    // Échafaudages en branches d'acacia saillantes
-    faces.addAll(_buildBox(cx: 0, cy: 20, cz: 42, w: 4, h: 4, d: 16, color: branchColor));
-    faces.addAll(_buildBox(cx: -25, cy: -10, cz: 30, w: 4, h: 4, d: 16, color: branchColor));
-    faces.addAll(_buildBox(cx: 25, cy: -10, cz: 30, w: 4, h: 4, d: 16, color: branchColor));
-    faces.addAll(_buildBox(cx: 0, cy: -50, cz: 18, w: 4, h: 4, d: 14, color: branchColor));
+    // Couronnement sommital (plateforme rituelle des Askia)
+    faces.addAll(_buildBox(cx: 0, cy: -86, cz: 0, w: 18, h: 12, d: 18, color: darkAdobe));
+
+    // 3. Sanctuaire et mosquée de prière attenants (nef orientale et nef occidentale)
+    faces.addAll(_buildBox(cx: 52, cy: 65, cz: -10, w: 32, h: 42, d: 48, color: sanctuaryColor));
+    faces.addAll(_buildBox(cx: -52, cy: 65, cz: -10, w: 32, h: 42, d: 48, color: sanctuaryColor));
+
+    // 4. Échafaudages permanents en branches d'acacia (torons saillants sur les 4 façades)
+    // Façade avant (+Z)
+    faces.addAll(_buildBox(cx: 0, cy: 20, cz: 40, w: 3.5, h: 3.5, d: 14, color: branchColor));
+    faces.addAll(_buildBox(cx: -24, cy: 20, cz: 40, w: 3.5, h: 3.5, d: 14, color: branchColor));
+    faces.addAll(_buildBox(cx: 24, cy: 20, cz: 40, w: 3.5, h: 3.5, d: 14, color: branchColor));
+    faces.addAll(_buildBox(cx: -18, cy: -30, cz: 26, w: 3.5, h: 3.5, d: 14, color: branchColor));
+    faces.addAll(_buildBox(cx: 18, cy: -30, cz: 26, w: 3.5, h: 3.5, d: 14, color: branchColor));
+    faces.addAll(_buildBox(cx: 0, cy: -55, cz: 16, w: 3.5, h: 3.5, d: 12, color: branchColor));
+
+    // Façade arrière (-Z)
+    faces.addAll(_buildBox(cx: 0, cy: 20, cz: -40, w: 3.5, h: 3.5, d: 14, color: branchColor));
+    faces.addAll(_buildBox(cx: -18, cy: -30, cz: -26, w: 3.5, h: 3.5, d: 14, color: branchColor));
+    faces.addAll(_buildBox(cx: 18, cy: -30, cz: -26, w: 3.5, h: 3.5, d: 14, color: branchColor));
+
+    // Muret d'enceinte de la nécropole sacrée
+    faces.addAll(_buildBox(cx: 0, cy: 88, cz: 58, w: 124, h: 8, d: 4, color: darkAdobe));
 
     return faces;
   }
@@ -2617,18 +2641,31 @@ class MonumentRealistic3DPainter extends CustomPainter {
     const tombouctouEarth = Color(0xFFB38955);
     const minaretEarth = Color(0xFF9E7441);
     const woodBeams = Color(0xFF4A3525);
+    const domeColor = Color(0xFF8C6436);
 
-    // Grande nef en terre crue et pierres d'alchor
-    faces.addAll(_buildBox(cx: 20, cy: 55, cz: 0, w: 85, h: 65, d: 85, color: tombouctouEarth));
+    // 1. Grande salle hypostyle en terre crue et calcaire d'alchor
+    faces.addAll(_buildBox(cx: 18, cy: 55, cz: 0, w: 90, h: 65, d: 90, color: tombouctouEarth));
 
-    // Grand minaret conique de Mansa Moussa
-    faces.addAll(_buildCylinder(cx: -32, yBottom: 85, yTop: 15, radiusBottom: 28, radiusTop: 20, segments: 10, color: minaretEarth));
-    faces.addAll(_buildCylinder(cx: -32, yBottom: 15, yTop: -90, radiusBottom: 20, radiusTop: 10, segments: 10, color: minaretEarth));
-    faces.addAll(_buildPyramidFrustum(yBottom: -90, yTop: -125, wBottom: 16, wTop: 3, color: tombouctouEarth));
+    // Dômes de ventilation et puits de lumière sur la toiture (djoubba coniques)
+    faces.addAll(_buildPyramidFrustum(cx: 0, cz: -20, yBottom: 22, yTop: 12, wBottom: 12, wTop: 4, color: domeColor));
+    faces.addAll(_buildPyramidFrustum(cx: 35, cz: -20, yBottom: 22, yTop: 12, wBottom: 12, wTop: 4, color: domeColor));
+    faces.addAll(_buildPyramidFrustum(cx: 0, cz: 20, yBottom: 22, yTop: 12, wBottom: 12, wTop: 4, color: domeColor));
+    faces.addAll(_buildPyramidFrustum(cx: 35, cz: 20, yBottom: 22, yTop: 12, wBottom: 12, wTop: 4, color: domeColor));
 
-    // Poutres de bois traversantes
-    faces.addAll(_buildBox(cx: -32, cy: -40, cz: 0, w: 30, h: 3, d: 3, color: woodBeams));
-    faces.addAll(_buildBox(cx: -32, cy: -10, cz: 0, w: 36, h: 3, d: 3, color: woodBeams));
+    // 2. Grand minaret conique emblématique d'Abou Ishaq es-Sahéli
+    faces.addAll(_buildCylinder(cx: -34, yBottom: 85, yTop: 15, radiusBottom: 26, radiusTop: 20, segments: 10, color: minaretEarth));
+    faces.addAll(_buildCylinder(cx: -34, yBottom: 15, yTop: -85, radiusBottom: 20, radiusTop: 11, segments: 10, color: minaretEarth));
+    faces.addAll(_buildPyramidFrustum(cx: -34, cz: 0, yBottom: -85, yTop: -125, wBottom: 16, wTop: 3, color: minaretEarth));
+
+    // 3. Poutres traversantes de rônier (torons d'échafaudage)
+    faces.addAll(_buildBox(cx: -34, cy: -55, cz: 0, w: 28, h: 3, d: 3, color: woodBeams));
+    faces.addAll(_buildBox(cx: -34, cy: -25, cz: 0, w: 34, h: 3, d: 3, color: woodBeams));
+    faces.addAll(_buildBox(cx: -34, cy: 5, cz: 0, w: 38, h: 3, d: 3, color: woodBeams));
+    faces.addAll(_buildBox(cx: -34, cy: 35, cz: 0, w: 42, h: 3, d: 3, color: woodBeams));
+
+    // 4. Cour d'accès et arcades andalouses
+    faces.addAll(_buildBox(cx: 18, cy: 75, cz: 52, w: 78, h: 25, d: 4, color: tombouctouEarth));
+    faces.addAll(_buildBox(cx: 18, cy: 72, cz: 54, w: 16, h: 18, d: 3, color: const Color(0xFF3E2723)));
 
     return faces;
   }
@@ -2638,15 +2675,24 @@ class MonumentRealistic3DPainter extends CustomPainter {
     final List<PolygonFace3D> faces = [];
     const sankoreGold = Color(0xFFA88250);
     const stoneEarth = Color(0xFF8C6839);
+    const woodColor = Color(0xFF4A3525);
 
-    // Cour des manuscrits
-    faces.addAll(_buildBox(cx: 15, cy: 60, cz: 0, w: 80, h: 60, d: 80, color: sankoreGold));
+    // 1. Grande cour centrale des manuscrits (dimensions sacrificielles de la Kaaba)
+    faces.addAll(_buildBox(cx: 15, cy: 60, cz: 0, w: 85, h: 60, d: 85, color: sankoreGold));
 
-    // Minaret à gradins (proportions de la Kaaba)
-    faces.addAll(_buildBox(cx: -30, cy: 45, cz: 25, w: 42, h: 48, d: 42, color: sankoreGold));
-    faces.addAll(_buildBox(cx: -30, cy: 0, cz: 25, w: 32, h: 42, d: 32, color: sankoreGold));
-    faces.addAll(_buildBox(cx: -30, cy: -40, cz: 25, w: 22, h: 38, d: 22, color: sankoreGold));
-    faces.addAll(_buildPyramidFrustum(yBottom: -59, yTop: -95, wBottom: 16, wTop: 4, color: stoneEarth));
+    // 2. Minaret pyramidal à degrés réguliers
+    faces.addAll(_buildBox(cx: -32, cy: 45, cz: 25, w: 44, h: 48, d: 44, color: sankoreGold));
+    faces.addAll(_buildBox(cx: -32, cy: 0, cz: 25, w: 34, h: 42, d: 34, color: sankoreGold));
+    faces.addAll(_buildBox(cx: -32, cy: -40, cz: 25, w: 24, h: 38, d: 24, color: sankoreGold));
+    faces.addAll(_buildPyramidFrustum(cx: -32, cz: 25, yBottom: -59, yTop: -100, wBottom: 18, wTop: 4, color: stoneEarth));
+
+    // 3. Poutres de rônier sortantes sur le minaret (torons des savants)
+    faces.addAll(_buildBox(cx: -32, cy: 15, cz: 49, w: 26, h: 2.8, d: 6, color: woodColor));
+    faces.addAll(_buildBox(cx: -32, cy: -20, cz: 39, w: 18, h: 2.8, d: 6, color: woodColor));
+    faces.addAll(_buildBox(cx: -32, cy: -50, cz: 29, w: 12, h: 2.5, d: 6, color: woodColor));
+
+    // 4. Aile des bibliothèques des manuscrits et arcades d'étude
+    faces.addAll(_buildBox(cx: 20, cy: 50, cz: -35, w: 55, h: 35, d: 18, color: stoneEarth));
 
     return faces;
   }
@@ -2656,19 +2702,26 @@ class MonumentRealistic3DPainter extends CustomPainter {
     final List<PolygonFace3D> faces = [];
     const wallLaterite = Color(0xFF8D5832);
     const bastionDark = Color(0xFF5D4037);
+    const redSoil = Color(0xFF794624);
 
-    // Soubassement
-    faces.addAll(_buildBox(cx: 0, cy: 90, cz: 0, w: 130, h: 22, d: 75, color: bastionDark));
+    // 1. Soubassement de terre battue et latérite rouge
+    faces.addAll(_buildBox(cx: 0, cy: 90, cz: 0, w: 135, h: 22, d: 80, color: bastionDark));
 
-    // Muraille défensive
-    faces.addAll(_buildBox(cx: 0, cy: 45, cz: 0, w: 120, h: 68, d: 40, color: wallLaterite));
+    // 2. Muraille défensive massive (épaisse de 3m à la base)
+    faces.addAll(_buildBox(cx: 0, cy: 45, cz: 0, w: 125, h: 68, d: 42, color: wallLaterite));
 
-    // Tours de guet circulaires d'angle
-    faces.addAll(_buildCylinder(cx: -58, yBottom: 85, yTop: -10, radiusBottom: 18, radiusTop: 15, segments: 8, color: const Color(0xFF794624)));
-    faces.addAll(_buildCylinder(cx: 58, yBottom: 85, yTop: -10, radiusBottom: 18, radiusTop: 15, segments: 8, color: const Color(0xFF794624)));
+    // 3. Créneaux de tir et meurtrières le long du parapet
+    for (double x = -50; x <= 50; x += 25) {
+      faces.addAll(_buildBox(cx: x, cy: 8, cz: 18, w: 14, h: 8, d: 6, color: redSoil));
+    }
 
-    // Porte fortifiée
-    faces.addAll(_buildBox(cx: 0, cy: 55, cz: 22, w: 28, h: 45, d: 6, color: const Color(0xFF3E2723)));
+    // 4. Tours de guet circulaires d'angle (bastions défensifs du Kénédougou)
+    faces.addAll(_buildCylinder(cx: -62, yBottom: 85, yTop: -15, radiusBottom: 20, radiusTop: 16, segments: 10, color: redSoil));
+    faces.addAll(_buildCylinder(cx: 62, yBottom: 85, yTop: -15, radiusBottom: 20, radiusTop: 16, segments: 10, color: redSoil));
+
+    // 5. Porte fortifiée héroïque (Porte Tiéba) avec linteau de bois renforcé
+    faces.addAll(_buildBox(cx: 0, cy: 50, cz: 22, w: 32, h: 55, d: 8, color: const Color(0xFF422B1D)));
+    faces.addAll(_buildBox(cx: 0, cy: 56, cz: 26, w: 20, h: 36, d: 4, color: const Color(0xFF26180F)));
 
     return faces;
   }
@@ -2678,14 +2731,24 @@ class MonumentRealistic3DPainter extends CustomPainter {
     final List<PolygonFace3D> faces = [];
     const fortSandstone = Color(0xFFA84A33);
     const darkFort = Color(0xFF7E3827);
+    const commandHouse = Color(0xFF9E4B35);
+    const roofColor = Color(0xFF5D2418);
 
-    // Bastion de pierre
-    faces.addAll(_buildBox(cx: 0, cy: 90, cz: 0, w: 125, h: 22, d: 85, color: darkFort));
-    faces.addAll(_buildBox(cx: 0, cy: 45, cz: 0, w: 110, h: 68, d: 70, color: fortSandstone));
+    // 1. Assise en grès rouge sur la berge du fleuve Sénégal
+    faces.addAll(_buildBox(cx: 0, cy: 90, cz: 0, w: 130, h: 22, d: 90, color: darkFort));
 
-    // Échauguettes d'angle
-    faces.addAll(_buildBox(cx: -52, cy: 0, cz: 32, w: 16, h: 32, d: 16, color: darkFort));
-    faces.addAll(_buildBox(cx: 52, cy: 0, cz: 32, w: 16, h: 32, d: 16, color: darkFort));
+    // 2. Remparts principaux et courtines
+    faces.addAll(_buildBox(cx: 0, cy: 48, cz: 0, w: 115, h: 62, d: 75, color: fortSandstone));
+
+    // 3. Bastions d'angle d'artillerie
+    faces.addAll(_buildBox(cx: -56, cy: 15, cz: 36, w: 22, h: 55, d: 22, color: darkFort));
+    faces.addAll(_buildBox(cx: 56, cy: 15, cz: 36, w: 22, h: 55, d: 22, color: darkFort));
+    faces.addAll(_buildBox(cx: -56, cy: 15, cz: -36, w: 22, h: 55, d: 22, color: darkFort));
+    faces.addAll(_buildBox(cx: 56, cy: 15, cz: -36, w: 22, h: 55, d: 22, color: darkFort));
+
+    // 4. Poste de commandement central historique (siège de 1857)
+    faces.addAll(_buildBox(cx: 0, cy: 18, cz: 0, w: 42, h: 30, d: 32, color: commandHouse));
+    faces.addAll(_buildPyramidFrustum(cx: 0, cz: 0, yBottom: 3, yTop: -14, wBottom: 46, wTop: 12, color: roofColor));
 
     return faces;
   }

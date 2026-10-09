@@ -11,6 +11,7 @@ import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
 import '../../../../presentation/common/widgets/alternia_logo.dart';
+import '../../../curiosity/presentation/widgets/daily_curiosity_card.dart';
 import '../widgets/culture_region_bottom_sheet.dart';
 
 /// Vue 1 : Accueil Culture — « Le Sanctuaire Vivant du Mali »
@@ -82,6 +83,12 @@ class CultureHomeView extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── 0. LE RITUEL QUOTIDIEN : LA PÉPITE DU JOUR & LE DÉFI ÉCLAIR (60s) ──
+            const AnimatedCulturalReveal(
+              delay: Duration(milliseconds: 60),
+              child: DailyCuriosityCard(),
+            ),
+
             // ── 1. SECTION « À LA UNE » ─────────────────────────────────────────
             AnimatedCulturalReveal(
               delay: const Duration(milliseconds: 120),

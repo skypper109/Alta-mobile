@@ -157,6 +157,44 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
       subjectsProgress: progressMap,
     );
   }
+
+  /// Crédite de l'XP localement avec persistance immédiate
+  Future<void> addXp(int points) async {
+    final cleanXp = state.xp.replaceAll(RegExp(r'[^0-9]'), '');
+    final currentXpNum = int.tryParse(cleanXp) ?? 0;
+    final newXp = currentXpNum + points;
+    final formattedXp = newXp >= 1000 ? '$newXp'.replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]} ') : '$newXp';
+
+    state = state.copyWith(xp: formattedXp);
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedJson = prefs.getString(_prefsKey);
+      final data = cachedJson != null ? jsonDecode(cachedJson) as Map<String, dynamic> : <String, dynamic>{};
+      data['xp'] = newXp;
+      data['xp_label'] = formattedXp;
+      await prefs.setString(_prefsKey, jsonEncode(data));
+    } catch (_) {}
+  }
+
+  /// Incrémente la série de jours consécutifs (streak)
+  Future<void> incrementStreak() async {
+    final cleanStreak = state.streak.replaceAll(RegExp(r'[^0-9]'), '');
+    final currentStreakNum = int.tryParse(cleanStreak) ?? 0;
+    final newStreak = currentStreakNum + 1;
+    final streakLabel = '${newStreak}j';
+
+    state = state.copyWith(streak: streakLabel);
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedJson = prefs.getString(_prefsKey);
+      final data = cachedJson != null ? jsonDecode(cachedJson) as Map<String, dynamic> : <String, dynamic>{};
+      data['streak'] = newStreak;
+      data['streak_label'] = streakLabel;
+      await prefs.setString(_prefsKey, jsonEncode(data));
+    } catch (_) {}
+  }
 }
 
 final gamificationProvider =

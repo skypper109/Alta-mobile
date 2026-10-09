@@ -12,7 +12,7 @@ import 'monument_3d_interactive_stage.dart';
 
 /// Ambiance lumineuse sahélienne pour le monument
 enum MonumentSunAtmosphere {
-  zenith('Zénith Saharien', Icons.wb_sunny_rounded, Color(0xFFF59E0B)),
+  zenith('Zénith Saharien', Icons.wb_sunny_rounded, CultureTheme.accentOrange),
   crepuscule('Crépuscule d\'Ocre', Icons.nights_stay_rounded, Color(0xFFE11D48)),
   nuit('Nuit Mystique', Icons.star_rounded, Color(0xFF6366F1));
 
@@ -84,9 +84,9 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
       ];
     }
 
-    // Par défaut, afficher directement le Modèle 3D immersif pour la Mosquée de Djenné
-    final isDjenne = widget.monument.id.toLowerCase().contains('djenne');
-    _heroMode = isDjenne ? LivingHeroMode.model3D : LivingHeroMode.model3D;
+    // Par défaut, afficher les photos réelles authentiques avec swipe intuitif,
+    // tout en offrant le sélecteur [🏛 3D 360° | 📸 Photos HD] pour basculer instantanément
+    _heroMode = LivingHeroMode.photosHD;
 
     _particlesController = AnimationController(
       vsync: this,
@@ -128,9 +128,42 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
     );
   }
 
+  void _previousPhoto() {
+    CulturalHaptics.tabSwitch();
+    if (_currentPage > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeInOutCubic,
+      );
+    } else {
+      _pageController.animateToPage(
+        _photos.length - 1,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeInOutCubic,
+      );
+    }
+  }
+
+  void _nextPhoto() {
+    CulturalHaptics.tabSwitch();
+    if (_currentPage < _photos.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeInOutCubic,
+      );
+    } else {
+      _pageController.animateToPage(
+        0,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeInOutCubic,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.sizeOf(context).height;
+    final topPadding = MediaQuery.paddingOf(context).top;
     final heroHeight = (screenHeight * 0.48).clamp(380.0, 460.0);
 
     return SizedBox(
@@ -175,7 +208,7 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
                               child: Icon(
                                 Icons.museum_rounded,
                                 size: 64,
-                                color: Color(0xFFF59E0B),
+                                color: CultureTheme.accentOrange,
                               ),
                             ),
                           ),
@@ -226,14 +259,14 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
 
           // ── SÉLECTEUR DE MODE [3D 360° | PHOTOS RÉELLES] (SOUS LA BARRE STICKY) ───
           Positioned(
-            top: MediaQuery.of(context).padding.top + 52,
+            top: topPadding > 0 ? topPadding + 58 : 16,
             left: 0,
             right: 0,
             child: Center(
               child: Container(
                 padding: const EdgeInsets.all(3.5),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.82),
+                  color: Colors.black.withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: CultureTheme.accentOrange.withValues(alpha: 0.55),
@@ -252,7 +285,7 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
                   children: [
                     _buildModeTab(
                       mode: LivingHeroMode.model3D,
-                      label: '3D 360°',
+                      label: 'Vue 360°',
                       icon: Icons.view_in_ar_rounded,
                     ),
                     _buildModeTab(
@@ -266,23 +299,165 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
             ),
           ),
 
-          // ── BOUTONS D'INTERACTION SECONDAIRES FLOTTANTS ────────────────────
-          Positioned(
-            bottom: 56,
-            right: 16,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_heroMode == LivingHeroMode.photosHD) ...[
-                  // Sélecteur d'ambiance solaire
+          // ── CHEVRONS DE DÉFILEMENT GAUCHE ET DROITE (MODE PHOTOS) ──────────
+          if (_heroMode == LivingHeroMode.photosHD && _photos.length > 1) ...[
+            // Chevron Gauche (Précédent)
+            Positioned(
+              left: 10,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: _GalleryNavigationChevron(
+                  icon: Icons.chevron_left_rounded,
+                  tooltip: 'Photo précédente',
+                  onTap: _previousPhoto,
+                ),
+              ),
+            ),
+
+            // Chevron Droit (Suivant)
+            Positioned(
+              right: 10,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: _GalleryNavigationChevron(
+                  icon: Icons.chevron_right_rounded,
+                  tooltip: 'Photo suivante',
+                  onTap: _nextPhoto,
+                ),
+              ),
+            ),
+          ],
+
+          // ── BARRE INFÉRIEURE UNIFIÉE EN MODE PHOTOS RÉELLES ────────────────
+          // Compacte, sans débordement et avec alignement parfait
+          if (_heroMode == LivingHeroMode.photosHD) ...[
+            // Compteur de photos au-dessus de la barre
+            if (_photos.length > 1)
+              Positioned(
+                left: 16,
+                bottom: 44,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.65),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.photo_library_rounded,
+                        size: 11,
+                        color: Color(0xFFFCD34D),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${_currentPage + 1}/${_photos.length}',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFFFCD34D),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            // Rangée principale inférieure (UNESCO, Région, Ambiance)
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 14,
+              child: Row(
+                children: [
+                  // Badge UNESCO compact
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [CultureTheme.accentOrange, CultureTheme.accentLight],
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.verified_rounded,
+                          size: 11,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'UNESCO',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(width: 6),
+
+                  // Badge Région
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.65),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.25),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.location_on_rounded,
+                          size: 11,
+                          color: CultureTheme.accentOrange,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          widget.monument.regionName,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  // Sélecteur d'ambiance solaire compact
                   GestureDetector(
                     onTap: _nextAtmosphere,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.72),
-                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.black.withValues(alpha: 0.75),
+                        borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                           color: _atmosphere.accent.withValues(alpha: 0.7),
                         ),
@@ -297,12 +472,12 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(_atmosphere.icon,
-                              size: 13, color: _atmosphere.accent),
-                          const SizedBox(width: 5),
+                              size: 12, color: _atmosphere.accent),
+                          const SizedBox(width: 4),
                           Text(
-                            _atmosphere.label,
+                            _atmosphere.label.split(' ').first,
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10.5,
+                              fontSize: 10,
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
                             ),
@@ -311,227 +486,10 @@ class _MonumentLivingHeroState extends State<MonumentLivingHero>
                       ),
                     ),
                   ),
-                ] else ...[
-                  // Bouton Modèle 3D Plein Écran
-                  GestureDetector(
-                    onTap: _open3DViewer,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 7),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFD97706), Color(0xFFF59E0B)],
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFF59E0B).withValues(alpha: 0.45),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.fullscreen_rounded,
-                            size: 15,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Plein écran 3D',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
-              ],
+              ),
             ),
-          ),
-
-          // ── 5. BADGES PATRIMONIAUX EN BAS DU HERO ─────────────────────────
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 14,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Ligne des badges
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    // Badge UNESCO / Tag avec éclat doré
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4.5),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFB45309), Color(0xFFD97706)],
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.verified_rounded,
-                            size: 11,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            widget.monument.tag.toUpperCase(),
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Badge Région
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 9, vertical: 4.5),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.65),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.25),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.location_on_rounded,
-                            size: 11,
-                            color: CultureTheme.accentOrange,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            widget.monument.regionName,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Badge Compteur Photos Réelles ou Statut 3D
-                    if (_heroMode == LivingHeroMode.photosHD && _photos.length > 1)
-                      GestureDetector(
-                        onTap: () => _openFullscreenGallery(_currentPage),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4.5),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.65),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.2),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.photo_library_rounded,
-                                size: 11,
-                                color: Color(0xFFFCD34D),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${_currentPage + 1}/${_photos.length} photos',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFFFCD34D),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    else if (_heroMode == LivingHeroMode.model3D)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4.5),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.65),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: CultureTheme.accentOrange.withValues(alpha: 0.35),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.touch_app_rounded,
-                              size: 11,
-                              color: CultureTheme.accentOrange,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '360° Tactile • Touchez les pins',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: CultureTheme.accentOrange,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-
-                // Indicateurs discrets de pagination (en mode photos)
-                if (_heroMode == LivingHeroMode.photosHD && _photos.length > 1)
-                  Row(
-                    children: List.generate(_photos.length, (idx) {
-                      final isSelected = idx == _currentPage;
-                      return AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        margin: const EdgeInsets.only(right: 4),
-                        height: 3.5,
-                        width: isSelected ? 18 : 6,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFFF59E0B)
-                              : Colors.white.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      );
-                    }),
-                  ),
-              ],
-            ),
-          ),
+          ],
         ],
       ),
     );
@@ -744,7 +702,7 @@ class _MonumentFullscreenGalleryState
                         'Photo ${_currentIndex + 1} sur ${widget.photos.length}',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
-                          color: const Color(0xFFF59E0B),
+                          color: CultureTheme.accentOrange,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -754,6 +712,65 @@ class _MonumentFullscreenGalleryState
               ],
             ),
           ),
+
+          // Chevrons de défilement plein écran (si plus d'1 photo)
+          if (widget.photos.length > 1) ...[
+            // Chevron Gauche
+            Positioned(
+              left: 14,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: _GalleryNavigationChevron(
+                  icon: Icons.chevron_left_rounded,
+                  tooltip: 'Photo précédente',
+                  onTap: () {
+                    CulturalHaptics.tabSwitch();
+                    if (_currentIndex > 0) {
+                      _controller.previousPage(
+                        duration: const Duration(milliseconds: 280),
+                        curve: Curves.easeInOutCubic,
+                      );
+                    } else {
+                      _controller.animateToPage(
+                        widget.photos.length - 1,
+                        duration: const Duration(milliseconds: 320),
+                        curve: Curves.easeInOutCubic,
+                      );
+                    }
+                  },
+                ),
+              ),
+            ),
+
+            // Chevron Droit
+            Positioned(
+              right: 14,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: _GalleryNavigationChevron(
+                  icon: Icons.chevron_right_rounded,
+                  tooltip: 'Photo suivante',
+                  onTap: () {
+                    CulturalHaptics.tabSwitch();
+                    if (_currentIndex < widget.photos.length - 1) {
+                      _controller.nextPage(
+                        duration: const Duration(milliseconds: 280),
+                        curve: Curves.easeInOutCubic,
+                      );
+                    } else {
+                      _controller.animateToPage(
+                        0,
+                        duration: const Duration(milliseconds: 320),
+                        curve: Curves.easeInOutCubic,
+                      );
+                    }
+                  },
+                ),
+              ),
+            ),
+          ],
 
           // Pied de page : Crédits
           Positioned(
@@ -798,3 +815,60 @@ class _MonumentFullscreenGalleryState
     );
   }
 }
+
+/// Bouton chevron tactile et glassmorphic pour faire défiler les photos à gauche et à droite
+class _GalleryNavigationChevron extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  const _GalleryNavigationChevron({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Tooltip(
+        message: tooltip,
+        child: InkResponse(
+          onTap: onTap,
+          radius: 26,
+          containedInkWell: true,
+          splashColor: CultureTheme.accentOrange.withValues(alpha: 0.4),
+          highlightColor: Colors.white.withValues(alpha: 0.15),
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.58),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.32),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.45),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Icon(
+                icon,
+                color: Colors.white,
+                size: 26,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+

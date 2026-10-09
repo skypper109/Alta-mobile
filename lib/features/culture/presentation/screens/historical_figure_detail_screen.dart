@@ -10,6 +10,7 @@ import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_detail_models.dart';
 import '../../core/models/culture_passport_models.dart';
+import '../../core/datasources/historical_figure_sagas_data.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/services/cultural_haptics.dart';
 import '../../../../core/services/vivienne_tts_service.dart';
@@ -19,7 +20,6 @@ import '../widgets/connected_contents_section.dart';
 import '../widgets/documentary_scene_player.dart';
 import '../widgets/historical_sacred_parchment_card.dart';
 import '../widgets/passport_stamp_toast.dart';
-import '../widgets/soundiata_living_book_view.dart';
 
 /// Fiche de consultation immersive d'un Grand Personnage Historique
 /// Sublimée avec du Motion Design 2D de classe mondiale (Soundiata Keïta, Mansa Moussa, etc.)
@@ -162,7 +162,7 @@ class _HistoricalFigureDetailScreenState
             isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground,
         body: Center(
           child: CircularProgressIndicator(
-            color: isDark ? const Color(0xFFF59E0B) : CultureTheme.primaryDark,
+            color: isDark ? CultureTheme.orPatrimoine : CultureTheme.primaryDark,
           ),
         ),
       );
@@ -238,7 +238,7 @@ class _HistoricalFigureDetailScreenState
                             const Icon(
                               Icons.location_on_rounded,
                               size: 13,
-                              color: Color(0xFFF59E0B),
+                              color: CultureTheme.orPatrimoine,
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -246,7 +246,7 @@ class _HistoricalFigureDetailScreenState
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFFF59E0B),
+                                color: CultureTheme.orPatrimoine,
                               ),
                             ),
                           ],
@@ -254,17 +254,138 @@ class _HistoricalFigureDetailScreenState
                         const SizedBox(height: 12),
                       ],
 
+                      // ── EXPÉRIENCE IMMERSIVE UNIFIÉE : ÉPOPÉE DU PERSONNAGE (MOTION DESIGN VIDÉO) ──
+                      Builder(
+                        builder: (context) {
+                          final saga = HistoricalFigureSagas.getSaga(item.id);
+                          return GestureDetector(
+                            onTap: () {
+                              HapticFeedback.heavyImpact();
+                              context.push('/culture/personnage/${item.id}/reel');
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 24),
+                              padding: const EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                color: CultureTheme.darkSurface,
+                                borderRadius: BorderRadius.circular(22),
+                                border: Border.all(
+                                  color: saga.primaryAccent.withValues(alpha: 0.6),
+                                  width: 1.5,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: saga.primaryAccent.withValues(alpha: 0.22),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3.5,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: saga.secondaryAccent.withValues(alpha: 0.2),
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(
+                                            color: saga.secondaryAccent.withValues(alpha: 0.6),
+                                            width: 1.0,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'ÉPOPÉE HISTORIQUE',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 9.5,
+                                            fontWeight: FontWeight.w900,
+                                            color: saga.secondaryAccent,
+                                            letterSpacing: 0.6,
+                                          ),
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      Icon(
+                                        Icons.auto_stories_rounded,
+                                        size: 16,
+                                        color: saga.primaryAccent,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    saga.sagaTitle,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w900,
+                                      color: CultureTheme.sable,
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    saga.sagaSubtitle,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 12.5,
+                                      color: CultureTheme.sable.withValues(alpha: 0.85),
+                                      height: 1.45,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 11,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: saga.secondaryAccent,
+                                      borderRadius: BorderRadius.circular(14),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: saga.secondaryAccent.withValues(alpha: 0.4),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.play_circle_fill_rounded,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'DÉCOUVRIR L\'ÉPOPÉE',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.white,
+                                            letterSpacing: 0.6,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+
                       // ── 1. NARRATION VIVANTE ADAPTÉE AU PERSONNAGE ──
-                      if (item.id.contains('soundiata'))
-                        SoundiataLivingBookView(
-                          figure: item,
-                          isDark: isDark,
-                        )
-                      else
-                        DocumentaryScenePlayer(
-                          figure: item,
-                          isDark: isDark,
-                        ),
+                      DocumentaryScenePlayer(
+                        figure: item,
+                        isDark: isDark,
+                      ),
 
                       const SizedBox(height: 24),
 
@@ -385,11 +506,11 @@ class _HistoricalFigureDetailScreenState
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 10, vertical: 5),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF1E0E05)
+                                    color: CultureTheme.darkSurface
                                         .withValues(alpha: 0.85),
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color: const Color(0xFFF59E0B)
+                                      color: CultureTheme.orPatrimoine
                                           .withValues(alpha: 0.6),
                                       width: 1.0,
                                     ),
@@ -402,7 +523,7 @@ class _HistoricalFigureDetailScreenState
                                         height: 6,
                                         decoration: const BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: Color(0xFFF59E0B),
+                                          color: CultureTheme.orPatrimoine,
                                         ),
                                       ),
                                       const SizedBox(width: 6),
@@ -414,7 +535,7 @@ class _HistoricalFigureDetailScreenState
                                           style: GoogleFonts.plusJakartaSans(
                                             fontSize: 9.5,
                                             fontWeight: FontWeight.w800,
-                                            color: const Color(0xFFF59E0B),
+                                            color: CultureTheme.orPatrimoine,
                                             letterSpacing: 0.8,
                                           ),
                                           maxLines: 1,
@@ -434,7 +555,7 @@ class _HistoricalFigureDetailScreenState
                           ? Icons.bookmark_rounded
                           : Icons.bookmark_border_rounded,
                       iconColor: _isBookmarked
-                          ? const Color(0xFFF59E0B)
+                          ? CultureTheme.orPatrimoine
                           : (_isScrolled && !isDark
                               ? const Color(0xFF0F172A)
                               : Colors.white),
@@ -469,7 +590,7 @@ class _HistoricalFigureDetailScreenState
             const Icon(
               Icons.military_tech_rounded,
               size: 20,
-              color: Color(0xFFF59E0B),
+              color: CultureTheme.orPatrimoine,
             ),
             const SizedBox(width: 8),
             Text(
@@ -518,13 +639,13 @@ class _HistoricalFigureDetailScreenState
                           width: 34,
                           height: 34,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                            color: CultureTheme.orPatrimoine.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
                             fact.icon,
                             size: 18,
-                            color: const Color(0xFFF59E0B),
+                            color: CultureTheme.orPatrimoine,
                           ),
                         ),
                         const SizedBox(height: 10),

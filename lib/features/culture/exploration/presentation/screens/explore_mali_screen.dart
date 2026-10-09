@@ -151,7 +151,7 @@ class _ExploreMaliScreenState extends ConsumerState<ExploreMaliScreen> {
           tag: place.tag,
           latitude: place.latitude,
           longitude: place.longitude,
-          unlockedBadge: 'Explorateur 3D',
+          unlockedBadge: 'Grand Explorateur',
           xpEarned: 50,
           keywords: [place.name, place.fullName],
           detectionFeatures: const [],

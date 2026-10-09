@@ -92,11 +92,11 @@ class _MonumentGuidedTourViewState extends State<MonumentGuidedTourView> {
         color: cardBg,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: const Color(0xFFF59E0B).withValues(alpha: isDark ? 0.4 : 0.25),
+          color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.4 : 0.25),
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFD97706).withValues(alpha: isDark ? 0.2 : 0.05),
+            color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.2 : 0.05),
             blurRadius: 18,
             offset: const Offset(0, 4),
           ),
@@ -115,12 +115,12 @@ class _MonumentGuidedTourViewState extends State<MonumentGuidedTourView> {
                   height: 42,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFB45309), Color(0xFFF59E0B)],
+                      colors: [CultureTheme.accentOrange, CultureTheme.accentLight],
                     ),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
+                        color: CultureTheme.accentOrange.withValues(alpha: 0.35),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -154,7 +154,7 @@ class _MonumentGuidedTourViewState extends State<MonumentGuidedTourView> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3.5),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF59E0B)
+                              color: CultureTheme.accentOrange
                                   .withValues(alpha: isDark ? 0.2 : 0.12),
                               borderRadius: BorderRadius.circular(6),
                             ),
@@ -163,7 +163,7 @@ class _MonumentGuidedTourViewState extends State<MonumentGuidedTourView> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w900,
-                                color: const Color(0xFFD97706),
+                                color: CultureTheme.accentOrange,
                               ),
                             ),
                           ),
@@ -210,7 +210,7 @@ class _MonumentGuidedTourViewState extends State<MonumentGuidedTourView> {
                         color: isSelected
                             ? CultureTheme.accentOrange
                             : (isVisited
-                                ? const Color(0xFFF59E0B)
+                                ? CultureTheme.accentOrange
                                     .withValues(alpha: isDark ? 0.18 : 0.08)
                                 : (isDark
                                     ? const Color(0xFF1E293B)
@@ -220,7 +220,7 @@ class _MonumentGuidedTourViewState extends State<MonumentGuidedTourView> {
                           color: isSelected
                               ? CultureTheme.accentOrange
                               : (isVisited
-                                  ? const Color(0xFFF59E0B)
+                                  ? CultureTheme.accentOrange
                                       .withValues(alpha: 0.35)
                                   : borderCol),
                         ),
@@ -281,7 +281,7 @@ class _MonumentGuidedTourViewState extends State<MonumentGuidedTourView> {
                           child: Icon(
                             Icons.museum_rounded,
                             size: 48,
-                            color: Color(0xFFF59E0B),
+                            color: CultureTheme.accentOrange,
                           ),
                         ),
                       ),
@@ -349,10 +349,10 @@ class _MonumentGuidedTourViewState extends State<MonumentGuidedTourView> {
               decoration: BoxDecoration(
                 color: isDark
                     ? const Color(0xFF1E293B).withValues(alpha: 0.5)
-                    : const Color(0xFFFFFBEB),
+                    : CultureTheme.accentOrange.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
+                  color: CultureTheme.accentOrange.withValues(alpha: 0.3),
                 ),
               ),
               child: Column(
@@ -422,7 +422,7 @@ class _MonumentGuidedTourViewState extends State<MonumentGuidedTourView> {
                     : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: const Color(0xFFD97706).withValues(alpha: 0.25),
+                  color: CultureTheme.accentOrange.withValues(alpha: 0.25),
                 ),
               ),
               child: Row(
@@ -432,13 +432,13 @@ class _MonumentGuidedTourViewState extends State<MonumentGuidedTourView> {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD97706).withValues(alpha: 0.15),
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
                       Icons.remove_red_eye_rounded,
                       size: 15,
-                      color: Color(0xFFD97706),
+                      color: CultureTheme.accentOrange,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -525,12 +525,12 @@ class _MonumentGuidedTourViewState extends State<MonumentGuidedTourView> {
                       height: 48,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFB45309), Color(0xFFF59E0B)],
+                          colors: [CultureTheme.accentOrange, CultureTheme.accentLight],
                         ),
                         borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFF59E0B)
+                            color: CultureTheme.accentOrange
                                 .withValues(alpha: 0.35),
                             blurRadius: 10,
                             offset: const Offset(0, 3),

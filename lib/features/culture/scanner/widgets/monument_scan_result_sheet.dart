@@ -580,7 +580,7 @@ class _MonumentScanResultSheetState extends ConsumerState<MonumentScanResultShee
                                 const Icon(Icons.view_in_ar_rounded, size: 18, color: CultureTheme.accentOrange),
                                 const SizedBox(width: 6),
                                 Text(
-                                  '3D / AR',
+                                  'Vue 360°',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,

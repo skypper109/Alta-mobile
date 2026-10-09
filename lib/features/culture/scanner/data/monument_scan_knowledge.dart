@@ -3,7 +3,7 @@ import '../models/monument_scan_models.dart';
 
 /// Répertoire de connaissances des monuments et sites remarquables du Mali
 /// calibré pour la vision par ordinateur CultureLens AI, la géolocalisation et le récit historique oral.
-/// Se base strictement sur les monuments disposant de dossiers et photos réelles du dataset.
+/// Se base strictement sur les 8 monuments historiques réels du dataset et du patrimoine malien.
 abstract final class MonumentScanKnowledge {
   static final List<MonumentScanTarget> _dynamicTargets = [];
 
@@ -22,825 +22,10 @@ abstract final class MonumentScanKnowledge {
 
   static const List<MonumentScanTarget> defaultTargets = [
     // ══════════════════════════════════════════════════════════════════════════
-    // ── MONUMENTS DE BAMAKO (AVEC PHOTOS RÉELLES DU DATASET) ──────────────────
+    // ── LES 8 GRANDS MONUMENTS HISTORIQUES AUTHENTIQUES DU MALI ───────────────
     // ══════════════════════════════════════════════════════════════════════════
 
-    // 1. MONUMENT DE L'INDÉPENDANCE
-    MonumentScanTarget(
-      id: 'monument_independance_bamako',
-      name: 'Monument de l\'Indépendance',
-      subtitle: 'Symbole éternel de la souveraineté et du 22 Septembre 1960',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Érigé en hommage au 22 septembre 1960 • Modibo Keïta',
-      architectureStyle:
-          'Obélisque monumentaliste moderne orné de bas-reliefs patriotiques',
-      locationDetails:
-          'Boulevard de l\'Indépendance, Hamdallaye / Centre administratif',
-      photoUrl:
-          'assets/images/culture/monuments/monument_independance_bamako/ind11.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_independance_bamako/ind11.jpg',
-        'assets/images/culture/monuments/monument_independance_bamako/ind12.jpg',
-        'assets/images/culture/monuments/monument_independance_bamako/ind13.jpg',
-        'assets/images/culture/monuments/monument_independance_bamako/ind2.jpg',
-      ],
-      tag: 'Monument National Emblématique',
-      latitude: 12.6392,
-      longitude: -8.0029,
-      unlockedBadge: 'Pionnier de la Souveraineté',
-      xpEarned: 60,
-      keywords: [
-        'independance',
-        'obelisque',
-        'bamako',
-        'modibo',
-        'keita',
-        '1960',
-        'souverainete',
-        'patrie',
-        'boulevard',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Obélisque vertical élancé (25 mètres)',
-          confidence: 0.992,
-          category: 'Structure',
-          icon: Icons.trending_up_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Bas-reliefs en bronze figurant les pères de la nation',
-          confidence: 0.985,
-          category: 'Détail',
-          icon: Icons.military_tech_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Socle pyramidal en marbre et granit',
-          confidence: 0.978,
-          category: 'Matériau',
-          icon: Icons.layers_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'Le monument abrite une crypte commémorative scellée et le socle de la flamme sacrée du souvenir. Chaque 22 septembre, les délégations de toute l\'Afrique s\'y réunissent pour célébrer l\'accession à la souveraineté nationale.',
-      historicalStory:
-          'Érigé pour immortaliser l\'accession de la République du Mali à l\'indépendance le 22 septembre 1960, le monument célèbre le courage de Modibo Keïta et des artisans de la liberté. Il incarne le non catégorique à la sujétion et le ralliement à l\'idéal panafricain.',
-      audioNarrationText:
-          'Vous contemplez le Monument de l\'Indépendance du Mali, qui s\'élève fièrement sur le grand boulevard de Bamako. Cet obélisque géant rappelle à chaque génération le courage des pères fondateurs de 1960 et le serment inaltérable de la liberté nationale.',
-      whyItMatters:
-          'C\'est le repère patriotique central de la nation malienne et le lieu cérémoniel d\'affirmation de la souveraineté.',
-      routePath: '/culture/monuments',
-      arAvailable: true,
-      validationStatus: 'Validé Archives Nationales',
-    ),
-
-    // 2. LA TOUR DE L'AFRIQUE
-    MonumentScanTarget(
-      id: 'monument_tour_afrique_bamako',
-      name: 'La Tour de l\'Afrique',
-      subtitle: 'Le Phare du Panafricanisme et de la Fraternité Sahélienne',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Inaugurée en 2001 lors du Sommet France-Afrique',
-      architectureStyle:
-          'Tour néo-sahélienne de 46 mètres évoquant un baobab sacré surmonté d\'une corbeille de l\'union',
-      locationDetails:
-          'Rond-point de Faladié, Carrefour de la Paix, Commune VI',
-      photoUrl:
-          'assets/images/culture/monuments/monument_tour_afrique_bamako/tour.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_tour_afrique_bamako/tour.jpg',
-        'assets/images/culture/monuments/monument_tour_afrique_bamako/tour1.jpg',
-        'assets/images/culture/monuments/monument_tour_afrique_bamako/tour10.jpg',
-        'assets/images/culture/monuments/monument_tour_afrique_bamako/tour11.jpg',
-      ],
-      tag: 'Symbole de l\'Unité Africaine',
-      latitude: 12.5935,
-      longitude: -7.9463,
-      unlockedBadge: 'Bâtisseur de l\'Unité Africaine',
-      xpEarned: 60,
-      keywords: [
-        'tour',
-        'afrique',
-        'faladie',
-        'baobab',
-        'corbeille',
-        'panafricanisme',
-        'bamako',
-        'aeroport',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Silhouette évasée en forme de baobab (46m)',
-          confidence: 0.994,
-          category: 'Structure',
-          icon: Icons.nature_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Corbeille supérieure de la concorde',
-          confidence: 0.988,
-          category: 'Symbole',
-          icon: Icons.all_inclusive_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Enduit ocre et fresques céramiques des 54 pays',
-          confidence: 0.976,
-          category: 'Détail',
-          icon: Icons.public_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'La corbeille au sommet symbolise le mythe de la jarre percée : nul ne peut étancher la soif d\'un continent seul, mais unis, les doigts des peuples retiennent l\'eau de la paix et de la prospérité.',
-      historicalStory:
-          'Construite au carrefour stratégique menant à l\'aéroport et aux régions du sud, la Tour de l\'Afrique est un vibrant hommage à l\'idéal des États-Unis d\'Afrique et à la solidarité interétatique.',
-      audioNarrationText:
-          'Dressée à 46 mètres au-dessus du rond-point de Faladié, la Tour de l\'Afrique accueille les visiteurs entrant à Bamako. Ses lignes sinueuses rendent hommage à l\'arbre à palabres et rappellent la vocation du Mali à être le carrefour éternel de l\'unité africaine.',
-      whyItMatters:
-          'C\'est l\'un des monuments les plus hauts et les plus photographiés d\'Afrique de l\'Ouest.',
-      routePath: '/culture/monuments',
-      arAvailable: true,
-      validationStatus: 'Validé Ministère de la Culture',
-    ),
-
-    // 3. LE MONUMENT DE LA PAIX
-    MonumentScanTarget(
-      id: 'monument_paix_bamako',
-      name: 'Le Monument de la Paix',
-      subtitle: 'La Colombe de la Concorde et de la Réconciliation',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Érigé en 1996 • Dans la ferveur de la Flamme de la Paix',
-      architectureStyle:
-          'Colombe blanche monumentale aux ailes déployées au-dessus du globe terrestre',
-      locationDetails:
-          'Rond-point de la Paix, Hamdallaye ACI 2000, Commune IV',
-      photoUrl:
-          'assets/images/culture/monuments/monument_paix_bamako/Ref_P5.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_paix_bamako/Ref_P5.jpg',
-        'assets/images/culture/monuments/monument_paix_bamako/paix1.jpg',
-        'assets/images/culture/monuments/monument_paix_bamako/ref_P1.jpg',
-        'assets/images/culture/monuments/monument_paix_bamako/ref_P10.jpg',
-      ],
-      tag: 'Monument National de Concorde',
-      latitude: 12.6322,
-      longitude: -8.0261,
-      unlockedBadge: 'Artisan de la Paix',
-      xpEarned: 50,
-      keywords: [
-        'paix',
-        'colombe',
-        'aci 2000',
-        'hamdallaye',
-        'reconciliation',
-        'concorde',
-        'bamako',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Colombe sculpturale blanche en plein envol',
-          confidence: 0.990,
-          category: 'Symbole',
-          icon: Icons.flutter_dash_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Sphère terrestre en acier ajouré',
-          confidence: 0.982,
-          category: 'Structure',
-          icon: Icons.public_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Bassin d\'eau circulaire réfléchissant',
-          confidence: 0.970,
-          category: 'Environnement',
-          icon: Icons.water_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'Le monument a été érigé suite à l\'accord historique de Tombouctou en 1996 où plus de 3 000 fusils de guerre furent brûlés dans un brasier d\'espoir.',
-      historicalStory:
-          'Situé dans le quartier d\'affaires d\'ACI 2000, le monument rappelle que la paix n\'est pas un vain mot, mais un comportement quotidien inscrit dans la parenté à plaisanterie (Sinankunya).',
-      audioNarrationText:
-          'Vous admirez le Monument de la Paix d\'Hamdallaye ACI 2000. La colombe immaculée prenant son essor symbolise le triomphe du dialogue sur la discorde.',
-      whyItMatters:
-          'Rappel solennel de la réconciliation et du vivre-ensemble entre toutes les communautés maliennes.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Validé',
-    ),
-
-    // 4. MONUMENT DES HÉROS DE L'ARMÉE NOIRE
-    MonumentScanTarget(
-      id: 'monument_armee_noire_bamako',
-      name: 'Monument des Héros de l\'Armée Noire',
-      subtitle: 'Hommage universel aux Tirailleurs et Combattants Africains',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Conçu en 1924 • Réhabilité solennellement en 2004',
-      architectureStyle:
-          'Statuaire monumentale en bronze représentant des soldats africains solidaires',
-      locationDetails: 'Place de la Liberté, Centre-ville, Commune III',
-      photoUrl:
-          'assets/images/culture/monuments/monument_armee_noire_bamako/ref_N1.webp',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_armee_noire_bamako/ref_N1.webp',
-      ],
-      tag: 'Mémoire Militaire & Universelle',
-      latitude: 12.6514,
-      longitude: -7.9982,
-      unlockedBadge: 'Mémoire des Tirailleurs',
-      xpEarned: 55,
-      keywords: [
-        'tirailleurs',
-        'armee noire',
-        'liberte',
-        'guerre',
-        'heros',
-        'bamako',
-        'bronze',
-        'place',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Groupe sculpté de soldats africains en uniforme d\'époque',
-          confidence: 0.991,
-          category: 'Sculpture',
-          icon: Icons.groups_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Piédestal en pierre de taille rouge',
-          confidence: 0.980,
-          category: 'Matériau',
-          icon: Icons.foundation_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Emplacement central sur la Place de la Liberté',
-          confidence: 0.974,
-          category: 'Topographie',
-          icon: Icons.location_city_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'Ce monument est la réplique exacte de celui érigé à Reims en France en 1924, détruit durant l\'occupation de 1940, puis reconstruit grâce aux archives conservées à Bamako.',
-      historicalStory:
-          'Ce mémorial consacre le sacrifice suprême consenti par les fils du Mali et d\'Afrique de l\'Ouest pour la liberté mondiale lors des deux guerres mondiales.',
-      audioNarrationText:
-          'Ici s\'élève le Monument des Héros de l\'Armée Noire, sur la Place de la Liberté. Il honore la mémoire impérissable des tirailleurs qui ont combattu sur les champs de bataille avec un héroïsme légendaire.',
-      whyItMatters:
-          'Plaque tournante de la mémoire combattante africaine et de la reconnaissance internationale.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Validé Archives Militaires',
-    ),
-
-    // 5. MONUMENT DE SAMORY TOURÉ
-    MonumentScanTarget(
-      id: 'monument_samory_toure_bamako',
-      name: 'Monument de l\'Almamy Samory Touré',
-      subtitle: 'Le Bâtisseur de l\'Empire Ouassoulou et Grand Stratège',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Érigé sous la IIIe République',
-      architectureStyle:
-          'Statue équestre impériale en bronze sur socle monolithique',
-      locationDetails:
-          'Boulevard du 22 Octobre, Hamdallaye ACI 2000, Bamako',
-      photoUrl:
-          'assets/images/culture/monuments/monument_samory_toure_bamako/sam1.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_samory_toure_bamako/sam1.jpg',
-        'assets/images/culture/monuments/monument_samory_toure_bamako/sam10.jpg',
-        'assets/images/culture/monuments/monument_samory_toure_bamako/sam2.jpg',
-        'assets/images/culture/monuments/monument_samory_toure_bamako/sam3.jpg',
-      ],
-      tag: 'Monument Historique de Résistance',
-      latitude: 12.6348,
-      longitude: -8.0315,
-      unlockedBadge: 'Cavalier du Ouassoulou',
-      xpEarned: 55,
-      keywords: [
-        'samory',
-        'toure',
-        'almamy',
-        'cavalier',
-        'cheval',
-        'ouassoulou',
-        'resistance',
-        'aci 2000',
-        'bamako',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Statue équestre en bronze (cheval cabré)',
-          confidence: 0.993,
-          category: 'Sculpture',
-          icon: Icons.sports_score_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Almamy en tenue guerrière et sabre au côté',
-          confidence: 0.986,
-          category: 'Détail',
-          icon: Icons.shield_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Implantation sur le rond-point d\'ACI 2000',
-          confidence: 0.975,
-          category: 'Topographie',
-          icon: Icons.place_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'Samory Touré avait organisé une armée moderne de 30 000 sofa et développé des forges artisanales capables de fabriquer des répliques fidèles des fusils à tir rapide Chassepot et Kropatschek.',
-      historicalStory:
-          'L\'Almamy Samory Touré (1830-1900) résista pendant près de vingt ans aux armées coloniales avec une intelligence tactique qui suscita le respect des généraux de son siècle.',
-      audioNarrationText:
-          'Vous voici devant la statue équestre de l\'Almamy Samory Touré. Fondateur de l\'Empire du Ouassoulou, il est l\'une des figures militaires les plus remarquables de l\'histoire africaine.',
-      whyItMatters:
-          'Symbole de la résistance acharnée et de la capacité industrielle précoloniale.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Validé',
-    ),
-
-    // 6. MONUMENT DES MARTYRS
-    MonumentScanTarget(
-      id: 'monument_martyrs_bamako',
-      name: 'Monument des Martyrs',
-      subtitle: 'Hommage au soulèvement démocratique du 26 Mars 1991',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Érigé en 1993 • IIIe République',
-      architectureStyle:
-          'Mémorial géométrique moderne en marbre blanc et structures ajourées sur les rives du fleuve Niger',
-      locationDetails: 'Tête du Pont des Martyrs, Badalabougou, Bamako',
-      photoUrl:
-          'assets/images/culture/monuments/monument_martyrs_bamako/mart1.webp',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_martyrs_bamako/mart1.webp',
-        'assets/images/culture/monuments/monument_martyrs_bamako/mart10.jpg',
-        'assets/images/culture/monuments/monument_martyrs_bamako/mart2.jpg',
-        'assets/images/culture/monuments/monument_martyrs_bamako/mart3.jpg',
-      ],
-      tag: 'Sanctuaire Démocratique',
-      latitude: 12.6358,
-      longitude: -7.9942,
-      unlockedBadge: 'Flambeau Démocratique',
-      xpEarned: 55,
-      keywords: [
-        'martyrs',
-        'democratie',
-        'pont',
-        'mars',
-        '1991',
-        'fleuve',
-        'liberte',
-        'bamako',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Stèle commémorative stylisée et flamme du souvenir',
-          confidence: 0.990,
-          category: 'Structure',
-          icon: Icons.local_fire_department_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Arcs et bas-reliefs gravés des martyrs de la liberté',
-          confidence: 0.982,
-          category: 'Sculpture',
-          icon: Icons.history_edu_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Emplacement emblématique à la tête du Pont des Martyrs',
-          confidence: 0.975,
-          category: 'Topographie',
-          icon: Icons.alt_route_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'Chaque 26 mars, le Président de la République et les associations de la société civile viennent y déposer une gerbe de fleurs en mémoire des pionniers qui ont offert leur vie pour la démocratie pluraliste.',
-      historicalStory:
-          'Le 26 mars 1991 marque la chute de la dictature militaire et la naissance du renouveau démocratique au Mali. Ce monument perpétue la bravoure de la jeunesse et des femmes maliennes.',
-      audioNarrationText:
-          'Vous êtes au Monument des Martyrs, érigé au bord du majestueux fleuve Niger. Il honore les femmes et les hommes tombés en mars 1991 pour la démocratie et la dignité du Mali.',
-      whyItMatters:
-          'Cœur de la mémoire citoyenne et de l\'avènement de la IIIe République.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Validé Archives Nationales',
-    ),
-
-    // 7. MONUMENT KWAMÉ NKRUMAH
-    MonumentScanTarget(
-      id: 'monument_kwame_nkrumah_bamako',
-      name: 'Monument Kwamé Nkrumah',
-      subtitle: 'Hommage à l\'Apôtre des États-Unis d\'Afrique',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Érigé dans les années 1990',
-      architectureStyle:
-          'Buste commémoratif en bronze monté sur stèle trapézoïdale de marbre sombre',
-      locationDetails: 'Avenue Kwamé Nkrumah, Hamdallaye, Bamako',
-      photoUrl:
-          'assets/images/culture/monuments/monument_kwame_nkrumah_bamako/kk1.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_kwame_nkrumah_bamako/kk1.jpg',
-        'assets/images/culture/monuments/monument_kwame_nkrumah_bamako/kk10.jpg',
-        'assets/images/culture/monuments/monument_kwame_nkrumah_bamako/kk2.jpg',
-        'assets/images/culture/monuments/monument_kwame_nkrumah_bamako/kk3.jpg',
-      ],
-      tag: 'Panafricanisme & Fraternité',
-      latitude: 12.6380,
-      longitude: -8.0120,
-      unlockedBadge: 'Visionnaire de l\'Unité Africaine',
-      xpEarned: 50,
-      keywords: [
-        'nkrumah',
-        'kwame',
-        'panafricanisme',
-        'ghana',
-        'modibo',
-        'bamako',
-        'afrique',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Buste sculpté en bronze de Kwamé Nkrumah',
-          confidence: 0.991,
-          category: 'Sculpture',
-          icon: Icons.person_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Stèle sombre gravée de maximes panafricaines',
-          confidence: 0.980,
-          category: 'Matériau',
-          icon: Icons.auto_stories_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Rond-point arboré sur l\'avenue éponyme',
-          confidence: 0.970,
-          category: 'Environnement',
-          icon: Icons.park_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'Kwamé Nkrumah et Modibo Keïta conclurent l\'Union Guinée-Ghana-Mali en 1961, première tentative concrète de fusion politique panafricaine du XXe siècle.',
-      historicalStory:
-          'Ce monument célèbre la fraternité indissoluble entre le peuple malien et les pères de la libération africaine. Nkrumah voyait en Bamako le foyer ardent de la Renaissance africaine.',
-      audioNarrationText:
-          'Voici le Monument dédié au docteur Kwamé Nkrumah, héros de l\'indépendance du Ghana et champion infatigable de l\'Unité Africaine, honoré par la capitale malienne.',
-      whyItMatters:
-          'Symbole de la vision panafricaine partagée entre le Mali et les bâtisseurs du continent.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Validé',
-    ),
-
-    // 8. CATHÉDRALE DU SACRÉ-CŒUR DE BAMAKO
-    MonumentScanTarget(
-      id: 'monument_cathedrale_bamako',
-      name: 'Cathédrale du Sacré-Cœur',
-      subtitle: 'Chef-d\'œuvre de pierre et de coexistence pacifique',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Construite entre 1925 et 1936',
-      architectureStyle:
-          'Style néo-roman byzantin en grès rouge de Kati et pierres taillées',
-      locationDetails: 'Avenue Modibo Keïta, Centre-ville, Bamako',
-      photoUrl:
-          'assets/images/culture/monuments/monument_cathedrale_bamako/cat1.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_cathedrale_bamako/cat1.jpg',
-        'assets/images/culture/monuments/monument_cathedrale_bamako/cat10.jpg',
-        'assets/images/culture/monuments/monument_cathedrale_bamako/cat2.jpg',
-        'assets/images/culture/monuments/monument_cathedrale_bamako/cat3.jpg',
-      ],
-      tag: 'Patrimoine Spirituel & Architectural',
-      latitude: 12.6450,
-      longitude: -7.9970,
-      unlockedBadge: 'Harmonie Interreligieuse',
-      xpEarned: 55,
-      keywords: [
-        'cathedrale',
-        'sacre coeur',
-        'eglise',
-        'kati',
-        'gres',
-        'bamako',
-        'centre-ville',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Façade massive en pierres de taille de grès rouge',
-          confidence: 0.993,
-          category: 'Matériau',
-          icon: Icons.foundation_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Campanile roman élancé et clocher central',
-          confidence: 0.985,
-          category: 'Structure',
-          icon: Icons.church_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Vitraux polychromes et portail cintré',
-          confidence: 0.978,
-          category: 'Détail',
-          icon: Icons.auto_awesome_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'Les pierres ayant servi à sa construction furent extraites manuellement des carrières de Kati et transportées par les ouvriers maliens, illustrant une rare maîtrise de la taille de pierre.',
-      historicalStory:
-          'Siège de l\'archevêché de Bamako, la cathédrale est un témoignage vivant de la laïcité harmonieuse et de la fraternité séculaire entre chrétiens et musulmans au Mali.',
-      audioNarrationText:
-          'Vous contemplez la Cathédrale du Sacré-Cœur de Bamako, bâtie en solide grès de Kati dès 1925. Elle reflète la tolérance et la paix religieuse qui caractérisent le Mali.',
-      whyItMatters:
-          'Joyau patrimonial urbain et symbole de concorde confessionnelle.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Validé',
-    ),
-
-    // 9. STATUE DE SOGOLON KOLONKAN
-    MonumentScanTarget(
-      id: 'monument_sogolon_bamako',
-      name: 'Statue de Sogolon Kolonkan',
-      subtitle: 'L\'Héroïne Mystique du Mandé et Mère de Soundiata',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Érigée pour la valorisation du Matrimoine',
-      architectureStyle:
-          'Sculpture monumentale figurative représentant la femme matrice du Mandé',
-      locationDetails: 'Boulevard de l\'OUA / ACI 2000, Bamako',
-      photoUrl:
-          'assets/images/culture/monuments/monument_sogolon_bamako/sog1.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_sogolon_bamako/sog1.jpg',
-        'assets/images/culture/monuments/monument_sogolon_bamako/sog10.jpg',
-        'assets/images/culture/monuments/monument_sogolon_bamako/sog2.jpg',
-        'assets/images/culture/monuments/monument_sogolon_bamako/sog3.jpg',
-      ],
-      tag: 'Matrimoine & Épopée Mandingue',
-      latitude: 12.6340,
-      longitude: -8.0200,
-      unlockedBadge: 'Héritier de Sogolon',
-      xpEarned: 55,
-      keywords: [
-        'sogolon',
-        'kolonkan',
-        'mande',
-        'soundiata',
-        'femme',
-        'matrimoine',
-        'bamako',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Silhouette sculptée de la mère protectrice mandingue',
-          confidence: 0.992,
-          category: 'Sculpture',
-          icon: Icons.female_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Attributs traditionnels et parures féminines soudanaises',
-          confidence: 0.984,
-          category: 'Détail',
-          icon: Icons.flare_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Socle gravé des versets de la Charte de Kurukan Fuga',
-          confidence: 0.976,
-          category: 'Texte',
-          icon: Icons.history_edu_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'Sogolon Kèdjou possédait selon l\'épopée le pouvoir du double totem du buffle sacré de Do. C\'est sa clairvoyance et son abnégation qui ont rendu possible le destin grandiose de Soundiata Keïta.',
-      historicalStory:
-          'Ce monument rend hommage aux femmes du Mali, gardiennes de la paix, des secrets botaniques et de la cohésion sociale depuis la fondation de l\'Empire en 1236.',
-      audioNarrationText:
-          'Voici la statue dédiée à Sogolon Kolonkan et Sogolon Kèdjou. Dans l\'Épopée du Mandé, ces femmes d\'exception ont forgé le destin du grand conquérant Soundiata.',
-      whyItMatters:
-          'Consécration du rôle fondamental de la femme dans l\'histoire et la culture maliennes.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Validé',
-    ),
-
-    // 10. MONUMENT AL-QOODS (AL-QODS)
-    MonumentScanTarget(
-      id: 'monument_al_quouds',
-      name: 'Monument Al-Qoods (Al-Qods)',
-      subtitle: 'Symbole de Fraternité Internationale et de Paix Sacrée',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Inauguré dans les années 2000',
-      architectureStyle:
-          'Dôme doré oriental surmonté du croissant et arcades mauresques élancées',
-      locationDetails: 'Carrefour d\'Hamdallaye ACI 2000, Bamako',
-      photoUrl:
-          'assets/images/culture/monuments/monument_al_quouds/qu1.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_al_quouds/qu1.jpg',
-        'assets/images/culture/monuments/monument_al_quouds/qu10.jpg',
-        'assets/images/culture/monuments/monument_al_quouds/qu2.jpg',
-        'assets/images/culture/monuments/monument_al_quouds/qu3.jpg',
-      ],
-      tag: 'Solidarité & Architecture Mauresque',
-      latitude: 12.6360,
-      longitude: -8.0250,
-      unlockedBadge: 'Porteur de Solidarité',
-      xpEarned: 50,
-      keywords: [
-        'al-qods',
-        'quouds',
-        'dome',
-        'croissant',
-        'arcades',
-        'solidarite',
-        'bamako',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Coupole dorée scintillante et flèche au croissant',
-          confidence: 0.994,
-          category: 'Structure',
-          icon: Icons.brightness_7_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Arcades en fer à cheval mauresques ajourées',
-          confidence: 0.986,
-          category: 'Architecture',
-          icon: Icons.account_balance_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Jardin circulaire paysager et carrefour ACI',
-          confidence: 0.978,
-          category: 'Topographie',
-          icon: Icons.place_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'Le monument a été conçu en hommage à la ville sainte d\'Al-Qods et incarne la position constante du Mali en faveur du droit des peuples et de la justice internationale.',
-      historicalStory:
-          'Érigé au cœur de l\'expansion moderne d\'ACI 2000, le Monument Al-Qoods rappelle les liens historiques et culturels profonds unissant le Mali aux civilisations du monde arabo-musulman.',
-      audioNarrationText:
-          'Vous admirez le Monument Al-Qods, reconnaissable à son dôme éclatant et ses fines arcades orientales. Il reflète la fraternité spirituelle et la quête de paix universelle.',
-      whyItMatters:
-          'Repère visuel majeur du quartier d\'affaires de la capitale malienne.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Validé',
-    ),
-
-    // 11. MONUMENT MALIBA (LE GRAND MALI)
-    MonumentScanTarget(
-      id: 'monument_maliba_bamako',
-      name: 'Monument MaliBa (Grand Mali)',
-      subtitle: 'L\'Emblème de l\'Unité Patriotique et de la Fierté Nationale',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Création contemporaine',
-      architectureStyle:
-          'Lettres sculpturales monumentales polychromes aux couleurs nationales Vert-Jaune-Rouge',
-      locationDetails: 'Grand Axe Urbain, Commune II / Centre-ville, Bamako',
-      photoUrl:
-          'assets/images/culture/monuments/monument_maliba_bamako/mb1.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_maliba_bamako/mb1.jpg',
-        'assets/images/culture/monuments/monument_maliba_bamako/mb2.jpg',
-        'assets/images/culture/monuments/monument_maliba_bamako/mb3.jpg',
-        'assets/images/culture/monuments/monument_maliba_bamako/mb4.jpg',
-      ],
-      tag: 'Fierté Civique & Jeunesse',
-      latitude: 12.6480,
-      longitude: -8.0010,
-      unlockedBadge: 'Cœur Battant MaliBa',
-      xpEarned: 50,
-      keywords: [
-        'maliba',
-        'patriotisme',
-        'vert jaune rouge',
-        'lettres',
-        'fierte',
-        'unite',
-        'bamako',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Typographie sculpturale 3D « MALIBA »',
-          confidence: 0.995,
-          category: 'Typographie',
-          icon: Icons.text_fields_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Triptyque chromatique Vert, Jaune d\'or et Rouge',
-          confidence: 0.988,
-          category: 'Couleur',
-          icon: Icons.palette_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Plateforme piétonne festive pour la citoyenneté',
-          confidence: 0.978,
-          category: 'Espace',
-          icon: Icons.photo_camera_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          '« MaliBa » signifie littéralement le « Grand Mali » en bambara, faisant écho à l\'immensité de son passé impérial et à l\'espérance invincible de sa jeunesse contemporaine.',
-      historicalStory:
-          'Lieu de rassemblement civique très prisé par les jeunes générations et les visiteurs, cette œuvre matérialise l\'attachement indéfectible à la patrie et aux valeurs du drapeau national.',
-      audioNarrationText:
-          'Voici le Monument MaliBa ! Ses lettres géantes aux trois couleurs nationales célèbrent le Grand Mali uni, fort de son histoire millénaire et résolument tourné vers l\'avenir.',
-      whyItMatters:
-          'Le spot photo citoyen le plus populaire et vibrant de Bamako.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Validé',
-    ),
-
-    // 12. PLACE DE LA LIBERTÉ & OBÉLISQUE
-    MonumentScanTarget(
-      id: 'monument_obelisque_bamako',
-      name: 'Place de la Liberté & Obélisque',
-      subtitle: 'Le Cœur Civique et Historique de Bamako',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Aménagée dès le début du XXe siècle',
-      architectureStyle:
-          'Esplanade circulaire pavée centrée sur une stèle obélisque commémorative',
-      locationDetails: 'Place de la Liberté, Centre-ville, Commune III, Bamako',
-      photoUrl:
-          'assets/images/culture/monuments/monument_obelisque_bamako/ob10.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_obelisque_bamako/ob10.jpg',
-        'assets/images/culture/monuments/monument_obelisque_bamako/ob11.jpg',
-        'assets/images/culture/monuments/monument_obelisque_bamako/ob2.jpg',
-        'assets/images/culture/monuments/monument_obelisque_bamako/ob3.jpg',
-      ],
-      tag: 'Cœur Historique de Bamako',
-      latitude: 12.6510,
-      longitude: -7.9985,
-      unlockedBadge: 'Citoyen de la Liberté',
-      xpEarned: 50,
-      keywords: [
-        'liberte',
-        'obelisque',
-        'place',
-        'centre-ville',
-        'commune 3',
-        'bamako',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Obélisque central en pierre et bas-reliefs',
-          confidence: 0.990,
-          category: 'Structure',
-          icon: Icons.account_balance_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Vaste rond-point pavé bordé d\'arbres centenaires',
-          confidence: 0.982,
-          category: 'Urbanisme',
-          icon: Icons.traffic_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Perspective vers les bâtiments coloniaux et le marché',
-          confidence: 0.974,
-          category: 'Vue',
-          icon: Icons.visibility_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'La Place de la Liberté est le point zéro historique à partir duquel s\'est développée l\'urbanisation moderne de Bamako au pied de la colline de Koulouba.',
-      historicalStory:
-          'Carrefour incontournable entre la ville administrative et le grand marché grouillant, la Place de la Liberté est le témoin quotidien des grands événements politiques et populaires maliens.',
-      audioNarrationText:
-          'Vous êtes sur la Place de la Liberté, véritable centre névralgique de Bamako. Son obélisque et son esplanade incarnent le pouls vivant de la cité depuis plus d\'un siècle.',
-      whyItMatters:
-          'Le carrefour historique et civique le plus célèbre de la capitale.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Validé',
-    ),
-
-    // ══════════════════════════════════════════════════════════════════════════
-    // ── MONUMENTS NATIONAUX DES RÉGIONS (AVEC PHOTOS RÉELLES DU DATASET) ─────
-    // ══════════════════════════════════════════════════════════════════════════
-
-    // 13. GRANDE MOSQUÉE DE DJENNÉ
+    // 1. GRANDE MOSQUÉE DE DJENNÉ (MOPTI)
     MonumentScanTarget(
       id: 'monument_mosquee_djenne',
       name: 'Grande Mosquée de Djenné',
@@ -921,7 +106,7 @@ abstract final class MonumentScanKnowledge {
       validationStatus: 'Patrimoine Mondial UNESCO',
     ),
 
-    // 14. MOSQUÉE DJINGAREYBER DE TOMBOUCTOU
+    // 2. MOSQUÉE DJINGAREYBER (TOMBOUCTOU)
     MonumentScanTarget(
       id: 'monument_djingareyber',
       name: 'Mosquée Djingareyber',
@@ -934,12 +119,13 @@ abstract final class MonumentScanKnowledge {
           'Style soudano-andalou en banco, piliers intérieurs monumentaux, toiture en troncs de rônier',
       locationDetails: 'Quartier historique, Cité des 333 Saints, Tombouctou',
       photoUrl:
-          'assets/images/culture/monuments/monument_djingareyber/djin1.jpg',
+          'assets/images/culture/monuments/monument_djingareyber/wm_djin_1.jpg',
       galleryPhotos: [
-        'assets/images/culture/monuments/monument_djingareyber/djin1.jpg',
-        'assets/images/culture/monuments/monument_djingareyber/djin10.jpg',
-        'assets/images/culture/monuments/monument_djingareyber/djin2.jpg',
-        'assets/images/culture/monuments/monument_djingareyber/djin3.jpg',
+        'assets/images/culture/monuments/monument_djingareyber/wm_djin_1.jpg',
+        'assets/images/culture/monuments/monument_djingareyber/wm_djin_2.jpg',
+        'assets/images/culture/monuments/monument_djingareyber/wm_djin_3.jpg',
+        'assets/images/culture/monuments/monument_djingareyber/wm_djin_4.jpg',
+        'assets/images/culture/monuments/monument_djingareyber/wm_djin_5.jpg',
       ],
       tag: 'Patrimoine Mondial UNESCO',
       latitude: 16.7725,
@@ -989,199 +175,7 @@ abstract final class MonumentScanKnowledge {
       validationStatus: 'Patrimoine Mondial UNESCO',
     ),
 
-    // 15. FORT DE MÉDINE
-    MonumentScanTarget(
-      id: 'monument_fort_medine',
-      name: 'Fort de Médine',
-      subtitle: 'Sentinelle historique de pierre sur le Haut-Sénégal',
-      regionId: 'kayes',
-      regionName: 'Kayes',
-      ville: 'Kayes',
-      era: 'Construit en 1855 sous le règne du roi du Khasso Hawa Demba Diallo',
-      architectureStyle:
-          'Fortification militaire en pierres taillées de grès rouge et mortier de chaux',
-      locationDetails: 'Bord du fleuve Sénégal, à 12 km de Kayes',
-      photoUrl:
-          'assets/images/culture/monuments/monument_fort_medine/med1.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_fort_medine/med1.jpg',
-        'assets/images/culture/monuments/monument_fort_medine/med10.jpg',
-        'assets/images/culture/monuments/monument_fort_medine/med2.jpg',
-        'assets/images/culture/monuments/monument_fort_medine/med3.jpg',
-      ],
-      tag: 'Monument Historique National',
-      latitude: 14.3756,
-      longitude: -11.3653,
-      unlockedBadge: 'Vigie du Khasso',
-      xpEarned: 55,
-      keywords: [
-        'kayes',
-        'medine',
-        'fort',
-        'khasso',
-        'senegal',
-        'elhadj',
-        'tall',
-        'pierre',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Appareillage en pierres rouges de latérite taillée',
-          confidence: 0.984,
-          category: 'Matériau',
-          icon: Icons.handyman_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Tour de guet cylindrique & bastions d\'artillerie',
-          confidence: 0.978,
-          category: 'Structure',
-          icon: Icons.visibility_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Remparts surplombant le cours du fleuve Sénégal',
-          confidence: 0.968,
-          category: 'Topographie',
-          icon: Icons.water_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'Le fort a été le théâtre du célèbre siège de 1857 opposant les troupes d\'El Hadj Oumar Tall aux forces coalisées de Faidherbe et du roi Sambala Diallo.',
-      historicalStory:
-          'Bâti pour contrôler la navigation fluviale sur le Haut-Sénégal, Médine est un carrefour stratégique unique.',
-      audioNarrationText:
-          'Voici le Fort de Médine, dressé au bord du fleuve Sénégal près de Kayes. Construit en 1855 en solides pierres taillées de grès.',
-      whyItMatters:
-          'Témoin clé de l\'épopée toucouleure et de l\'histoire fluviale du Mali.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Monument National',
-    ),
-
-    // 16. SÉGOU-KORO & CITÉ DES BALANZANS
-    MonumentScanTarget(
-      id: 'segou',
-      name: 'Ségou-Koro & Cité des Balanzans',
-      subtitle: 'La Cité Royale Fondatrice du Royaume Bambara',
-      regionId: 'segou',
-      regionName: 'Ségou',
-      ville: 'Ségou',
-      era: 'Fondée au XVIIe siècle • Apogée sous Biton Coulibaly (1712-1755)',
-      architectureStyle:
-          'Architecture traditionnelle soudanaise en banco, vestibules royaux et sanctuaires ancestraux',
-      locationDetails: 'Bord du fleuve Niger, Ségou-Koro (à 10 km de Ségou)',
-      photoUrl:
-          'assets/images/culture/monuments/segou/segou_!.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/segou/segou_!.jpg',
-      ],
-      tag: 'Capitale Royale Historique',
-      latitude: 13.4333,
-      longitude: -6.2667,
-      unlockedBadge: 'Noble du Royaume Bambara',
-      xpEarned: 60,
-      keywords: [
-        'segou',
-        'segou-koro',
-        'biton',
-        'coulibaly',
-        'balanzans',
-        'bambara',
-        'djoliba',
-        'banco',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Vestibule royal en banco ancestral de Biton Coulibaly',
-          confidence: 0.992,
-          category: 'Structure',
-          icon: Icons.castle_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Mosquée historique de Ba Sounou Sako',
-          confidence: 0.985,
-          category: 'Architecture',
-          icon: Icons.mosque_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Arbres Balanzans sacrés en bordure du Djoliba',
-          confidence: 0.976,
-          category: 'Nature',
-          icon: Icons.nature_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'La légende raconte que Ségou est protégée par ses 4 444 balanzans sacrés (Acacia albida), plus un arbre mystérieux introuvable qui veille sur la paix du royaume.',
-      historicalStory:
-          'Ancienne capitale de l\'Empire Bambara de Ségou, la cité conserve la tombe du fondateur Mamary Biton Coulibaly et les premières mosquées bâties au cœur des traditions ancestrales.',
-      audioNarrationText:
-          'Bienvenue à Ségou-Koro, le berceau du puissant Royaume Bambara. C\'est ici que Biton Coulibaly organisa ses célèbres guerriers Tònjon et fit rayonner la culture des balanzans.',
-      whyItMatters:
-          'L\'un des sanctuaires dynastiques les plus vénérés de la mémoire bamanan.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Validé Patrimoine National',
-    ),
-
-    // 17. PLACE DE LA LIBERTÉ
-    MonumentScanTarget(
-      id: 'monument_Place_de_la_liberte',
-      name: 'Place de la Liberté',
-      subtitle: 'Le Cœur Civique et Historique de la Capitale',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Aménagée dès le début du XXe siècle',
-      architectureStyle:
-          'Esplanade circulaire pavée, perspectives urbaines coloniales et néo-soudanaises',
-      locationDetails: 'Place de la Liberté, Centre-ville, Commune III, Bamako',
-      photoUrl:
-          'assets/images/culture/monuments/monument_Place_de_la_liberte/lib1.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_Place_de_la_liberte/lib1.jpg',
-        'assets/images/culture/monuments/monument_Place_de_la_liberte/lib2.jpg',
-        'assets/images/culture/monuments/monument_Place_de_la_liberte/lib3.jpg',
-        'assets/images/culture/monuments/monument_Place_de_la_liberte/lib10.jpg',
-      ],
-      tag: 'Cœur Historique & Citoyen',
-      latitude: 12.6514,
-      longitude: -7.9982,
-      unlockedBadge: 'Pèlerin de la Liberté',
-      xpEarned: 50,
-      keywords: [
-        'place',
-        'liberte',
-        'centre-ville',
-        'bamako',
-        'esplanade',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Esplanade centrale pavée et arbres séculaires',
-          confidence: 0.990,
-          category: 'Urbanisme',
-          icon: Icons.nature_people_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Perspective vers les bâtiments historiques',
-          confidence: 0.981,
-          category: 'Vue',
-          icon: Icons.visibility_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'Point de départ de la croissance urbaine de Bamako au début du XXe siècle, reliant le centre commercial à Koulouba.',
-      historicalStory:
-          'Lieu hautement symbolique de Bamako ayant accueilli les grands rassemblements populaires et célébrations nationales.',
-      audioNarrationText:
-          'Vous voici sur la Place de la Liberté, le cœur battant de la ville de Bamako. Un espace de rencontre et de citoyenneté.',
-      whyItMatters:
-          'Centre névralgique de la capitale malienne.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Validé',
-    ),
-
-    // 18. MOSQUÉE ET UNIVERSITÉ DE SANKORÉ
+    // 3. MOSQUÉE ET UNIVERSITÉ DE SANKORÉ (TOMBOUCTOU)
     MonumentScanTarget(
       id: 'monument_sankore',
       name: 'Mosquée et Université de Sankoré',
@@ -1194,12 +188,13 @@ abstract final class MonumentScanKnowledge {
           'Architecture en banco soudanais avec cour sacrée respectant les dimensions de la Kaaba',
       locationDetails: 'Nord de Tombouctou, Quartier Sankoré',
       photoUrl:
-          'assets/images/culture/monuments/monument_sankore/sank.jpg',
+          'assets/images/culture/monuments/monument_sankore/wm_san_1.jpg',
       galleryPhotos: [
-        'assets/images/culture/monuments/monument_sankore/sank.jpg',
-        'assets/images/culture/monuments/monument_sankore/sank2.jpg',
-        'assets/images/culture/monuments/monument_sankore/sank3.jpg',
-        'assets/images/culture/monuments/monument_sankore/san11.jpg',
+        'assets/images/culture/monuments/monument_sankore/wm_san_1.jpg',
+        'assets/images/culture/monuments/monument_sankore/wm_san_2.jpg',
+        'assets/images/culture/monuments/monument_sankore/wm_san_3.jpg',
+        'assets/images/culture/monuments/monument_sankore/wm_san_4.jpg',
+        'assets/images/culture/monuments/monument_sankore/wm_san_5.JPG',
       ],
       tag: 'Patrimoine Mondial UNESCO',
       latitude: 16.7778,
@@ -1249,76 +244,7 @@ abstract final class MonumentScanKnowledge {
       validationStatus: 'Patrimoine Mondial UNESCO',
     ),
 
-    // 19. LE TATA DE SIKASSO
-    MonumentScanTarget(
-      id: 'monument_tata_sikasso',
-      name: 'Le Tata de Sikasso',
-      subtitle: 'La Muraille de Résistance Héroïque du Kénédougou',
-      regionId: 'sikasso',
-      regionName: 'Sikasso',
-      ville: 'Sikasso',
-      era: 'Édifié entre 1877 et 1890 par le roi Tiéba Traoré',
-      architectureStyle:
-          'Fortification militaire massive en banco durci et blocs de latérite taillée',
-      locationDetails: 'Colline du Mamelon, Centre de Sikasso',
-      photoUrl:
-          'assets/images/culture/monuments/monument_tata_sikasso/tat1.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/monument_tata_sikasso/tat1.jpg',
-        'assets/images/culture/monuments/monument_tata_sikasso/tat2.jpg',
-        'assets/images/culture/monuments/monument_tata_sikasso/tat3.jpg',
-        'assets/images/culture/monuments/monument_tata_sikasso/tat10.jpg',
-      ],
-      tag: 'Monument National de Résistance',
-      latitude: 11.3176,
-      longitude: -5.6665,
-      unlockedBadge: 'Bravoure du Kénédougou',
-      xpEarned: 65,
-      keywords: [
-        'sikasso',
-        'tata',
-        'rempart',
-        'muraille',
-        'tieba',
-        'babemba',
-        'traore',
-        'kenedougou',
-        'mamelon',
-      ],
-      detectionFeatures: [
-        ScanDetectionFeature(
-          label: 'Blocs de latérite taillée & terre rouge cuite',
-          confidence: 0.988,
-          category: 'Matériau',
-          icon: Icons.layers_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Épaisseur défensive (3 à 6 mètres)',
-          confidence: 0.974,
-          category: 'Structure',
-          icon: Icons.shield_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Meurtrières de tir & créneaux de garde',
-          confidence: 0.965,
-          category: 'Tactique',
-          icon: Icons.security_rounded,
-        ),
-      ],
-      secretsAndMysteries:
-          'Le Tata mesurait à son apogée plus de 9 kilomètres de circonférence. En 1898, encerclé par les troupes coloniales, le roi Babemba Traoré s\'exclama : « Plutôt la mort que la honte » (Sayi té Maloya Sa).',
-      historicalStory:
-          'Chef-d\'œuvre de génie militaire précolonial ouest-africain, le Tata de Sikasso est l\'ultime forteresse de la souveraineté.',
-      audioNarrationText:
-          'Voici les vestiges héroïques du Tata de Sikasso, l\'enceinte fortifiée du royaume du Kénédougou. Érigée par Tiéba Traoré et défendue jusqu\'au dernier souffle par son frère Babemba en 1898.',
-      whyItMatters:
-          'Témoignage suprême du refus de la servitude et du sens aigu de l\'indépendance nationale.',
-      routePath: '/culture/monuments',
-      arAvailable: false,
-      validationStatus: 'Monument National',
-    ),
-
-    // 20. TOMBEAU PYRAMIDAL DES ASKIA
+    // 4. TOMBEAU PYRAMIDAL DES ASKIA (GAO)
     MonumentScanTarget(
       id: 'monument_tombeau_askia',
       name: 'Tombeau pyramidal des Askia',
@@ -1331,12 +257,13 @@ abstract final class MonumentScanKnowledge {
           'Structure pyramidale à degrés sahélienne avec deux minarets et nécropole sacrée',
       locationDetails: 'Bord du fleuve Niger, Gao',
       photoUrl:
-          'assets/images/culture/monuments/monument_tombeau_askia/tomb1.jpg',
+          'assets/images/culture/monuments/monument_tombeau_askia/wm_tomb_1.jpg',
       galleryPhotos: [
-        'assets/images/culture/monuments/monument_tombeau_askia/tomb1.jpg',
-        'assets/images/culture/monuments/monument_tombeau_askia/tomb2.jpg',
-        'assets/images/culture/monuments/monument_tombeau_askia/tomb3.jpg',
-        'assets/images/culture/monuments/monument_tombeau_askia/tomb4.jpg',
+        'assets/images/culture/monuments/monument_tombeau_askia/wm_tomb_1.jpg',
+        'assets/images/culture/monuments/monument_tombeau_askia/wm_tomb_2.jpg',
+        'assets/images/culture/monuments/monument_tombeau_askia/wm_tomb_3.jpg',
+        'assets/images/culture/monuments/monument_tombeau_askia/wm_tomb_4.jpg',
+        'assets/images/culture/monuments/monument_tombeau_askia/wm_tomb_5.jpg',
       ],
       tag: 'Patrimoine Mondial UNESCO',
       latitude: 16.2974,
@@ -1386,180 +313,276 @@ abstract final class MonumentScanKnowledge {
       validationStatus: 'Patrimoine Mondial UNESCO',
     ),
 
-    // 21. MASQUE CIWARA DE SÉNOU
+    // 5. MONUMENT DE L'INDÉPENDANCE (BAMAKO)
     MonumentScanTarget(
-      id: 'monument_ciwara_senou_bamako',
-      name: 'Masque Ciwara de Sénou',
-      subtitle: 'L\'Emblème Sacré de l\'Agriculture et de l\'Accueil',
+      id: 'monument_independance_bamako',
+      name: 'Monument de l\'Indépendance',
+      subtitle: 'Symbole éternel de la souveraineté et du 22 Septembre 1960',
       regionId: 'bamako',
       regionName: 'District de Bamako',
       ville: 'Bamako',
-      era: 'Porte d\'accueil aéroportuaire de Bamako',
-      architectureStyle: 'Sculpture zoomorphe géante en bois noble',
-      locationDetails: 'Rond-point d\'accès de l\'Aéroport International Modibo Keïta de Sénou',
-      photoUrl: 'assets/images/culture/monuments/ciwara_senou.jpg',
+      era: 'Érigé en hommage au 22 septembre 1960 • Modibo Keïta',
+      architectureStyle:
+          'Obélisque monumentaliste moderne orné de bas-reliefs patriotiques',
+      locationDetails:
+          'Boulevard de l\'Indépendance, Hamdallaye / Centre administratif',
+      photoUrl:
+          'assets/images/culture/monuments/monument_independance_bamako/ind_24.jpg',
       galleryPhotos: [
-        'assets/images/culture/monuments/ciwara_senou.jpg',
+        'assets/images/culture/monuments/monument_independance_bamako/ind_24.jpg',
+        'assets/images/culture/monuments/monument_independance_bamako/ind11.jpg',
+        'assets/images/culture/monuments/monument_independance_bamako/ind12.jpg',
+        'assets/images/culture/monuments/monument_independance_bamako/ind13.jpg',
       ],
-      tag: 'Emblème Sacré Agricole',
-      latitude: 12.5510,
-      longitude: -7.9548,
-      unlockedBadge: 'Gardien du Ciwara',
-      xpEarned: 55,
-      keywords: ['ciwara', 'senou', 'aeroport', 'antilope', 'agriculture', 'bamako'],
+      tag: 'Monument National Emblématique',
+      latitude: 12.6392,
+      longitude: -8.0029,
+      unlockedBadge: 'Pionnier de la Souveraineté',
+      xpEarned: 60,
+      keywords: [
+        'independance',
+        'obelisque',
+        'bamako',
+        'modibo',
+        'keita',
+        '1960',
+        'souverainete',
+        'patrie',
+        'boulevard',
+      ],
       detectionFeatures: [
         ScanDetectionFeature(
-          label: 'Grandes cornes recourbées en arc vers le ciel',
-          confidence: 0.990,
+          label: 'Obélisque vertical élancé (25 mètres)',
+          confidence: 0.992,
           category: 'Structure',
-          icon: Icons.pets_rounded,
+          icon: Icons.trending_up_rounded,
         ),
         ScanDetectionFeature(
-          label: 'Crinière ajourée en dents de scie',
+          label: 'Bas-reliefs en bronze figurant les pères de la nation',
           confidence: 0.985,
           category: 'Détail',
-          icon: Icons.grain_rounded,
+          icon: Icons.military_tech_rounded,
         ),
-      ],
-      secretsAndMysteries: 'Le Ciwara est l\'être mythique mi-humain mi-animal qui enseigna l\'art du labour et de la culture de la terre aux ancêtres bambaras.',
-      historicalStory: 'Érigée à l\'entrée aéroportuaire de Bamako, cette antilope majestueuse accueille tout voyageur foulant la terre du Mali en lui souhaitant la bienvenue sacrée.',
-      audioNarrationText: 'Vous admirez le Masque Ciwara de Sénou, symbole universel de labeur, d\'ingéniosité agricole et de la légendaire hospitalité malienne.',
-      whyItMatters: 'Emblème culturel national et symbole d\'excellence laborieuse reconnu dans le monde entier.',
-      routePath: '/culture/monuments',
-      arAvailable: true,
-      validationStatus: 'Validé CultureLens AI',
-    ),
-
-    // 22. MUSÉE NATIONAL DU MALI
-    MonumentScanTarget(
-      id: 'monument_musee_national_bamako',
-      name: 'Musée National du Mali',
-      subtitle: 'Trésor Vivant & Archéologie Sahélienne',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: '1953 · Rénovation d\'architecture en terre crue',
-      architectureStyle: 'Architecture néo-soudanaise bioclimatique en banco stabilisé ocre-rouge',
-      locationDetails: 'Parc National du Mali, Avenue de la Liberté / Koulouba',
-      photoUrl: 'assets/images/culture/monuments/musee_national.jpg',
-      galleryPhotos: [
-        'assets/images/culture/monuments/musee_national.jpg',
-      ],
-      tag: 'Trésor Vivant & Archéologie',
-      latitude: 12.6601,
-      longitude: -8.0019,
-      unlockedBadge: 'Conservateur du Patrimoine',
-      xpEarned: 60,
-      keywords: ['musee', 'national', 'koulouba', 'banco', 'archeologie', 'bamako'],
-      detectionFeatures: [
         ScanDetectionFeature(
-          label: 'Murs en banco ocre-rouge et arcades sahéliennes',
-          confidence: 0.992,
+          label: 'Socle pyramidal en marbre et granit',
+          confidence: 0.978,
           category: 'Matériau',
-          icon: Icons.architecture_rounded,
-        ),
-        ScanDetectionFeature(
-          label: 'Colonnades à claire-voie et toitures à débord',
-          confidence: 0.980,
-          category: 'Style',
           icon: Icons.layers_rounded,
         ),
       ],
-      secretsAndMysteries: 'Le musée abrite les célébrissimes textiles Tellem du XIe siècle découverts dans les grottes de Bandiagara, ainsi que des trésors de statuaire préhistorique.',
-      historicalStory: 'Fondé en 1953 et magnifié par l\'architecte Diébédo Francis Kéré, le Musée National est le temple de la conservation de la mémoire matérielle et des arts ancestraux du Mali.',
-      audioNarrationText: 'Bienvenue au Musée National du Mali, chef-d\'œuvre en terre ocre niché au cœur d\'une forêt botanique apaisante au pied de Koulouba.',
-      whyItMatters: 'Le plus grand conservatoire d\'art rituel, de parures et de manuscrits de la république.',
+      secretsAndMysteries:
+          'Le monument abrite une crypte commémorative scellée et le socle de la flamme sacrée du souvenir. Chaque 22 septembre, les délégations de toute l\'Afrique s\'y réunissent pour célébrer l\'accession à la souveraineté nationale.',
+      historicalStory:
+          'Érigé pour immortaliser l\'accession de la République du Mali à l\'indépendance le 22 septembre 1960, le monument célèbre le courage de Modibo Keïta et des artisans de la liberté. Il incarne le non catégorique à la sujétion et le ralliement à l\'idéal panafricain.',
+      audioNarrationText:
+          'Vous contemplez le Monument de l\'Indépendance du Mali, qui s\'élève fièrement sur le grand boulevard de Bamako. Cet obélisque géant rappelle à chaque génération le courage des pères fondateurs de 1960 et le serment inaltérable de la liberté nationale.',
+      whyItMatters:
+          'C\'est le repère patriotique central de la nation malienne et le lieu cérémoniel d\'affirmation de la souveraineté.',
       routePath: '/culture/monuments',
       arAvailable: true,
-      validationStatus: 'Validé CultureLens AI',
+      validationStatus: 'Validé Archives Nationales',
     ),
 
-    // 23. PALAIS DE LA CULTURE AMADOU HAMPÂTÉ BÂ
+    // 6. LA TOUR DE L'AFRIQUE (BAMAKO)
     MonumentScanTarget(
-      id: 'monument_palais_culture_bamako',
-      name: 'Palais de la Culture Amadou Hampâté Bâ',
-      subtitle: 'L\'Agora des Arts Vivants et du Djoliba',
+      id: 'monument_tour_afrique_bamako',
+      name: 'La Tour de l\'Afrique',
+      subtitle: 'Le Phare du Panafricanisme et de la Fraternité Sahélienne',
       regionId: 'bamako',
       regionName: 'District de Bamako',
       ville: 'Bamako',
-      era: '1976 · Inauguration sur la rive droite',
-      architectureStyle: 'Amphithéâtre monumental en hémicycle et complexe scénique',
-      locationDetails: 'Badalabougou, Rive droite du fleuve Niger',
-      photoUrl: 'assets/images/culture/monuments/palais_culture.jpg',
+      era: 'Inaugurée en 2001 lors du Sommet France-Afrique',
+      architectureStyle:
+          'Tour néo-sahélienne de 46 mètres évoquant un baobab sacré surmonté d\'une corbeille de l\'union',
+      locationDetails:
+          'Rond-point de Faladié, Carrefour de la Paix, Commune VI',
+      photoUrl:
+          'assets/images/culture/monuments/monument_tour_afrique_bamako/wm_tour_1.jpg',
       galleryPhotos: [
-        'assets/images/culture/monuments/palais_culture.jpg',
+        'assets/images/culture/monuments/monument_tour_afrique_bamako/wm_tour_1.jpg',
+        'assets/images/culture/monuments/monument_tour_afrique_bamako/wm_tour_2.jpg',
+        'assets/images/culture/monuments/monument_tour_afrique_bamako/wm_tour_3.jpg',
+        'assets/images/culture/monuments/monument_tour_afrique_bamako/wm_tour_4.jpg',
       ],
-      tag: 'Arts Vivants & Spectacle',
-      latitude: 12.6262,
-      longitude: -7.9897,
-      unlockedBadge: 'Mélomane du Mandé',
-      xpEarned: 50,
-      keywords: ['palais', 'culture', 'hampate', 'ba', 'badalabougou', 'djoliba', 'bamako'],
+      tag: 'Symbole de l\'Unité Africaine',
+      latitude: 12.5935,
+      longitude: -7.9463,
+      unlockedBadge: 'Bâtisseur de l\'Unité Africaine',
+      xpEarned: 60,
+      keywords: [
+        'tour',
+        'afrique',
+        'faladie',
+        'baobab',
+        'corbeille',
+        'panafricanisme',
+        'bamako',
+        'aeroport',
+      ],
       detectionFeatures: [
         ScanDetectionFeature(
-          label: 'Amphithéâtre ouvert face au fleuve Niger',
+          label: 'Silhouette évasée en forme de baobab (46m)',
+          confidence: 0.994,
+          category: 'Structure',
+          icon: Icons.nature_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Corbeille supérieure de la concorde',
           confidence: 0.988,
-          category: 'Structure',
-          icon: Icons.theater_comedy_rounded,
+          category: 'Symbole',
+          icon: Icons.all_inclusive_rounded,
         ),
         ScanDetectionFeature(
-          label: 'Coque acoustique monumentale',
-          confidence: 0.975,
-          category: 'Acoustique',
-          icon: Icons.music_note_rounded,
+          label: 'Enduit ocre et fresques céramiques des 54 pays',
+          confidence: 0.976,
+          category: 'Détail',
+          icon: Icons.public_rounded,
         ),
       ],
-      secretsAndMysteries: 'Le palais porte le nom du vénérable Amadou Hampâté Bâ, auteur de la célèbre maxime : « En Afrique, un vieillard qui meurt est une bibliothèque qui brûle ».',
-      historicalStory: 'Érigé au bord du mythique Djoliba, le Palais de la Culture est l\'arène vibrante des grands maîtres griots, de la kora, du balafon et des troupes théâtrales nationales.',
-      audioNarrationText: 'Vous êtes devant le Palais de la Culture Amadou Hampâté Bâ, haut lieu de la parole, de la musique et des arts scéniques maliens.',
-      whyItMatters: 'Le cœur battant de la création artistique contemporaine et de la transmission orale.',
+      secretsAndMysteries:
+          'La corbeille au sommet symbolise le mythe de la jarre percée : nul ne peut étancher la soif d\'un continent seul, mais unis, les doigts des peuples retiennent l\'eau de la paix et de la prospérité.',
+      historicalStory:
+          'Construite au carrefour stratégique menant à l\'aéroport et aux régions du sud, la Tour de l\'Afrique est un vibrant hommage à l\'idéal des États-Unis d\'Afrique et à la solidarité interétatique.',
+      audioNarrationText:
+          'Dressée à 46 mètres au-dessus du rond-point de Faladié, la Tour de l\'Afrique accueille les visiteurs entrant à Bamako. Ses lignes sinueuses rendent hommage à l\'arbre à palabres et rappellent la vocation du Mali à être le carrefour éternel de l\'unité africaine.',
+      whyItMatters:
+          'C\'est l\'un des monuments les plus hauts et les plus photographiés d\'Afrique de l\'Ouest.',
       routePath: '/culture/monuments',
       arAvailable: true,
-      validationStatus: 'Validé CultureLens AI',
+      validationStatus: 'Validé Ministère de la Culture',
     ),
 
-    // 24. GRANDE MOSQUÉE DE BAMAKO
+    // 7. FORT DE MÉDINE (KAYES)
     MonumentScanTarget(
-      id: 'monument_mosquee_bamako',
-      name: 'Grande Mosquée de Bamako',
-      subtitle: 'Architecture Religieuse & Minarets Célestes',
-      regionId: 'bamako',
-      regionName: 'District de Bamako',
-      ville: 'Bamako',
-      era: 'Érigée à l\'époque coloniale, rénovée en 1970 avec l\'Arabie Saoudite',
-      architectureStyle: 'Style islamique contemporain à minarets élancés et arcades blanches',
-      locationDetails: 'Quartier Dabanani, Centre commercial de Bamako',
-      photoUrl: 'assets/images/culture/monuments/mosquee_bamako.jpg',
+      id: 'monument_fort_medine',
+      name: 'Fort de Médine',
+      subtitle: 'Sentinelle historique de pierre sur le Haut-Sénégal',
+      regionId: 'kayes',
+      regionName: 'Kayes',
+      ville: 'Kayes',
+      era: 'Construit en 1855 sous le règne du roi du Khasso Hawa Demba Diallo',
+      architectureStyle:
+          'Fortification militaire en pierres taillées de grès rouge et mortier de chaux',
+      locationDetails: 'Bord du fleuve Sénégal, à 12 km de Kayes',
+      photoUrl:
+          'assets/images/culture/monuments/monument_fort_medine/wm_med_1.jpg',
       galleryPhotos: [
-        'assets/images/culture/monuments/mosquee_bamako.jpg',
+        'assets/images/culture/monuments/monument_fort_medine/wm_med_1.jpg',
+        'assets/images/culture/monuments/monument_fort_medine/wm_med_2.jpg',
+        'assets/images/culture/monuments/monument_fort_medine/wm_med_3.jpg',
       ],
-      tag: 'Architecture Religieuse (1970)',
-      latitude: 12.6520,
-      longitude: -7.9960,
-      unlockedBadge: 'Pèlerin de Dabanani',
+      tag: 'Monument Historique National',
+      latitude: 14.3756,
+      longitude: -11.3653,
+      unlockedBadge: 'Vigie du Khasso',
       xpEarned: 55,
-      keywords: ['mosquee', 'grande', 'bamako', 'dabanani', 'minaret', 'priere'],
+      keywords: [
+        'kayes',
+        'medine',
+        'fort',
+        'khasso',
+        'senegal',
+        'elhadj',
+        'tall',
+        'pierre',
+      ],
       detectionFeatures: [
         ScanDetectionFeature(
-          label: 'Deux grands minarets élancés couronnés de croissants dorés',
-          confidence: 0.995,
-          category: 'Structure',
-          icon: Icons.mosque_rounded,
+          label: 'Appareillage en pierres rouges de latérite taillée',
+          confidence: 0.984,
+          category: 'Matériau',
+          icon: Icons.handyman_rounded,
         ),
         ScanDetectionFeature(
-          label: 'Façade blanche et arcades islamiques',
-          confidence: 0.982,
-          category: 'Façade',
-          icon: Icons.layers_rounded,
+          label: 'Tour de guet cylindrique & bastions d\'artillerie',
+          confidence: 0.978,
+          category: 'Structure',
+          icon: Icons.visibility_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Remparts surplombant le cours du fleuve Sénégal',
+          confidence: 0.968,
+          category: 'Topographie',
+          icon: Icons.water_rounded,
         ),
       ],
-      secretsAndMysteries: 'Construite sur l\'emplacement d\'une mosquée précoloniale en banco, ses minarets sont visibles depuis les quatre points cardinaux de la cuvette de Bamako.',
-      historicalStory: 'Située au cœur vibrant du marché Dabanani, elle rassemble chaque semaine des milliers de fidèles dans une ferveur solennelle et fraternelle.',
-      audioNarrationText: 'Voici la Grande Mosquée de Bamako, dont les minarets blancs s\'élancent vers le ciel au-dessus du tumulte commerçant de Dabanani.',
-      whyItMatters: 'Le principal pôle spirituel de la capitale malienne.',
+      secretsAndMysteries:
+          'Le fort a été le théâtre du célèbre siège de 1857 opposant les troupes d\'El Hadj Oumar Tall aux forces coalisées de Faidherbe et du roi Sambala Diallo.',
+      historicalStory:
+          'Bâti pour contrôler la navigation fluviale sur le Haut-Sénégal, Médine est un carrefour stratégique unique.',
+      audioNarrationText:
+          'Voici le Fort de Médine, dressé au bord du fleuve Sénégal près de Kayes. Construit en 1855 en solides pierres taillées de grès.',
+      whyItMatters:
+          'Témoin clé de l\'épopée toucouleure et de l\'histoire fluviale du Mali.',
       routePath: '/culture/monuments',
-      arAvailable: true,
-      validationStatus: 'Validé CultureLens AI',
+      arAvailable: false,
+      validationStatus: 'Monument National',
+    ),
+
+    // 8. LE TATA DE SIKASSO (SIKASSO)
+    MonumentScanTarget(
+      id: 'monument_tata_sikasso',
+      name: 'Le Tata de Sikasso',
+      subtitle: 'La Muraille de Résistance Héroïque du Kénédougou',
+      regionId: 'sikasso',
+      regionName: 'Sikasso',
+      ville: 'Sikasso',
+      era: 'Édifié entre 1877 et 1890 par le roi Tiéba Traoré',
+      architectureStyle:
+          'Fortification militaire massive en banco durci et blocs de latérite taillée',
+      locationDetails: 'Colline du Mamelon, Centre de Sikasso',
+      photoUrl:
+          'assets/images/culture/monuments/monument_tata_sikasso/wm_tata_1.jpg',
+      galleryPhotos: [
+        'assets/images/culture/monuments/monument_tata_sikasso/wm_tata_1.jpg',
+      ],
+      tag: 'Monument National de Résistance',
+      latitude: 11.3176,
+      longitude: -5.6665,
+      unlockedBadge: 'Bravoure du Kénédougou',
+      xpEarned: 65,
+      keywords: [
+        'sikasso',
+        'tata',
+        'rempart',
+        'muraille',
+        'tieba',
+        'babemba',
+        'traore',
+        'kenedougou',
+        'mamelon',
+      ],
+      detectionFeatures: [
+        ScanDetectionFeature(
+          label: 'Blocs de latérite taillée & terre rouge cuite',
+          confidence: 0.988,
+          category: 'Matériau',
+          icon: Icons.layers_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Épaisseur défensive (3 à 6 mètres)',
+          confidence: 0.974,
+          category: 'Structure',
+          icon: Icons.shield_rounded,
+        ),
+        ScanDetectionFeature(
+          label: 'Meurtrières de tir & créneaux de garde',
+          confidence: 0.965,
+          category: 'Tactique',
+          icon: Icons.security_rounded,
+        ),
+      ],
+      secretsAndMysteries:
+          'Le Tata mesurait à son apogée plus de 9 kilomètres de circonférence. En 1898, encerclé par les troupes coloniales, le roi Babemba Traoré s\'exclama : « Plutôt la mort que la honte » (Sayi té Maloya Sa).',
+      historicalStory:
+          'Chef-d\'œuvre de génie militaire précolonial ouest-africain, le Tata de Sikasso est l\'ultime forteresse de la souveraineté.',
+      audioNarrationText:
+          'Voici les vestiges héroïques du Tata de Sikasso, l\'enceinte fortifiée du royaume du Kénédougou. Érigée par Tiéba Traoré et défendue jusqu\'au dernier souffle par son frère Babemba en 1898.',
+      whyItMatters:
+          'Témoignage suprême du refus de la servitude et du sens aigu de l\'indépendance nationale.',
+      routePath: '/culture/monuments',
+      arAvailable: false,
+      validationStatus: 'Monument National',
     ),
   ];
 

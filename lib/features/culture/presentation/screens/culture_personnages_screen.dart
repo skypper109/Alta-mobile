@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
+import '../../core/datasources/historical_figure_sagas_data.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
@@ -245,13 +246,16 @@ class _PersonnageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardBg = isDark ? CultureTheme.darkSurface : Colors.white;
+    final saga = HistoricalFigureSagas.sagas[item.id];
+    final hasSaga = saga != null;
     final isSoundiata = item.id.contains('soundiata');
+    final accentColor = saga?.primaryAccent ?? _accent;
     final heroTag = 'personnage_list_${item.id}';
     final hasImage = item.imageUrl != null && item.imageUrl!.isNotEmpty;
 
-    // Bordure premium avec accentuation or pour Soundiata
-    final borderCol = isSoundiata
-        ? const Color(0xFFF59E0B).withValues(alpha: isDark ? 0.45 : 0.35)
+    // Bordure premium avec accentuation or pour les figures épiques
+    final borderCol = hasSaga
+        ? accentColor.withValues(alpha: isDark ? 0.45 : 0.35)
         : (isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder);
 
     final speechNarrative =
@@ -268,14 +272,14 @@ class _PersonnageCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
             color: borderCol,
-            width: isSoundiata ? 1.6 : 1.0,
+            width: hasSaga ? 1.6 : 1.0,
           ),
           boxShadow: [
             BoxShadow(
-              color: isSoundiata
-                  ? const Color(0xFFF59E0B).withValues(alpha: isDark ? 0.16 : 0.08)
+              color: hasSaga
+                  ? accentColor.withValues(alpha: isDark ? 0.18 : 0.08)
                   : Colors.black.withValues(alpha: isDark ? 0.22 : 0.05),
-              blurRadius: isSoundiata ? 16 : 12,
+              blurRadius: hasSaga ? 16 : 12,
               offset: const Offset(0, 4),
             ),
           ],
@@ -361,16 +365,11 @@ class _PersonnageCard extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color: isSoundiata
-                                  ? const Color(0xFFF59E0B)
-                                  : _accent,
+                              color: accentColor,
                               borderRadius: BorderRadius.circular(8),
                               boxShadow: [
                                 BoxShadow(
-                                  color: (isSoundiata
-                                          ? const Color(0xFFF59E0B)
-                                          : _accent)
-                                      .withValues(alpha: 0.4),
+                                  color: accentColor.withValues(alpha: 0.4),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -380,11 +379,11 @@ class _PersonnageCard extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  isSoundiata
-                                      ? Icons.shield_rounded
-                                      : item.icon,
+                                  hasSaga ? Icons.shield_rounded : item.icon,
                                   size: 12,
-                                  color: isSoundiata ? Colors.black : Colors.white,
+                                  color: accentColor.computeLuminance() > 0.45
+                                      ? Colors.black
+                                      : Colors.white,
                                 ),
                                 const SizedBox(width: 5),
                                 Flexible(
@@ -395,7 +394,7 @@ class _PersonnageCard extends StatelessWidget {
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w900,
-                                      color: isSoundiata
+                                      color: accentColor.computeLuminance() > 0.45
                                           ? Colors.black
                                           : Colors.white,
                                       letterSpacing: 0.6,
@@ -553,37 +552,41 @@ class _PersonnageCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
 
-                  // Pill spécifique pour Soundiata avec mention de l'épopée 2D
-                  if (isSoundiata) ...[
+                  // Pill avec mention de l'épopée pour toutes les grandes figures historiques
+                  if (hasSaga) ...[
                     const SizedBox(height: 10),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
+                        color: accentColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: const Color(0xFFF59E0B).withValues(alpha: 0.25),
+                          color: accentColor.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.auto_awesome_rounded,
                             size: 13,
-                            color: Color(0xFFF59E0B),
+                            color: accentColor,
                           ),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              'Motion 2D • Épopée de Kirina & Charte de 1236',
+                              _getSagaHighlight(item.id),
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 color: isDark
-                                    ? const Color(0xFFFCD34D)
-                                    : const Color(0xFFB45309),
+                                    ? accentColor
+                                    : (accentColor.computeLuminance() > 0.4
+                                        ? const Color(0xFF92400E)
+                                        : accentColor),
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -602,53 +605,60 @@ class _PersonnageCard extends StatelessWidget {
                         speechText: speechNarrative,
                         label: 'Écouter',
                         compact: true,
-                        activeColor: isSoundiata
-                            ? const Color(0xFFF59E0B)
-                            : _accent,
+                        activeColor: accentColor,
                       ),
 
                       const Spacer(),
 
-                      // Bouton d'action immersif
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8.5),
-                        decoration: BoxDecoration(
-                          color: isSoundiata
-                              ? const Color(0xFFF59E0B)
-                              : _accent,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: (isSoundiata
-                                      ? const Color(0xFFF59E0B)
-                                      : _accent)
-                                  .withValues(alpha: 0.35),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              isSoundiata ? 'Explorer l\'Épopée 2D' : 'Découvrir',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                color: isSoundiata ? Colors.black : Colors.white,
+                      // Bouton d'action immersif vers le motion design reel
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          if (hasSaga) {
+                            context.push('/culture/personnage/${item.id}/reel');
+                          } else {
+                            context.push('/culture/personnage/${item.id}', extra: heroTag);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8.5),
+                          decoration: BoxDecoration(
+                            color: accentColor,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: accentColor.withValues(alpha: 0.35),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
                               ),
-                            ),
-                            const SizedBox(width: 5),
-                            Icon(
-                              isSoundiata
-                                  ? Icons.play_circle_fill_rounded
-                                  : Icons.arrow_forward_rounded,
-                              size: 14,
-                              color: isSoundiata ? Colors.black : Colors.white,
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                hasSaga ? 'Explorer l\'Épopée' : 'Découvrir',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  color: accentColor.computeLuminance() > 0.45
+                                      ? Colors.black
+                                      : Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              Icon(
+                                hasSaga
+                                    ? Icons.play_circle_fill_rounded
+                                    : Icons.arrow_forward_rounded,
+                                size: 14,
+                                color: accentColor.computeLuminance() > 0.45
+                                    ? Colors.black
+                                    : Colors.white,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -676,5 +686,24 @@ class _PersonnageCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getSagaHighlight(String id) {
+    switch (id) {
+      case 'perso_soundiata':
+        return 'Épopée de Kirina & Charte de 1236';
+      case 'perso_mansa_moussa':
+        return 'Pèlerinage d\'Or & Savoirs de Tombouctou (1324)';
+      case 'perso_askia_mohammed':
+        return 'Réformes du Songhoï & Pyramide de Gao (1493)';
+      case 'perso_babemba':
+        return 'Le Tata de Sikasso & « Anka sa ni ka malo ! »';
+      case 'perso_biton_coulibaly':
+        return 'Royaume Bambara & Les 4 444 Balanzans';
+      case 'perso_modibo_keita':
+        return 'Proclamation de l\'Indépendance (22 Sept. 1960)';
+      default:
+        return 'Récit Historique & Motion Design';
+    }
   }
 }

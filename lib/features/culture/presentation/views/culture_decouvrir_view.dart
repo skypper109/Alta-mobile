@@ -27,7 +27,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
 
   static const List<String> _categories = [
     'Personnages',
-    'Monuments ',
+    'Monuments',
     'Villes & Villages',
   ];
 
@@ -438,15 +438,15 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                          color: CultureTheme.orPatrimoine.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          '2D ÉPOPÉE',
+                          'ÉPOPÉE',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
-                            color: const Color(0xFFF59E0B),
+                            color: CultureTheme.orPatrimoine,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -690,7 +690,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                                 ],
                                 Text(
                                   item.id.contains('soundiata')
-                                      ? '2D ÉPOPÉE'
+                                      ? 'ÉPOPÉE'
                                       : item.tag.toUpperCase(),
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 8.5,

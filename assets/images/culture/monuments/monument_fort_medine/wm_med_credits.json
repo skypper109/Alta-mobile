@@ -1,0 +1,23 @@
+﻿[
+    {
+        "fileName":  "wm_med_1.jpg",
+        "sourceTitle":  "File:Fort de medine 1.jpg",
+        "artist":  "Olivier Epron Olivierkeita",
+        "license":  "CC BY 3.0",
+        "sourceUrl":  "https://commons.wikimedia.org/wiki/File:Fort_de_medine_1.jpg"
+    },
+    {
+        "fileName":  "wm_med_2.jpg",
+        "sourceTitle":  "File:Fort de medine 2.jpg",
+        "artist":  "Olivier Epron Olivierkeita",
+        "license":  "CC BY-SA 3.0",
+        "sourceUrl":  "https://commons.wikimedia.org/wiki/File:Fort_de_medine_2.jpg"
+    },
+    {
+        "fileName":  "wm_med_3.jpg",
+        "sourceTitle":  "File:FORT DE MEDINE A KAYES .jpg",
+        "artist":  "KAG1LP2MDIAKITE",
+        "license":  "CC BY-SA 4.0",
+        "sourceUrl":  "https://commons.wikimedia.org/wiki/File:FORT_DE_MEDINE_A_KAYES_.jpg"
+    }
+]

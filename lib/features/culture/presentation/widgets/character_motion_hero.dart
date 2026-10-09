@@ -1,8 +1,11 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/models/culture_detail_models.dart';
+import '../../core/theme/culture_theme.dart';
 
 /// 🏛️ COMPOSANT HERO CINÉMATIQUE 2.5D MULTI-FIGURES DE CLASSE MONDIALE
 /// Vrai Motion Design Multi-Plans adapté à CHAQUE grand personnage historique :
@@ -261,8 +264,8 @@ class _CharacterMotionHeroState extends State<CharacterMotionHero>
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: const Color(0xFF38BDF8)
-                                          .withValues(alpha: 0.24),
+                                      color: config.primaryAccent
+                                          .withValues(alpha: 0.3),
                                       width: 1.0,
                                     ),
                                   ),
@@ -515,7 +518,7 @@ class _CharacterMotionHeroState extends State<CharacterMotionHero>
                                 const Icon(
                                   Icons.location_on_rounded,
                                   size: 11,
-                                  color: Color(0xFF38BDF8),
+                                  color: CultureTheme.accentOrange,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
@@ -579,6 +582,53 @@ class _CharacterMotionHeroState extends State<CharacterMotionHero>
                           fontWeight: FontWeight.w700,
                           color: config.primaryAccent.withValues(alpha: 0.92),
                           letterSpacing: 0.2,
+                        ),
+                      ),
+
+                      // Bouton d'accès direct à l'Épopée Intégrale pour tous les personnages
+                      const SizedBox(height: 10),
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.heavyImpact();
+                          context.push('/culture/personnage/${widget.figure.id}/reel');
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 13,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: config.secondaryAccent,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: config.secondaryAccent
+                                    .withValues(alpha: 0.45),
+                                blurRadius: 14,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.play_circle_fill_rounded,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'DÉCOUVRIR L\'ÉPOPÉE',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],

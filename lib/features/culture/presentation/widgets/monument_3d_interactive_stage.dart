@@ -204,6 +204,7 @@ class _Monument3DInteractiveStageState
   Widget build(BuildContext context) {
     final hotspots = Monument3DViewerModal.getHotspotsForTarget(widget.target);
     final isDjenne = widget.target.id.toLowerCase().contains('djenne');
+    final topPadding = MediaQuery.paddingOf(context).top;
 
     return Container(
       height: widget.height,
@@ -327,7 +328,7 @@ class _Monument3DInteractiveStageState
                         ),
                         const SizedBox(width: 5),
                         Text(
-                          isDjenne ? 'Mosquée 3D 360°' : 'Modèle 3D 360°',
+                          isDjenne ? 'Grande Mosquée 360°' : 'Vue interactive 360°',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
@@ -376,21 +377,12 @@ class _Monument3DInteractiveStageState
             ),
 
           // ── 7. BOUTONS DE COMMANDE LATÉRAUX (HUD) ──────────────────────────
+          // Décalés vers le bas pour ne jamais chevaucher le bouton Favori de l'en-tête
           Positioned(
             right: 12,
-            top: 12,
+            top: topPadding > 0 ? topPadding + 88 : 48,
             child: Column(
               children: [
-                // Plein écran
-                if (widget.onExpandFullscreen != null) ...[
-                  _buildHudButton(
-                    icon: Icons.fullscreen_rounded,
-                    tooltip: 'Plein écran',
-                    onTap: widget.onExpandFullscreen!,
-                  ),
-                  const SizedBox(height: 7),
-                ],
-
                 // Auto-rotation Play/Pause
                 _buildHudButton(
                   icon: _autoRotate
@@ -414,6 +406,14 @@ class _Monument3DInteractiveStageState
                 ),
                 const SizedBox(height: 7),
 
+                // Ambiance lumineuse / Éclairage (Zénith, Crépuscule, Nuit)
+                _buildHudButton(
+                  icon: _getLightingIcon(),
+                  tooltip: 'Éclairage: ${_getLightingName()}',
+                  onTap: _cycleLighting,
+                ),
+                const SizedBox(height: 7),
+
                 // Reset caméra
                 _buildHudButton(
                   icon: Icons.restart_alt_rounded,
@@ -424,34 +424,99 @@ class _Monument3DInteractiveStageState
             ),
           ),
 
-          // ── 8. SÉLECTEUR RAPIDE DE VUES ARCHITECTURALES (CAMÉRA) ───────────
+          // ── 8. BARRE INFÉRIEURE : SÉLECTEUR RAPIDE DE VUES + PLEIN ÉCRAN ────
+          // Alignement horizontal parfait et unifié sans aucune superposition
           Positioned(
             left: 14,
-            bottom: _activeHotspot != null ? 140 : 12,
+            right: 14,
+            bottom: 14,
             child: Row(
               children: [
-                _buildPresetChip('Façade', () => _resetCamera(rotX: -0.15, rotY: 0.0)),
-                const SizedBox(width: 6),
-                _buildPresetChip('3/4 Haut', () => _resetCamera(rotX: -0.38, rotY: 0.62)),
-                const SizedBox(width: 6),
-                _buildPresetChip('Minarets', () => _resetCamera(rotX: 0.12, rotY: 0.25, scale: 1.35)),
-                if (isDjenne) ...[
-                  const SizedBox(width: 6),
-                  _buildPresetChip('Cour Sahn', () => _resetCamera(rotX: -0.35, rotY: 3.14)),
+                // Vues architecturales
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      children: [
+                        _buildPresetChip('Façade', () => _resetCamera(rotX: -0.15, rotY: 0.0)),
+                        const SizedBox(width: 6),
+                        _buildPresetChip('3/4 Haut', () => _resetCamera(rotX: -0.38, rotY: 0.62)),
+                        const SizedBox(width: 6),
+                        _buildPresetChip('Minarets', () => _resetCamera(rotX: 0.12, rotY: 0.25, scale: 1.35)),
+                        if (isDjenne) ...[
+                          const SizedBox(width: 6),
+                          _buildPresetChip('Cour Sahn', () => _resetCamera(rotX: -0.35, rotY: 3.14)),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Bouton Plein écran 3D aligné sur la même rangée
+                if (widget.onExpandFullscreen != null) ...[
+                  const SizedBox(width: 8),
+                  _buildFullscreenPill(widget.onExpandFullscreen!),
                 ],
               ],
             ),
           ),
 
-          // ── 9. DRAWER / CARTE FLOTTANTE D'INFO DU HOTSPOT ACTIF ───────────
+          // ── 9. CARTE FLOTTANTE D'INFO DU HOTSPOT ACTIF ───────────────────
+          // Positionnée au-dessus de la barre inférieure pour éviter tout conflit
           if (_activeHotspot != null)
             Positioned(
               left: 12,
               right: 12,
-              bottom: 12,
+              bottom: 58,
               child: _buildActiveHotspotCard(_activeHotspot!),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFullscreenPill(VoidCallback onTap) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6.5),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFD97706), Color(0xFFF59E0B)],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFF59E0B).withValues(alpha: 0.45),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.fullscreen_rounded,
+              size: 15,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'Plein écran',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -539,9 +604,14 @@ class _Monument3DInteractiveStageState
     // Cache les points d'intérêt sur la face cachée arrière
     if (z2 < -80) return const SizedBox.shrink();
 
-    final double proj = (d / (d + z2)) * _scale;
+    final double denom = d + z2;
+    if (denom <= 20.0) return const SizedBox.shrink();
+
+    final double proj = (d / denom) * _scale;
     final double screenX = x1 * proj + _panOffset.dx;
     final double screenY = y2 * proj + _panOffset.dy;
+
+    if (!screenX.isFinite || !screenY.isFinite) return const SizedBox.shrink();
 
     final bool isSelected = _activeHotspot == hp;
 

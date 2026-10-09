@@ -84,7 +84,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     category: HistoricalPlaceCategory.unesco,
     tag: 'UNESCO',
     era: 'XIVe siècle · Empire du Mali',
-    photoUrl: 'assets/images/culture/monuments/mosquee_sankore.jpg',
+    photoUrl: 'assets/images/culture/monuments/monument_sankore/wm_san_1.jpg',
     description:
         'L\'une des plus prestigieuses universités du monde médiéval. Plus de 25 000 étudiants y étudiaient l\'astronomie, le droit et la médecine.',
     keyFact: '25 000 étudiants & 700 000 manuscrits anciens',
@@ -107,7 +107,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     category: HistoricalPlaceCategory.unesco,
     tag: 'UNESCO (1327)',
     era: 'Érigée en 1327 par Abou Ishaq es-Sahéli',
-    photoUrl: 'assets/images/culture/monuments/mosquee_djingareyber.jpg',
+    photoUrl: 'assets/images/culture/monuments/monument_djingareyber/wm_djin_1.jpg',
     description:
         'Plus ancien sanctuaire encore en activité à Tombouctou, érigé sur commande de Mansa Moussa avec son minaret tronconique dominant la cité.',
     keyFact: 'Édifice impérial financé par 200 kg d\'or',
@@ -223,7 +223,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     category: HistoricalPlaceCategory.monument,
     tag: 'Monument National',
     era: '1877-1890 · Rois Tiéba et Babemba Traoré',
-    photoUrl: 'assets/images/culture/monuments/tata_sikasso.jpg',
+    photoUrl: 'assets/images/culture/monuments/monument_tata_sikasso/wm_tata_1.jpg',
     description:
         'Colossale forteresse de banco et pierres de 9,5 km de circonférence qui résista aux plus rudes sièges. Berceau de la devise : "Plutôt la mort que la honte !".',
     keyFact: 'Muraille de 9,5 km & colline du Mamelon',
@@ -269,7 +269,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     category: HistoricalPlaceCategory.unesco,
     tag: 'UNESCO (2004)',
     era: 'Édifié en 1495 par l\'Empereur Askia Mohammed',
-    photoUrl: 'assets/images/culture/monuments/tombeau_askia.jpg',
+    photoUrl: 'assets/images/culture/monuments/monument_tombeau_askia/wm_tomb_1.jpg',
     description:
         'Structure pyramidale à degrés en terre crue de 17 mètres hérissée de torons, symbole de l\'apogée de l\'Empire Songhoï.',
     keyFact: 'Pyramide de 17 m en banco et bois d\'acacia',
@@ -360,7 +360,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     category: HistoricalPlaceCategory.monument,
     tag: 'Monument Historique',
     era: 'Construit en 1855 sur les rives du fleuve Sénégal',
-    photoUrl: 'assets/images/culture/monuments/fort_medine.jpg',
+    photoUrl: 'assets/images/culture/monuments/monument_fort_medine/wm_med_1.jpg',
     description:
         'Forteresse de grès rouge témoin du siège mémorable de 1857 mené par El Hadj Oumar Tall, au pied des chutes du Félou.',
     keyFact: 'Forteresse de 1855 & bastion de pierre',
@@ -383,7 +383,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     category: HistoricalPlaceCategory.siteNaturel,
     tag: 'Merveille Fluviale',
     era: 'Haut-Bassin du Fleuve Sénégal',
-    photoUrl: 'assets/images/culture/monuments/fort_medine.jpg',
+    photoUrl: 'assets/images/culture/monuments/monument_fort_medine/wm_med_1.jpg',
     description:
         'Spectaculaire cataracte de 16 mètres de haut sur 500 mètres de large, créant un rideau d\'eau rugissant au milieu des formations rocheuses.',
     keyFact: 'Front de 500 m de chutes et rapides sauvages',
@@ -407,7 +407,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     category: HistoricalPlaceCategory.monument,
     tag: 'Symbole National (1960)',
     era: '1960 · Boulevard de l\'Indépendance',
-    photoUrl: 'assets/images/culture/monuments/monument_independance_bamako/ind11.jpg',
+    photoUrl: 'assets/images/culture/monuments/monument_independance_bamako/ind_24.jpg',
     description:
         'Obélisque monumental soudanais étagé orné de frises géométriques mandingues au cœur du grand boulevard de la capitale.',
     keyFact: 'Flèche souveraine de 25m et flamme de la patrie',
@@ -430,7 +430,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     category: HistoricalPlaceCategory.monument,
     tag: 'Panafricanisme (2001)',
     era: '2001 · Sommet France-Afrique',
-    photoUrl: 'assets/images/culture/monuments/monument_tour_afrique_bamako/tour11.jpg',
+    photoUrl: 'assets/images/culture/monuments/monument_tour_afrique_bamako/wm_tour_1.jpg',
     description:
         'Tour cylindrique de 46 mètres inspirée de l\'écorce d\'un baobab protecteur, couronnée par le flambeau ardent de l\'unité africaine.',
     keyFact: 'Haute de 46m sur un grand rond-point verdoyant',
@@ -731,7 +731,7 @@ abstract final class MaliHistoricalPlacesRegistry {
     era: 'Centre civique de Bamako',
     photoUrl: 'assets/images/culture/monuments/monument_maliba_bamako/mb5.jpg',
     description:
-        'Lettres monumentales en 3D « M A L I B A » aux couleurs nationales Vert, Jaune et Rouge incarnant l\'attachement de la jeunesse.',
+        'Sculpture monumentale « M A L I B A » aux couleurs nationales Vert, Jaune et Rouge incarnant l\'attachement de la jeunesse.',
     keyFact: 'Point photo civique et symbole populaire de l\'unité nationale',
     routePath: '/culture/monument/monument_maliba_bamako',
     scannerId: 'monument_maliba_bamako',
@@ -856,24 +856,10 @@ abstract final class MaliHistoricalPlacesRegistry {
 
   /// Liste complète de tous les lieux et monuments historiques géoréférencés du Mali
   static const List<MaliHistoricalPlaceMarker> all = [
-    // ── Bamako (tous les 17 monuments de la capitale géoréférencés) ──
+    // ── Bamako (Monuments nationaux majeurs et musée) ──
     monumentIndependance,
     tourAfrique,
-    monumentPaix,
-    monumentArmeeNoire,
-    ciwaraSenou,
     museeNationalBamako,
-    samoryToure,
-    martyrsBamako,
-    palaisCultureBamako,
-    kwameNkrumah,
-    cathedraleBamako,
-    mosqueeBamako,
-    sogolonBamako,
-    alQoudsBamako,
-    malibaBamako,
-    obelisqueBamako,
-    placeDeLaLiberte,
 
     // ── Monuments et sites des Régions du Mali ──
     sankore,

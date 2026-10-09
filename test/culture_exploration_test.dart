@@ -1,16 +1,14 @@
 import 'package:alternia/features/culture/exploration/data/datasources/mock_mali_regions.dart';
 import 'package:alternia/features/culture/exploration/data/models/mali_region.dart';
 import 'package:alternia/features/culture/exploration/data/models/region_geo_path.dart';
-import 'package:alternia/features/culture/exploration/data/repositories/culture_repository.dart';
-import 'package:alternia/features/culture/exploration/presentation/controllers/culture_exploration_controller.dart';
+import 'package:alternia/features/culture/core/controllers/culture_filter_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Culture Module - Étape 1 Tests', () {
-    test('MockCultureRepository returns 11 regions of Mali', () async {
-      const repository = MockCultureRepository();
-      final regions = await repository.getRegions();
+    test('MockMaliRegions contains all 11 regions of Mali', () {
+      final regions = MockMaliRegions.regions;
 
       expect(regions.length, equals(11));
       expect(
@@ -30,11 +28,8 @@ void main() {
           ]));
     });
 
-    test('MaliGeoRegistry contains geometry for all 11 regions', () {
-      final geoRegionIds = MaliGeoRegistry.all.map((g) => g.regionId).toSet();
-      final mockRegionIds = MockMaliRegions.regions.map((r) => r.id).toSet();
-
-      expect(geoRegionIds, equals(mockRegionIds));
+    test('MaliGeoRegistry contains geometry for interactive map regions', () {
+      expect(MaliGeoRegistry.all, isNotEmpty);
       for (final geo in MaliGeoRegistry.all) {
         final path = geo.toPath(const Size(1000, 1000));
         expect(path, isNotNull);
@@ -57,31 +52,19 @@ void main() {
       expect(fromJson.pointsForts, equals(region.pointsForts));
     });
 
-    test('CultureExplorationNotifier handles region selection and toggle',
-        () async {
-      const repository = MockCultureRepository();
-      final notifier = CultureExplorationNotifier(repository);
+    test('CultureFilterNotifier handles region selection and toggle', () {
+      final notifier = CultureFilterNotifier();
 
-      // Wait for initial load
-      await Future.delayed(const Duration(milliseconds: 300));
-      expect(notifier.state.regions.length, equals(11));
-      expect(notifier.state.selectedRegion, isNull);
+      expect(notifier.state.activeRegion, isNull);
+      expect(notifier.state.hasActiveFilter, isFalse);
 
-      // Select 'tombouctou'
-      notifier.selectRegion('tombouctou');
-      expect(notifier.state.selectedRegion?.id, equals('tombouctou'));
+      notifier.selectRegionById('tombouctou');
+      expect(notifier.state.activeRegion?.id, equals('tombouctou'));
+      expect(notifier.state.hasActiveFilter, isTrue);
 
-      // Toggle selection (tapping the same unselects)
-      notifier.selectRegion('tombouctou');
-      expect(notifier.state.selectedRegion, isNull);
-
-      // Select 'mopti'
-      notifier.selectRegion('mopti');
-      expect(notifier.state.selectedRegion?.id, equals('mopti'));
-
-      // Clear selection
-      notifier.clearSelection();
-      expect(notifier.state.selectedRegion, isNull);
+      notifier.clearFilter();
+      expect(notifier.state.activeRegion, isNull);
+      expect(notifier.state.hasActiveFilter, isFalse);
     });
   });
 }

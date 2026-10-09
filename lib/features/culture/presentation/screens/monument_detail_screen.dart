@@ -6,11 +6,14 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/controllers/culture_passport_controller.dart';
+import '../../core/datasources/mock_culture_details_data.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_detail_models.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/services/cultural_haptics.dart';
+import '../../scanner/data/monument_scan_knowledge.dart';
+import '../../core/datasources/monument_bespoke_content_data.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/connected_contents_section.dart';
 import '../widgets/culture_audio_listen_badge.dart';
@@ -20,16 +23,38 @@ import '../widgets/monument_living_hero.dart';
 import '../widgets/passport_stamp_toast.dart';
 import '../../../../core/services/vivienne_tts_service.dart';
 
-/// Onglets d'exploration thématique d'un monument
+/// Onglets d'exploration thématique d'un monument adaptés dynamiquement à chaque édifice
 enum MonumentDetailTab {
-  essentiel('L\'Essentiel', Icons.explore_rounded),
-  architecture('Architecture', Icons.architecture_rounded),
-  crepissage('Le Crépissage', Icons.celebration_rounded),
-  histoire('Histoire', Icons.auto_stories_rounded);
+  essentiel,
+  architecture,
+  tradition,
+  histoire;
 
-  final String label;
-  final IconData icon;
-  const MonumentDetailTab(this.label, this.icon);
+  String getLabel(MonumentDetail monument) {
+    switch (this) {
+      case MonumentDetailTab.essentiel:
+        return 'L\'Essentiel';
+      case MonumentDetailTab.architecture:
+        return 'Architecture';
+      case MonumentDetailTab.tradition:
+        return MonumentBespokeContentRegistry.getTradition(monument).tabLabel;
+      case MonumentDetailTab.histoire:
+        return 'Histoire';
+    }
+  }
+
+  IconData getIcon(MonumentDetail monument) {
+    switch (this) {
+      case MonumentDetailTab.essentiel:
+        return Icons.explore_rounded;
+      case MonumentDetailTab.architecture:
+        return Icons.architecture_rounded;
+      case MonumentDetailTab.tradition:
+        return MonumentBespokeContentRegistry.getTradition(monument).tabIcon;
+      case MonumentDetailTab.histoire:
+        return Icons.auto_stories_rounded;
+    }
+  }
 }
 
 /// Fiche de consultation immersive d'un Monument Historique
@@ -98,11 +123,58 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
     final detailAsync = widget.monument != null
         ? null
         : ref.watch(monumentDetailProvider(widget.id));
-    final item = widget.monument ?? detailAsync?.valueOrNull;
+    MonumentDetail? loaded = widget.monument ?? detailAsync?.valueOrNull;
+
+    // Repli de secours immédiat et synchrone (hors-ligne instantané)
+    if (loaded == null) {
+      try {
+        // ignore: deprecated_member_use_from_same_package
+        loaded = MockCultureDetailsData.monuments.firstWhere(
+          (m) =>
+              m.id == widget.id ||
+              m.id == 'monument_${widget.id}' ||
+              widget.id == 'monument_${m.id}' ||
+              (widget.id.contains('djenne') && m.id.contains('djenne')),
+        );
+      } catch (_) {
+        final target = MonumentScanKnowledge.findById(widget.id);
+        if (target != null) {
+          loaded = MonumentDetail(
+            id: target.id,
+            name: target.name,
+            subtitle: target.subtitle,
+            era: target.era,
+            regionId: target.regionId,
+            regionName: target.regionName,
+            tag: target.tag,
+            photoUrl: target.photoUrl,
+            photoCredits: 'Direction Nationale du Patrimoine',
+            locationDetails: target.locationDetails,
+            presentation: target.historicalStory,
+            architectureAndMaterials: target.architectureStyle,
+            whyItMatters: target.whyItMatters,
+            keyFacts: target.detectionFeatures
+                .map((f) => HistoricalKeyFact(label: f.label, value: f.category, icon: f.icon))
+                .toList(),
+            chapters: [
+              EditorialStoryChapter(
+                title: 'Histoire & Origine',
+                content: target.historicalStory,
+              ),
+              EditorialStoryChapter(
+                title: 'Secrets & Mystères',
+                content: target.secretsAndMysteries,
+              ),
+            ],
+            connectedItems: const [],
+          );
+        }
+      }
+    }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    if (item == null) {
+    if (loaded == null) {
       return Scaffold(
         backgroundColor:
             isDark ? CultureTheme.darkBackground : CultureTheme.lightBackground,
@@ -113,6 +185,8 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
         ),
       );
     }
+
+    final item = loaded;
 
     final activeRegion = ref.watch(activeCultureRegionProvider).activeRegion;
 
@@ -188,6 +262,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                 SliverPersistentHeader(
                   pinned: true,
                   delegate: _MonumentTabHeaderDelegate(
+                    monument: item,
                     currentTab: _currentTab,
                     onTabSelected: _switchTab,
                     isDark: isDark,
@@ -256,13 +331,11 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFB45309), Color(0xFFD97706)],
-                ),
+                color: CultureTheme.accentOrange,
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFD97706).withValues(alpha: 0.35),
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.35),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -418,11 +491,11 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
             ),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: const Color(0xFFD97706).withValues(alpha: isDark ? 0.4 : 0.35),
+              color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.4 : 0.35),
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFD97706).withValues(alpha: isDark ? 0.18 : 0.08),
+                color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.18 : 0.08),
                 blurRadius: 14,
                 offset: const Offset(0, 4),
               ),
@@ -435,12 +508,12 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                 height: 44,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFFD97706), Color(0xFFF59E0B)],
+                    colors: [CultureTheme.accentOrange, CultureTheme.accentLight],
                   ),
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.35),
                       blurRadius: 8,
                     ),
                   ],
@@ -533,8 +606,8 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
           borderCol,
           surfaceAlt,
         );
-      case MonumentDetailTab.crepissage:
-        return _buildCrepissageTab(
+      case MonumentDetailTab.tradition:
+        return _buildTraditionTab(
           context,
           item,
           isDark,
@@ -593,12 +666,12 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
             ),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: const Color(0xFFF59E0B).withValues(alpha: isDark ? 0.45 : 0.4),
+              color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.45 : 0.4),
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFD97706).withValues(alpha: isDark ? 0.2 : 0.06),
+                color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.2 : 0.06),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
@@ -612,13 +685,13 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
                       Icons.auto_awesome_rounded,
                       size: 20,
-                      color: Color(0xFFF59E0B),
+                      color: CultureTheme.accentOrange,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -652,7 +725,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
 
         // ── VISITE GUIDÉE PAS-À-PAS DU MONUMENT ─────────────────────────────
         Text(
-          'Visite Guidée des 5 Stations',
+          'Visite Guidée des Stations',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 17,
             fontWeight: FontWeight.w900,
@@ -662,7 +735,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
         ),
         const SizedBox(height: 6),
         Text(
-          'Suivez le Maître Ousmane Barey à travers les stations secrètes du sanctuaire.',
+          'Explorez pas-à-pas les stations secrètes et repères historiques de ${item.name}.',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12.5,
             color: subtitleColor,
@@ -728,6 +801,10 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
     Color borderCol,
     Color surfaceAlt,
   ) {
+    final sectionTitle =
+        MonumentBespokeContentRegistry.getArchitectureSectionTitle(item);
+    final pillars = MonumentBespokeContentRegistry.getPillars(item);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -744,10 +821,11 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.architecture_rounded, size: 20, color: Color(0xFFF59E0B)),
+                  const Icon(Icons.architecture_rounded,
+                      size: 20, color: CultureTheme.accentOrange),
                   const SizedBox(width: 8),
                   Text(
-                    'Le Génie Bâtisseur Soudano-Sahélien',
+                    'Le Génie Bâtisseur & Matériaux',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w900,
@@ -761,7 +839,9 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                 item.architectureAndMaterials,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13.5,
-                  color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
+                  color: isDark
+                      ? const Color(0xFFE2E8F0)
+                      : const Color(0xFF334155),
                   height: 1.6,
                   fontWeight: FontWeight.w500,
                 ),
@@ -773,7 +853,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
         const SizedBox(height: 24),
 
         Text(
-          'Les 4 Piliers de l\'Ingénierie de Djenné',
+          sectionTitle,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 17,
             fontWeight: FontWeight.w900,
@@ -783,7 +863,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
         ),
         const SizedBox(height: 6),
         Text(
-          'Comment la boue du Bani défie les siècles et les éléments.',
+          'Les particularités constructives et trésors bâtis de ${item.name}.',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12.5,
             color: subtitleColor,
@@ -791,139 +871,32 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
         ),
         const SizedBox(height: 16),
 
-        // Pilier 1 : Le Banco Alchimique
-        _buildPillarCard(
-          number: '01',
-          title: 'Le Banco Alchimique (Terre Crue)',
-          subtitle: 'Une composition vivante et imperméable',
-          description:
-              'Le banco n\'est pas de la simple terre : c\'est un alliage savant d\'argile fine récoltée dans le lit du fleuve Bani, de paille de riz fermentée pour la cohésion fibreuse, de balle de mil et de beurre de karité. Le karité apporte les lipides nécessaires pour rendre le mortier hydrofuge face aux orages tropicaux.',
-          icon: Icons.grain_rounded,
-          color: const Color(0xFFD97706),
-          isDark: isDark,
-          cardBg: cardBg,
-          borderCol: borderCol,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
-
-        const SizedBox(height: 14),
-
-        // Pilier 2 : Les Torons de Palmier Rônier
-        _buildPillarCard(
-          number: '02',
-          title: 'Les Torons en Bois de Rônier',
-          subtitle: 'L\'échafaudage permanent et armature antisismique',
-          description:
-              'Ces poutres en bois qui hérissent les murailles sont prélevées sur le palmier rônier (Borassus aethiopum). Ce bois extraordinaire ne pourrit jamais et repousse naturellement les termites. Il permet aux maçons d\'escalader les façades lors du crépissage et dissipe les tensions mécaniques causées par les chocs thermiques du Sahel (de 15°C la nuit à 45°C le jour).',
-          icon: Icons.carpenter_rounded,
-          color: const Color(0xFFB45309),
-          isDark: isDark,
-          cardBg: cardBg,
-          borderCol: borderCol,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
-
-        const SizedBox(height: 14),
-
-        // Pilier 3 : Les Cimes aux Œufs d'Autruche
-        _buildPillarCard(
-          number: '03',
-          title: 'Les Cimes aux Œufs d\'Autruche',
-          subtitle: 'Pureté sacrée, fertilité et protection divine',
-          description:
-              'Au sommet des trois minarets culminent de véritables œufs d\'autruche blancs polis. Dans la cosmogonie sahélienne, l\'œuf d\'autruche est le symbole premier de la fécondité, de la pureté morale et du renouveau perpétuel. Traditionnellement, ils servaient également de protection spirituelle contre la foudre.',
-          icon: Icons.egg_rounded,
-          color: const Color(0xFFF59E0B),
-          isDark: isDark,
-          cardBg: cardBg,
-          borderCol: borderCol,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
-
-        const SizedBox(height: 14),
-
-        // Pilier 4 : La Forêt Hypostyle des 90 Piliers
-        _buildPillarCard(
-          number: '04',
-          title: 'La Forêt des 90 Piliers Hypostyles',
-          subtitle: 'Climatisation naturelle bio-climatique à 22°C',
-          description:
-              'À l\'intérieur, la nef est soutenue par 90 piliers massifs en banco d\'une épaisseur allant jusqu\'à 60 centimètres. Cette masse thermique colossale emmagasine la fraîcheur de la nuit pour tempérer le sanctuaire en plein jour, maintenant une température intérieure stable à 22°C sous un soleil de plomb.',
-          icon: Icons.temple_buddhist_rounded,
-          color: const Color(0xFF0D9488),
-          isDark: isDark,
-          cardBg: cardBg,
-          borderCol: borderCol,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
-
-        const SizedBox(height: 22),
-
-        // Focus Système Bioclimatique & Ventilation
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0D9488).withValues(alpha: isDark ? 0.15 : 0.08),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: const Color(0xFF0D9488).withValues(alpha: 0.35),
+        ...pillars.map((pillar) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: _buildPillarCard(
+              number: pillar.number,
+              title: pillar.title,
+              subtitle: pillar.subtitle,
+              description: pillar.description,
+              icon: pillar.icon,
+              color: CultureTheme.accentOrange,
+              isDark: isDark,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              titleColor: titleColor,
+              subtitleColor: subtitleColor,
             ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0D9488).withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.air_rounded,
-                  size: 22,
-                  color: Color(0xFF0D9488),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Les 104 Lucarnes Zénithales du Toit',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                        color: titleColor,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Le toit-terrasse est percé de 104 orifices fermés par des couvercles en terre cuite. En saison chaude, les fidèles ôtent les chapeaux pour créer un tirage d\'air ascendant. Dès que l\'hivernage approche, ils sont scellés pour protéger le sanctuaire des pluies battantes.',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12.5,
-                        color: subtitleColor,
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+          );
+        }),
       ],
     );
   }
 
   // ══════════════════════════════════════════════════════════════════════════════
-  // ONGLET 3 : LE CRÉPISSAGE SACRÉ (FÊTE ANNUELLE)
+  // ONGLET 3 : TRADITION, CÉLÉBRATION & RITUELS SPÉCIFIQUES
   // ══════════════════════════════════════════════════════════════════════════════
-  Widget _buildCrepissageTab(
+  Widget _buildTraditionTab(
     BuildContext context,
     MonumentDetail item,
     bool isDark,
@@ -933,21 +906,25 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
     Color borderCol,
     Color surfaceAlt,
   ) {
+    final tradition = MonumentBespokeContentRegistry.getTradition(item);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Carte Héroïque du Crépissage
+        // Carte Héroïque de la Tradition Spécifique
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
-              color: const Color(0xFFD97706).withValues(alpha: isDark ? 0.45 : 0.3),
+              color: CultureTheme.accentOrange
+                  .withValues(alpha: isDark ? 0.45 : 0.3),
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFD97706).withValues(alpha: isDark ? 0.2 : 0.08),
+                color: CultureTheme.accentOrange
+                    .withValues(alpha: isDark ? 0.2 : 0.08),
                 blurRadius: 18,
                 offset: const Offset(0, 4),
               ),
@@ -956,13 +933,14 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Photo réelle du festival
+              // Photo réelle du monument / rituel
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(22)),
                 child: Stack(
                   children: [
                     Image.asset(
-                      'assets/images/culture/monuments/monument_mosquee_djenne/dje_4.webp',
+                      tradition.photoAsset,
                       height: 200,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -970,7 +948,8 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                         height: 200,
                         color: const Color(0xFF1E293B),
                         child: const Center(
-                          child: Icon(Icons.celebration_rounded, size: 48, color: Color(0xFFF59E0B)),
+                          child: Icon(Icons.celebration_rounded,
+                              size: 48, color: CultureTheme.accentOrange),
                         ),
                       ),
                     ),
@@ -996,13 +975,14 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF59E0B),
+                              color: CultureTheme.accentOrange,
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'TRADITION SÉCULAIRE UNIQUE AU MONDE',
+                              tradition.badge,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 9.5,
                                 fontWeight: FontWeight.w900,
@@ -1013,7 +993,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'La Fête Sacrée du Crépissage',
+                            tradition.title,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 20,
                               fontWeight: FontWeight.w900,
@@ -1034,10 +1014,12 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Chaque année, à la fin de la saison sèche, toute la cité de Djenné s\'unit en une seule matinée de liesse collective pour réenduire entièrement la mosquée d\'une nouvelle couche d\'argile sacrée.',
+                      tradition.description,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13.5,
-                        color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
+                        color: isDark
+                            ? const Color(0xFFE2E8F0)
+                            : const Color(0xFF334155),
                         height: 1.6,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1054,11 +1036,12 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.record_voice_over_rounded, size: 20, color: Color(0xFFF59E0B)),
+                          const Icon(Icons.record_voice_over_rounded,
+                              size: 20, color: CultureTheme.accentOrange),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'Écouter le récit de la fête du Crépissage',
+                              tradition.audioListenTitle,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
@@ -1067,13 +1050,8 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                             ),
                           ),
                           CultureAudioListenBadge(
-                            contentId: 'crepissage_${item.id}',
-                            speechText:
-                                'La fête sacrée du Crépissage de Djenné. '
-                                'Chaque année, la veille au crépuscule, des milliers de garçons malaxent le banco dans les fosses du Bani. '
-                                'À quatre heures du matin, le tambour retentit depuis les minarets. '
-                                'À l\'aube, une marée humaine s\'élance avec les corbeilles de mortier. '
-                                'Les jeunes escaladent les torons en bois et réenduient les murailles à mains nues sous le chant des femmes et le regard vigilant des maîtres maçons Barey Ton.',
+                            contentId: tradition.audioContentId,
+                            speechText: tradition.audioSpeechText,
                             label: 'Écouter',
                             compact: true,
                             activeColor: CultureTheme.accentOrange,
@@ -1091,7 +1069,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
         const SizedBox(height: 24),
 
         Text(
-          'Chronologie de la Journée Sacrée',
+          tradition.chronologyTitle,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 17,
             fontWeight: FontWeight.w900,
@@ -1099,85 +1077,32 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
             letterSpacing: -0.4,
           ),
         ),
+        const SizedBox(height: 4),
+        Text(
+          tradition.chronologySubtitle,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 12.5,
+            color: subtitleColor,
+          ),
+        ),
         const SizedBox(height: 14),
 
-        // Étape 1 : La Veille
-        _buildRitualStep(
-          time: 'La Veille au Crépuscule',
-          title: 'Le Malaxage dans les Fosses du Bani',
-          content:
-              'Dans d\'immenses bassins d\'argile creusés aux abords du fleuve, des centaines de jeunes hommes et garçons piétinent et malaxent le banco en chantant. Le mortier repose toute la nuit pour atteindre une texture parfaite.',
-          icon: Icons.nightlife_rounded,
-          isDark: isDark,
-          cardBg: cardBg,
-          borderCol: borderCol,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
-
-        const SizedBox(height: 12),
-
-        // Étape 2 : L'Appel
-        _buildRitualStep(
-          time: '4h00 du Matin',
-          title: 'L\'Appel Solennel du Tambour',
-          content:
-              'Un son lourd et profond retentit depuis la terrasse de la mosquée. Le tocsin traditionnel réveille chaque foyer de Djenné. Personne ne dort : la fête du Crépissage a commencé.',
-          icon: Icons.notifications_active_rounded,
-          isDark: isDark,
-          cardBg: cardBg,
-          borderCol: borderCol,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
-
-        const SizedBox(height: 12),
-
-        // Étape 3 : La Ruée
-        _buildRitualStep(
-          time: 'L\'Aube (6h00)',
-          title: 'La Ruée Folle du Mortier',
-          content:
-              'Des équipes de porteurs de chaque quartier rivalisent de vitesse. Les corbeilles d\'osier remplies d\'argile fraîche sont hissées sur les têtes. Des courses effrénées s\'engagent à travers les ruelles jusqu\'au parvis.',
-          icon: Icons.directions_run_rounded,
-          isDark: isDark,
-          cardBg: cardBg,
-          borderCol: borderCol,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
-
-        const SizedBox(height: 12),
-
-        // Étape 4 : L'Escalade
-        _buildRitualStep(
-          time: '7h00 – 10h00',
-          title: 'L\'Escalade des Torons & L\'Enduit à Mains Nues',
-          content:
-              'Perchés à 15 mètres de hauteur sur les poutres de palmier, les jeunes maçons étalent l\'argile à mains nues avec une agilité acrobatique. En bas, les femmes apportent l\'eau fraîche du fleuve en entonnant des hymnes guerriers et spirituels.',
-          icon: Icons.pan_tool_rounded,
-          isDark: isDark,
-          cardBg: cardBg,
-          borderCol: borderCol,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
-
-        const SizedBox(height: 12),
-
-        // Étape 5 : La Bénédiction
-        _buildRitualStep(
-          time: 'Midi',
-          title: 'L\'Inspection des Maîtres Barey Ton & Le Festin',
-          content:
-              'Les doyens de la corporation des maçons inspectent chaque pan de mur. La mosquée brille d\'une robe neuve ocre-dorée. La journée se termine par un immense banquet populaire où tous les différends de la cité sont pardonnés.',
-          icon: Icons.restaurant_rounded,
-          isDark: isDark,
-          cardBg: cardBg,
-          borderCol: borderCol,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
+        ...tradition.steps.map((step) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _buildRitualStep(
+              time: step.time,
+              title: step.title,
+              content: step.content,
+              icon: step.icon,
+              isDark: isDark,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              titleColor: titleColor,
+              subtitleColor: subtitleColor,
+            ),
+          );
+        }),
       ],
     );
   }
@@ -1195,12 +1120,14 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
     Color borderCol,
     Color surfaceAlt,
   ) {
+    final timelineEvents = MonumentBespokeContentRegistry.getTimeline(item);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Frise Chronologique Interactive
         Text(
-          'Frise Chronologique des Huit Siècles',
+          'Frise Chronologique & Mémoire',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 17,
             fontWeight: FontWeight.w900,
@@ -1210,7 +1137,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
         ),
         const SizedBox(height: 6),
         Text(
-          'Des fondations médiévales du XIIIe siècle à la renaissance de 1907.',
+          'Les grands jalons historiques et l\'épopée de ${item.name}.',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12.5,
             color: subtitleColor,
@@ -1218,57 +1145,18 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
         ),
         const SizedBox(height: 16),
 
-        _buildTimelineItem(
-          year: '1280',
-          title: 'Fondation par le Roi Koy Konboro',
-          content:
-              'Le 26e roi de Djenné, Koy Konboro, se convertit à l\'islam. En signe d\'humilité spirituelle, il fait raser son somptueux palais royal pour édifier à sa place la toute première Grande Mosquée.',
-          isFirst: true,
-          isDark: isDark,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
-
-        _buildTimelineItem(
-          year: '1324',
-          title: 'L\'Âge d\'Or de l\'Empire du Mali',
-          content:
-              'Sous le règne de l\'empereur Mansa Moussa, Djenné devient la métropole commerciale sœur de Tombouctou. Des caravanes de sel et d\'or transitent chaque jour devant la mosquée.',
-          isDark: isDark,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
-
-        _buildTimelineItem(
-          year: '1834',
-          title: 'L\'Épreuve de l\'Empire du Macina',
-          content:
-              'Le conquérant peul Sékou Amadou juge l\'édifice originel trop orné et luxueux. Il fait bâtir une mosquée austère à proximité et laisse l\'ancien sanctuaire se dégrader sous les intempéries.',
-          isDark: isDark,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
-
-        _buildTimelineItem(
-          year: '1907',
-          title: 'La Renaissance Triomphale',
-          content:
-              'La corporation des maçons traditionnels de Djenné (Barey Ton), dirigée par le maître d\'œuvre Ismaïla Traoré, reconstruit le monument selon son architecture originelle monumentale avec ses trois minarets emblématiques.',
-          isDark: isDark,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
-
-        _buildTimelineItem(
-          year: '1988',
-          title: 'Consécration au Patrimoine Mondial UNESCO',
-          content:
-              'L\'UNESCO classe la Grande Mosquée et la ville ancienne de Djenné au Patrimoine Mondial de l\'Humanité, consacrant le plus grand chef-d\'œuvre architectural en terre crue de la planète.',
-          isLast: true,
-          isDark: isDark,
-          titleColor: titleColor,
-          subtitleColor: subtitleColor,
-        ),
+        ...timelineEvents.map((event) {
+          return _buildTimelineItem(
+            year: event.year,
+            title: event.title,
+            content: event.content,
+            isFirst: event.isFirst,
+            isLast: event.isLast,
+            isDark: isDark,
+            titleColor: titleColor,
+            subtitleColor: subtitleColor,
+          );
+        }),
 
         const SizedBox(height: 24),
 
@@ -1401,7 +1289,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
             children: [
               Row(
                 children: [
-                  Icon(fact.icon, size: 15, color: const Color(0xFFD97706)),
+                  Icon(fact.icon, size: 15, color: CultureTheme.accentOrange),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -1551,10 +1439,10 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFFD97706).withValues(alpha: 0.12),
+              color: CultureTheme.accentOrange.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, size: 18, color: const Color(0xFFD97706)),
+            child: Icon(icon, size: 18, color: CultureTheme.accentOrange),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1566,7 +1454,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD97706).withValues(alpha: 0.15),
+                        color: CultureTheme.accentOrange.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -1574,7 +1462,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
                           fontWeight: FontWeight.w900,
-                          color: const Color(0xFFD97706),
+                          color: CultureTheme.accentOrange,
                         ),
                       ),
                     ),
@@ -1628,7 +1516,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
-                  color: const Color(0xFFD97706),
+                  color: CultureTheme.accentOrange,
                 ),
               ),
               const SizedBox(height: 4),
@@ -1636,7 +1524,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                 width: 10,
                 height: 10,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFF59E0B),
+                  color: CultureTheme.accentOrange,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -1644,7 +1532,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                 Container(
                   width: 2,
                   height: 60,
-                  color: const Color(0xFFD97706).withValues(alpha: 0.3),
+                  color: CultureTheme.accentOrange.withValues(alpha: 0.3),
                 ),
             ],
           ),
@@ -1686,21 +1574,23 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
 // DÉLÉGUÉ D'EN-TÊTE PERSISTANT DES ONGLETS DU MONUMENT
 // ══════════════════════════════════════════════════════════════════════════════
 class _MonumentTabHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final MonumentDetail monument;
   final MonumentDetailTab currentTab;
   final ValueChanged<MonumentDetailTab> onTabSelected;
   final bool isDark;
 
   const _MonumentTabHeaderDelegate({
+    required this.monument,
     required this.currentTab,
     required this.onTabSelected,
     required this.isDark,
   });
 
   @override
-  double get minExtent => 52.0;
+  double get minExtent => 54.0;
 
   @override
-  double get maxExtent => 52.0;
+  double get maxExtent => 54.0;
 
   @override
   Widget build(
@@ -1712,69 +1602,75 @@ class _MonumentTabHeaderDelegate extends SliverPersistentHeaderDelegate {
     final tabBg = isDark ? CultureTheme.darkSurface : const Color(0xFFF1F5F9);
     final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
-    return Container(
-      color: bgColor,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+    return SizedBox(
+      height: 54.0,
       child: Container(
-        decoration: BoxDecoration(
-          color: tabBg,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: borderCol),
-        ),
-        child: Row(
-          children: MonumentDetailTab.values.map((tab) {
-            final isSelected = tab == currentTab;
-            return Expanded(
-              child: GestureDetector(
-                onTap: () => onTabSelected(tab),
-                behavior: HitTestBehavior.opaque,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? const Color(0xFFD97706)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: const Color(0xFFD97706).withValues(alpha: 0.35),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        tab.icon,
-                        size: 13,
-                        color: isSelected
-                            ? Colors.white
-                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        tab.label,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+        color: bgColor,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: tabBg,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: borderCol),
+          ),
+          child: Row(
+            children: MonumentDetailTab.values.map((tab) {
+              final isSelected = tab == currentTab;
+              final label = tab.getLabel(monument);
+              final icon = tab.getIcon(monument);
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => onTabSelected(tab),
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 7),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? CultureTheme.accentOrange
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: CultureTheme.accentOrange.withValues(alpha: 0.35),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          icon,
+                          size: 13,
                           color: isSelected
                               ? Colors.white
                               : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            label,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10.5,
+                              fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                              color: isSelected
+                                  ? Colors.white
+                                  : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -1782,6 +1678,8 @@ class _MonumentTabHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(covariant _MonumentTabHeaderDelegate oldDelegate) {
-    return oldDelegate.currentTab != currentTab || oldDelegate.isDark != isDark;
+    return oldDelegate.currentTab != currentTab ||
+        oldDelegate.isDark != isDark ||
+        oldDelegate.monument.id != monument.id;
   }
 }
