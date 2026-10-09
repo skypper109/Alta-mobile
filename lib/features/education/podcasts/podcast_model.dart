@@ -8,6 +8,18 @@ class PodcastChapter {
     required this.title,
     required this.timestampSeconds,
   });
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'timestamp_seconds': timestampSeconds,
+      };
+
+  factory PodcastChapter.fromJson(Map<String, dynamic> json) => PodcastChapter(
+        title: json['title'] as String? ?? 'Chapitre',
+        timestampSeconds:
+            (json['timestamp_seconds'] ?? json['timestampSeconds'] ?? 0)
+                as int,
+      );
 }
 
 class RevisionPodcast {
@@ -24,6 +36,7 @@ class RevisionPodcast {
   final IconData icon;
   final Color accentColor;
   final String? audioUrl;
+  final bool isCustomGenerated;
 
   const RevisionPodcast({
     required this.id,
@@ -39,7 +52,78 @@ class RevisionPodcast {
     required this.icon,
     required this.accentColor,
     this.audioUrl,
+    this.isCustomGenerated = false,
   });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'subject': subject,
+        'class_level': classLevel,
+        'duration_minutes': durationMinutes,
+        'summary': summary,
+        'narrator': narrator,
+        'chapters': chapters.map((c) => c.toJson()).toList(),
+        'key_takeaways': keyTakeaways,
+        'full_script': fullScript,
+        'audio_url': audioUrl,
+        'is_custom_generated': isCustomGenerated,
+      };
+
+  factory RevisionPodcast.fromJson(Map<String, dynamic> json) {
+    final sub = (json['subject'] as String? ?? 'Général');
+    return RevisionPodcast(
+      id: json['id'] as String? ??
+          'pod_${DateTime.now().millisecondsSinceEpoch}',
+      title: json['title'] as String? ?? 'Cours Audio AlternIA',
+      subject: sub,
+      classLevel: json['class_level'] as String? ??
+          json['classLevel'] as String? ??
+          'Tous niveaux',
+      durationMinutes:
+          (json['duration_minutes'] ?? json['durationMinutes'] ?? 6) as int,
+      summary: json['summary'] as String? ?? '',
+      narrator: json['narrator'] as String? ?? 'Professeur IA (AlternIA)',
+      chapters: (json['chapters'] as List<dynamic>? ?? [])
+          .map((c) => PodcastChapter.fromJson(c as Map<String, dynamic>))
+          .toList(),
+      keyTakeaways: (json['key_takeaways'] as List<dynamic>? ??
+              json['keyTakeaways'] as List<dynamic>? ??
+              [])
+          .map((k) => k.toString())
+          .toList(),
+      fullScript: json['full_script'] as String? ??
+          json['fullScript'] as String? ??
+          '',
+      icon: iconForSubject(sub),
+      accentColor: colorForSubject(sub),
+      audioUrl: json['audio_url'] as String?,
+      isCustomGenerated: json['is_custom_generated'] as bool? ?? true,
+    );
+  }
+
+  static IconData iconForSubject(String subject) {
+    final s = subject.toLowerCase();
+    if (s.contains('math')) return Icons.calculate_rounded;
+    if (s.contains('phys') || s.contains('chim')) return Icons.science_rounded;
+    if (s.contains('hist') || s.contains('géo')) return Icons.public_rounded;
+    if (s.contains('philo')) return Icons.psychology_rounded;
+    if (s.contains('svt') || s.contains('biol')) return Icons.biotech_rounded;
+    if (s.contains('fran') || s.contains('litt')) {
+      return Icons.menu_book_rounded;
+    }
+    return Icons.headphones_rounded;
+  }
+
+  static Color colorForSubject(String subject) {
+    final s = subject.toLowerCase();
+    if (s.contains('math')) return const Color(0xFF314999);
+    if (s.contains('phys') || s.contains('chim')) return const Color(0xFF0284C7);
+    if (s.contains('hist') || s.contains('géo')) return const Color(0xFFF1851F);
+    if (s.contains('philo')) return const Color(0xFF40BBCC);
+    if (s.contains('svt')) return const Color(0xFF059669);
+    return const Color(0xFF314999);
+  }
 }
 
 class PodcastCatalog {

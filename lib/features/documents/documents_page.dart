@@ -308,9 +308,10 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
             ],
           ),
 
-          // ── Raccourcis complémentaires : Duel & Podcasts ────────────────
+          // ── HUB D'ACTIVITÉS PÉDAGOGIQUES ALTERNIA ─────────────────────────
           Row(
             children: [
+              // 1. CARTE DUEL SCOLAIRE
               Expanded(
                 child: GestureDetector(
                   onTap: () {
@@ -318,33 +319,99 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                     context.push('/education/duel');
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: cardBg,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: borderCol),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: AltaColors.accent.withValues(alpha: 0.4),
+                        width: 1.5,
+                      ),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.sports_esports_rounded,
-                            color: AltaColors.accent, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Duel Scolaire',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: textPri,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AltaColors.accent.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.sports_esports_rounded,
+                                color: AltaColors.accent,
+                                size: 22,
+                              ),
                             ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AltaColors.accent.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '+250 XP',
+                                style: GoogleFonts.spaceMono(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: AltaColors.accent,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Duel Scolaire',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: textPri,
                           ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Défie tes camarades & grimpe au classement national.',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            color: textSec,
+                            height: 1.3,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Text(
+                              'Entrer dans l\'arène',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AltaColors.accent,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 13,
+                              color: AltaColors.accent,
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+
+              const SizedBox(width: 12),
+
+              // 2. CARTE PODCASTS AUDIO
               Expanded(
                 child: GestureDetector(
                   onTap: () {
@@ -352,26 +419,89 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                     context.push('/education/podcasts');
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: cardBg,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: borderCol),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: AltaColors.secondary.withValues(alpha: 0.4),
+                        width: 1.5,
+                      ),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.headphones_rounded,
-                            color: AltaColors.secondary, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Podcasts Audio',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: textPri,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AltaColors.secondary.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.headphones_rounded,
+                                color: AltaColors.secondary,
+                                size: 22,
+                              ),
                             ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AltaColors.secondary.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'AUDIO IA',
+                                style: GoogleFonts.spaceMono(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: AltaColors.secondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Podcasts Audio',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: textPri,
                           ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Génère tes leçons & écoute en mode mains libres.',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            color: textSec,
+                            height: 1.3,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Text(
+                              'Écouter les cours',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AltaColors.secondary,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 13,
+                              color: AltaColors.secondary,
+                            ),
+                          ],
                         ),
                       ],
                     ),
