@@ -9,6 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -314,7 +315,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                 child: GestureDetector(
                   onTap: () {
                     HapticFeedback.selectionClick();
-                    Navigator.pushNamed(context, '/education/duel');
+                    context.push('/education/duel');
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -348,7 +349,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                 child: GestureDetector(
                   onTap: () {
                     HapticFeedback.selectionClick();
-                    Navigator.pushNamed(context, '/education/podcasts');
+                    context.push('/education/podcasts');
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
