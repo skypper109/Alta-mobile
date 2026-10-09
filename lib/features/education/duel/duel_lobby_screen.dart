@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants.dart';
@@ -874,6 +875,21 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
               onTap: () {
                 HapticFeedback.selectionClick();
                 setState(() => _selectedMode = DuelMode.passAndPlay);
+              },
+            ),
+
+            const SizedBox(height: 10),
+
+            // 5. Mode Grin Éducatif (Réseau Local sans Internet)
+            _ModeSelectTile(
+              title: 'Mode Grin Éducatif (Réseau Local Boîtier)',
+              subtitle: 'Joue avec ton groupe d\'étude en Wi-Fi local • 100% sans Internet',
+              icon: Icons.groups_rounded,
+              isSelected: false,
+              color: AltaColors.secondary,
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                context.push('/education/grin');
               },
             ),
 

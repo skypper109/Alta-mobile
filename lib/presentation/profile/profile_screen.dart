@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/malian_school_system.dart';
+import '../../core/services/sync_queue_service.dart';
 import '../../features/device/device_notifier.dart';
 import '../../features/device/device_page.dart';
 import '../../features/profile/gamification_notifier.dart';
@@ -409,6 +410,7 @@ class ProfileScreen extends ConsumerWidget {
     final userState = ref.watch(userPrefsProvider);
     final deviceState = ref.watch(deviceNotifierProvider);
     final gamification = ref.watch(gamificationProvider);
+    final syncState = ref.watch(syncQueueProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
     final textSec = isDark ? AppColors.textSecondary : const Color(0xFF475569);
@@ -809,11 +811,12 @@ class ProfileScreen extends ConsumerWidget {
                 color: AppColors.accent,
               ),
               _ProfileStatCard(
-                title: 'SÉANCES D\'ÉTUDE',
-                value: '${gamification.seances} sessions',
-                subtitle: 'Modules travaillés',
-                icon: Icons.school_rounded,
-                color: AppColors.primaryLight,
+                title: 'FLASHCARDS LEITNER',
+                value: 'Mémoriser',
+                subtitle: 'Répétition J+1/J+7',
+                icon: Icons.style_rounded,
+                color: AppColors.primary,
+                onTap: () => context.push('/education/flashcards'),
               ),
               _ProfileStatCard(
                 title: 'DUEL SCOLAIRE',
@@ -824,12 +827,12 @@ class ProfileScreen extends ConsumerWidget {
                 onTap: () => context.push('/education/duel'),
               ),
               _ProfileStatCard(
-                title: 'PODCASTS AUDIO',
-                value: 'Mode Audio',
-                subtitle: 'Écouter & Réviser',
-                icon: Icons.headphones_rounded,
+                title: 'MODE GRIN LOCAL',
+                value: 'Réseau Boîtier',
+                subtitle: 'Défis sans Internet',
+                icon: Icons.groups_rounded,
                 color: const Color(0xFFE0823D),
-                onTap: () => context.push('/education/podcasts'),
+                onTap: () => context.push('/education/grin'),
               ),
             ],
           ),
@@ -939,6 +942,135 @@ class ProfileScreen extends ConsumerWidget {
                     isConnected
                         ? 'Gérer le boîtier'
                         : 'Appairer mon boîtier AlterniA',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor:
+                        isDark ? AppColors.secondary : AppColors.primary,
+                    side: BorderSide(
+                      color: isDark
+                          ? AppColors.secondary.withValues(alpha: 0.5)
+                          : AppColors.primary.withValues(alpha: 0.5),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    minimumSize: const Size.fromHeight(42),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // ── 5. CARTE SYNCHRONISATION ASYNCHRONE STORE & FORWARD ─────────
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: syncState.hasPending
+                    ? AppColors.warning.withValues(alpha: 0.5)
+                    : borderCol,
+                width: 1.2,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(9),
+                      decoration: BoxDecoration(
+                        color: (syncState.hasPending
+                                ? AppColors.warning
+                                : AppColors.secondary)
+                            .withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        syncState.hasPending
+                            ? Icons.cloud_sync_rounded
+                            : Icons.cloud_done_rounded,
+                        size: 20,
+                        color: syncState.hasPending
+                            ? AppColors.warning
+                            : AppColors.secondary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Synchronisation Hors-Ligne',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: textPri,
+                            ),
+                          ),
+                          Text(
+                            'Sauvegarde interne Store & Forward',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              color: textSec,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3.5),
+                      decoration: BoxDecoration(
+                        color: (syncState.hasPending
+                                ? AppColors.warning
+                                : AppColors.success)
+                            .withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        syncState.hasPending
+                            ? '${syncState.pendingCount} EN ATTENTE'
+                            : 'À JOUR',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.bold,
+                          color: syncState.hasPending
+                              ? AppColors.warning
+                              : AppColors.success,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  syncState.hasPending
+                      ? 'Vos derniers duels et révisions sont stockés sur votre téléphone. Touchez pour synchroniser avec le classement dès que vous avez du réseau.'
+                      : 'Toutes vos données (scores, victoires en duel, cartes mémo) sont synchronisées.',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11.5,
+                    color: textSec,
+                    height: 1.35,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                OutlinedButton.icon(
+                  onPressed: () => showSyncStatusModalSheet(context),
+                  icon: const Icon(Icons.sync_rounded, size: 16),
+                  label: Text(
+                    syncState.hasPending
+                        ? 'Gérer la file d\'attente (${syncState.pendingCount})'
+                        : 'Vérifier la synchronisation',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12.5,
                       fontWeight: FontWeight.bold,

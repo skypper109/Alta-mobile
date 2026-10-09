@@ -43,6 +43,8 @@ import '../splash/splash_screen.dart';
 import '../../features/education/duel/duel_lobby_screen.dart';
 import '../../features/education/duel/duel_leaderboard_screen.dart';
 import '../../features/education/podcasts/podcasts_home_screen.dart';
+import '../../features/education/flashcards/flashcards_screen.dart';
+import '../../features/education/grin/grin_hub_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -472,6 +474,19 @@ GoRouter appRouter(Ref ref) {
         path: '/education/podcasts',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const PodcastsHomeScreen(),
+      ),
+      GoRoute(
+        path: '/education/grin',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const GrinHubScreen(),
+      ),
+      GoRoute(
+        path: '/education/flashcards',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final subject = state.extra is String ? state.extra as String : null;
+          return FlashcardsScreen(selectedSubject: subject);
+        },
       ),
       GoRoute(
         path: '/splash',

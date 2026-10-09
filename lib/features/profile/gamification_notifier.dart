@@ -241,6 +241,39 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
       } catch (_) {}
     }
   }
+
+  /// Crédite instantanément les récompenses de révision flashcards (XP)
+  Future<void> addFlashcardReward({
+    required int xpGained,
+    required String subject,
+  }) async {
+    final newXpVal = state.xpInt + xpGained;
+
+    final progressMap = Map<String, double>.from(state.subjectsProgress);
+    final curProg = state.getProgressForSubject(subject);
+    progressMap[subject] = (curProg + 0.01).clamp(0.0, 1.0);
+
+    state = state.copyWith(
+      xp: _formatNumber(newXpVal),
+      subjectsProgress: progressMap,
+    );
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheData = {
+        'streak': state.streak,
+        'streak_label': state.streak,
+        'xp': newXpVal,
+        'xp_label': state.xp,
+        'coins': state.coins,
+        'coins_label': state.coins,
+        'seances': state.seances,
+        'seances_label': state.seances,
+        'subjects_progress': progressMap,
+      };
+      await prefs.setString(_prefsKey, jsonEncode(cacheData));
+    } catch (_) {}
+  }
 }
 
 final gamificationProvider =

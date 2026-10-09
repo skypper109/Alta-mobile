@@ -126,40 +126,30 @@ class HomeScreen extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color:
-                    isDark ? const Color(0xFF131D31) : const Color(0xFFF1F5F9),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isConnected
-                      ? AppColors.secondary.withValues(alpha: 0.55)
-                      : AppColors.primary.withValues(alpha: 0.35),
-                  width: 1.4,
-                ),
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(22),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
-                    blurRadius: 14,
-                    offset: const Offset(0, 3),
+                    color: AppColors.primary.withValues(alpha: 0.35),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(11),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isConnected
-                          ? AppColors.secondary.withValues(alpha: 0.15)
-                          : AppColors.primary.withValues(alpha: 0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(
                       isConnected
                           ? Icons.router_rounded
                           : Icons.wifi_tethering_rounded,
-                      size: 24,
-                      color:
-                          isConnected ? AppColors.secondary : AppColors.primary,
+                      size: 26,
+                      color: isConnected ? AppColors.secondary : Colors.white,
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -172,19 +162,19 @@ class HomeScreen extends ConsumerWidget {
                               ? 'Boîtier AlterniA Connecté'
                               : 'Boîtier AlterniA',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 15,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: textColor,
+                            color: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           isConnected
                               ? 'Wi-Fi local • $deviceName'
-                              : 'Mode Cloud IA • Toucher pour appairer',
+                              : 'Appairer ou utiliser le Cloud IA',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11.5,
-                            color: textMuted,
+                            fontSize: 12,
+                            color: Colors.white.withValues(alpha: 0.8),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -439,6 +429,235 @@ class HomeScreen extends ConsumerWidget {
                           children: [
                             Text(
                               'Écouter les cours',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.secondary,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 13,
+                              color: AppColors.secondary,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // RANGÉE 2 : FLASHCARDS LEITNER & MODE GRIN ÉDUCATIF
+          Row(
+            children: [
+              // CARTE 3 : FLASHCARDS LEITNER
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    context.push('/education/flashcards');
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.45),
+                        width: 1.4,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black
+                              .withValues(alpha: isDark ? 0.2 : 0.04),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.style_rounded,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'MÉMOIRE',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Flashcards Leitner',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Mémorisation espacée (J+1, J+3, J+7).',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            color: textMuted,
+                            height: 1.3,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Text(
+                              'Réviser les cartes',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 13,
+                              color: AppColors.primary,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // CARTE 4 : MODE GRIN ÉDUCATIF
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    context.push('/education/grin');
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.secondary.withValues(alpha: 0.45),
+                        width: 1.4,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black
+                              .withValues(alpha: isDark ? 0.2 : 0.04),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.secondary.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.groups_rounded,
+                                color: AppColors.secondary,
+                                size: 20,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.secondary.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'HORS-LIGNE',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.secondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Mode Grin Éducatif',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Duels & partage P2P sans connexion.',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            color: textMuted,
+                            height: 1.3,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Text(
+                              'Ouvrir le Grin',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,

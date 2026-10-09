@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/sync_queue_service.dart';
 import '../../../features/culture/core/controllers/culture_filter_controller.dart';
 import '../../../features/culture/core/theme/culture_theme.dart';
 import '../../../features/culture/presentation/widgets/culture_region_bottom_sheet.dart';
@@ -282,9 +283,60 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
 
   // ── ACTIONS POUR LA SECTION ÉDUCATION ───────────────────────────────────────
   Widget _buildEducationActions(BuildContext context, WidgetRef ref, bool isDark) {
+    final syncState = ref.watch(syncQueueProvider);
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Bouton Indicateur Store & Forward (Synchronisation Asynchrone)
+        GestureDetector(
+          onTap: () => showSyncStatusModalSheet(context),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.surface : Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: syncState.hasPending
+                    ? AppColors.warning.withValues(alpha: 0.7)
+                    : (isDark ? AppColors.border : const Color(0xFFE2E8F0)),
+              ),
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  syncState.isSyncing
+                      ? Icons.sync_rounded
+                      : (syncState.hasPending
+                          ? Icons.cloud_queue_rounded
+                          : Icons.cloud_done_rounded),
+                  size: 18,
+                  color: syncState.hasPending
+                      ? AppColors.warning
+                      : (syncState.isOnline
+                          ? AppColors.secondary
+                          : (isDark ? AppColors.textMuted : const Color(0xFF94A3B8))),
+                ),
+                if (syncState.hasPending)
+                  Positioned(
+                    top: -2,
+                    right: -2,
+                    child: Container(
+                      width: 7,
+                      height: 7,
+                      decoration: const BoxDecoration(
+                        color: AppColors.warning,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+
         // Avatar Salon Live Action Button (Icône seule)
         const AlterniaAvatarTopBarButton(showLabel: false),
         const SizedBox(width: 8),

@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants.dart';
+import '../../../core/services/sync_queue_service.dart';
 import '../../profile/gamification_notifier.dart';
 import 'duel_leaderboard_screen.dart';
 import 'duel_model.dart';
@@ -217,6 +218,21 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
           coinsGained: coinsGained,
           subject: widget.subject,
           won: playerWon,
+        );
+
+    // Persistance asynchrone Store & Forward (Garantit la sauvegarde même hors-ligne)
+    ref.read(syncQueueProvider.notifier).enqueue(
+          SyncEventType.duelCompleted,
+          {
+            'subject': widget.subject,
+            'player_score': _playerScore,
+            'opponent_score': _opponentScore,
+            'is_winner': playerWon,
+            'xp_earned': xpGained,
+            'coins_earned': coinsGained,
+            'opponent_name': widget.opponentName,
+            'mode': widget.mode.name,
+          },
         );
 
     showModalBottomSheet(
