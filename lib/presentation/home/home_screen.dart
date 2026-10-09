@@ -370,6 +370,44 @@ class HomeScreen extends ConsumerWidget {
 
           const SizedBox(height: 24),
 
+          // ── 6.B NOUVEAUTÉS INNOVATION ÉDUCATION ALTERNIA ───────────────
+          const DetSectionHeader(
+            title: 'Arène & Podcasts AlterniA',
+          ),
+          const SizedBox(height: 14),
+
+          Row(
+            children: [
+              Expanded(
+                child: _TeenSuggestionCard(
+                  title: 'Duel Scolaire ⚔️',
+                  subtitle: 'Défie l\'IA ou un ami chrono',
+                  icon: Icons.flash_on_rounded,
+                  color: const Color(0xFFE26D14),
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    context.push('/education/duel');
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _TeenSuggestionCard(
+                  title: 'Podcasts Cours 🎧',
+                  subtitle: 'Mode Sotrama sans écran',
+                  icon: Icons.headphones_rounded,
+                  color: const Color(0xFF0D9488),
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    context.push('/education/podcasts');
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
           // ── 7. PATRIMOINE & CULTURE DU MALI ────────────────────────────
           DetSectionHeader(
             title: 'Patrimoine & Culture Malienne',

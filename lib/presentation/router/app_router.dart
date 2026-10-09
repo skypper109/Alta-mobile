@@ -40,6 +40,8 @@ import '../onboarding/onboarding_screen.dart';
 import '../../core/services/vivienne_tts_service.dart';
 import '../profile/profile_screen.dart';
 import '../splash/splash_screen.dart';
+import '../../features/education/duel/duel_lobby_screen.dart';
+import '../../features/education/podcasts/podcasts_home_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -454,6 +456,16 @@ GoRouter appRouter(Ref ref) {
         path: '/holo-salon',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const HolographicSalonPage(),
+      ),
+      GoRoute(
+        path: '/education/duel',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const DuelLobbyScreen(),
+      ),
+      GoRoute(
+        path: '/education/podcasts',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PodcastsHomeScreen(),
       ),
       GoRoute(
         path: '/splash',

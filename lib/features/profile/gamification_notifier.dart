@@ -10,6 +10,7 @@ class GamificationState {
   const GamificationState({
     required this.streak,
     required this.xp,
+    required this.coins,
     required this.seances,
     required this.subjectsProgress,
     this.isLoading = false,
@@ -17,9 +18,20 @@ class GamificationState {
 
   final String streak;
   final String xp;
+  final String coins;
   final String seances;
   final Map<String, double> subjectsProgress; // 0.0 to 1.0
   final bool isLoading;
+
+  int get xpInt {
+    final cleaned = xp.replaceAll(RegExp(r'[^0-9]'), '');
+    return int.tryParse(cleaned) ?? 3450;
+  }
+
+  int get coinsInt {
+    final cleaned = coins.replaceAll(RegExp(r'[^0-9]'), '');
+    return int.tryParse(cleaned) ?? 240;
+  }
 
   double getProgressForSubject(String subject) {
     // 1. Recherche exacte
@@ -40,6 +52,7 @@ class GamificationState {
   GamificationState copyWith({
     String? streak,
     String? xp,
+    String? coins,
     String? seances,
     Map<String, double>? subjectsProgress,
     bool? isLoading,
@@ -47,6 +60,7 @@ class GamificationState {
     return GamificationState(
       streak: streak ?? this.streak,
       xp: xp ?? this.xp,
+      coins: coins ?? this.coins,
       seances: seances ?? this.seances,
       subjectsProgress: subjectsProgress ?? this.subjectsProgress,
       isLoading: isLoading ?? this.isLoading,
@@ -59,6 +73,7 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
       : super(const GamificationState(
           streak: '12j',
           xp: '3 450',
+          coins: '240',
           seances: '28',
           subjectsProgress: {
             'Sociologie Générale': 0.68,
@@ -81,6 +96,13 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
   final Ref _ref;
 
   static const _prefsKey = 'alternia_gamification_stats_cache';
+
+  static String _formatNumber(int number) {
+    return number.toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]} ',
+        );
+  }
 
   Future<void> _loadFromLocalCache() async {
     try {
@@ -131,7 +153,10 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
         (data['streak'] != null ? '${data['streak']}j' : state.streak);
 
     final xp = data['xp_label'] as String? ??
-        (data['xp'] != null ? '${data['xp']}' : state.xp);
+        (data['xp'] != null ? _formatNumber(int.tryParse(data['xp'].toString()) ?? 3450) : state.xp);
+
+    final coins = data['coins_label'] as String? ??
+        (data['coins'] != null ? data['coins'].toString() : state.coins);
 
     final seances = data['seances_label'] as String? ??
         (data['seances'] != null ? '${data['seances']}' : state.seances);
@@ -143,7 +168,6 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
       for (final entry in rawSubProgress.entries) {
         final val = entry.value;
         if (val is num) {
-          // Si le backend renvoie un pourcentage (ex: 75), normaliser entre 0.0 et 1.0
           final normalized = val > 1.0 ? (val / 100.0).clamp(0.0, 1.0) : val.toDouble();
           progressMap[entry.key] = normalized;
         }
@@ -153,9 +177,69 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
     state = state.copyWith(
       streak: streak,
       xp: xp,
+      coins: coins,
       seances: seances,
       subjectsProgress: progressMap,
     );
+  }
+
+  /// Crédite instantanément les récompenses de duel (XP + Pièces AlterniA)
+  Future<void> addDuelReward({
+    required int xpGained,
+    required int coinsGained,
+    required String subject,
+    required bool won,
+  }) async {
+    final newXpVal = state.xpInt + xpGained;
+    final newCoinsVal = state.coinsInt + coinsGained;
+
+    final progressMap = Map<String, double>.from(state.subjectsProgress);
+    final curProg = state.getProgressForSubject(subject);
+    progressMap[subject] = (curProg + (won ? 0.05 : 0.02)).clamp(0.0, 1.0);
+
+    state = state.copyWith(
+      xp: _formatNumber(newXpVal),
+      coins: newCoinsVal.toString(),
+      subjectsProgress: progressMap,
+    );
+
+    // Persister immédiatement en local
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheData = {
+        'streak': state.streak,
+        'streak_label': state.streak,
+        'xp': newXpVal,
+        'xp_label': state.xp,
+        'coins': newCoinsVal,
+        'coins_label': state.coins,
+        'seances': state.seances,
+        'seances_label': state.seances,
+        'subjects_progress': progressMap,
+      };
+      await prefs.setString(_prefsKey, jsonEncode(cacheData));
+    } catch (_) {}
+
+    // Synchronisation en tâche de fond avec le backend si connecté
+    final userPrefs = _ref.read(userPrefsProvider);
+    final dio = Dio();
+    for (final url in AltaApiConfig.candidateBaseUrls) {
+      try {
+        await dio.post(
+          '$url/api/duel/claim-reward',
+          data: {
+            'player_name': userPrefs.name.isNotEmpty ? userPrefs.name : 'Élève',
+            'subject': subject,
+            'player_won': won,
+            'score': xpGained,
+            'xp_earned': xpGained,
+            'coins_earned': coinsGained,
+          },
+          options: Options(connectTimeout: const Duration(seconds: 2)),
+        );
+        break;
+      } catch (_) {}
+    }
   }
 }
 
@@ -163,3 +247,4 @@ final gamificationProvider =
     StateNotifierProvider<GamificationNotifier, GamificationState>((ref) {
   return GamificationNotifier(ref);
 });
+
