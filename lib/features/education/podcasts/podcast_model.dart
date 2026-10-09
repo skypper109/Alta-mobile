@@ -109,6 +109,11 @@ class RevisionPodcast {
     if (s.contains('hist') || s.contains('géo')) return Icons.public_rounded;
     if (s.contains('philo')) return Icons.psychology_rounded;
     if (s.contains('svt') || s.contains('biol')) return Icons.biotech_rounded;
+    if (s.contains('socio') || s.contains('social')) return Icons.groups_rounded;
+    if (s.contains('droit') || s.contains('institut') || s.contains('jurid')) return Icons.gavel_rounded;
+    if (s.contains('polit')) return Icons.account_balance_rounded;
+    if (s.contains('éco') || s.contains('eco') || s.contains('ses')) return Icons.trending_up_rounded;
+    if (s.contains('angl') || s.contains('engl')) return Icons.language_rounded;
     if (s.contains('fran') || s.contains('litt')) {
       return Icons.menu_book_rounded;
     }
@@ -122,6 +127,11 @@ class RevisionPodcast {
     if (s.contains('hist') || s.contains('géo')) return const Color(0xFFF1851F);
     if (s.contains('philo')) return const Color(0xFF40BBCC);
     if (s.contains('svt')) return const Color(0xFF059669);
+    if (s.contains('socio') || s.contains('social')) return const Color(0xFF8B5CF6);
+    if (s.contains('droit')) return const Color(0xFF3B82F6);
+    if (s.contains('polit')) return const Color(0xFF10B981);
+    if (s.contains('éco') || s.contains('eco')) return const Color(0xFF059669);
+    if (s.contains('angl')) return const Color(0xFF6366F1);
     return const Color(0xFF314999);
   }
 }
@@ -320,6 +330,144 @@ Puis, à l'anaphase un, les chromosomes de chaque paire se séparent au hasard v
 Avec vingt-trois paires de chromosomes chez l'humain, le brassage interchromosomique peut à lui seul produire plus de huit millions de spermatozoïdes ou d'ovocytes génétiquement distincts ! Et quand deux gamètes fusionnent lors de la fécondation, les probabilités se multiplient : il y a plus de soixante-dix mille milliards de combinaisons possibles pour un même couple de parents.
 
 Chaque élève qui écoute ce podcast est un chef-d'œuvre mathématique et biologique unique dans tout l'univers. Retiens bien les étapes de la méiose pour ton examen !
+''',
+    ),
+
+    // ── SOCIOLOGIE GÉNÉRALE (TSS — BACCALAURÉAT MALIEN) ───────────────────
+    RevisionPodcast(
+      id: 'pod_tss_socio_1',
+      title: 'La Stratification Sociale & les Structures Familiales au Mali',
+      subject: 'Sociologie Générale',
+      classLevel: 'TSS',
+      durationMinutes: 7,
+      narrator: 'Professeur Amadou (AlternIA)',
+      icon: Icons.groups_rounded,
+      accentColor: Color(0xFF8B5CF6),
+      summary:
+          'Comprends la méthode durkheimienne, les mécanismes de socialisation et les mutations contemporaines de la famille malienne face aux réalités urbaines.',
+      chapters: [
+        PodcastChapter(title: 'L\'objet de la sociologie selon Durkheim & Weber', timestampSeconds: 0),
+        PodcastChapter(title: 'La socialisation primaire et secondaire', timestampSeconds: 110),
+        PodcastChapter(title: 'Ordres statutaires, castes et parenté au Mali', timestampSeconds: 230),
+        PodcastChapter(title: 'Conseils pour la dissertation sociologique au Bac', timestampSeconds: 320),
+      ],
+      keyTakeaways: [
+        'Traiter les faits sociaux comme des choses : extériorité et pouvoir de contrainte (Durkheim).',
+        'Distinguer la socialisation primaire (enfance/famille) de la socialisation secondaire (pairs/travail).',
+        'Analyser l\'organisation statutaire mandingue (Horonw, Nyamakala, Jonw) et l\'impact de la modernisation.',
+        'Construire un raisonnement sociologique rigoureux sans jamais émettre de jugements de valeur.',
+      ],
+      fullScript: '''
+Bienvenue dans cette session audio de Sociologie Générale pour la Terminale Sciences Sociales (TSS).
+
+En sociologie, la démarche scientifique consiste d'abord à rompre avec les préjugés du sens commun. Comme le rappelait Émile Durkheim : les faits sociaux doivent être traités comme des choses, car ils préexistent à l'individu et s'imposent à lui.
+
+La socialisation est le processus par lequel chaque individu intériorise les normes et valeurs de sa communauté. Au Mali, la socialisation primaire au sein de la famille élargie inculque des valeurs fortes de solidarité, de respect des aînés et de parenté à plaisanterie (Sinankunya). La socialisation secondaire, via l'école et le monde du travail, ouvre ensuite l'individu aux exigences économiques modernes.
+
+Lors de ton épreuve du Bac, sache montrer comment les structures traditionnelles cohabitent avec les dynamiques urbaines contemporaines à Bamako et dans les grandes villes régionales. Bonnes révisions !
+''',
+    ),
+
+    // ── DROIT & INSTITUTIONS (TSS — BACCALAURÉAT MALIEN) ──────────────────
+    RevisionPodcast(
+      id: 'pod_tss_droit_1',
+      title: 'La Constitution Malienne & la Séparation des Pouvoirs',
+      subject: 'Droit & Institutions',
+      classLevel: 'TSS',
+      durationMinutes: 7,
+      narrator: 'Maître Kéïta (AlternIA)',
+      icon: Icons.gavel_rounded,
+      accentColor: Color(0xFF3B82F6),
+      summary:
+          'Tout le droit constitutionnel résumé : la hiérarchie des normes de Kelsen, l\'équilibre des pouvoirs publics et les garanties juridictionnelles au Mali.',
+      chapters: [
+        PodcastChapter(title: 'La Constitution : loi fondamentale suprême', timestampSeconds: 0),
+        PodcastChapter(title: 'La théorie de la séparation des pouvoirs (Montesquieu)', timestampSeconds: 100),
+        PodcastChapter(title: 'La pyramide des normes de Hans Kelsen', timestampSeconds: 210),
+        PodcastChapter(title: 'Le contrôle de constitutionnalité et les juges', timestampSeconds: 310),
+      ],
+      keyTakeaways: [
+        'La Constitution est la norme juridique suprême qui organise l\'État et protège les droits fondamentaux.',
+        'La séparation des pouvoirs (exécutif, législatif, judiciaire) empêche toute concentration tyrannique.',
+        'Pyramide des normes : Constitution > Traités > Lois votées > Règlements & Décrets > Actes administratifs.',
+        'Adopter le raisonnement du syllogisme juridique (majeure, mineure, conclusion) dans les épreuves.',
+      ],
+      fullScript: '''
+Bonjour cher lycéen de la série TSS. Aujourd'hui en Droit et Institutions, nous explorons les fondements juridiques de l'État de droit.
+
+Au sommet de l'ordre juridique se trouve la Constitution. Elle définit qui gouverne, comment sont votées les lois et quelles libertés sont intangibles pour chaque citoyen de la République.
+
+Selon Montesquieu dans De l'esprit des lois, le pouvoir doit arrêter le pouvoir. Si la même autorité faisait les lois et les appliquait sans contrôle, il n'y aurait plus de liberté. C'est pourquoi le pouvoir législatif vote la loi, le pouvoir exécutif assure son application et le pouvoir judiciaire tranche les litiges en toute indépendance.
+
+Retiens bien la pyramide des normes de Kelsen pour ton examen : aucune décision administrative ne peut contredire une loi, et aucune loi ne peut contredire la Constitution.
+''',
+    ),
+
+    // ── SCIENCE POLITIQUE (TSS — BACCALAURÉAT MALIEN) ─────────────────────
+    RevisionPodcast(
+      id: 'pod_tss_sp_1',
+      title: 'L\'État, la Citoyenneté & la Géopolitique Sahélienne (AES)',
+      subject: 'Science Politique',
+      classLevel: 'TSS',
+      durationMinutes: 6,
+      narrator: 'Professeur Amadou (AlternIA)',
+      icon: Icons.account_balance_rounded,
+      accentColor: Color(0xFF10B981),
+      summary:
+          'Analyse des fonctions de l\'État, des partis politiques démocratiques et de l\'affirmation de la souveraineté sahélienne à travers l\'Alliance des États du Sahel.',
+      chapters: [
+        PodcastChapter(title: 'La définition weberienne de l\'État souverain', timestampSeconds: 0),
+        PodcastChapter(title: 'Le rôle démocratique des partis politiques', timestampSeconds: 90),
+        PodcastChapter(title: 'L\'Alliance des États du Sahel (AES) et la souveraineté', timestampSeconds: 190),
+        PodcastChapter(title: 'Méthodologie du commentaire de texte politique', timestampSeconds: 280),
+      ],
+      keyTakeaways: [
+        'L\'État détient le monopole de la contrainte physique légitime sur un territoire délimité (Max Weber).',
+        'Les partis politiques sélectionnent les dirigeants et éduquent politiquement les citoyens.',
+        'L\'AES concrétise une volonté géopolitique de souveraineté sécuritaire, diplomatique et économique.',
+        'Garder une posture d\'analyse objective et académique lors des examens.',
+      ],
+      fullScript: '''
+Bonjour et bienvenue dans cette leçon audio de Science Politique dédiée à la classe de TSS.
+
+Qu'est-ce que le pouvoir politique ? C'est la capacité d'une autorité à orienter la conduite de l'ensemble d'une communauté nationale. Selon Max Weber, l'État se caractérise par la revendication du monopole de la violence physique légitime.
+
+Dans une société démocratique, les partis politiques remplissent des fonctions vitales : ils formulent des projets de société, encadrent le débat public et permettent l'expression pacifique des suffrages.
+
+Aujourd'hui, l'actualité géopolitique sahélienne est marquée par l'émergence de l'Alliance des États du Sahel (AES), regroupant le Mali, le Burkina Faso et le Niger. Cette confédération illustre la volonté des peuples de reprendre en main leur destin sécuritaire et leur souveraineté économique.
+''',
+    ),
+
+    // ── ÉCONOMIE (TSS — BACCALAURÉAT MALIEN) ──────────────────────────────
+    RevisionPodcast(
+      id: 'pod_tss_eco_1',
+      title: 'Le PIB, la Croissance & l\'Économie Réelle au Mali',
+      subject: 'Économie',
+      classLevel: 'TSS',
+      durationMinutes: 6,
+      narrator: 'Professeur Amadou (AlternIA)',
+      icon: Icons.trending_up_rounded,
+      accentColor: Color(0xFF059669),
+      summary:
+          'Maîtrise les agrégats macroéconomiques essentiels : PIB, inflation, rôle de la BCEAO dans la zone UEMOA et poids déterminant du secteur informel malien.',
+      chapters: [
+        PodcastChapter(title: 'Définition et calcul du Produit Intérieur Brut', timestampSeconds: 0),
+        PodcastChapter(title: 'Croissance versus développement humain (IDH)', timestampSeconds: 90),
+        PodcastChapter(title: 'Le secteur informel et l\'agriculture au Mali', timestampSeconds: 180),
+        PodcastChapter(title: 'La politique monétaire de la BCEAO (UEMOA)', timestampSeconds: 270),
+      ],
+      keyTakeaways: [
+        'Le PIB mesure la valeur monétaire des biens et services finaux créés sur un territoire en un an.',
+        'La croissance est quantitative ; le développement durable s\'apprécie par la santé et l\'éducation (IDH).',
+        'Le secteur informel emploie plus de 80% des actifs et constitue un filet de sécurité économique au Mali.',
+        'La BCEAO veille à la stabilité des prix et régule la masse monétaire dans les 8 pays de l\'UEMOA.',
+      ],
+      fullScript: '''
+Bonjour à toi ! Aujourd'hui en Économie, nous plongeons dans les grands rouages de l'activité économique nationale.
+
+Le Produit Intérieur Brut (PIB) est le thermomètre économique par excellence : il additionne les valeurs ajoutées créées par l'ensemble des entreprises, administrations et ménages d'un pays au cours d'une année. Mais attention : avoir de la croissance ne signifie pas automatiquement avoir du développement. Pour le Bac, rappelle-toi que le développement intègre le niveau de vie réel, l'éducation et l'espérance de vie, mesurés par l'IDH.
+
+Au Mali, l'économie réelle s'appuie largement sur le secteur primaire (coton, céréales, or) et sur un secteur informel très dynamique qui assure l'essentiel de l'emploi urbain.
 ''',
     ),
   ];

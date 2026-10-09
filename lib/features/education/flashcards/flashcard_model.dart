@@ -92,10 +92,10 @@ class Flashcard {
 }
 
 class FlashcardBank {
-  static List<Flashcard> getInitialCards() {
+  static List<Flashcard> getInitialCards({String? level}) {
     final now = DateTime.now();
 
-    return [
+    final allCards = [
       // ── MATHÉMATIQUES ──────────────────────────────────────────────────────
       Flashcard(
         id: 'fc_math_1',
@@ -235,6 +235,207 @@ class FlashcardBank {
         box: 1,
         nextReviewDate: now,
       ),
+
+      // ── DIPLÔME D'ÉTUDES FONDAMENTALES (DEF — 9ÈME ANNÉE) ──────────────────
+      Flashcard(
+        id: 'fc_def_math_1',
+        subject: 'Mathématiques',
+        classLevel: 'def',
+        concept: 'Théorème de Pythagore',
+        front: 'Énoncer le Théorème de Pythagore dans un triangle ABC rectangle en A.',
+        back: 'BC² = AB² + AC².\n\nLe carré de l\'hypoténuse est égal à la somme des carrés des côtés de l\'angle droit.',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_def_math_2',
+        subject: 'Mathématiques',
+        classLevel: 'def',
+        concept: 'Théorème de Thalès',
+        front: 'Quelle est la propriété de Thalès pour deux droites sécantes coupées par deux parallèles (BC) // (MN) ?',
+        back: 'AM / AB = AN / AC = MN / BC.\n\nElle permet de calculer des longueurs inconnues dans des triangles emboîtés.',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_def_pc_1',
+        subject: 'Physique-Chimie',
+        classLevel: 'def',
+        concept: 'Poids et Masse',
+        front: 'Quelle est la formule liant le poids P et la masse m d\'un corps sur Terre ?',
+        back: 'P = m · g\n\n• P en Newtons (N)\n• m en kilogrammes (kg)\n• g : intensité de la pesanteur (g ≈ 9,8 N/kg ou 10 N/kg).',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_def_svt_1',
+        subject: 'Biologie (SVT)',
+        classLevel: 'def',
+        concept: 'Défense Immunitaire',
+        front: 'Quelles cellules sanguines sont responsables de la défense de l\'organisme ?',
+        back: 'Les globules blancs (ou leucocytes).\n\nIls détruisent les bactéries et virus par phagocytose et production d\'anticorps.',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_def_fr_1',
+        subject: 'Français',
+        classLevel: 'def',
+        concept: 'Grammaire & Conjugaison',
+        front: 'Quand accorde-t-on le participe passé employé avec l\'auxiliaire « avoir » ?',
+        back: 'Le participe passé avec « avoir » s\'accorde en genre et en nombre avec le Complément d\'Objet Direct (COD) UNIQUEMENT si celui-ci est placé AVANT le verbe.\n\nExemple : « Les lettres que j\'ai écrites » (COD = que / les lettres, féminin pluriel).',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_def_ecm_1',
+        subject: 'Éducation Civique & Morale',
+        classLevel: 'def',
+        concept: 'Symboles de la République',
+        front: 'Quelle est la devise nationale de la République du Mali inscrite dans la Constitution ?',
+        back: '« Un Peuple - Un But - Une Foi ».\n\nElle symbolise l\'unité nationale sacrée de tous les citoyens maliens.',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      // ── TERMINALE SCIENCE SOCIALE (TSS) ───────────────────────────────────
+      Flashcard(
+        id: 'fc_tss_socio_1',
+        subject: 'Sociologie Générale',
+        classLevel: 'tss',
+        concept: 'Méthode Sociologique',
+        front: 'Quelle est la règle méthodologique fondamentale d\'Émile Durkheim ?',
+        back: '« Traiter les faits sociaux comme des choses ».\n\nLes faits sociaux sont extérieurs à l\'individu et exercent une force coercitive (contrainte) sur ses comportements.',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_tss_socio_2',
+        subject: 'Sociologie Générale',
+        classLevel: 'tss',
+        concept: 'Socialisation',
+        front: 'Quelle est la différence entre socialisation primaire et socialisation secondaire ?',
+        back: '• Primaire : pendant l\'enfance, via la famille et l\'école (construction des bases de l\'identité).\n• Secondaire : à l\'âge adulte, via le travail, l\'université et les groupes de pairs.',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_tss_socio_3',
+        subject: 'Sociologie Générale',
+        classLevel: 'tss',
+        concept: 'Stratification au Mali',
+        front: 'Comment s\'organise traditionnellement la société en milieu mandingue ?',
+        back: 'En trois grands groupes statutaires :\n1. Les hommes libres (Horonw)\n2. Les gens de caste ou artisans dépositaires du savoir (Nyamakala : griots, forgerons, cordonniers)\n3. Historiquement les captifs (Jonw).',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_tss_droit_1',
+        subject: 'Droit & Institutions',
+        classLevel: 'tss',
+        concept: 'Séparation des Pouvoirs',
+        front: 'Quel est le principe de la séparation des pouvoirs selon Montesquieu ?',
+        back: 'La séparation stricte entre pouvoir exécutif (appliquer les lois), législatif (voter les lois) et judiciaire (sanctionner les infractions) pour garantir la liberté des citoyens.',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_tss_droit_2',
+        subject: 'Droit & Institutions',
+        classLevel: 'tss',
+        concept: 'Pyramide des Normes',
+        front: 'Qu\'est-ce que la pyramide des normes juridiques de Hans Kelsen ?',
+        back: 'Une hiérarchie où chaque norme doit respecter la norme supérieure :\nConstitution > Traités internationaux > Lois votées > Règlements & Décrets > Actes administratifs.',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_tss_sp_1',
+        subject: 'Science Politique',
+        classLevel: 'tss',
+        concept: 'L\'État & Souveraineté',
+        front: 'Quelle est la célèbre définition de l\'État selon le sociologue Max Weber ?',
+        back: 'L\'État est l\'institution humaine qui revendique avec succès le « monopole de la violence physique légitime » sur un territoire donné.',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_tss_sp_2',
+        subject: 'Science Politique',
+        classLevel: 'tss',
+        concept: 'Intégration Sahélienne (AES)',
+        front: 'Qu\'est-ce que l\'Alliance des États du Sahel (AES) créée par le Mali, le Burkina et le Niger ?',
+        back: 'Une confédération géopolitique et de sécurité collective visant à mutualiser la défense, la diplomatie et le codéveloppement pour la souveraineté pleine des trois nations sahéliennes.',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_tss_philo_1',
+        subject: 'Philosophie',
+        classLevel: 'tss',
+        concept: 'Contrat Social',
+        front: 'Selon Jean-Jacques Rousseau, comment s\'exprime la légitimité politique de l\'État ?',
+        back: 'Par la « Volonté Générale » dans le cadre du Contrat Social (1762), où l\'obéissance à la loi qu\'on s\'est prescrite est la seule vraie liberté.',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_tss_eco_1',
+        subject: 'Économie',
+        classLevel: 'tss',
+        concept: 'PIB & Croissance',
+        front: 'Quelle est la définition rigoureuse du Produit Intérieur Brut (PIB) ?',
+        back: 'La valeur marchande totale de l\'ensemble des biens et services finaux produits à l\'intérieur d\'un pays au cours d\'une année donnée.',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_tss_hg_1',
+        subject: 'Histoire-Géographie',
+        classLevel: 'tss',
+        concept: 'Indépendance Nationale',
+        front: 'À quelle date le Mali a-t-il accédé à la souveraineté internationale ?',
+        back: 'Le 22 septembre 1960 à Bamako, sous la direction du président Modibo Keïta, après l\'éclatement de la Fédération du Mali.',
+        box: 1,
+        nextReviewDate: now,
+      ),
+      Flashcard(
+        id: 'fc_tss_fr_1',
+        subject: 'Français',
+        classLevel: 'tss',
+        concept: 'Dissertation Littéraire',
+        front: 'Quelles sont les trois parties majeures du plan dialectique ?',
+        back: '1. Thèse (développement de l\'opinion proposée)\n2. Antithèse (objections et nuances argumentées)\n3. Synthèse (dépassement vers une vision équilibrée et élargie).',
+        box: 1,
+        nextReviewDate: now,
+      ),
     ];
+
+    if (level != null && level.isNotEmpty) {
+      final lvlNorm = level.toLowerCase();
+      if (lvlNorm.contains('tss')) {
+        final tssCards = allCards
+            .where((c) => c.classLevel.toLowerCase() == 'tss')
+            .toList();
+        if (tssCards.isNotEmpty) return tssCards;
+      }
+      final filtered = allCards.where((c) {
+        final cLvl = c.classLevel.toLowerCase();
+        if (lvlNorm.contains('def') && cLvl.contains('def')) return true;
+        if ((lvlNorm.contains('12') ||
+                lvlNorm.contains('tse') ||
+                lvlNorm.contains('tsexp')) &&
+            (cLvl.contains('12') ||
+                cLvl.contains('tse') ||
+                cLvl.contains('tsexp'))) {
+          return true;
+        }
+        if (lvlNorm.contains('11') && cLvl.contains('11')) return true;
+        if (lvlNorm.contains('10') && cLvl.contains('10')) return true;
+        return false;
+      }).toList();
+      if (filtered.isNotEmpty) return filtered;
+    }
+
+    return allCards;
   }
 }

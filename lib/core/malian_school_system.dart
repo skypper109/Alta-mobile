@@ -6,6 +6,33 @@ import '../domain/entities/malian_class.dart';
 export '../domain/entities/malian_class.dart';
 
 const List<MalianClass> malianClasses = [
+  // ── DEF — 9ème Année Fondamentale ──────────────────────────────────────────
+  MalianClass(
+    id: 'def',
+    label: 'DEF — 9ème Année Fondamentale',
+    shortLabel: 'DEF',
+    level: 'DEF',
+    emoji: '🎓',
+    iconData: Icons.school_rounded,
+    description: 'Diplôme d\'Études Fondamentales (Examen National)',
+    subjects: [
+      'Mathématiques',
+      'Physique-Chimie',
+      'Biologie (SVT)',
+      'Histoire-Géographie',
+      'Français',
+      'Anglais',
+      'Éducation Civique & Morale',
+    ],
+    suggestedQuestions: [
+      'Comment calculer le PGCD de deux nombres entiers et simplifier une fraction ?',
+      'Quelles sont les caractéristiques d\'une force et la formule du poids P = m · g ?',
+      'Explique le rôle des globules blancs dans la défense immunitaire de l\'organisme.',
+      'Quels sont les grands fleuves du Mali et leur importance pour l\'agriculture ?',
+    ],
+    color: 0xFF2563EB,
+  ),
+
   // ── 10ÈME — Tronc commun ────────────────────────────────────────────────
   MalianClass(
     id: '10eme',
@@ -284,7 +311,7 @@ const List<MalianClass> malianClasses = [
   ),
 ];
 
-const List<String> malianLevels = ['10ème', '11ème', 'Terminale'];
+const List<String> malianLevels = ['DEF', '10ème', '11ème', 'Terminale'];
 
 List<MalianClass> classesByLevel(String level) =>
     malianClasses.where((c) => c.level == level).toList();

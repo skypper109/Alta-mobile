@@ -27,6 +27,7 @@ class DuelArenaScreen extends ConsumerStatefulWidget {
     this.opponentName = 'Professeur IA',
     this.roomCode,
     this.initialQuestions,
+    this.questionCount = 5,
   });
 
   final String subject;
@@ -36,6 +37,7 @@ class DuelArenaScreen extends ConsumerStatefulWidget {
   final String opponentName;
   final String? roomCode;
   final List<DuelQuestion>? initialQuestions;
+  final int questionCount;
 
   @override
   ConsumerState<DuelArenaScreen> createState() => _DuelArenaScreenState();
@@ -95,7 +97,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
     final qs = await duelServiceProvider.fetchQuestions(
       subject: widget.subject,
       classLevel: widget.classLevel,
-      count: 5,
+      count: widget.questionCount,
     );
     if (!mounted) return;
     setState(() {
@@ -222,18 +224,18 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
 
     // Persistance asynchrone Store & Forward (Garantit la sauvegarde même hors-ligne)
     ref.read(syncQueueProvider.notifier).enqueue(
-          SyncEventType.duelCompleted,
-          {
-            'subject': widget.subject,
-            'player_score': _playerScore,
-            'opponent_score': _opponentScore,
-            'is_winner': playerWon,
-            'xp_earned': xpGained,
-            'coins_earned': coinsGained,
-            'opponent_name': widget.opponentName,
-            'mode': widget.mode.name,
-          },
-        );
+      SyncEventType.duelCompleted,
+      {
+        'subject': widget.subject,
+        'player_score': _playerScore,
+        'opponent_score': _opponentScore,
+        'is_winner': playerWon,
+        'xp_earned': xpGained,
+        'coins_earned': coinsGained,
+        'opponent_name': widget.opponentName,
+        'mode': widget.mode.name,
+      },
+    );
 
     showModalBottomSheet(
       context: context,
@@ -326,27 +328,35 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
-        backgroundColor: cardBg,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF1A2340), Color(0xFF253060)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.close_rounded, color: textPri),
+          icon: const Icon(Icons.close_rounded, color: Colors.white70),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
           decoration: BoxDecoration(
-            color: AltaColors.primary.withValues(alpha: 0.12),
+            color: Colors.white.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(16),
-            border:
-                Border.all(color: AltaColors.primary.withValues(alpha: 0.3)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
           ),
           child: Text(
-            '${widget.subject} • Question ${_currentIndex + 1}/${_questions.length}',
+            '${widget.subject} • Q${_currentIndex + 1}/${_questions.length}',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: AltaColors.secondary,
+              color: Colors.white,
             ),
           ),
         ),
@@ -362,11 +372,18 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
 
                     // ── 1. HEADER DUEL : JOUEUR VS ADVERSAIRE ─────────────────
                     Container(
-                      padding: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: cardBg,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(22),
                         border: Border.all(color: borderCol),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AltaColors.primary.withValues(alpha: 0.08),
+                            blurRadius: 14,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Row(
                         children: [
@@ -374,9 +391,20 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                           Expanded(
                             child: Row(
                               children: [
-                                CircleAvatar(
-                                  radius: 17,
-                                  backgroundColor: AltaColors.primary,
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Color(0xFF314999),
+                                        Color(0xFF4C66C4)
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                  ),
                                   child: const Icon(Icons.person,
                                       color: Colors.white, size: 18),
                                 ),
@@ -400,7 +428,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                                         style: GoogleFonts.spaceMono(
                                           color: AltaColors.secondary,
                                           fontWeight: FontWeight.w800,
-                                          fontSize: 13,
+                                          fontSize: 14,
                                         ),
                                       ),
                                     ],
@@ -413,9 +441,11 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                           // VS Badge central
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
+                                horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color: AltaColors.primary,
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF314999), Color(0xFF1A2340)],
+                              ),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
@@ -424,6 +454,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                                 fontWeight: FontWeight.w900,
                                 fontSize: 11,
                                 color: Colors.white,
+                                letterSpacing: 1,
                               ),
                             ),
                           ),
@@ -449,18 +480,29 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                                       Text(
                                         '$_opponentScore pts',
                                         style: GoogleFonts.spaceMono(
-                                          color: AltaColors.primary,
+                                          color: AltaColors.accent,
                                           fontWeight: FontWeight.w800,
-                                          fontSize: 13,
+                                          fontSize: 14,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                CircleAvatar(
-                                  radius: 17,
-                                  backgroundColor: AltaColors.primary,
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Color(0xFFF1851F),
+                                        Color(0xFFFF9D42)
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                  ),
                                   child: Icon(
                                     widget.mode == DuelMode.vsAi
                                         ? Icons.smart_toy_rounded
@@ -537,37 +579,69 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                     const SizedBox(height: 10),
 
                     // ── 3. JAUGE DE CHRONO PULSANTE ─────────────────────────
-                    Stack(
-                      alignment: Alignment.center,
+                    Row(
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: LinearProgressIndicator(
-                            value: timerProgress,
-                            minHeight: 8,
-                            backgroundColor: isDark
-                                ? AltaColors.borderDark
-                                : AltaColors.borderLight,
-                            valueColor: AlwaysStoppedAnimation(timerColor),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Container(
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(6),
+                                  color: isDark
+                                      ? AltaColors.borderDark
+                                      : AltaColors.borderLight,
+                                  boxShadow: _secondsRemaining <= 4
+                                      ? [
+                                          BoxShadow(
+                                            color: timerColor.withValues(
+                                                alpha: 0.45),
+                                            blurRadius: 8,
+                                            spreadRadius: 0,
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: AnimatedBuilder(
+                                    animation: _pulseController,
+                                    builder: (_, __) => LinearProgressIndicator(
+                                      value: timerProgress,
+                                      minHeight: 10,
+                                      backgroundColor: Colors.transparent,
+                                      valueColor: AlwaysStoppedAnimation(
+                                        timerColor.withValues(
+                                          alpha: _secondsRemaining <= 4
+                                              ? 0.7 +
+                                                  0.3 * _pulseController.value
+                                              : 1.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Container(
-                            margin: const EdgeInsets.only(top: 22),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: timerColor.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(6),
+                        const SizedBox(width: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: timerColor.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: timerColor.withValues(alpha: 0.35),
                             ),
-                            child: Text(
-                              '${_secondsRemaining}s',
-                              style: GoogleFonts.spaceMono(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: timerColor,
-                              ),
+                          ),
+                          child: Text(
+                            '${_secondsRemaining}s',
+                            style: GoogleFonts.spaceMono(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: timerColor,
                             ),
                           ),
                         ),
@@ -576,22 +650,44 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
 
                     const SizedBox(height: 16),
 
-                    // ── 4. CARTE ÉNONCÉ DE LA QUESTION (SOLIDE) ──────────────
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: cardBg,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: borderCol),
-                      ),
-                      child: Text(
-                        currentQ.questionText,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          height: 1.45,
-                          color: textPri,
+                    // ── 4. CARTE ÉNONCÉ DE LA QUESTION ───────────────────────
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: cardBg,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: borderCol),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Accent strip top
+                            Container(
+                              height: 3,
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Color(0xFF314999),
+                                    Color(0xFF40BBCC)
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(18),
+                              child: Text(
+                                currentQ.questionText,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.5,
+                                  color: textPri,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -618,13 +714,19 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                             textColor = textPri;
                           } else {
                             if (isCorrect) {
-                              bgColor = Colors.green.withValues(alpha: 0.15);
-                              borderColor = Colors.green;
-                              textColor = Colors.greenAccent;
+                              bgColor =
+                                  AltaColors.success.withValues(alpha: 0.12);
+                              borderColor = AltaColors.success;
+                              textColor = isDark
+                                  ? const Color(0xFF4ADE80)
+                                  : const Color(0xFF16A34A);
                             } else if (isSelected) {
-                              bgColor = Colors.red.withValues(alpha: 0.15);
-                              borderColor = Colors.redAccent;
-                              textColor = Colors.redAccent;
+                              bgColor =
+                                  AltaColors.error.withValues(alpha: 0.10);
+                              borderColor = AltaColors.error;
+                              textColor = isDark
+                                  ? const Color(0xFFF87171)
+                                  : const Color(0xFFDC2626);
                             } else {
                               bgColor = isDark
                                   ? AltaColors.surfaceAltDark
@@ -683,13 +785,13 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                                     ),
                                   ),
                                   if (_answered && isCorrect)
-                                    const Icon(Icons.check_circle_rounded,
-                                        color: Colors.green, size: 20)
+                                    Icon(Icons.check_circle_rounded,
+                                        color: AltaColors.success, size: 20)
                                   else if (_answered &&
                                       isSelected &&
                                       !isCorrect)
-                                    const Icon(Icons.cancel_rounded,
-                                        color: Colors.redAccent, size: 20),
+                                    Icon(Icons.cancel_rounded,
+                                        color: AltaColors.error, size: 20),
                                 ],
                               ),
                             ),
@@ -847,226 +949,366 @@ class _DuelVictoryModal extends ConsumerWidget {
       actionText = 'Revanche';
     }
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        border: Border.all(color: AltaColors.borderDark),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // ── ICÔNE PODIUM ──────────────────────────────────────────────────
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: resultColor.withValues(alpha: 0.15),
-            ),
-            child: Icon(
-              resultIcon,
-              size: 46,
-              color: resultColor,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            resultTitle,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: textPri,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            resultSubtitle,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              color: textSec,
-            ),
-          ),
-
-          const SizedBox(height: 18),
-
-          // ── SCORES COMPARATIFS ────────────────────────────────────────────
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _ScoreCard(
-                  label: playerName, score: playerScore, isWinner: didWin),
-              _ScoreCard(
-                  label: opponentName,
-                  score: opponentScore,
-                  isWinner: !didWin && !isDraw),
-            ],
-          ),
-
-          const SizedBox(height: 18),
-
-          // ── CARTES DE RÉCOMPENSES XPS ET PIÈCES ALTERNIA ─────────────────
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? AltaColors.surfaceAltDark
-                  : AltaColors.surfaceAltLight,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AltaColors.borderDark),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  'RÉCOMPENSES DE FIN DE DUEL',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.0,
-                    color: AltaColors.secondary,
-                  ),
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ── GRADIENT HEADER HERO ──────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF1A2340), Color(0xFF314999)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    // Badge XP
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 10),
-                        decoration: BoxDecoration(
-                          color: AltaColors.primary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AltaColors.primary),
+              ),
+              child: Column(
+                children: [
+                  // Drag handle
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.25),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  // Icon podium
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: resultColor.withValues(alpha: 0.20),
+                      border: Border.all(
+                        color: resultColor.withValues(alpha: 0.40),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Icon(resultIcon, size: 42, color: resultColor),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    resultTitle,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    resultSubtitle,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      height: 1.4,
+                      color: Colors.white.withValues(alpha: 0.80),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── BODY CONTENT ─────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+              child: Column(
+                children: [
+                  // ── SCORES COMPARATIFS ──────────────────────────────────
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _ScoreCard(
+                          label: playerName,
+                          score: playerScore,
+                          isWinner: didWin,
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Column(
                           children: [
-                            const Icon(Icons.bolt_rounded,
-                                color: AltaColors.secondary, size: 20),
-                            const SizedBox(width: 4),
-                            Text(
-                              '+$xpReward XPS',
-                              style: GoogleFonts.spaceMono(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF314999),
+                                    Color(0xFF1A2340)
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                'VS',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 11,
+                                  color: Colors.white,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: _ScoreCard(
+                          label: opponentName,
+                          score: opponentScore,
+                          isWinner: !didWin && !isDraw,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // ── RÉCOMPENSES ─────────────────────────────────────────
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AltaColors.surfaceAltDark
+                          : AltaColors.surfaceAltLight,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: AltaColors.secondary.withValues(alpha: 0.25),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 3,
+                              height: 12,
+                              decoration: BoxDecoration(
                                 color: AltaColors.secondary,
+                                borderRadius: BorderRadius.circular(2),
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Badge Pièces AlterniA
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 10),
-                        decoration: BoxDecoration(
-                          color: AltaColors.primary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AltaColors.primary),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.monetization_on_rounded,
-                                color: AltaColors.primary, size: 20),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 7),
                             Text(
-                              '+$coinsReward Pièces',
-                              style: GoogleFonts.spaceMono(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                                color: AltaColors.primary,
+                              'RÉCOMPENSES',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.8,
+                                color: textSec,
                               ),
                             ),
                           ],
                         ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            // Badge XP
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 11, horizontal: 10),
+                                decoration: BoxDecoration(
+                                  color: AltaColors.secondary
+                                      .withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: AltaColors.secondary
+                                        .withValues(alpha: 0.35),
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    const Icon(Icons.bolt_rounded,
+                                        color: AltaColors.secondary, size: 20),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '+$xpReward XPS',
+                                      style: GoogleFonts.spaceMono(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 14,
+                                        color: AltaColors.secondary,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Points XP',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 9.5,
+                                        color: textSec,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            // Badge Pièces
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 11, horizontal: 10),
+                                decoration: BoxDecoration(
+                                  color:
+                                      AltaColors.accent.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: AltaColors.accent
+                                        .withValues(alpha: 0.35),
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    const Icon(Icons.monetization_on_rounded,
+                                        color: AltaColors.accent, size: 20),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '+$coinsReward',
+                                      style: GoogleFonts.spaceMono(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 14,
+                                        color: AltaColors.accent,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Pièces AlterniA',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 9.5,
+                                        color: textSec,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Solde : ${gamification.xp} XP  •  ${gamification.coins} Pièces',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            color: textSec,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // ── CLASSEMENT ─────────────────────────────────────────
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const DuelLeaderboardScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      decoration: BoxDecoration(
+                        color: AltaColors.secondary.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: AltaColors.secondary.withValues(alpha: 0.35),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.leaderboard_rounded,
+                              size: 17, color: AltaColors.secondary),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Classement National & Lycées',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: AltaColors.secondary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Solde actuel : ${gamification.xp} XP • ${gamification.coins} Pièces',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    color: textSec,
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 10),
+
+                  // ── REVANCHE & QUITTER ──────────────────────────────────
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: onExit,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 13),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                  color: isDark
+                                      ? Colors.white24
+                                      : AltaColors.borderLight,
+                                  width: 1.2),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Quitter',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                  color: textPri,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: onReplay,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 13),
+                            decoration: BoxDecoration(
+                              color: AltaColors.primary,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Center(
+                              child: Text(
+                                actionText,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-
-          const SizedBox(height: 14),
-
-          // ── BOUTON ACCÈS AU CLASSEMENT NATIONAL ───────────────────────────
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(
-                    color: AltaColors.secondary.withValues(alpha: 0.5)),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const DuelLeaderboardScreen()),
-                );
-              },
-              icon: const Icon(Icons.leaderboard_rounded,
-                  size: 18, color: AltaColors.secondary),
-              label: const Text(
-                'Consulter le Classement National & Lycées',
-                style: TextStyle(
-                    color: AltaColors.secondary, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // ── BOUTONS REVANCHE ET QUITTER ─────────────────────────────────
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white24),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  onPressed: onExit,
-                  child: Text('Quitter', style: TextStyle(color: textPri)),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AltaColors.primary,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  onPressed: onReplay,
-                  child: Text(actionText,
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1090,28 +1332,72 @@ class _ScoreCard extends StatelessWidget {
     final textSec = isDark ? Colors.white70 : const Color(0xFF475569);
 
     return Container(
-      width: 130,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
       decoration: BoxDecoration(
         color: isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isWinner ? AltaColors.primary : Colors.transparent,
-          width: 1.5,
+          color: isWinner
+              ? AltaColors.secondary.withValues(alpha: 0.70)
+              : Colors.transparent,
+          width: isWinner ? 1.8 : 1.0,
         ),
+        boxShadow: isWinner
+            ? [
+                BoxShadow(
+                  color: AltaColors.secondary.withValues(alpha: 0.15),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: Column(
         children: [
-          Text(label,
-              style: TextStyle(
-                  fontSize: 11, color: textSec, fontWeight: FontWeight.w600),
-              overflow: TextOverflow.ellipsis),
+          if (isWinner)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              margin: const EdgeInsets.only(bottom: 6),
+              decoration: BoxDecoration(
+                color: AltaColors.secondary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '🏆 VAINQUEUR',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 8.5,
+                  fontWeight: FontWeight.w800,
+                  color: AltaColors.secondary,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              color: textSec,
+              fontWeight: FontWeight.w600,
+            ),
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 4),
-          Text('$score pts',
-              style: GoogleFonts.spaceMono(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: isWinner ? AltaColors.secondary : textPri)),
+          Text(
+            '$score',
+            style: GoogleFonts.spaceMono(
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+              color: isWinner ? AltaColors.secondary : textPri,
+            ),
+          ),
+          Text(
+            'pts',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 10,
+              color: textSec,
+            ),
+          ),
         ],
       ),
     );

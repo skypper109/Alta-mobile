@@ -257,6 +257,58 @@ class GrinServiceNotifier extends StateNotifier<GrinState> {
     _logger.i('[GrinService] Salon local créé : ${newRoom.title} (PIN: ${newRoom.pinCode})');
     return newRoom;
   }
+
+  /// Publie une nouvelle ressource en P2P (Wi-Fi local / boîtier)
+  Future<GrinSharedResource> shareResource({
+    required String title,
+    required String subject,
+    required String type,
+    required String sharedBy,
+    String? sizeMb,
+    String? targetPeerId,
+  }) async {
+    final resId = 'res_${DateTime.now().millisecondsSinceEpoch}';
+    final computedSize = sizeMb ?? '1.8 Mo';
+    GrinSharedResource newRes = GrinSharedResource(
+      id: resId,
+      title: title,
+      subject: subject,
+      type: type,
+      sizeMb: computedSize,
+      sharedBy: sharedBy,
+    );
+
+    for (final base in AltaApiConfig.candidateBaseUrls) {
+      try {
+        final res = await _dio.post(
+          '$base/api/grin/resources/share',
+          data: {
+            'title': title,
+            'subject': subject,
+            'type': type,
+            'shared_by': sharedBy,
+            'size_mb': computedSize,
+            'target_peer_id': targetPeerId,
+          },
+          options: Options(connectTimeout: const Duration(seconds: 2)),
+        );
+        if (res.statusCode == 200 &&
+            res.data is Map &&
+            res.data['resource'] != null) {
+          newRes = GrinSharedResource.fromJson(
+              res.data['resource'] as Map<String, dynamic>);
+          break;
+        }
+      } catch (_) {}
+    }
+
+    state = state.copyWith(
+      sharedResources: [newRes, ...state.sharedResources],
+    );
+    _logger.i(
+        '[GrinService] Ressource P2P partagée : ${newRes.title} par ${newRes.sharedBy}');
+    return newRes;
+  }
 }
 
 final grinServiceProvider =

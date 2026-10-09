@@ -57,17 +57,27 @@ class FlashcardDeckState {
 class FlashcardServiceNotifier extends StateNotifier<FlashcardDeckState> {
   FlashcardServiceNotifier(this._ref) : super(const FlashcardDeckState(isLoading: true)) {
     _initDeck();
+    _ref.listen<UserProfileState>(userPrefsProvider, (previous, next) {
+      if (previous?.studentClassId != next.studentClassId && next.studentClassId.isNotEmpty) {
+        _logger.i('[FlashcardService] Changement de classe détecté (${previous?.studentClassId} -> ${next.studentClassId}), rechargement...');
+        reloadForClass(next.studentClassId);
+      }
+    });
   }
 
   final Ref _ref;
-  static const _storageKey = 'alternia_leitner_flashcards_deck';
+  String _storageKeyFor(String level) =>
+      'alternia_leitner_flashcards_deck_${level.toLowerCase().trim()}';
   final _logger = Logger();
   final _dio = Dio();
 
   Future<void> _initDeck() async {
     try {
+      final userPrefs = _ref.read(userPrefsProvider);
+      final currentLevel = userPrefs.studentClassId.isNotEmpty ? userPrefs.studentClassId : '12eme';
+
       final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_storageKey);
+      final raw = prefs.getString(_storageKeyFor(currentLevel));
 
       List<Flashcard> loadedCards = [];
       if (raw != null && raw.isNotEmpty) {
@@ -77,10 +87,10 @@ class FlashcardServiceNotifier extends StateNotifier<FlashcardDeckState> {
             .toList();
       }
 
-      if (loadedCards.isEmpty) {
-        // Préchargement de la banque certifiée officielle du Mali
-        loadedCards = FlashcardBank.getInitialCards();
-        await _saveDeck(loadedCards);
+      // Si le deck est vide ou ne correspond pas au niveau actif, charger la banque certifiée
+      if (loadedCards.isEmpty || !loadedCards.any((c) => c.classLevel.toLowerCase() == currentLevel.toLowerCase())) {
+        loadedCards = FlashcardBank.getInitialCards(level: currentLevel);
+        await _saveDeck(loadedCards, currentLevel);
       }
 
       state = FlashcardDeckState(cards: loadedCards, isLoading: false);
@@ -89,21 +99,86 @@ class FlashcardServiceNotifier extends StateNotifier<FlashcardDeckState> {
       unawaited(fetchAiFlashcardsFromBackend());
     } catch (e) {
       _logger.e('[FlashcardService] Erreur d\'initialisation du deck : $e');
+      final currentLevel = _ref.read(userPrefsProvider).studentClassId;
       state = FlashcardDeckState(
-        cards: FlashcardBank.getInitialCards(),
+        cards: FlashcardBank.getInitialCards(level: currentLevel),
         isLoading: false,
       );
     }
   }
 
-  Future<void> _saveDeck(List<Flashcard> deck) async {
+  /// Réinitialise et recharge le deck pour une nouvelle classe
+  Future<void> reloadForClass(String classLevel) async {
+    state = state.copyWith(isLoading: true);
     try {
       final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_storageKeyFor(classLevel));
+      List<Flashcard> loadedCards = [];
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = jsonDecode(raw) as List<dynamic>;
+        loadedCards = decoded
+            .map((e) => Flashcard.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+
+      if (loadedCards.isEmpty || !loadedCards.any((c) => c.classLevel.toLowerCase() == classLevel.toLowerCase())) {
+        loadedCards = FlashcardBank.getInitialCards(level: classLevel);
+        await _saveDeck(loadedCards, classLevel);
+      }
+
+      state = FlashcardDeckState(cards: loadedCards, isLoading: false);
+      unawaited(fetchAiFlashcardsFromBackend());
+    } catch (e) {
+      final cards = FlashcardBank.getInitialCards(level: classLevel);
+      state = FlashcardDeckState(cards: cards, isLoading: false);
+      await _saveDeck(cards, classLevel);
+    }
+  }
+
+  Future<void> _saveDeck(List<Flashcard> deck, [String? classLevel]) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final level = classLevel ?? _ref.read(userPrefsProvider).studentClassId;
+      final key = _storageKeyFor(level.isNotEmpty ? level : '12eme');
       final encoded = jsonEncode(deck.map((c) => c.toJson()).toList());
-      await prefs.setString(_storageKey, encoded);
+      await prefs.setString(key, encoded);
     } catch (e) {
       _logger.w('[FlashcardService] Erreur de sauvegarde du deck : $e');
     }
+  }
+
+  String? _cachedActiveBaseUrl;
+  DateTime? _lastHealthCheckTime;
+
+  /// Vérifie rapidement la connectivité avec le serveur AlternIA
+  Future<String?> _getActiveBaseUrlFast() async {
+    final now = DateTime.now();
+    if (_lastHealthCheckTime != null &&
+        _cachedActiveBaseUrl != null &&
+        now.difference(_lastHealthCheckTime!) < const Duration(seconds: 15)) {
+      return _cachedActiveBaseUrl;
+    }
+
+    for (final baseUrl in AltaApiConfig.candidateBaseUrls) {
+      try {
+        final res = await _dio.get(
+          '$baseUrl/api/health',
+          options: Options(
+            connectTimeout: const Duration(milliseconds: 2500),
+            receiveTimeout: const Duration(milliseconds: 2500),
+          ),
+        );
+        if (res.statusCode == 200 && res.data is Map && res.data['status'] == 'healthy') {
+          _cachedActiveBaseUrl = baseUrl;
+          _lastHealthCheckTime = now;
+          return baseUrl;
+        }
+      } catch (_) {}
+    }
+
+    _lastHealthCheckTime = now;
+    _cachedActiveBaseUrl = null;
+    return null;
   }
 
   /// Appelle l'API IA backend pour générer de vraies cartes pédagogiques inédites
@@ -118,41 +193,47 @@ class FlashcardServiceNotifier extends StateNotifier<FlashcardDeckState> {
 
     state = state.copyWith(isGeneratingAi: true);
 
-    for (final baseUrl in AltaApiConfig.candidateBaseUrls) {
-      try {
-        _logger.i('[FlashcardService] Requête génération IA réelle → $baseUrl/api/education/flashcards/generate');
-        final response = await _dio.post(
-          '$baseUrl/api/education/flashcards/generate',
-          data: {
-            'subject': targetSubject,
-            'class_level': classLevel,
-            'topic': topic,
-            'count': count,
-          },
-          options: Options(
-            connectTimeout: const Duration(seconds: 4),
-            receiveTimeout: const Duration(seconds: 15),
-          ),
-        );
+    try {
+      final activeUrl = await _getActiveBaseUrlFast();
+      final urlsToTry = activeUrl != null
+          ? [activeUrl, ...AltaApiConfig.candidateBaseUrls.where((u) => u != activeUrl)]
+          : AltaApiConfig.candidateBaseUrls;
 
-        if (response.statusCode == 200 && response.data is List) {
-          final list = (response.data as List)
-              .map((it) => Flashcard.fromJson(it as Map<String, dynamic>))
-              .toList();
+      for (final baseUrl in urlsToTry) {
+        try {
+          _logger.i('[FlashcardService] Requête génération IA réelle → $baseUrl/api/education/flashcards/generate');
+          final response = await _dio.post(
+            '$baseUrl/api/education/flashcards/generate',
+            data: {
+              'subject': targetSubject,
+              'class_level': classLevel,
+              'topic': topic,
+              'count': count,
+            },
+            options: Options(
+              connectTimeout: const Duration(seconds: 5),
+              receiveTimeout: const Duration(seconds: 35),
+            ),
+          );
 
-          if (list.isNotEmpty) {
-            await addCards(list);
-            _logger.i('[FlashcardService] ${list.length} vraies cartes IA ajoutées au deck !');
-            state = state.copyWith(isGeneratingAi: false);
-            return true;
+          if (response.statusCode == 200 && response.data is List) {
+            final list = (response.data as List)
+                .map((it) => Flashcard.fromJson(it as Map<String, dynamic>))
+                .toList();
+
+            if (list.isNotEmpty) {
+              await addCards(list);
+              _logger.i('[FlashcardService] ${list.length} vraies cartes IA ajoutées au deck !');
+              return true;
+            }
           }
+        } catch (e) {
+          _logger.d('[FlashcardService] Échec sur $baseUrl : $e');
         }
-      } catch (e) {
-        _logger.d('[FlashcardService] Échec sur $baseUrl : $e');
       }
+    } finally {
+      state = state.copyWith(isGeneratingAi: false);
     }
-
-    state = state.copyWith(isGeneratingAi: false);
     return false;
   }
 

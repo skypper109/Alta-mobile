@@ -252,7 +252,7 @@ class SyncQueueNotifier extends StateNotifier<SyncQueueState> {
             receiveTimeout: const Duration(milliseconds: 1500),
           ),
         );
-        if (res.statusCode == 200) return base;
+        if (res.statusCode == 200 && res.data is Map) return base;
       } catch (_) {
         try {
           final res2 = await _dio.get(
@@ -262,7 +262,7 @@ class SyncQueueNotifier extends StateNotifier<SyncQueueState> {
               receiveTimeout: const Duration(milliseconds: 1500),
             ),
           );
-          if (res2.statusCode == 200) return base;
+          if (res2.statusCode == 200 && res2.data is List) return base;
         } catch (_) {}
       }
     }

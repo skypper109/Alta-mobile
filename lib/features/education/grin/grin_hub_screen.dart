@@ -28,6 +28,8 @@ class GrinHubScreen extends ConsumerStatefulWidget {
 class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final Set<String> _downloadedResourceIds = {};
+  final Set<String> _downloadingIds = {};
 
   @override
   void initState() {
@@ -42,9 +44,12 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
   }
 
   void _showCreateGrinRoomDialog(
-      BuildContext context, String userName, String userClass) {
+      BuildContext context, String userName, String userClass, List<String> subjects) {
     final titleCtrl = TextEditingController(text: 'Grin Révision $userClass');
-    String selectedSubject = 'Mathématiques';
+    final availableSubjects = subjects.isNotEmpty
+        ? subjects
+        : ['Mathématiques', 'Physique-Chimie', 'Biologie (SVT)', 'Histoire-Géographie', 'Français'];
+    String selectedSubject = availableSubjects.first;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
     final borderCol = isDark ? AppColors.border : const Color(0xFFCBD5E1);
@@ -80,7 +85,7 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
               ),
               const SizedBox(height: 16),
               Text(
-                'Créer un Grin Local',
+                'Créer un Salon de Grin Local',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -131,19 +136,9 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
                     borderSide: BorderSide(color: borderCol),
                   ),
                 ),
-                items: const [
-                  DropdownMenuItem(
-                      value: 'Mathématiques', child: Text('Mathématiques')),
-                  DropdownMenuItem(
-                      value: 'Physique-Chimie', child: Text('Physique-Chimie')),
-                  DropdownMenuItem(
-                      value: 'Biologie', child: Text('Biologie (SVT)')),
-                  DropdownMenuItem(
-                      value: 'Histoire-Géographie',
-                      child: Text('Histoire-Géographie')),
-                  DropdownMenuItem(
-                      value: 'Philosophie', child: Text('Philosophie')),
-                ],
+                items: availableSubjects
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .toList(),
                 onChanged: (val) {
                   if (val != null) {
                     setModalState(() => selectedSubject = val);
@@ -167,7 +162,7 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
                           );
                       if (ctx.mounted) Navigator.pop(ctx);
                       if (context.mounted) {
-                        _launchDuelForRoom(context, newRoom, userName);
+                        _showGrinWaitingRoom(context, newRoom, userName, isHost: true);
                       }
                     }
                   },
@@ -181,7 +176,7 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
                     elevation: 0,
                   ),
                   child: Text(
-                    'Lancer le Salon de Grin',
+                    'Créer le Salon (Attente des camarades)',
                     style: GoogleFonts.plusJakartaSans(
                       fontWeight: FontWeight.bold,
                     ),
@@ -195,8 +190,823 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
     );
   }
 
+  void _showGrinWaitingRoom(
+    BuildContext context,
+    GrinRoom room,
+    String currentUserName, {
+    required bool isHost,
+  }) {
+    int selectedQuestionCount = 5;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSec = isDark ? AppColors.textSecondary : const Color(0xFF475569);
+    final borderCol = isDark ? AppColors.border : const Color(0xFFCBD5E1);
+    final cardBg = isDark ? const Color(0xFF141C2E) : const Color(0xFFF8FAFC);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? AppColors.surface : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          final currentPeers = ref.watch(grinServiceProvider).nearbyPeers;
+
+          return Padding(
+            padding: EdgeInsets.only(
+              left: 22,
+              right: 22,
+              top: 20,
+              bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 38,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.border : const Color(0xFFCBD5E1),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            room.title,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: textPri,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  room.subject,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.secondary.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  room.hostClass,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? AppColors.secondary : AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: room.pinCode));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Code PIN copié !'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.secondary.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.secondary.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'PIN: ${room.pinCode}',
+                              style: GoogleFonts.spaceMono(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.secondary,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.copy_rounded, size: 14, color: AppColors.secondary),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+
+                // Sélecteur de nombre de questions
+                Text(
+                  'Nombre de questions du duel :',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
+                    color: textPri,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _buildQuestionCountChip(
+                      label: '3 Questions\n(Flash)',
+                      count: 3,
+                      selected: selectedQuestionCount == 3,
+                      onTap: isHost
+                          ? () => setSheetState(() => selectedQuestionCount = 3)
+                          : null,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildQuestionCountChip(
+                      label: '5 Questions\n(Standard)',
+                      count: 5,
+                      selected: selectedQuestionCount == 5,
+                      onTap: isHost
+                          ? () => setSheetState(() => selectedQuestionCount = 5)
+                          : null,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildQuestionCountChip(
+                      label: '10 Questions\n(Examen)',
+                      count: 10,
+                      selected: selectedQuestionCount == 10,
+                      onTap: isHost
+                          ? () => setSheetState(() => selectedQuestionCount = 10)
+                          : null,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+
+                // Participants connectés et présents
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Camarades présents (${1 + (isHost ? currentPeers.length : 1)}) :',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.bold,
+                        color: textPri,
+                      ),
+                    ),
+                    Text(
+                      'Réseau Local Boîtier',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 11, color: textSec),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: borderCol),
+                  ),
+                  child: Column(
+                    children: [
+                      // Ligne Hôte
+                      Row(
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                room.hostName.isNotEmpty ? room.hostName[0] : 'H',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              '${room.hostName} (Hôte • ${room.hostClass})',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: textPri,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.success.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Prêt 🟢',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.success,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      // Ligne Invité ou Peers
+                      if (!isHost) ...[
+                        const Divider(height: 16),
+                        Row(
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: AppColors.secondary.withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  currentUserName.isNotEmpty ? currentUserName[0] : 'V',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.secondary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                '$currentUserName (Vous)',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: textPri,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AppColors.success.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Rejoint 🟢',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.success,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      for (final peer in currentPeers.take(2)) ...[
+                        const Divider(height: 16),
+                        Row(
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  peer.name.isNotEmpty ? peer.name[0] : 'C',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                '${peer.name} (${peer.className})',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: textPri,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AppColors.secondary.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'En ligne 🟡',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.secondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 22),
+
+                // Bouton de lancement
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      _launchDuelForRoom(
+                        context,
+                        room,
+                        currentUserName,
+                        questionCount: selectedQuestionCount,
+                      );
+                    },
+                    icon: const Icon(Icons.bolt_rounded, size: 20),
+                    label: Text(
+                      isHost
+                          ? 'Lancer le Duel IA du Grin ($selectedQuestionCount Q)'
+                          : 'Rejoindre l\'Arène de Duel ($selectedQuestionCount Q)',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 0,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildQuestionCountChip({
+    required String label,
+    required int count,
+    required bool selected,
+    required VoidCallback? onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.primary
+                : AppColors.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: selected ? AppColors.primary : Colors.transparent,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: selected ? Colors.white : AppColors.primary,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showShareResourceSheet(BuildContext context, {GrinPeer? targetPeer}) {
+    final userPrefs = ref.read(userPrefsProvider);
+    final rawName = userPrefs.name.trim();
+    final userName = rawName.isNotEmpty ? rawName : 'Élève';
+    final availableSubjects = userPrefs.subjects.isNotEmpty
+        ? userPrefs.subjects
+        : ['Mathématiques', 'Physique-Chimie', 'Biologie (SVT)', 'Histoire-Géographie', 'Français'];
+
+    final titleCtrl = TextEditingController(
+      text: targetPeer != null
+          ? 'Cours partagé pour ${targetPeer.name}'
+          : 'Fiche Révision - ${availableSubjects.first}',
+    );
+    String selectedSubject = availableSubjects.first;
+    String selectedType = 'fiche';
+    GrinPeer? chosenPeer = targetPeer;
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+    final borderCol = isDark ? AppColors.border : const Color(0xFFCBD5E1);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? AppColors.surface : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          final peers = ref.watch(grinServiceProvider).nearbyPeers;
+
+          return Padding(
+            padding: EdgeInsets.only(
+              left: 22,
+              right: 22,
+              top: 20,
+              bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 38,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.border : const Color(0xFFCBD5E1),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Icon(Icons.share_rounded, color: AppColors.primary, size: 22),
+                    const SizedBox(width: 8),
+                    Text(
+                      targetPeer != null
+                          ? 'Partager avec ${targetPeer.name}'
+                          : 'Partager une ressource sans Internet',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: textPri,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Échange P2P local ultra-rapide via le Boîtier AlterniA (0 Mo de données mobiles consommées).',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11.5,
+                    color: isDark ? AppColors.textSecondary : const Color(0xFF475569),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: titleCtrl,
+                  style: GoogleFonts.plusJakartaSans(fontSize: 13, color: textPri),
+                  decoration: InputDecoration(
+                    labelText: 'Titre de la ressource',
+                    labelStyle: GoogleFonts.plusJakartaSans(fontSize: 12),
+                    filled: true,
+                    fillColor: isDark ? AppColors.surfaceAlt : const Color(0xFFF1F5F9),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderCol),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  initialValue: selectedSubject,
+                  decoration: InputDecoration(
+                    labelText: 'Matière',
+                    labelStyle: GoogleFonts.plusJakartaSans(fontSize: 12),
+                    filled: true,
+                    fillColor: isDark ? AppColors.surfaceAlt : const Color(0xFFF1F5F9),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderCol),
+                    ),
+                  ),
+                  items: availableSubjects
+                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                      .toList(),
+                  onChanged: (val) {
+                    if (val != null) setSheetState(() => selectedSubject = val);
+                  },
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  initialValue: selectedType,
+                  decoration: InputDecoration(
+                    labelText: 'Type de document',
+                    labelStyle: GoogleFonts.plusJakartaSans(fontSize: 12),
+                    filled: true,
+                    fillColor: isDark ? AppColors.surfaceAlt : const Color(0xFFF1F5F9),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderCol),
+                    ),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'fiche', child: Text('Fiche de révision PDF / Synthèse')),
+                    DropdownMenuItem(value: 'podcast', child: Text('Podcast Audio Éducatif')),
+                    DropdownMenuItem(value: 'flashcards', child: Text('Deck Flashcards de Mémorisation')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setSheetState(() => selectedType = val);
+                  },
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String?>(
+                  initialValue: chosenPeer?.id,
+                  decoration: InputDecoration(
+                    labelText: 'Partager avec',
+                    labelStyle: GoogleFonts.plusJakartaSans(fontSize: 12),
+                    filled: true,
+                    fillColor: isDark ? AppColors.surfaceAlt : const Color(0xFFF1F5F9),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderCol),
+                    ),
+                  ),
+                  items: [
+                    const DropdownMenuItem(value: null, child: Text('Tout le Grin (Diffusion générale)')),
+                    for (final p in peers)
+                      DropdownMenuItem(value: p.id, child: Text('${p.name} (${p.className})')),
+                  ],
+                  onChanged: (val) {
+                    setSheetState(() {
+                      chosenPeer = val != null ? peers.firstWhere((p) => p.id == val) : null;
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final title = titleCtrl.text.trim();
+                      if (title.isEmpty) return;
+
+                      Navigator.pop(ctx);
+                      await ref.read(grinServiceProvider.notifier).shareResource(
+                            title: title,
+                            subject: selectedSubject,
+                            type: selectedType,
+                            sharedBy: userName,
+                            targetPeerId: chosenPeer?.id,
+                          );
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              chosenPeer != null
+                                  ? '« $title » partagé directement avec ${chosenPeer!.name} !'
+                                  : '« $title » partagé avec succès dans le Grin !',
+                            ),
+                            backgroundColor: AppColors.success,
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.send_rounded, size: 18),
+                    label: Text(
+                      'Envoyer en P2P Local (0 Data)',
+                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      elevation: 0,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _downloadResource(GrinSharedResource res) async {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _downloadingIds.add(res.id);
+    });
+
+    await Future.delayed(const Duration(milliseconds: 900));
+
+    if (mounted) {
+      setState(() {
+        _downloadingIds.remove(res.id);
+        _downloadedResourceIds.add(res.id);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('« ${res.title} » téléchargé et prêt à être consulté hors-ligne !'),
+          backgroundColor: AppColors.success,
+          action: SnackBarAction(
+            label: 'Ouvrir',
+            textColor: Colors.white,
+            onPressed: () => _showResourcePreview(context, res),
+          ),
+        ),
+      );
+    }
+  }
+
+  void _showResourcePreview(BuildContext context, GrinSharedResource res) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSec = isDark ? AppColors.textSecondary : const Color(0xFF475569);
+    final cardBg = isDark ? const Color(0xFF141C2E) : const Color(0xFFF1F5F9);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? AppColors.surface : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(22.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 38,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.border : const Color(0xFFCBD5E1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(
+                  res.type == 'podcast'
+                      ? Icons.headphones_rounded
+                      : (res.type == 'flashcards'
+                          ? Icons.style_rounded
+                          : Icons.menu_book_rounded),
+                  color: AppColors.secondary,
+                  size: 24,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    res.title,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: textPri,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${res.subject} • ${res.sizeMb} • Partagé par ${res.sharedBy}',
+              style: GoogleFonts.plusJakartaSans(fontSize: 12, color: textSec),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: res.type == 'podcast'
+                  ? Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Lecture audio locale (Boîtier)', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: textSec)),
+                            Text('08:45', style: GoogleFonts.spaceMono(fontSize: 12, fontWeight: FontWeight.bold, color: textPri)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        LinearProgressIndicator(
+                          value: 0.35,
+                          backgroundColor: AppColors.border,
+                          valueColor: const AlwaysStoppedAnimation(AppColors.secondary),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(icon: const Icon(Icons.replay_10_rounded), onPressed: () {}),
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 12),
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.primary,
+                              ),
+                              child: IconButton(
+                                icon: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 28),
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Lecture de "${res.title}"...')),
+                                  );
+                                },
+                              ),
+                            ),
+                            IconButton(icon: const Icon(Icons.forward_10_rounded), onPressed: () {}),
+                          ],
+                        ),
+                      ],
+                    )
+                  : Text(
+                      'Résumé & Points clés du cours :\n• Conforme au programme officiel du Mali\n• Concepts fondamentaux, définitions et exercices types\n• Document vérifié et stocké sur votre téléphone sans connexion Internet.',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        height: 1.5,
+                        color: textPri,
+                      ),
+                    ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(ctx),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: const Text('Fermer la prévisualisation'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _launchDuelForRoom(
-      BuildContext context, GrinRoom room, String currentUserName) {
+      BuildContext context, GrinRoom room, String currentUserName, {int questionCount = 5}) {
     HapticFeedback.mediumImpact();
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -209,6 +1019,7 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
               ? room.hostName
               : 'Camarade du Grin',
           roomCode: room.pinCode,
+          questionCount: questionCount,
         ),
       ),
     );
@@ -298,33 +1109,50 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
       body: SafeArea(
         child: Column(
           children: [
-            // ── BANNIÈRE STATUT RÉSEAU LOCAL ──────────────────────────────
+            // ── BANNIÈRE STATUT RÉSEAU LOCAL — PREMIUM ────────────────────
             Container(
               margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: isConnectedToBox
-                    ? AppColors.secondary.withValues(alpha: 0.12)
+                    ? AppColors.secondary.withValues(alpha: 0.10)
                     : (isDark ? AppColors.surfaceAlt : const Color(0xFFF1F5F9)),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(
                   color: isConnectedToBox
-                      ? AppColors.secondary.withValues(alpha: 0.4)
+                      ? AppColors.secondary.withValues(alpha: 0.45)
                       : borderCol,
+                  width: 1.5,
                 ),
+                boxShadow: isConnectedToBox
+                    ? [
+                        BoxShadow(
+                          color: AppColors.secondary.withValues(alpha: 0.12),
+                          blurRadius: 14,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : null,
               ),
               child: Row(
                 children: [
-                  Icon(
-                    isConnectedToBox
-                        ? Icons.router_rounded
-                        : Icons.wifi_tethering_rounded,
-                    color: isConnectedToBox
-                        ? AppColors.secondary
-                        : AppColors.primary,
-                    size: 22,
+                  Container(
+                    padding: const EdgeInsets.all(9),
+                    decoration: BoxDecoration(
+                      color: (isConnectedToBox ? AppColors.secondary : AppColors.primary).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      isConnectedToBox
+                          ? Icons.router_rounded
+                          : Icons.wifi_tethering_rounded,
+                      color: isConnectedToBox
+                          ? AppColors.secondary
+                          : AppColors.primary,
+                      size: 20,
+                    ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -334,13 +1162,14 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
                               ? 'Connecté au Boîtier AlterniA'
                               : 'Wi-Fi Local',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
                             color: textPri,
                           ),
                         ),
+                        const SizedBox(height: 2),
                         Text(
-                          'Les échanges fonctionnent à 100% sans consommer de data.',
+                          '0 Mo consommés • Échanges P2P en direct',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 10.5,
                             color: textSec,
@@ -350,14 +1179,37 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
                     ),
                   ),
                   if (!isConnectedToBox)
-                    TextButton(
-                      onPressed: () => showDeviceModalSheet(context),
+                    GestureDetector(
+                      onTap: () => showDeviceModalSheet(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          'Associer',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       child: Text(
-                        'Associer',
+                        'En ligne 🟢',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
+                          fontSize: 10.5,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: AppColors.success,
                         ),
                       ),
                     ),
@@ -374,35 +1226,116 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
                   ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: () => _showCreateGrinRoomDialog(
-                            context, userName, userClass),
-                        icon: const Icon(Icons.add_rounded, size: 18),
-                        label: Text(
-                          'Créer un Salon pour notre Grin',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
+                      // Hero CTA — Créer un Salon de Grin
+                      GestureDetector(
+                        onTap: () => _showCreateGrinRoomDialog(
+                            context, userName, userClass, userPrefs.subjects),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(22),
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(20),
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Color(0xFF253060), Color(0xFF314999)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: const Icon(
+                                        Icons.groups_rounded,
+                                        color: Colors.white,
+                                        size: 26,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Créer un Salon Grin',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w800,
+                                              color: Colors.white,
+                                              letterSpacing: -0.2,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 3),
+                                          Text(
+                                            'Révision local • Sans Internet • Boitier',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 11,
+                                              color: Colors.white.withValues(alpha: 0.78),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.accent,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: const Icon(
+                                        Icons.add_rounded,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Positioned(
+                                right: -20,
+                                bottom: -20,
+                                child: Opacity(
+                                  opacity: 0.12,
+                                  child: Image.asset(
+                                    'assets/images/alternia_logo.png',
+                                    width: 100,
+                                    height: 100,
+                                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          elevation: 0,
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Text(
-                        'Salons ouverts à proximité (${grinState.rooms.length})',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: textPri,
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 3, height: 14,
+                            decoration: BoxDecoration(
+                              color: AppColors.secondary,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'SALONS OUVERTS (${grinState.rooms.length})',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.6,
+                              color: textSec,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 10),
                       for (final room in grinState.rooms) ...[
@@ -413,7 +1346,7 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
                           textPri: textPri,
                           textSec: textSec,
                           onJoin: () =>
-                              _launchDuelForRoom(context, room, userName),
+                              _showGrinWaitingRoom(context, room, userName, isHost: false),
                         ),
                         const SizedBox(height: 10),
                       ],
@@ -424,13 +1357,26 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
                   ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      Text(
-                        'Camarades connectés au Grin (${grinState.nearbyPeers.length})',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: textPri,
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 3, height: 14,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'CAMARADES DU GRIN (${grinState.nearbyPeers.length})',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.6,
+                              color: textSec,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 10),
                       for (final peer in grinState.nearbyPeers) ...[
@@ -504,6 +1450,16 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
                                   ),
                                 ),
                               ),
+                              const SizedBox(width: 6),
+                              IconButton(
+                                icon: const Icon(Icons.share_rounded, size: 20),
+                                color: isDark
+                                    ? AppColors.secondary
+                                    : AppColors.primary,
+                                tooltip: 'Partager une ressource avec ${peer.name}',
+                                onPressed: () => _showShareResourceSheet(
+                                    context, targetPeer: peer),
+                              ),
                             ],
                           ),
                         ),
@@ -516,6 +1472,27 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
                   ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
+                      ElevatedButton.icon(
+                        onPressed: () => _showShareResourceSheet(context),
+                        icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
+                        label: Text(
+                          'Partager une ressource dans le Grin',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       Text(
                         'Ressources partagées dans le Grin (${grinState.sharedResources.length})',
                         style: GoogleFonts.plusJakartaSans(
@@ -586,23 +1563,35 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
                                   ],
                                 ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.download_rounded),
-                                color: isDark
-                                    ? AppColors.secondary
-                                    : AppColors.primary,
-                                tooltip: 'Télécharger en local',
-                                onPressed: () {
-                                  HapticFeedback.lightImpact();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          'Fichier "${res.title}" téléchargé sur votre mémoire locale !'),
-                                      backgroundColor: AppColors.success,
+                              if (_downloadingIds.contains(res.id))
+                                const Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primary,
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                )
+                              else if (_downloadedResourceIds.contains(res.id))
+                                IconButton(
+                                  icon: const Icon(Icons.check_circle_rounded,
+                                      color: AppColors.success),
+                                  tooltip: 'Ouvrir la ressource',
+                                  onPressed: () =>
+                                      _showResourcePreview(context, res),
+                                )
+                              else
+                                IconButton(
+                                  icon: const Icon(Icons.download_rounded),
+                                  color: isDark
+                                      ? AppColors.secondary
+                                      : AppColors.primary,
+                                  tooltip: 'Télécharger en local',
+                                  onPressed: () => _downloadResource(res),
+                                ),
                             ],
                           ),
                         ),

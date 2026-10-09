@@ -15,6 +15,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants.dart';
+import '../../shared/edu_feature_widgets.dart';
 import '../../shared/widgets.dart';
 import '../discussions/subject_chat_provider.dart';
 import '../profile/user_prefs_notifier.dart';
@@ -303,272 +304,176 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
           ),
 
           // ── HUB D'ACTIVITÉS PÉDAGOGIQUES ALTERNIA ─────────────────────────
-          Row(
-            children: [
-              // 1. CARTE DUEL SCOLAIRE
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    context.push('/education/duel');
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: AltaColors.primary.withValues(alpha: 0.4),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color:
-                                    AltaColors.primary.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.sports_esports_rounded,
-                                color: AltaColors.primary,
-                                size: 22,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 3),
-                              decoration: BoxDecoration(
-                                color:
-                                    AltaColors.primary.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                '+250 XP',
-                                style: GoogleFonts.spaceMono(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: AltaColors.primary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Duel Scolaire',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: textPri,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Défie tes camarades & grimpe au classement national.',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10,
-                            color: textSec,
-                            height: 1.3,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Text(
-                              'Entrer dans l\'arène',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AltaColors.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 13,
-                              color: AltaColors.primary,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 12),
-
-              // 2. CARTE PODCASTS AUDIO
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    context.push('/education/podcasts');
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: AltaColors.secondary.withValues(alpha: 0.4),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: AltaColors.secondary
-                                    .withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.headphones_rounded,
-                                color: AltaColors.secondary,
-                                size: 22,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: AltaColors.secondary
-                                    .withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'AUDIO IA',
-                                style: GoogleFonts.spaceMono(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: AltaColors.secondary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Podcasts Audio',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: textPri,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Génère tes leçons & écoute en mode mains libres.',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10,
-                            color: textSec,
-                            height: 1.3,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Text(
-                              'Écouter les cours',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AltaColors.secondary,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 13,
-                              color: AltaColors.secondary,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+          EduHeroCard(
+            title: 'Duel Scolaire',
+            subtitle: 'Défie tes camarades & grimpe au classement national.',
+            ctaLabel: 'Entrer dans l\'arène',
+            icon: Icons.sports_esports_rounded,
+            chips: const [
+              EduHeroChip(
+                icon: Icons.stars_rounded,
+                label: '+250 XP',
+                color: AltaColors.accentLight,
               ),
             ],
+            onTap: () {
+              HapticFeedback.selectionClick();
+              context.push('/education/duel');
+            },
+          ),
+          const SizedBox(height: 10),
+          EduToolTile(
+            horizontal: true,
+            icon: Icons.headphones_rounded,
+            title: 'Podcasts Audio',
+            tag: 'AUDIO IA',
+            subtitle: 'Génère tes leçons & écoute en mode mains libres.',
+            color: AltaColors.secondary,
+            onTap: () {
+              HapticFeedback.selectionClick();
+              context.push('/education/podcasts');
+            },
           ),
 
           const SizedBox(height: DetSizes.lg),
 
-          // ── Zone d'importation réelle ───────────────────────────────────
-          Container(
-            padding: const EdgeInsets.all(DetSizes.xl),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: DetSizes.borderRadiusXl,
-              border: Border.all(
-                color: AltaColors.primary.withValues(alpha: 0.3),
-                width: DetSizes.borderWidth,
-              ),
-            ),
-            child: Column(
+          // ── Zone d'importation réelle ──── PREMIUM REDESIGN ───────────────
+          ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Stack(
               children: [
+                // Dégradé fond bleu officiel
                 Container(
-                  padding: const EdgeInsets.all(DetSizes.lg),
-                  decoration: BoxDecoration(
-                    color: AltaColors.primary.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                  decoration: const BoxDecoration(
+                    gradient: AltaColors.heroBannerGradient,
                   ),
-                  child: const Icon(
-                    Icons.document_scanner_rounded,
-                    size: 40,
-                    color: AltaColors.primary,
+                  child: Column(
+                    children: [
+                      // Logo watermark + icône centrale
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Opacity(
+                            opacity: 0.10,
+                            child: Image.asset(
+                              'assets/images/alternia_logo.png',
+                              width: 120,
+                              height: 120,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) =>
+                                  const SizedBox.shrink(),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.25),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.document_scanner_rounded,
+                              size: 36,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Scanner un devoir ou exercice',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Le service AlternIA extrait le texte par OCR\net vous guide pas à pas.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          height: 1.45,
+                          color: Colors.white.withValues(alpha: 0.80),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () =>
+                                  _pickAndAnalyzeDocument(ImageSource.camera),
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 13),
+                                decoration: BoxDecoration(
+                                  color: AltaColors.accent,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.camera_alt_rounded,
+                                        color: Colors.white, size: 18),
+                                    const SizedBox(width: 7),
+                                    Text(
+                                      'Caméra',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () =>
+                                  _pickAndAnalyzeDocument(ImageSource.gallery),
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 13),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.14),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.30),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.photo_library_rounded,
+                                        color: Colors.white, size: 18),
+                                    const SizedBox(width: 7),
+                                    Text(
+                                      'Galerie',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: DetSizes.md),
-                Text(
-                  'Scanner un devoir ou exercice',
-                  style: DetTextStyles.headingMd.copyWith(color: textPri),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Prenez une photo : le service AlternIA extrait le texte par OCR et vous guide pas à pas.',
-                  textAlign: TextAlign.center,
-                  style: DetTextStyles.bodySm.copyWith(color: textSec),
-                ),
-                const SizedBox(height: DetSizes.lg),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DetButton(
-                        label: 'Caméra',
-                        icon: Icons.camera_alt_rounded,
-                        onPressed: () =>
-                            _pickAndAnalyzeDocument(ImageSource.camera),
-                      ),
-                    ),
-                    const SizedBox(width: DetSizes.md),
-                    Expanded(
-                      child: DetButton(
-                        label: 'Galerie',
-                        icon: Icons.photo_library_rounded,
-                        variant: DetButtonVariant.secondary,
-                        onPressed: () =>
-                            _pickAndAnalyzeDocument(ImageSource.gallery),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -579,48 +484,95 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
           // ── Résultat de l'analyse ou Chargement ──────────────────────────
           if (_isProcessing) ...[
             Container(
-              padding: const EdgeInsets.all(DetSizes.xl),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: cardBg,
-                borderRadius: DetSizes.borderRadiusLg,
-                border: Border.all(color: borderCol),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: AltaColors.secondary.withValues(alpha: 0.35),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AltaColors.secondary.withValues(alpha: 0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
-              child: Column(
+              child: Row(
                 children: [
                   AnimatedBuilder(
                     animation: _pulseCtrl,
                     builder: (context, child) {
                       return Transform.scale(
-                        scale: 0.95 + 0.1 * _pulseCtrl.value,
+                        scale: 0.90 + 0.18 * _pulseCtrl.value,
                         child: Container(
-                          width: 60,
-                          height: 60,
+                          width: 56,
+                          height: 56,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AltaColors.secondary.withValues(alpha: 0.2),
+                            gradient: LinearGradient(
+                              colors: [
+                                AltaColors.secondary.withValues(alpha: 0.25),
+                                AltaColors.primary.withValues(alpha: 0.18),
+                              ],
+                            ),
                             border: Border.all(
-                              color: AltaColors.secondary,
+                              color:
+                                  AltaColors.secondary.withValues(alpha: 0.6),
                               width: 2,
                             ),
                           ),
                           child: const Icon(
                             Icons.psychology_rounded,
                             color: AltaColors.secondary,
-                            size: 32,
+                            size: 28,
                           ),
                         ),
                       );
                     },
                   ),
-                  const SizedBox(height: DetSizes.md),
-                  Text(
-                    'Traitement OCR & Analyse Pédagogique…',
-                    style: DetTextStyles.headingSm.copyWith(color: textPri),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Extraction du texte par OCR et résolution guidée (${userPrefs.classFullLabel})',
-                    style: DetTextStyles.bodySm.copyWith(color: textSec),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Analyse AlternIA en cours…',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: textPri,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'OCR + résolution guidée (${userPrefs.classFullLabel})',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11.5,
+                            color: textSec,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: AnimatedBuilder(
+                            animation: _pulseCtrl,
+                            builder: (_, __) => LinearProgressIndicator(
+                              value: null,
+                              minHeight: 4,
+                              backgroundColor:
+                                  AltaColors.secondary.withValues(alpha: 0.15),
+                              valueColor: AlwaysStoppedAnimation(
+                                AltaColors.secondary.withValues(
+                                    alpha: 0.7 + 0.3 * _pulseCtrl.value),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -631,11 +583,18 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
               padding: const EdgeInsets.all(DetSizes.lg),
               decoration: BoxDecoration(
                 color: cardBg,
-                borderRadius: DetSizes.borderRadiusLg,
+                borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: const Color(0xFFF59E0B),
+                  color: AltaColors.warning.withValues(alpha: 0.6),
                   width: 1.5,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AltaColors.warning.withValues(alpha: 0.07),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -643,16 +602,15 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color:
-                              const Color(0xFFF59E0B).withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
+                          color: AltaColors.warning.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.warning_amber_rounded,
-                          color: Color(0xFFF59E0B),
-                          size: 24,
+                          color: AltaColors.warning,
+                          size: 22,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -662,14 +620,16 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                           children: [
                             Text(
                               'Document non conforme',
-                              style: DetTextStyles.headingSm.copyWith(
-                                color: const Color(0xFFF59E0B),
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 14,
                                 fontWeight: FontWeight.w800,
+                                color: AltaColors.warning,
                               ),
                             ),
                             Text(
                               _scannedFileName ?? 'Fichier scanné',
-                              style: DetTextStyles.caption.copyWith(
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
                                 color: textSec,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -755,11 +715,18 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
               padding: const EdgeInsets.all(DetSizes.lg),
               decoration: BoxDecoration(
                 color: cardBg,
-                borderRadius: DetSizes.borderRadiusLg,
+                borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: AltaColors.secondary.withValues(alpha: 0.5),
+                  color: AltaColors.secondary.withValues(alpha: 0.45),
                   width: 1.5,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AltaColors.secondary.withValues(alpha: 0.07),
+                    blurRadius: 18,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -866,19 +833,69 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                     ),
                   ],
 
-                  const Divider(height: 24),
+                  // Stepper progress indicator
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      for (int i = 0; i < _socraticSteps.length; i++) ...[
+                        Expanded(
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            height: 3,
+                            decoration: BoxDecoration(
+                              color: i <= _currentStep
+                                  ? AltaColors.secondary
+                                  : AltaColors.secondary
+                                      .withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                        if (i < _socraticSteps.length - 1)
+                          const SizedBox(width: 4),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  // Step badge
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 9, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AltaColors.accent.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'ÉTAPE ${_currentStep + 1}/${_socraticSteps.length}',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                            color: AltaColors.accent,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                   Text(
                     _socraticSteps[_currentStep]['title']!,
-                    style: DetTextStyles.headingSm.copyWith(
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
                       color: AltaColors.accent,
+                      height: 1.25,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     _socraticSteps[_currentStep]['content']!,
-                    style: DetTextStyles.bodyMd.copyWith(
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
                       color: textPri,
-                      height: 1.4,
+                      height: 1.5,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -886,28 +903,37 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                     padding: const EdgeInsets.all(DetSizes.md),
                     decoration: BoxDecoration(
                       color: AltaColors.primary
-                          .withValues(alpha: isDark ? 0.15 : 0.06),
-                      borderRadius: DetSizes.borderRadiusMd,
+                          .withValues(alpha: isDark ? 0.18 : 0.07),
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: AltaColors.primary.withValues(alpha: 0.3),
+                        color: AltaColors.primary.withValues(alpha: 0.28),
                       ),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.help_outline_rounded,
-                          color: AltaColors.primary,
-                          size: 18,
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: AltaColors.primary.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.help_outline_rounded,
+                            color: AltaColors.primary,
+                            size: 15,
+                          ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             _socraticSteps[_currentStep]['question']!,
-                            style: DetTextStyles.bodySm.copyWith(
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12.5,
                               color: textPri,
                               fontStyle: FontStyle.italic,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
+                              height: 1.4,
                             ),
                           ),
                         ),
@@ -964,22 +990,35 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'HISTORIQUE DE MES DEVOIRS SCANNÉS',
-                style: GoogleFonts.plusJakartaSans(
-                  color: textSec,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.8,
-                ),
+              Row(
+                children: [
+                  Container(
+                    width: 3,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: AltaColors.primary,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'MES DEVOIRS SCANNÉS',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: textSec,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ],
               ),
               if (_history.isNotEmpty)
                 GestureDetector(
                   onTap: _clearScansHistory,
                   child: Text(
-                    'Effacer l\'historique',
+                    'Effacer',
                     style: GoogleFonts.plusJakartaSans(
-                      color: Colors.redAccent,
+                      color: AltaColors.error,
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1037,25 +1076,35 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                 final doc = _history[index];
                 return GestureDetector(
                   onTap: () => _openDocumentDetails(doc),
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.all(DetSizes.md),
                     decoration: BoxDecoration(
                       color: cardBg,
-                      borderRadius: DetSizes.borderRadiusLg,
+                      borderRadius: BorderRadius.circular(18),
                       border: Border.all(color: borderCol),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black
+                              .withValues(alpha: isDark ? 0.18 : 0.04),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(DetSizes.md),
+                          width: 48,
+                          height: 48,
                           decoration: BoxDecoration(
-                            color: doc.color.withValues(alpha: 0.12),
-                            borderRadius: DetSizes.borderRadiusMd,
+                            color: doc.color.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(14),
                           ),
                           child: Icon(
                             Icons.photo_camera_rounded,
                             color: doc.color,
-                            size: 24,
+                            size: 22,
                           ),
                         ),
                         const SizedBox(width: DetSizes.md),
@@ -1065,38 +1114,55 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
                             children: [
                               Text(
                                 doc.name,
-                                style: DetTextStyles.bodyMd.copyWith(
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13.5,
                                   color: textPri,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 3),
                               Text(
                                 '${doc.subject} • ${doc.date}',
-                                style: DetTextStyles.bodySm
-                                    .copyWith(color: textSec),
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  color: textSec,
+                                ),
                               ),
                             ],
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: DetSizes.sm,
-                            vertical: DetSizes.xs,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AltaColors.secondary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(DetSizes.xs),
-                          ),
-                          child: Text(
-                            '${doc.stepsCount} étapes',
-                            style: DetTextStyles.caption.copyWith(
-                              color: AltaColors.secondary,
-                              fontWeight: FontWeight.w600,
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AltaColors.secondary
+                                    .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '${doc.stepsCount} étapes',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 10.5,
+                                  color: AltaColors.secondary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(height: 4),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              color: textSec,
+                              size: 18,
+                            ),
+                          ],
                         ),
                       ],
                     ),

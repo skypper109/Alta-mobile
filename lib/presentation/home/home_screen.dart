@@ -10,6 +10,7 @@ import '../../features/device/device_page.dart';
 import '../../features/discussions/subject_chat_provider.dart';
 import '../../features/profile/gamification_notifier.dart';
 import '../../features/profile/user_prefs_notifier.dart';
+import '../../shared/edu_feature_widgets.dart';
 import '../../shared/widgets.dart';
 import '../common/widgets/universe_splash_transition.dart';
 
@@ -32,7 +33,6 @@ class HomeScreen extends ConsumerWidget {
     final textMuted =
         isDark ? AppColors.textSecondary : const Color(0xFF475569);
     final borderCol = isDark ? AppColors.border : const Color(0xFFE2E8F0);
-    final cardBg = isDark ? AppColors.surface : Colors.white;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -214,9 +214,9 @@ class HomeScreen extends ConsumerWidget {
 
           const SizedBox(height: 22),
 
-          // ── 4. NOUVEAUTÉS MAJEURES : DUEL & PODCASTS ALTERNIA ────────────
+          // ── 4. RÉVISION & DUEL : CARTE VEDETTE + OUTILS ────────────────
           DetSectionHeader(
-            title: 'Entraînement & Podcasts',
+            title: 'Révision & Duel',
             actionLabel: 'Classement',
             onAction: () {
               HapticFeedback.selectionClick();
@@ -225,459 +225,77 @@ class HomeScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
 
-          Row(
-            children: [
-              // CARTE 1 : DUEL SCOLAIRE
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    context.push('/education/duel');
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.45),
-                        width: 1.4,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black
-                              .withValues(alpha: isDark ? 0.2 : 0.04),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color:
-                                    AppColors.primary.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.sports_esports_rounded,
-                                color: AppColors.primary,
-                                size: 20,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 3),
-                              decoration: BoxDecoration(
-                                color:
-                                    AppColors.primary.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                '+250 XP',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Duel Scolaire',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Défie l\'IA ou des camarades en direct.',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10.5,
-                            color: textMuted,
-                            height: 1.3,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Text(
-                              'Entrer dans l\'arène',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 13,
-                              color: AppColors.primary,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+          // CARTE VEDETTE : DUEL SCOLAIRE
+          EduHeroCard(
+            title: 'Duel Scolaire',
+            subtitle: 'Défie l\'IA ou tes camarades et grimpe au classement.',
+            ctaLabel: 'Entrer dans l\'arène',
+            icon: Icons.sports_esports_rounded,
+            chips: const [
+              EduHeroChip(
+                icon: Icons.bolt_rounded,
+                label: 'EN DIRECT',
+                color: AppColors.secondaryLight,
               ),
-
-              const SizedBox(width: 12),
-
-              // CARTE 2 : PODCASTS DE RÉVISION
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    context.push('/education/podcasts');
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppColors.secondary.withValues(alpha: 0.45),
-                        width: 1.4,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black
-                              .withValues(alpha: isDark ? 0.2 : 0.04),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color:
-                                    AppColors.secondary.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.headphones_rounded,
-                                color: AppColors.secondary,
-                                size: 20,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 3),
-                              decoration: BoxDecoration(
-                                color:
-                                    AppColors.secondary.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'AUDIO IA',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.secondary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Podcasts de Cours',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Résumés audio par chapitre en mains libres.',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10.5,
-                            color: textMuted,
-                            height: 1.3,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Text(
-                              'Écouter les cours',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.secondary,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 13,
-                              color: AppColors.secondary,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              EduHeroChip(
+                icon: Icons.stars_rounded,
+                label: '+250 XP',
+                color: AppColors.accentLight,
               ),
             ],
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              context.push('/education/duel');
+            },
           ),
 
           const SizedBox(height: 12),
 
-          // RANGÉE 2 : FLASHCARDS LEITNER & MODE GRIN ÉDUCATIF
-          Row(
-            children: [
-              // CARTE 3 : FLASHCARDS LEITNER
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    context.push('/education/flashcards');
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.45),
-                        width: 1.4,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black
-                              .withValues(alpha: isDark ? 0.2 : 0.04),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color:
-                                    AppColors.primary.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.style_rounded,
-                                color: AppColors.primary,
-                                size: 20,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 3),
-                              decoration: BoxDecoration(
-                                color:
-                                    AppColors.primary.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'MÉMOIRE',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Flashcards Leitner',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Mémorisation espacée (J+1, J+3, J+7).',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10.5,
-                            color: textMuted,
-                            height: 1.3,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Text(
-                              'Réviser les cartes',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 13,
-                              color: AppColors.primary,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+          // TUILES SECONDAIRES : RÉVISION, PODCASTS, GRIN
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: EduToolTile(
+                    icon: Icons.style_rounded,
+                    title: 'Cartes Révision',
+                    tag: 'J+1 · J+3 · J+7',
+                    color: AppColors.primaryLight,
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      context.push('/education/flashcards');
+                    },
                   ),
                 ),
-              ),
-
-              const SizedBox(width: 12),
-
-              // CARTE 4 : MODE GRIN ÉDUCATIF
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    context.push('/education/grin');
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppColors.secondary.withValues(alpha: 0.45),
-                        width: 1.4,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black
-                              .withValues(alpha: isDark ? 0.2 : 0.04),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color:
-                                    AppColors.secondary.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.groups_rounded,
-                                color: AppColors.secondary,
-                                size: 20,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 3),
-                              decoration: BoxDecoration(
-                                color:
-                                    AppColors.secondary.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'HORS-LIGNE',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.secondary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Mode Grin Éducatif',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Duels & partage P2P sans connexion.',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10.5,
-                            color: textMuted,
-                            height: 1.3,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Text(
-                              'Ouvrir le Grin',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.secondary,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 13,
-                              color: AppColors.secondary,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: EduToolTile(
+                    icon: Icons.headphones_rounded,
+                    title: 'Podcasts de Cours',
+                    tag: 'AUDIO IA',
+                    color: AppColors.secondary,
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      context.push('/education/podcasts');
+                    },
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 10),
+                Expanded(
+                  child: EduToolTile(
+                    icon: Icons.groups_rounded,
+                    title: 'Mode Grin',
+                    tag: 'HORS-LIGNE',
+                    color: AppColors.accent,
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      context.push('/education/grin');
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
 
           const SizedBox(height: 24),

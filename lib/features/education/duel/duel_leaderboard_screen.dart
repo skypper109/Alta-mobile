@@ -11,6 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants.dart';
 import '../../profile/gamification_notifier.dart';
 import '../../profile/user_prefs_notifier.dart';
+import 'duel_service.dart';
 
 enum LeaderboardScope {
   national,
@@ -76,27 +77,74 @@ class _DuelLeaderboardScreenState extends ConsumerState<DuelLeaderboardScreen> {
     'Lycée Mahamane Alassane Haïdara (Tombouctou)',
   ];
 
-  static const List<MalianRankedStudent> _studentsBank = [
+  List<MalianRankedStudent> _liveStudents = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLiveLeaderboard();
+  }
+
+  Future<void> _loadLiveLeaderboard() async {
+    setState(() => _isLoading = true);
+    final raw = await duelServiceProvider.fetchLeaderboard();
+    if (raw.isNotEmpty && mounted) {
+      setState(() {
+        _liveStudents = raw
+            .map((m) => MalianRankedStudent(
+                  rank: m['rank'] ?? 1,
+                  name: m['name'] ?? 'Élève',
+                  school: m['school'] ?? 'Lycée Malien',
+                  city: m['city'] ?? 'Bamako',
+                  classLevel: m['class_level'] ?? 'TSExp',
+                  gender: m['gender'] ?? 'M',
+                  xp: m['xp'] ?? 5000,
+                  coins: m['coins'] ?? 200,
+                  wins: m['wins'] ?? 20,
+                  totalDuels: m['total_duels'] ?? 25,
+                ))
+            .toList();
+        _isLoading = false;
+      });
+    } else if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  static const List<MalianRankedStudent> _defaultStudentsBank = [
     MalianRankedStudent(
       rank: 1,
+      name: 'Sory  Diallo',
+      school: 'Lycée Askia Mohamed (Bamako)',
+      city: 'Bamako',
+      classLevel: 'TSExp',
+      gender: 'M',
+      xp: 13275,
+      coins: 520,
+      wins: 39,
+      totalDuels: 46,
+    ),
+    MalianRankedStudent(
+      rank: 2,
       name: 'Fatoumata Diarra',
       school: 'Lycée Ba Aminata Diallo (Bamako)',
       city: 'Bamako',
       classLevel: 'TSE',
       gender: 'F',
-      xp: 9450,
+      xp: 12758,
       coins: 480,
       wins: 38,
       totalDuels: 41,
     ),
     MalianRankedStudent(
-      rank: 2,
+      rank: 3,
       name: 'Amadou Konaté',
       school: 'Lycée Askia Mohamed (Bamako)',
       city: 'Bamako',
       classLevel: 'TSE',
       gender: 'M',
-      xp: 8820,
+      xp: 11670,
       coins: 420,
       wins: 34,
       totalDuels: 39,
@@ -211,8 +259,10 @@ class _DuelLeaderboardScreenState extends ConsumerState<DuelLeaderboardScreen> {
     final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
     final textSec = isDark ? Colors.white70 : const Color(0xFF475569);
 
-    // Filtrage
-    var filtered = _studentsBank.where((s) {
+    // Filtrage dynamique (priorité à alta_db en direct)
+    final activeList =
+        _liveStudents.isNotEmpty ? _liveStudents : _defaultStudentsBank;
+    var filtered = activeList.where((s) {
       if (_genderFilter == LeaderboardGenderFilter.girls && s.gender != 'F') {
         return false;
       }
@@ -248,6 +298,26 @@ class _DuelLeaderboardScreenState extends ConsumerState<DuelLeaderboardScreen> {
             color: AltaColors.secondary,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AltaColors.secondary,
+                    ),
+                  )
+                : const Icon(Icons.refresh_rounded,
+                    color: AltaColors.secondary),
+            tooltip: 'Actualiser depuis alta_db',
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              _loadLiveLeaderboard();
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(

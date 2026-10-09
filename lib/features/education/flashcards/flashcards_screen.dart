@@ -11,7 +11,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/edu_feature_widgets.dart';
 import '../../../core/services/vivienne_tts_service.dart';
+import '../../profile/user_prefs_notifier.dart';
 import 'flashcard_model.dart';
 import 'flashcard_service.dart';
 
@@ -85,20 +87,264 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen>
     VivienneTtsService.instance.speak(text);
   }
 
+  void _showGenerateAiCardsSheet(
+    BuildContext context,
+    List<String> subjects,
+    String userClass,
+  ) {
+    String selectedSubject =
+        subjects.contains(_activeSubject) && _activeSubject != 'Toutes'
+            ? _activeSubject
+            : (subjects.isNotEmpty ? subjects.first : 'Mathématiques');
+    int selectedCount = 5;
+    final topicCtrl = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+    final borderCol = isDark ? AppColors.border : const Color(0xFFCBD5E1);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? AppColors.surface : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            left: 22,
+            right: 22,
+            top: 22,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 22,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.border : const Color(0xFFCBD5E1),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.school_rounded,
+                      color: AppColors.secondary, size: 22),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Nouvelles Cartes Mémo',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: textPri,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Création de cartes pédagogiques conformes au programme de $userClass.',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  color: isDark
+                      ? AppColors.textSecondary
+                      : const Color(0xFF475569),
+                ),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: selectedSubject,
+                decoration: InputDecoration(
+                  labelText: 'Matière du programme ($userClass)',
+                  labelStyle: GoogleFonts.plusJakartaSans(fontSize: 12),
+                  filled: true,
+                  fillColor:
+                      isDark ? AppColors.surfaceAlt : const Color(0xFFF1F5F9),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: borderCol),
+                  ),
+                ),
+                items: subjects
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .toList(),
+                onChanged: (val) {
+                  if (val != null) setModalState(() => selectedSubject = val);
+                },
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: topicCtrl,
+                style:
+                    GoogleFonts.plusJakartaSans(fontSize: 13, color: textPri),
+                decoration: InputDecoration(
+                  labelText: 'Chapitre ou notion clé (optionnel)',
+                  hintText:
+                      'ex: Stratification sociale, Séparation des pouvoirs...',
+                  labelStyle: GoogleFonts.plusJakartaSans(fontSize: 12),
+                  filled: true,
+                  fillColor:
+                      isDark ? AppColors.surfaceAlt : const Color(0xFFF1F5F9),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: borderCol),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Nombre de flashcards :',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: textPri,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [3, 5, 10].map((c) {
+                  final isSel = selectedCount == c;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text('$c Cartes',
+                          style: GoogleFonts.plusJakartaSans(fontSize: 12)),
+                      selected: isSel,
+                      selectedColor: AppColors.primary,
+                      labelStyle: TextStyle(
+                        color: isSel
+                            ? Colors.white
+                            : (isDark ? Colors.white70 : Colors.black87),
+                        fontWeight: FontWeight.bold,
+                      ),
+                      onSelected: (_) => setModalState(() => selectedCount = c),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.bolt_rounded, size: 18),
+                  label: Text(
+                    'Générer $selectedCount Cartes Mémo ($userClass)',
+                    style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: () async {
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                  'Génération des cartes mémo officielles pour $selectedSubject...'),
+                            ),
+                          ],
+                        ),
+                        duration: const Duration(seconds: 4),
+                        backgroundColor: AppColors.primary,
+                      ),
+                    );
+
+                    final ok = await ref
+                        .read(flashcardDeckProvider.notifier)
+                        .fetchAiFlashcardsFromBackend(
+                          subject: selectedSubject,
+                          topic: topicCtrl.text.trim().isNotEmpty
+                              ? topicCtrl.text.trim()
+                              : null,
+                          count: selectedCount,
+                        );
+
+                    if (context.mounted) {
+                      if (ok) {
+                        setState(() {
+                          _activeSubject = selectedSubject;
+                          _currentIndex = 0;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                '$selectedCount nouvelles cartes mémo ajoutées au deck !'),
+                            backgroundColor: AppColors.success,
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Le deck certifié officiel a été actualisé.'),
+                            backgroundColor: AppColors.secondary,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final deckState = ref.watch(flashcardDeckProvider);
+    final userPrefs = ref.watch(userPrefsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
     final textSec = isDark ? AppColors.textSecondary : const Color(0xFF475569);
     final cardBg = isDark ? const Color(0xFF141C2E) : Colors.white;
-    final borderCol = isDark ? const Color(0xFF23314D) : const Color(0xFFCBD5E1);
+    final borderCol =
+        isDark ? const Color(0xFF23314D) : const Color(0xFFCBD5E1);
+
+    final userClass = userPrefs.classShortLabel;
+
+    // Dérivation dynamique stricte des matières basées sur la classe de l'élève
+    final displaySubjects = <String>[];
+    if (userPrefs.subjects.isNotEmpty) {
+      displaySubjects.addAll(userPrefs.subjects);
+    } else {
+      displaySubjects.addAll([
+        'Mathématiques',
+        'Physique-Chimie',
+        'Histoire-Géo',
+        'Français',
+        'Philosophie',
+      ]);
+    }
 
     if (deckState.isLoading) {
       return Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          title: Text('Flashcards Leitner',
+          title: Text('Cartes Revisions',
               style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -109,10 +355,38 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen>
       );
     }
 
+    // Filtrage strict : seules les cartes correspondant aux matières de la classe sont retenues
+    final rawClassCards = deckState.cards.where((c) {
+      if (userPrefs.subjects.isNotEmpty) {
+        return userPrefs.subjects.any(
+          (s) => s.toLowerCase() == c.subject.toLowerCase(),
+        );
+      }
+      return true;
+    }).toList();
+
+    final classCards = rawClassCards.isNotEmpty
+        ? rawClassCards
+        : FlashcardBank.getInitialCards(
+            level: userPrefs.studentClassId.isNotEmpty
+                ? userPrefs.studentClassId
+                : 'tss',
+          );
+
+    // Si la matière active n'appartient pas aux matières de la classe, réinitialiser à 'Toutes'
+    if (_activeSubject != 'Toutes' &&
+        !displaySubjects
+            .any((s) => s.toLowerCase() == _activeSubject.toLowerCase())) {
+      _activeSubject = 'Toutes';
+    }
+
     // Filtrage des cartes selon la matière sélectionnée
     final filteredCards = _activeSubject == 'Toutes'
-        ? deckState.cards
-        : deckState.cards.where((c) => c.subject == _activeSubject).toList();
+        ? classCards
+        : classCards
+            .where(
+                (c) => c.subject.toLowerCase() == _activeSubject.toLowerCase())
+            .toList();
 
     final isSessionFinished = _currentIndex >= filteredCards.length;
 
@@ -134,7 +408,7 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Flashcards de Révision',
+              'Cartes Revisions',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -142,7 +416,7 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen>
               ),
             ),
             Text(
-              'Méthode Spaced Repetition (DEF & Bac)',
+              'Programme $userClass • Mémorisation active',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 11,
                 color: textSec,
@@ -151,33 +425,52 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen>
           ],
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.secondary.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.secondary.withValues(alpha: 0.35),
+          IconButton(
+            icon: deckState.isGeneratingAi
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.secondary,
+                    ),
+                  )
+                : const Icon(Icons.add_circle_outline_rounded,
+                    color: AppColors.secondary),
+            tooltip: "Ajouter de nouvelles cartes mémo",
+            onPressed: deckState.isGeneratingAi
+                ? null
+                : () => _showGenerateAiCardsSheet(
+                    context, displaySubjects, userClass),
+          ),
+          if (_sessionXpGained > 0)
+            Container(
+              margin: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.secondary.withValues(alpha: 0.35),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.stars_rounded,
+                      size: 15, color: AppColors.secondary),
+                  const SizedBox(width: 4),
+                  Text(
+                    '+$_sessionXpGained XP',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? AppColors.secondary : AppColors.primary,
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.stars_rounded,
-                    size: 15, color: AppColors.secondary),
-                const SizedBox(width: 4),
-                Text(
-                  '+$_sessionXpGained XP',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? AppColors.secondary : AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
       body: SafeArea(
@@ -192,7 +485,7 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen>
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
                   _FilterChip(
-                    label: 'Toutes (${deckState.totalCount})',
+                    label: 'Toutes (${classCards.length})',
                     isSelected: _activeSubject == 'Toutes',
                     onTap: () {
                       setState(() {
@@ -203,7 +496,7 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen>
                       });
                     },
                   ),
-                  for (final sub in deckState.availableSubjects) ...[
+                  for (final sub in displaySubjects) ...[
                     const SizedBox(width: 8),
                     _FilterChip(
                       label: sub,
@@ -228,11 +521,94 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen>
             Expanded(
               child: filteredCards.isEmpty
                   ? Center(
-                      child: Text(
-                        'Aucune carte pour cette matière.',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
-                          color: textSec,
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.auto_awesome_rounded,
+                                size: 36,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Aucune carte pour $_activeSubject ($userClass)',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: textPri,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Générez instantanément des cartes mémo certifiées conformes au programme officiel malien.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                color: textSec,
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            ElevatedButton.icon(
+                              onPressed: deckState.isGeneratingAi
+                                  ? null
+                                  : () async {
+                                      final targetSub =
+                                          _activeSubject == 'Toutes'
+                                              ? (displaySubjects.isNotEmpty
+                                                  ? displaySubjects.first
+                                                  : 'Mathématiques')
+                                              : _activeSubject;
+                                      final ok = await ref
+                                          .read(flashcardDeckProvider.notifier)
+                                          .fetchAiFlashcardsFromBackend(
+                                            subject: targetSub,
+                                            count: 5,
+                                          );
+                                      if (ok && mounted) {
+                                        setState(() => _currentIndex = 0);
+                                      }
+                                    },
+                              icon: deckState.isGeneratingAi
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Icon(Icons.bolt_rounded, size: 18),
+                              label: Text(
+                                deckState.isGeneratingAi
+                                    ? 'Génération en cours...'
+                                    : 'Générer 5 cartes avec l\'IA',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     )
@@ -295,10 +671,10 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen>
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.surfaceAlt : const Color(0xFFF1F5F9),
+                  color:
+                      isDark ? AppColors.surfaceAlt : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: borderCol),
                 ),
@@ -475,16 +851,15 @@ class _CardSideView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sideColor = isBack ? AppColors.secondary : AppColors.primary;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(22),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isBack
-              ? AppColors.secondary.withValues(alpha: 0.6)
-              : borderCol,
+          color: isBack ? sideColor.withValues(alpha: 0.6) : borderCol,
           width: 1.5,
         ),
         boxShadow: [
@@ -495,90 +870,121 @@ class _CardSideView extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // En-tête de la carte (Matière & Concept)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: (isBack ? AppColors.secondary : AppColors.primary)
-                      .withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
+      child: AlterniaWatermark(
+        size: 190,
+        opacity: isDark ? 0.06 : 0.07,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Bandeau de couleur charte (recto bleu / verso cyan)
+            Container(height: 4, color: sideColor),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(22, 18, 22, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // En-tête de la carte (Matière & Concept)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: (isBack
+                                    ? AppColors.secondary
+                                    : AppColors.primary)
+                                .withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            card.subject.toUpperCase(),
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                              color: isBack
+                                  ? AppColors.secondary
+                                  : AppColors.primary,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.volume_up_rounded, size: 22),
+                          color:
+                              isBack ? AppColors.secondary : AppColors.primary,
+                          tooltip: 'Écouter vocalement',
+                          onPressed: onAudioTap,
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.surfaceAlt
+                            : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        card.concept,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: textSec,
+                        ),
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    // Contenu principal de la carte
+                    Center(
+                      child: Text(
+                        isBack ? card.back : card.front,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: isBack ? 16 : 18,
+                          fontWeight: FontWeight.bold,
+                          height: 1.45,
+                          color: textPri,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    // Pied de carte : indication + signature AlterniA
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            isBack
+                                ? 'Verso • Réponse & Méthode'
+                                : 'Recto • Toucher pour révéler',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600,
+                              color: textSec,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        AlterniaSignature(color: sideColor),
+                      ],
+                    ),
+                  ],
                 ),
-                child: Text(
-                  card.subject.toUpperCase(),
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                    color: isBack ? AppColors.secondary : AppColors.primary,
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.volume_up_rounded, size: 22),
-                color: isBack ? AppColors.secondary : AppColors.primary,
-                tooltip: 'Écouter vocalement',
-                onPressed: onAudioTap,
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceAlt : const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              card.concept,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: textSec,
               ),
             ),
-          ),
-
-          const Spacer(),
-
-          // Contenu principal de la carte
-          Center(
-            child: Text(
-              isBack ? card.back : card.front,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: isBack ? 16 : 18,
-                fontWeight: FontWeight.bold,
-                height: 1.45,
-                color: textPri,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-
-          const Spacer(),
-
-          // Indication bas de carte
-          Center(
-            child: Text(
-              isBack
-                  ? 'Verso • Réponse & Méthode'
-                  : 'Recto • Toucher pour révéler',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w600,
-                color: textSec,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

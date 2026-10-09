@@ -23,6 +23,7 @@ class DuelService {
   Future<String?> getActiveBaseUrlFast() async {
     final now = DateTime.now();
     if (_lastHealthCheckTime != null &&
+        _cachedActiveBaseUrl != null &&
         now.difference(_lastHealthCheckTime!) < const Duration(seconds: 10)) {
       return _cachedActiveBaseUrl;
     }
@@ -30,13 +31,13 @@ class DuelService {
     for (final baseUrl in AltaApiConfig.candidateBaseUrls) {
       try {
         final res = await _dio.get(
-          '$baseUrl/api/apprenants',
+          '$baseUrl/api/health',
           options: Options(
-            connectTimeout: const Duration(milliseconds: 1500),
-            receiveTimeout: const Duration(milliseconds: 1500),
+            connectTimeout: const Duration(milliseconds: 2500),
+            receiveTimeout: const Duration(milliseconds: 2500),
           ),
         );
-        if (res.statusCode == 200) {
+        if (res.statusCode == 200 && res.data is Map && res.data['status'] == 'healthy') {
           _cachedActiveBaseUrl = baseUrl;
           _lastHealthCheckTime = now;
           return baseUrl;
@@ -61,7 +62,7 @@ class DuelService {
 
     if (activeUrl != null) {
       try {
-        _logger.i('[DuelService] Requête questions IA en direct → $activeUrl/api/duel/generate');
+        _logger.i('[DuelService] Requête questions IA en direct ($count questions) → $activeUrl/api/duel/generate');
         final response = await _dio.post(
           '$activeUrl/api/duel/generate',
           data: {
@@ -70,8 +71,8 @@ class DuelService {
             'count': count,
           },
           options: Options(
-            connectTimeout: const Duration(seconds: 6),
-            receiveTimeout: const Duration(seconds: 15),
+            connectTimeout: const Duration(seconds: 10),
+            receiveTimeout: const Duration(seconds: 35),
           ),
         );
 
@@ -114,6 +115,7 @@ class DuelService {
     required String creatorName,
     required String classLevel,
     required String subject,
+    int count = 5,
   }) async {
     final activeUrl = await getActiveBaseUrlFast();
     if (activeUrl == null) return null;
@@ -125,8 +127,12 @@ class DuelService {
           'creator_name': creatorName,
           'class_level': classLevel,
           'subject': subject,
+          'count': count,
         },
-        options: Options(connectTimeout: const Duration(seconds: 8)),
+        options: Options(
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 35),
+        ),
       );
 
       if (res.statusCode == 200 && res.data is Map) {
@@ -212,6 +218,7 @@ class DuelService {
     required String playerName,
     required String classLevel,
     required String subject,
+    int count = 5,
   }) async {
     final activeUrl = await getActiveBaseUrlFast();
     if (activeUrl == null) return null;
@@ -223,8 +230,12 @@ class DuelService {
           'player_name': playerName,
           'class_level': classLevel,
           'subject': subject,
+          'count': count,
         },
-        options: Options(connectTimeout: const Duration(seconds: 8)),
+        options: Options(
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 35),
+        ),
       );
 
       if (res.statusCode == 200 && res.data is Map) {
@@ -235,6 +246,31 @@ class DuelService {
     }
     return null;
   }
+
+  /// Récupère le classement scolaire national réel depuis la base de données backend alta_db
+  Future<List<Map<String, dynamic>>> fetchLeaderboard() async {
+    final activeUrl = await getActiveBaseUrlFast();
+    if (activeUrl != null) {
+      try {
+        final res = await _dio.get(
+          '$activeUrl/api/duel/leaderboard',
+          options: Options(
+            connectTimeout: const Duration(seconds: 4),
+            receiveTimeout: const Duration(seconds: 8),
+          ),
+        );
+        if (res.statusCode == 200 && res.data is List) {
+          return List<Map<String, dynamic>>.from(
+            (res.data as List).map((e) => Map<String, dynamic>.from(e as Map)),
+          );
+        }
+      } catch (e) {
+        _logger.w('[DuelService] Erreur récupération classement : $e');
+      }
+    }
+    return [];
+  }
 }
 
 final duelServiceProvider = DuelService();
+
