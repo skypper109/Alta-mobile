@@ -396,16 +396,18 @@ class _SyncStatusSheetContent extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Actions sauvegardées localement :',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w600,
-                        color: textPri,
+                    Expanded(
+                      child: Text(
+                        'Actions sauvegardées localement :',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: textPri,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
@@ -419,7 +421,7 @@ class _SyncStatusSheetContent extends ConsumerWidget {
                       child: Text(
                         syncState.hasPending
                             ? '${syncState.pendingCount} en attente'
-                            : 'Tout est synchronisé',
+                            : 'Synchronisé',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
