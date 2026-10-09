@@ -72,6 +72,24 @@ class GrinPeer {
     this.isConnectedLocal = true,
     this.deviceModel = 'Android',
   });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'className': className,
+        'scoreSession': scoreSession,
+        'isConnectedLocal': isConnectedLocal,
+        'deviceModel': deviceModel,
+      };
+
+  factory GrinPeer.fromJson(Map<String, dynamic> json) => GrinPeer(
+        id: json['id'] as String? ?? 'peer_${DateTime.now().millisecondsSinceEpoch}',
+        name: json['name'] as String? ?? 'Camarade',
+        className: json['className'] as String? ?? 'TSE',
+        scoreSession: (json['scoreSession'] as num?)?.toInt() ?? 0,
+        isConnectedLocal: json['isConnectedLocal'] as bool? ?? true,
+        deviceModel: json['deviceModel'] as String? ?? 'Boîtier AlternIA',
+      );
 }
 
 class GrinSharedResource {
@@ -90,4 +108,24 @@ class GrinSharedResource {
     required this.sizeMb,
     required this.sharedBy,
   });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'subject': subject,
+        'type': type,
+        'sizeMb': sizeMb,
+        'sharedBy': sharedBy,
+      };
+
+  factory GrinSharedResource.fromJson(Map<String, dynamic> json) =>
+      GrinSharedResource(
+        id: json['id'] as String? ?? 'res_${DateTime.now().millisecondsSinceEpoch}',
+        title: json['title'] as String? ?? 'Ressource',
+        subject: json['subject'] as String? ?? 'Général',
+        type: json['type'] as String? ?? 'fiche_cours',
+        sizeMb: json['sizeMb'] as String? ?? '1.0 Mo',
+        sharedBy: json['sharedBy'] as String? ?? 'Boîtier AlternIA',
+      );
 }
+

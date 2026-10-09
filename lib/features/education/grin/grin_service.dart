@@ -4,9 +4,11 @@
 library;
 
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
 
+import '../../../core/constants.dart';
 import 'grin_model.dart';
 
 class GrinState {
@@ -43,10 +45,17 @@ class GrinState {
 
 class GrinServiceNotifier extends StateNotifier<GrinState> {
   GrinServiceNotifier() : super(const GrinState()) {
-    _initSampleGrinData();
+    _initGrinData();
   }
 
   final _logger = Logger();
+  final _dio = Dio();
+
+  void _initGrinData() {
+    // Initialise avec le socle certifié par défaut puis tente la synchro backend
+    _initSampleGrinData();
+    unawaited(scanLocalGrin());
+  }
 
   void _initSampleGrinData() {
     state = GrinState(
@@ -135,20 +144,80 @@ class GrinServiceNotifier extends StateNotifier<GrinState> {
     );
   }
 
+  /// Scanne le réseau local / boîtier / backend pour rafraîchir les salons, pairs et ressources
   Future<void> scanLocalGrin() async {
     state = state.copyWith(isScanning: true);
-    await Future.delayed(const Duration(milliseconds: 900));
+
+    for (final base in AltaApiConfig.candidateBaseUrls) {
+      try {
+        final roomsRes = await _dio.get(
+          '$base/api/grin/rooms',
+          options: Options(
+            connectTimeout: const Duration(seconds: 2),
+            receiveTimeout: const Duration(seconds: 3),
+          ),
+        );
+
+        if (roomsRes.statusCode == 200 && roomsRes.data is List) {
+          final loadedRooms = (roomsRes.data as List)
+              .map((e) => GrinRoom.fromJson(e as Map<String, dynamic>))
+              .toList();
+
+          // Récupère aussi les pairs et les ressources
+          List<GrinPeer> loadedPeers = state.nearbyPeers;
+          try {
+            final peersRes = await _dio.get(
+              '$base/api/grin/peers',
+              options: Options(connectTimeout: const Duration(seconds: 2)),
+            );
+            if (peersRes.statusCode == 200 && peersRes.data is List) {
+              loadedPeers = (peersRes.data as List)
+                  .map((e) => GrinPeer.fromJson(e as Map<String, dynamic>))
+                  .toList();
+            }
+          } catch (_) {}
+
+          List<GrinSharedResource> loadedResources = state.sharedResources;
+          try {
+            final resRes = await _dio.get(
+              '$base/api/grin/resources',
+              options: Options(connectTimeout: const Duration(seconds: 2)),
+            );
+            if (resRes.statusCode == 200 && resRes.data is List) {
+              loadedResources = (resRes.data as List)
+                  .map((e) => GrinSharedResource.fromJson(e as Map<String, dynamic>))
+                  .toList();
+            }
+          } catch (_) {}
+
+          state = state.copyWith(
+            rooms: loadedRooms.isNotEmpty ? loadedRooms : state.rooms,
+            nearbyPeers: loadedPeers,
+            sharedResources: loadedResources,
+            isScanning: false,
+          );
+          _logger.i('[GrinService] Données Grin connectées et synchronisées depuis $base');
+          return;
+        }
+      } catch (e) {
+        // En cas d'échec sur cette URL candidate, continue vers la suivante
+      }
+    }
+
+    // Si aucun backend n'est joignable, maintien du mode maillé hors-ligne
+    await Future.delayed(const Duration(milliseconds: 600));
     state = state.copyWith(isScanning: false);
   }
 
-  GrinRoom createLocalRoom({
+  /// Crée un salon local et le propage immédiatement au serveur/boîtier
+  Future<GrinRoom> createLocalRoom({
     required String title,
     required String hostName,
     required String hostClass,
     required String subject,
-  }) {
+  }) async {
     final pin = (1000 + (DateTime.now().millisecond % 9000)).toString();
-    final newRoom = GrinRoom(
+    GrinRoom newRoom = GrinRoom(
       id: 'room_${DateTime.now().millisecondsSinceEpoch}',
       title: title,
       hostName: hostName,
@@ -161,11 +230,31 @@ class GrinServiceNotifier extends StateNotifier<GrinState> {
       createdAt: DateTime.now(),
     );
 
+    for (final base in AltaApiConfig.candidateBaseUrls) {
+      try {
+        final res = await _dio.post(
+          '$base/api/grin/rooms/create',
+          data: {
+            'title': title,
+            'host_name': hostName,
+            'host_class': hostClass,
+            'subject': subject,
+            'max_players': 6,
+          },
+          options: Options(connectTimeout: const Duration(seconds: 2)),
+        );
+        if (res.statusCode == 200 && res.data is Map) {
+          newRoom = GrinRoom.fromJson(res.data as Map<String, dynamic>);
+          break;
+        }
+      } catch (_) {}
+    }
+
     state = state.copyWith(
       rooms: [newRoom, ...state.rooms],
       activeRoomId: newRoom.id,
     );
-    _logger.i('[GrinService] Salon local créé : ${newRoom.title} (PIN: $pin)');
+    _logger.i('[GrinService] Salon local créé : ${newRoom.title} (PIN: ${newRoom.pinCode})');
     return newRoom;
   }
 }

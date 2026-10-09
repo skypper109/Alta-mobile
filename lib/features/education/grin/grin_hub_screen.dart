@@ -154,10 +154,10 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     final t = titleCtrl.text.trim();
                     if (t.isNotEmpty) {
-                      final newRoom = ref
+                      final newRoom = await ref
                           .read(grinServiceProvider.notifier)
                           .createLocalRoom(
                             title: t,
@@ -165,8 +165,10 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
                             hostClass: userClass,
                             subject: selectedSubject,
                           );
-                      Navigator.pop(ctx);
-                      _launchDuelForRoom(context, newRoom, userName);
+                      if (ctx.mounted) Navigator.pop(ctx);
+                      if (context.mounted) {
+                        _launchDuelForRoom(context, newRoom, userName);
+                      }
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -330,7 +332,7 @@ class _GrinHubScreenState extends ConsumerState<GrinHubScreen>
                         Text(
                           isConnectedToBox
                               ? 'Connecté au Boîtier AlterniA'
-                              : 'Wi-Fi Local / Hotspot Actif',
+                              : 'Wi-Fi Local',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12.5,
                             fontWeight: FontWeight.bold,

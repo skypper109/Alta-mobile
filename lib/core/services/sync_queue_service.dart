@@ -246,14 +246,25 @@ class SyncQueueNotifier extends StateNotifier<SyncQueueState> {
     for (final base in AltaApiConfig.candidateBaseUrls) {
       try {
         final res = await _dio.get(
-          '$base/api/apprenants',
+          '$base/api/sync/status',
           options: Options(
             connectTimeout: const Duration(milliseconds: 1500),
             receiveTimeout: const Duration(milliseconds: 1500),
           ),
         );
         if (res.statusCode == 200) return base;
-      } catch (_) {}
+      } catch (_) {
+        try {
+          final res2 = await _dio.get(
+            '$base/api/apprenants',
+            options: Options(
+              connectTimeout: const Duration(milliseconds: 1500),
+              receiveTimeout: const Duration(milliseconds: 1500),
+            ),
+          );
+          if (res2.statusCode == 200) return base;
+        } catch (_) {}
+      }
     }
     return null;
   }

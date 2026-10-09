@@ -1,24 +1,30 @@
-// ─── AlterniA — Service Flashcards Leitner (Répétition Espacée) ─────────────
-// Gestion locale, persistance SharedPreferences, calcul des intervalles
-// et synchronisation Store & Forward avec attribution des points XP.
+// ─── AlterniA — Service Flashcards Leitner (Connecté IA Backend & Offline) ──
+// Gestion hybride : génération de vraies cartes par l'IA AlternIA quand connecté,
+// persistance locale SharedPreferences, algorithme Leitner et Store & Forward.
 library;
 
+import 'dart:async';
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/constants.dart';
 import '../../../core/services/sync_queue_service.dart';
 import '../../profile/gamification_notifier.dart';
+import '../../profile/user_prefs_notifier.dart';
 import 'flashcard_model.dart';
 
 class FlashcardDeckState {
   final List<Flashcard> cards;
   final bool isLoading;
+  final bool isGeneratingAi;
 
   const FlashcardDeckState({
     this.cards = const [],
     this.isLoading = false,
+    this.isGeneratingAi = false,
   });
 
   List<Flashcard> get dueTodayCards => cards.where((c) => c.isDueToday).toList();
@@ -38,10 +44,12 @@ class FlashcardDeckState {
   FlashcardDeckState copyWith({
     List<Flashcard>? cards,
     bool? isLoading,
+    bool? isGeneratingAi,
   }) {
     return FlashcardDeckState(
       cards: cards ?? this.cards,
       isLoading: isLoading ?? this.isLoading,
+      isGeneratingAi: isGeneratingAi ?? this.isGeneratingAi,
     );
   }
 }
@@ -54,6 +62,7 @@ class FlashcardServiceNotifier extends StateNotifier<FlashcardDeckState> {
   final Ref _ref;
   static const _storageKey = 'alternia_leitner_flashcards_deck';
   final _logger = Logger();
+  final _dio = Dio();
 
   Future<void> _initDeck() async {
     try {
@@ -75,6 +84,9 @@ class FlashcardServiceNotifier extends StateNotifier<FlashcardDeckState> {
       }
 
       state = FlashcardDeckState(cards: loadedCards, isLoading: false);
+
+      // Tentative d'enrichissement par l'IA réelle si le serveur est accessible
+      unawaited(fetchAiFlashcardsFromBackend());
     } catch (e) {
       _logger.e('[FlashcardService] Erreur d\'initialisation du deck : $e');
       state = FlashcardDeckState(
@@ -92,6 +104,56 @@ class FlashcardServiceNotifier extends StateNotifier<FlashcardDeckState> {
     } catch (e) {
       _logger.w('[FlashcardService] Erreur de sauvegarde du deck : $e');
     }
+  }
+
+  /// Appelle l'API IA backend pour générer de vraies cartes pédagogiques inédites
+  Future<bool> fetchAiFlashcardsFromBackend({
+    String? subject,
+    String? topic,
+    int count = 5,
+  }) async {
+    final userPrefs = _ref.read(userPrefsProvider);
+    final targetSubject = subject ?? (userPrefs.subjects.isNotEmpty ? userPrefs.subjects.first : 'Mathématiques');
+    final classLevel = userPrefs.studentClassId.isNotEmpty ? userPrefs.studentClassId : '12eme';
+
+    state = state.copyWith(isGeneratingAi: true);
+
+    for (final baseUrl in AltaApiConfig.candidateBaseUrls) {
+      try {
+        _logger.i('[FlashcardService] Requête génération IA réelle → $baseUrl/api/education/flashcards/generate');
+        final response = await _dio.post(
+          '$baseUrl/api/education/flashcards/generate',
+          data: {
+            'subject': targetSubject,
+            'class_level': classLevel,
+            'topic': topic,
+            'count': count,
+          },
+          options: Options(
+            connectTimeout: const Duration(seconds: 4),
+            receiveTimeout: const Duration(seconds: 15),
+          ),
+        );
+
+        if (response.statusCode == 200 && response.data is List) {
+          final list = (response.data as List)
+              .map((it) => Flashcard.fromJson(it as Map<String, dynamic>))
+              .toList();
+
+          if (list.isNotEmpty) {
+            await addCards(list);
+            _logger.i('[FlashcardService] ${list.length} vraies cartes IA ajoutées au deck !');
+            state = state.copyWith(isGeneratingAi: false);
+            return true;
+          }
+        }
+      } catch (e) {
+        _logger.d('[FlashcardService] Échec sur $baseUrl : $e');
+      }
+    }
+
+    state = state.copyWith(isGeneratingAi: false);
+    return false;
   }
 
   /// Traitement d'une réponse selon l'algorithme Leitner :
