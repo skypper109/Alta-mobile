@@ -57,7 +57,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
   // ───────────────────────────────────────────────────────────────────────────
   // CRÉATION D'UNE SALLE AVEC CODE DE VALIDATION (PIN)
   // ───────────────────────────────────────────────────────────────────────────
-  Future<void> _handleCreateRoomWithCode(String playerName, String classId) async {
+  Future<void> _handleCreateRoomWithCode(
+      String playerName, String classId) async {
     if (!_isOnline) {
       _showOfflineNotice();
       return;
@@ -71,7 +72,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
           color: Theme.of(context).brightness == Brightness.dark
               ? AltaColors.surfaceDark
               : AltaColors.surfaceLight,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: const Padding(
             padding: EdgeInsets.all(24),
             child: Column(
@@ -129,7 +131,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
       enableDrag: false,
       backgroundColor: Colors.transparent,
       builder: (sheetCtx) {
-        pollTimer = Timer.periodic(const Duration(milliseconds: 1500), (t) async {
+        pollTimer =
+            Timer.periodic(const Duration(milliseconds: 1500), (t) async {
           final status = await duelServiceProvider.getRoomStatus(roomCode);
           if (status != null && status['status'] == 'IN_PROGRESS') {
             t.cancel();
@@ -157,7 +160,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
         });
 
         final isDark = Theme.of(sheetCtx).brightness == Brightness.dark;
-        final cardBg = isDark ? AltaColors.surfaceDark : AltaColors.surfaceLight;
+        final cardBg =
+            isDark ? AltaColors.surfaceDark : AltaColors.surfaceLight;
         final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
         final textSec = isDark ? Colors.white70 : const Color(0xFF475569);
 
@@ -169,7 +173,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
               color: cardBg,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(32)),
               border: Border.all(color: AltaColors.borderDark),
             ),
             child: Column(
@@ -184,7 +189,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Icon(Icons.vpn_key_rounded, size: 40, color: AltaColors.accent),
+                const Icon(Icons.vpn_key_rounded,
+                    size: 40, color: AltaColors.accent),
                 const SizedBox(height: 12),
                 Text(
                   'CODE DE VALIDATION DU DUEL',
@@ -212,16 +218,20 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                     HapticFeedback.mediumImpact();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Code $roomCode copié dans le presse-papiers.'),
+                        content: Text(
+                            'Code $roomCode copié dans le presse-papiers.'),
                         backgroundColor: AltaColors.primary,
                         duration: const Duration(seconds: 2),
                       ),
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 28, vertical: 14),
                     decoration: BoxDecoration(
-                      color: isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight,
+                      color: isDark
+                          ? AltaColors.surfaceAltDark
+                          : AltaColors.surfaceAltLight,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(color: AltaColors.secondary, width: 2),
                     ),
@@ -238,7 +248,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        const Icon(Icons.copy_rounded, color: AltaColors.secondary, size: 20),
+                        const Icon(Icons.copy_rounded,
+                            color: AltaColors.secondary, size: 20),
                       ],
                     ),
                   ),
@@ -383,9 +394,11 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
 
               if (res != null && res['status'] == 'success') {
                 HapticFeedback.heavyImpact();
-                final rawQs = (res['room']?['questions'] as List<dynamic>?) ?? [];
+                final rawQs =
+                    (res['room']?['questions'] as List<dynamic>?) ?? [];
                 final questions = rawQs
-                    .map((q) => DuelQuestion.fromJson(q as Map<String, dynamic>))
+                    .map(
+                        (q) => DuelQuestion.fromJson(q as Map<String, dynamic>))
                     .toList();
 
                 Navigator.push(
@@ -415,7 +428,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
               }
             },
             child: const Text('Valider & Démarrer',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -425,7 +439,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
   // ───────────────────────────────────────────────────────────────────────────
   // MATCHMAKING INSTANTANÉ MALI (MÊME CLASSE)
   // ───────────────────────────────────────────────────────────────────────────
-  Future<void> _handleMatchmakeMali(String playerName, String classId, String classLabel) async {
+  Future<void> _handleMatchmakeMali(
+      String playerName, String classId, String classLabel) async {
     if (!_isOnline) {
       _showOfflineNotice();
       return;
@@ -436,7 +451,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
       barrierDismissible: false,
       builder: (_) => Center(
         child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -506,7 +522,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Matchmaking temporairement indisponible.'),
+          content: Text('Creation de duel temporairement indisponible.'),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -534,7 +550,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AltaColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Compris', style: TextStyle(color: Colors.white)),
@@ -563,7 +580,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
         backgroundColor: cardBg,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: textPri, size: 20),
+          icon:
+              Icon(Icons.arrow_back_ios_new_rounded, color: textPri, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
@@ -584,7 +602,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const DuelLeaderboardScreen()),
+                MaterialPageRoute(
+                    builder: (_) => const DuelLeaderboardScreen()),
               );
             },
           ),
@@ -609,7 +628,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: AltaColors.primary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(10),
@@ -670,13 +690,17 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                 HapticFeedback.selectionClick();
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const DuelLeaderboardScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const DuelLeaderboardScreen()),
                 );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight,
+                  color: isDark
+                      ? AltaColors.surfaceAltDark
+                      : AltaColors.surfaceAltLight,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: borderCol),
                 ),
@@ -748,7 +772,9 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: _isOnline ? AltaColors.secondary : AltaColors.accent,
+                        color: _isOnline
+                            ? AltaColors.secondary
+                            : AltaColors.accent,
                       ),
                     ),
                   ),
@@ -772,7 +798,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
             // 1. Défi National Mali (Même classe)
             _ModeSelectTile(
               title: 'Défi National Mali',
-              subtitle: 'Affronte un camarade de ${userState.classShortLabel} dans tout le pays',
+              subtitle:
+                  'Affronte un camarade de ${userState.classShortLabel} dans tout le pays',
               icon: Icons.public_rounded,
               isSelected: _selectedMode == DuelMode.matchmakingMali,
               color: AltaColors.primary,
@@ -786,8 +813,9 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
 
             // 2. Solo vs Tuteur IA
             _ModeSelectTile(
-              title: 'Professeur Henri (IA AlterniA)',
-              subtitle: 'Entraînement individuel • 100% fonctionnel en ligne et hors-ligne',
+              title: 'Professeur IA (AlterniA)',
+              subtitle:
+                  'Entraînement individuel • 100% fonctionnel en ligne et hors-ligne',
               icon: Icons.smart_toy_rounded,
               isSelected: _selectedMode == DuelMode.vsAi,
               color: AltaColors.secondary,
@@ -811,7 +839,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                     color: AltaColors.accent,
                     onTap: () {
                       HapticFeedback.selectionClick();
-                      setState(() => _selectedMode = DuelMode.createRoomWithCode);
+                      setState(
+                          () => _selectedMode = DuelMode.createRoomWithCode);
                     },
                   ),
                 ),
@@ -877,7 +906,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                   backgroundColor: isDark
                       ? AltaColors.surfaceAltDark
                       : AltaColors.surfaceAltLight,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                     side: BorderSide(
@@ -912,11 +942,13 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                   HapticFeedback.heavyImpact();
 
                   if (_selectedMode == DuelMode.createRoomWithCode) {
-                    _handleCreateRoomWithCode(firstName, userState.studentClassId);
+                    _handleCreateRoomWithCode(
+                        firstName, userState.studentClassId);
                   } else if (_selectedMode == DuelMode.joinRoomWithCode) {
                     _handleJoinRoomDialog(firstName, userState.studentClassId);
                   } else if (_selectedMode == DuelMode.matchmakingMali) {
-                    _handleMatchmakeMali(firstName, userState.studentClassId, userState.classShortLabel);
+                    _handleMatchmakeMali(firstName, userState.studentClassId,
+                        userState.classShortLabel);
                   } else {
                     Navigator.push(
                       context,
@@ -927,7 +959,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                           mode: _selectedMode,
                           playerName: firstName,
                           opponentName: _selectedMode == DuelMode.vsAi
-                              ? 'Professeur Henri'
+                              ? 'Professeur IA'
                               : 'Camarade',
                         ),
                       ),
@@ -990,7 +1022,9 @@ class _ModeSelectTile extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight)
+              ? (isDark
+                  ? AltaColors.surfaceAltDark
+                  : AltaColors.surfaceAltLight)
               : cardBg,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
@@ -1033,7 +1067,9 @@ class _ModeSelectTile extends StatelessWidget {
               ),
             ),
             Icon(
-              isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+              isSelected
+                  ? Icons.check_circle_rounded
+                  : Icons.radio_button_unchecked_rounded,
               color: isSelected ? AltaColors.primary : Colors.grey,
               size: 20,
             ),
@@ -1076,7 +1112,9 @@ class _MiniModeCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight)
+              ? (isDark
+                  ? AltaColors.surfaceAltDark
+                  : AltaColors.surfaceAltLight)
               : cardBg,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(

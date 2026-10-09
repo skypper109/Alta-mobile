@@ -142,7 +142,9 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen>
     final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
     final textSec = isDark ? Colors.white70 : const Color(0xFF475569);
 
-    final progress = _totalSeconds > 0 ? (_currentSeconds / _totalSeconds).clamp(0.0, 1.0) : 0.0;
+    final progress = _totalSeconds > 0
+        ? (_currentSeconds / _totalSeconds).clamp(0.0, 1.0)
+        : 0.0;
 
     return Scaffold(
       backgroundColor: bg,
@@ -150,7 +152,8 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen>
         backgroundColor: cardBg,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.keyboard_arrow_down_rounded, color: textPri, size: 28),
+          icon:
+              Icon(Icons.keyboard_arrow_down_rounded, color: textPri, size: 28),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
@@ -181,7 +184,9 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen>
             color: textPri,
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Lien du cours copié dans le presse-papiers.')),
+                const SnackBar(
+                    content:
+                        Text('Lien du cours copié dans le presse-papiers.')),
               );
             },
           ),
@@ -192,7 +197,8 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen>
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 children: [
                   // ── 1. CARTE VISUELLE DU COURS (DESIGN SOBRE SOLIDE) ─────────
                   Center(
@@ -257,7 +263,7 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen>
                           size: 14, color: AltaColors.secondary),
                       const SizedBox(width: 6),
                       Text(
-                        'Voix Haute Fidélité : Vivienne (TTS AlternIA)',
+                        'Voix AlternIA',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -354,7 +360,8 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen>
 
                             // Reculer 15s
                             IconButton(
-                              icon: const Icon(Icons.replay_10_rounded, size: 28),
+                              icon:
+                                  const Icon(Icons.replay_10_rounded, size: 28),
                               color: textPri,
                               onPressed: () => _seekBy(-10),
                             ),
@@ -381,14 +388,16 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen>
 
                             // Avancer 15s
                             IconButton(
-                              icon: const Icon(Icons.forward_10_rounded, size: 28),
+                              icon: const Icon(Icons.forward_10_rounded,
+                                  size: 28),
                               color: textPri,
                               onPressed: () => _seekBy(10),
                             ),
 
                             // Répétition
                             IconButton(
-                              icon: const Icon(Icons.volume_up_rounded, size: 22),
+                              icon:
+                                  const Icon(Icons.volume_up_rounded, size: 22),
                               color: textSec,
                               onPressed: () {},
                             ),

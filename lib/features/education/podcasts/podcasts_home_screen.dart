@@ -246,39 +246,38 @@ class _PodcastsHomeScreenState extends State<PodcastsHomeScreen> {
                         children: [
                           Row(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: AltaColors.primary
-                                      .withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  podcast.subject.toUpperCase(),
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w800,
-                                    color: AltaColors.secondary,
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AltaColors.primary
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    podcast.subject.toUpperCase(),
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w800,
+                                      color: AltaColors.secondary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 6),
-                              Text(
-                                podcast.classLevel,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 10,
-                                  color: textSec,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                '${podcast.durationMinutes} min',
-                                style: GoogleFonts.spaceMono(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: textSec,
+                              Expanded(
+                                child: Text(
+                                  '${podcast.classLevel} • ${podcast.durationMinutes} min',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10,
+                                    color: textSec,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
