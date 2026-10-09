@@ -23,7 +23,7 @@ class DuelArenaScreen extends ConsumerStatefulWidget {
     required this.classLevel,
     required this.mode,
     this.playerName = 'Élève',
-    this.opponentName = 'Professeur Henri',
+    this.opponentName = 'Professeur IA',
     this.roomCode,
     this.initialQuestions,
   });
@@ -205,10 +205,11 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
   void _finishDuel() {
     _timer?.cancel();
     _opponentPollTimer?.cancel();
-    final playerWon = _playerScore >= _opponentScore;
+    final isDraw = _playerScore == _opponentScore;
+    final playerWon = _playerScore > _opponentScore;
 
-    final xpGained = playerWon ? 250 : 75;
-    final coinsGained = playerWon ? 50 : 15;
+    final xpGained = playerWon ? 250 : (isDraw ? 120 : 75);
+    final coinsGained = playerWon ? 50 : (isDraw ? 25 : 15);
 
     ref.read(gamificationProvider.notifier).addDuelReward(
       xpGained: xpGained,
@@ -792,6 +793,38 @@ class _DuelVictoryModal extends ConsumerWidget {
     final textSec = isDark ? Colors.white70 : const Color(0xFF475569);
     final gamification = ref.watch(gamificationProvider);
 
+    final isDraw = playerScore == opponentScore;
+    final didWin = playerScore > opponentScore;
+
+    final String resultTitle;
+    final String resultSubtitle;
+    final IconData resultIcon;
+    final Color resultColor;
+    final String actionText;
+
+    if (isDraw) {
+      resultTitle = 'Match Nul';
+      resultSubtitle =
+          'Égalité parfaite ($playerScore - $opponentScore) sur le programme de $subject !';
+      resultIcon = Icons.handshake_rounded;
+      resultColor = AltaColors.secondary;
+      actionText = 'Rejouer';
+    } else if (didWin) {
+      resultTitle = 'Victoire Éclatante';
+      resultSubtitle =
+          'Tu as remporté ce duel sur le programme de $subject.';
+      resultIcon = Icons.emoji_events_rounded;
+      resultColor = AltaColors.secondary;
+      actionText = 'Rejouer';
+    } else {
+      resultTitle = 'Beau Combat';
+      resultSubtitle =
+          'Bel entraînement. Prends ta revanche pour surpasser $opponentName !';
+      resultIcon = Icons.military_tech_rounded;
+      resultColor = AltaColors.accent;
+      actionText = 'Revanche';
+    }
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -807,19 +840,17 @@ class _DuelVictoryModal extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: playerWon
-                  ? AltaColors.primary.withValues(alpha: 0.15)
-                  : AltaColors.accent.withValues(alpha: 0.15),
+              color: resultColor.withValues(alpha: 0.15),
             ),
             child: Icon(
-              playerWon ? Icons.emoji_events_rounded : Icons.military_tech_rounded,
+              resultIcon,
               size: 46,
-              color: playerWon ? AltaColors.secondary : AltaColors.accent,
+              color: resultColor,
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            playerWon ? 'Victoire Éclatante' : 'Beau Combat',
+            resultTitle,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -828,9 +859,7 @@ class _DuelVictoryModal extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            playerWon
-                ? 'Tu as remporté ce duel sur le programme de $subject.'
-                : 'Bel entraînement. Recommence pour surpasser ton score.',
+            resultSubtitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
@@ -844,8 +873,12 @@ class _DuelVictoryModal extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _ScoreCard(label: playerName, score: playerScore, isWinner: playerWon),
-              _ScoreCard(label: opponentName, score: opponentScore, isWinner: !playerWon),
+              _ScoreCard(
+                  label: playerName, score: playerScore, isWinner: didWin),
+              _ScoreCard(
+                  label: opponentName,
+                  score: opponentScore,
+                  isWinner: !didWin && !isDraw),
             ],
           ),
 
@@ -998,8 +1031,8 @@ class _DuelVictoryModal extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   onPressed: onReplay,
-                  child: const Text('Revanche',
-                      style: TextStyle(
+                  child: Text(actionText,
+                      style: const TextStyle(
                           color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
