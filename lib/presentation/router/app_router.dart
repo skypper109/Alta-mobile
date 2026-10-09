@@ -41,6 +41,7 @@ import '../../core/services/vivienne_tts_service.dart';
 import '../profile/profile_screen.dart';
 import '../splash/splash_screen.dart';
 import '../../features/education/duel/duel_lobby_screen.dart';
+import '../../features/education/duel/duel_leaderboard_screen.dart';
 import '../../features/education/podcasts/podcasts_home_screen.dart';
 
 part 'app_router.g.dart';
@@ -461,6 +462,11 @@ GoRouter appRouter(Ref ref) {
         path: '/education/duel',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const DuelLobbyScreen(),
+      ),
+      GoRoute(
+        path: '/education/duel/leaderboard',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const DuelLeaderboardScreen(),
       ),
       GoRoute(
         path: '/education/podcasts',

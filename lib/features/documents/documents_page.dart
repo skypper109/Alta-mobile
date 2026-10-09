@@ -307,23 +307,89 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
             ],
           ),
 
-          const SizedBox(height: DetSizes.xl),
+          // ── Raccourcis complémentaires : Duel & Podcasts ────────────────
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    Navigator.pushNamed(context, '/education/duel');
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: borderCol),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.sports_esports_rounded,
+                            color: AltaColors.accent, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Duel Scolaire',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: textPri,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    Navigator.pushNamed(context, '/education/podcasts');
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: borderCol),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.headphones_rounded,
+                            color: AltaColors.secondary, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Podcasts Audio',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: textPri,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: DetSizes.lg),
 
           // ── Zone d'importation réelle ───────────────────────────────────
           Container(
             padding: const EdgeInsets.all(DetSizes.xl),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AltaColors.primary.withValues(alpha: isDark ? 0.2 : 0.08),
-                  AltaColors.secondary.withValues(alpha: isDark ? 0.1 : 0.05),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: cardBg,
               borderRadius: DetSizes.borderRadiusXl,
               border: Border.all(
-                color: AltaColors.primary.withValues(alpha: 0.4),
+                color: AltaColors.primary.withValues(alpha: 0.3),
                 width: DetSizes.borderWidth,
               ),
             ),

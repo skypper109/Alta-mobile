@@ -371,8 +371,13 @@ class HomeScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // ── 6.B NOUVEAUTÉS INNOVATION ÉDUCATION ALTERNIA ───────────────
-          const DetSectionHeader(
-            title: 'Arène & Podcasts AlterniA',
+          DetSectionHeader(
+            title: 'Entraînement & Podcasts AlterniA',
+            actionLabel: 'Classement',
+            onAction: () {
+              HapticFeedback.selectionClick();
+              context.push('/education/duel/leaderboard');
+            },
           ),
           const SizedBox(height: 14),
 
@@ -380,10 +385,10 @@ class HomeScreen extends ConsumerWidget {
             children: [
               Expanded(
                 child: _TeenSuggestionCard(
-                  title: 'Duel Scolaire ⚔️',
-                  subtitle: 'Défie l\'IA ou un ami chrono',
-                  icon: Icons.flash_on_rounded,
-                  color: const Color(0xFFE26D14),
+                  title: 'Duel Scolaire',
+                  subtitle: 'Défie l\'IA ou tes camarades',
+                  icon: Icons.sports_esports_rounded,
+                  color: AltaColors.accent,
                   onTap: () {
                     HapticFeedback.mediumImpact();
                     context.push('/education/duel');
@@ -393,10 +398,10 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: _TeenSuggestionCard(
-                  title: 'Podcasts Cours 🎧',
-                  subtitle: 'Mode Sotrama sans écran',
+                  title: 'Podcasts de Cours',
+                  subtitle: 'Révision audio mains libres',
                   icon: Icons.headphones_rounded,
-                  color: const Color(0xFF0D9488),
+                  color: AltaColors.secondary,
                   onTap: () {
                     HapticFeedback.mediumImpact();
                     context.push('/education/podcasts');

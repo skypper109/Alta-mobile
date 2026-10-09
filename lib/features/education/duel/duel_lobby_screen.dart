@@ -1,6 +1,7 @@
 // ─── AlterniA — Lobby de Duel Scolaire (Connecté IA & Matchmaking Mali) ──────
 // Sélection des modes, génération de code de validation (PIN),
-// matchmaking instantané par classe malienne et vérification hors-ligne.
+// matchmaking instantané par classe, classement national des lycées.
+// Design officiel : zéro dégradé, zéro sticker, couleurs de la charte AlterniA.
 library;
 
 import 'dart:async';
@@ -9,9 +10,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/constants/app_colors.dart';
+import '../../../core/constants.dart';
 import '../../profile/user_prefs_notifier.dart';
 import 'duel_arena_screen.dart';
+import 'duel_leaderboard_screen.dart';
 import 'duel_model.dart';
 import 'duel_service.dart';
 
@@ -64,16 +66,20 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(
+      builder: (_) => Center(
         child: Card(
-          child: Padding(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? AltaColors.surfaceDark
+              : AltaColors.surfaceLight,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: const Padding(
             padding: EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(color: AppColors.secondary),
+                CircularProgressIndicator(color: AltaColors.secondary),
                 SizedBox(height: 16),
-                Text('Création du salon et génération des questions IA...'),
+                Text('Création du salon et génération des questions...'),
               ],
             ),
           ),
@@ -123,7 +129,6 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
       enableDrag: false,
       backgroundColor: Colors.transparent,
       builder: (sheetCtx) {
-        // Polling pour détecter quand l'ami valide et rejoint le salon
         pollTimer = Timer.periodic(const Duration(milliseconds: 1500), (t) async {
           final status = await duelServiceProvider.getRoomStatus(roomCode);
           if (status != null && status['status'] == 'IN_PROGRESS') {
@@ -152,6 +157,9 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
         });
 
         final isDark = Theme.of(sheetCtx).brightness == Brightness.dark;
+        final cardBg = isDark ? AltaColors.surfaceDark : AltaColors.surfaceLight;
+        final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+        final textSec = isDark ? Colors.white70 : const Color(0xFF475569);
 
         return PopScope(
           onPopInvokedWithResult: (didPop, _) {
@@ -160,40 +168,40 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
           child: Container(
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF0F172A) : Colors.white,
+              color: cardBg,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-              border: Border.all(color: AppColors.secondary.withValues(alpha: 0.3)),
+              border: Border.all(color: AltaColors.borderDark),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: 48,
-                  height: 5,
+                  height: 4,
                   decoration: BoxDecoration(
                     color: Colors.grey.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Icon(Icons.key_rounded, size: 44, color: AppColors.accent),
+                const Icon(Icons.vpn_key_rounded, size: 40, color: AltaColors.accent),
                 const SizedBox(height: 12),
                 Text(
                   'CODE DE VALIDATION DU DUEL',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
                     letterSpacing: 1.2,
-                    color: AppColors.accent,
+                    color: AltaColors.accent,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Donne ce code à ton ami pour qu\'il rejoigne ton duel :',
+                  'Transmets ce code à ton camarade pour lancer le duel :',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    color: isDark ? Colors.white70 : Colors.black87,
+                    fontSize: 13,
+                    color: textSec,
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -204,8 +212,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                     HapticFeedback.mediumImpact();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Code $roomCode copié dans le presse-papiers !'),
-                        backgroundColor: AppColors.secondary,
+                        content: Text('Code $roomCode copié dans le presse-papiers.'),
+                        backgroundColor: AltaColors.primary,
                         duration: const Duration(seconds: 2),
                       ),
                     );
@@ -213,9 +221,9 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                     decoration: BoxDecoration(
-                      color: AppColors.secondary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.secondary, width: 2),
+                      color: isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: AltaColors.secondary, width: 2),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -223,37 +231,37 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                         Text(
                           roomCode,
                           style: GoogleFonts.spaceMono(
-                            fontSize: 28,
+                            fontSize: 26,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 4.0,
-                            color: AppColors.secondary,
+                            color: AltaColors.secondary,
                           ),
                         ),
                         const SizedBox(width: 12),
-                        const Icon(Icons.copy_rounded, color: AppColors.secondary, size: 22),
+                        const Icon(Icons.copy_rounded, color: AltaColors.secondary, size: 20),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 22),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const SizedBox(
-                      width: 16,
-                      height: 16,
+                      width: 14,
+                      height: 14,
                       child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: AppColors.accent,
+                        strokeWidth: 2,
+                        color: AltaColors.accent,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      'En attente de la saisie du code par ton ami...',
+                      'En attente de la saisie par ton camarade...',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: Colors.amber,
+                        color: AltaColors.accent,
                       ),
                     ),
                   ],
@@ -272,7 +280,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                       pollTimer?.cancel();
                       Navigator.pop(sheetCtx);
                     },
-                    child: const Text('Annuler le salon'),
+                    child: Text('Annuler', style: TextStyle(color: textPri)),
                   ),
                 ),
               ],
@@ -297,16 +305,16 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
     showDialog(
       context: context,
       builder: (dlgCtx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         title: Row(
           children: [
-            const Icon(Icons.login_rounded, color: AppColors.secondary),
+            const Icon(Icons.login_rounded, color: AltaColors.secondary),
             const SizedBox(width: 8),
             Text(
               'Rejoindre un Défi',
               style: GoogleFonts.plusJakartaSans(
                 fontWeight: FontWeight.bold,
-                fontSize: 18,
+                fontSize: 16,
               ),
             ),
           ],
@@ -316,7 +324,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Entre le code de validation reçu de ton ami (ex: ML-4821) :',
+              'Saisis le code de validation reçu de ton camarade (ex: ML-4821) :',
               style: TextStyle(fontSize: 13),
             ),
             const SizedBox(height: 16),
@@ -325,7 +333,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
               textCapitalization: TextCapitalization.characters,
               textAlign: TextAlign.center,
               style: GoogleFonts.spaceMono(
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 2,
               ),
@@ -346,7 +354,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accent,
+              backgroundColor: AltaColors.accent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -355,13 +363,13 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
               final code = codeController.text.trim().toUpperCase();
               if (code.isEmpty) return;
 
-              Navigator.pop(dlgCtx); // fermer dialog
+              Navigator.pop(dlgCtx);
 
               showDialog(
                 context: context,
                 barrierDismissible: false,
                 builder: (_) => const Center(
-                  child: CircularProgressIndicator(color: AppColors.secondary),
+                  child: CircularProgressIndicator(color: AltaColors.secondary),
                 ),
               );
 
@@ -371,7 +379,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
               );
 
               if (!mounted) return;
-              Navigator.pop(context); // fermer loading
+              Navigator.pop(context);
 
               if (res != null && res['status'] == 'success') {
                 HapticFeedback.heavyImpact();
@@ -406,7 +414,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                 );
               }
             },
-            child: const Text('Valider & Combattre ⚔️',
+            child: const Text('Valider & Démarrer',
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
@@ -428,31 +436,31 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
       barrierDismissible: false,
       builder: (_) => Center(
         child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(
-                  width: 50,
-                  height: 50,
+                  width: 44,
+                  height: 44,
                   child: CircularProgressIndicator(
-                    color: Color(0xFF10B981),
-                    strokeWidth: 3.5,
+                    color: AltaColors.primary,
+                    strokeWidth: 3,
                   ),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 16),
                 Text(
-                  'Radar Matchmaking Mali 🇲🇱',
+                  'Recherche Nationale',
                   style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
-                  'Recherche d\'un camarade de $classLabel connecté...',
+                  'Recherche d\'un élève de $classLabel au Mali...',
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
@@ -470,7 +478,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
     );
 
     if (!mounted) return;
-    Navigator.pop(context); // Fermer dialog
+    Navigator.pop(context);
 
     if (res != null && res['status'] == 'matched') {
       HapticFeedback.heavyImpact();
@@ -509,24 +517,24 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Row(
           children: [
-            Icon(Icons.wifi_off_rounded, color: Colors.amber),
+            Icon(Icons.wifi_off_rounded, color: AltaColors.accent),
             SizedBox(width: 8),
             Text('Mode Hors-ligne'),
           ],
         ),
         content: const Text(
-          'Tu es actuellement hors-ligne. Le multijoueur avec code ou matchmaking nécessite internet.\n\n'
-          'Tu peux toutefois jouer immédiatement en Solo contre l\'application ou en mode deux joueurs sur le même écran !',
+          'Tu es actuellement hors-ligne. Le multijoueur avec code ou matchmaking requiert une connexion internet.\n\n'
+          'Le mode Solo contre l\'application et le mode Pass & Play restent 100% disponibles.',
           style: TextStyle(fontSize: 13, height: 1.4),
         ),
         actions: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.secondary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              backgroundColor: AltaColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Compris', style: TextStyle(color: Colors.white)),
@@ -540,15 +548,19 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
   Widget build(BuildContext context) {
     final userState = ref.watch(userPrefsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? AltaColors.backgroundDark : AltaColors.backgroundLight;
+    final cardBg = isDark ? AltaColors.surfaceDark : AltaColors.surfaceLight;
+    final borderCol = isDark ? AltaColors.borderDark : AltaColors.borderLight;
     final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSec = isDark ? Colors.white70 : const Color(0xFF475569);
 
     final rawName = userState.name.trim();
     final firstName = rawName.isNotEmpty ? rawName.split(' ').first : 'Élève';
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0D1424) : const Color(0xFFF8FAFC),
+      backgroundColor: bg,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: cardBg,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: textPri, size: 20),
@@ -556,22 +568,25 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
         ),
         centerTitle: true,
         title: Text(
-          'DUEL SCOLAIRE ALTERNIA',
+          'ARÈNE DE DUEL SCOLAIRE',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 14,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 1.2,
-            color: AppColors.secondary,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.0,
+            color: AltaColors.secondary,
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.refresh_rounded,
-              color: isDark ? Colors.white70 : Colors.black54,
-              size: 20,
-            ),
-            onPressed: _checkServerConnectivity,
+            icon: const Icon(Icons.leaderboard_rounded),
+            color: AltaColors.accent,
+            tooltip: 'Classement National',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const DuelLeaderboardScreen()),
+              );
+            },
           ),
         ],
       ),
@@ -579,23 +594,13 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           children: [
-            // ── 1. BANNIÈRE HERO DUEL ÉPIQUE ────────────────────────────────
+            // ── 1. BANNIÈRE HERO DUEL SOBRE (SOLIDE, CHARTE OFFICIELLE) ─────
             Container(
-              padding: const EdgeInsets.all(22),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF283A7E), Color(0xFFE26D14)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(26),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFE26D14).withValues(alpha: 0.35),
-                    blurRadius: 20,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
+                color: cardBg,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: AltaColors.primary, width: 1.5),
               ),
               child: Row(
                 children: [
@@ -606,34 +611,35 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.25),
-                            borderRadius: BorderRadius.circular(12),
+                            color: AltaColors.primary.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            'ARÈNE DU BAC & DEF • ${userState.classShortLabel}',
-                            style: const TextStyle(
+                            'PROGRAMME NATIONAL • ${userState.classShortLabel}',
+                            style: GoogleFonts.plusJakartaSans(
                               fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              letterSpacing: 1.0,
+                              fontWeight: FontWeight.w800,
+                              color: AltaColors.secondary,
+                              letterSpacing: 0.8,
                             ),
                           ),
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'Défie le Mali ou un Ami ! ⚡',
+                          'Défis Scolaires Chronométrés',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 19,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: textPri,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Questions réelles IA • Gagne des XPS et des Pièces AlterniA à chaque victoire !',
+                          '5 questions chrono • 15 secondes • Récompenses en XPS et pièces AlterniA.',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
-                            color: Colors.white.withValues(alpha: 0.85),
+                            color: textSec,
+                            height: 1.4,
                           ),
                         ),
                       ],
@@ -641,67 +647,112 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                   ),
                   const SizedBox(width: 12),
                   Container(
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
+                      color: AltaColors.primary.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.15),
                     ),
                     child: const Icon(
                       Icons.military_tech_rounded,
-                      size: 42,
-                      color: Colors.amberAccent,
+                      size: 38,
+                      color: AltaColors.secondary,
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            // ── INDICATEUR DE STATUT SERVEUR & IA TEMPS RÉEL ────────────────
+            // ── BOUTON ACCÈS DIRECT AU CLASSEMENT DES LYCÉES ────────────────
             GestureDetector(
-              onTap: _checkServerConnectivity,
+              onTap: () {
+                HapticFeedback.selectionClick();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DuelLeaderboardScreen()),
+                );
+              },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: _isOnline
-                      ? Colors.green.withValues(alpha: 0.12)
-                      : Colors.amber.withValues(alpha: 0.12),
+                  color: isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: _isOnline
-                        ? Colors.green.withValues(alpha: 0.4)
-                        : Colors.amber.withValues(alpha: 0.4),
-                  ),
+                  border: Border.all(color: borderCol),
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      _isOnline
-                          ? Icons.wifi_rounded
-                          : Icons.wifi_off_rounded,
-                      color: _isOnline ? Colors.greenAccent : Colors.amber,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 10),
+                    const Icon(Icons.leaderboard_rounded,
+                        color: AltaColors.secondary, size: 22),
+                    const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        _isCheckingConnection
-                            ? 'Vérification de la connexion AlterniA...'
-                            : (_isOnline
-                                ? '🟢 Connecté à l\'IA AlterniA (Questions directes & Matchmaking actif)'
-                                : '⚡ Mode Hors-ligne : Duel Solo disponible avec l\'application'),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: _isOnline
-                              ? (isDark ? Colors.greenAccent : Colors.green.shade800)
-                              : (isDark ? Colors.amberAccent : Colors.amber.shade900),
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Classement National & Lycées',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: textPri,
+                            ),
+                          ),
+                          Text(
+                            'Compare tes scores par lycée, classe et genre',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              color: textSec,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                    const Icon(Icons.arrow_forward_ios_rounded,
+                        size: 14, color: Colors.grey),
                   ],
                 ),
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            // ── INDICATEUR DE STATUT SERVEUR & IA TEMPS RÉEL ────────────────
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: _isOnline
+                    ? AltaColors.primary.withValues(alpha: 0.1)
+                    : AltaColors.accent.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _isOnline
+                      ? AltaColors.primary.withValues(alpha: 0.3)
+                      : AltaColors.accent.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _isOnline ? Icons.wifi_rounded : Icons.wifi_off_rounded,
+                    color: _isOnline ? AltaColors.secondary : AltaColors.accent,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      _isCheckingConnection
+                          ? 'Vérification de la connexion...'
+                          : (_isOnline
+                              ? 'Connecté à l\'IA AlterniA • Questions en direct et multijoueur actif'
+                              : 'Mode Hors-ligne : Duel solo disponible avec l\'application'),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: _isOnline ? AltaColors.secondary : AltaColors.accent,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
 
@@ -709,23 +760,22 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
 
             // ── 2. CHOIX DU MODE DE COMBAT ──────────────────────────────────
             Text(
-              '1. Choisis le Type de Défi',
+              '1. Mode de Défi',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: textPri,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             // 1. Défi National Mali (Même classe)
             _ModeSelectTile(
-              title: 'Défi Mali Instantané 🇲🇱',
-              subtitle: 'Trouve un camarade de ${userState.classShortLabel} connecté dans tout le Mali',
+              title: 'Défi National Mali',
+              subtitle: 'Affronte un camarade de ${userState.classShortLabel} dans tout le pays',
               icon: Icons.public_rounded,
               isSelected: _selectedMode == DuelMode.matchmakingMali,
-              color: const Color(0xFF10B981),
-              isRecommended: true,
+              color: AltaColors.primary,
               onTap: () {
                 HapticFeedback.selectionClick();
                 setState(() => _selectedMode = DuelMode.matchmakingMali);
@@ -737,10 +787,10 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
             // 2. Solo vs Tuteur IA
             _ModeSelectTile(
               title: 'Professeur Henri (IA AlterniA)',
-              subtitle: 'Entraînement Solo face à l\'IA • Fonctionne aussi 100% Hors-ligne',
+              subtitle: 'Entraînement individuel • 100% fonctionnel en ligne et hors-ligne',
               icon: Icons.smart_toy_rounded,
               isSelected: _selectedMode == DuelMode.vsAi,
-              color: AppColors.secondary,
+              color: AltaColors.secondary,
               onTap: () {
                 HapticFeedback.selectionClick();
                 setState(() => _selectedMode = DuelMode.vsAi);
@@ -754,11 +804,11 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
               children: [
                 Expanded(
                   child: _MiniModeCard(
-                    title: 'Créer Défi 🔑',
-                    subtitle: 'Génère un Code PIN pour ton ami',
+                    title: 'Créer un Défi',
+                    subtitle: 'Génère un code PIN pour ton ami',
                     icon: Icons.vpn_key_rounded,
                     isSelected: _selectedMode == DuelMode.createRoomWithCode,
-                    color: AppColors.accent,
+                    color: AltaColors.accent,
                     onTap: () {
                       HapticFeedback.selectionClick();
                       setState(() => _selectedMode = DuelMode.createRoomWithCode);
@@ -768,11 +818,11 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: _MiniModeCard(
-                    title: 'Rejoindre Défi 📥',
-                    subtitle: 'Saisis le Code de ton ami',
+                    title: 'Rejoindre Défi',
+                    subtitle: 'Saisis le code de ton camarade',
                     icon: Icons.login_rounded,
                     isSelected: _selectedMode == DuelMode.joinRoomWithCode,
-                    color: const Color(0xFF8B5CF6),
+                    color: AltaColors.secondary,
                     onTap: () {
                       HapticFeedback.selectionClick();
                       setState(() => _selectedMode = DuelMode.joinRoomWithCode);
@@ -786,24 +836,24 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
 
             // 4. Pass & Play même écran
             _ModeSelectTile(
-              title: 'Duel Camarade (Même écran)',
-              subtitle: 'À deux sur le même téléphone • Idéal en classe ou récréation sans réseau',
+              title: 'Duel sur le Même Téléphone',
+              subtitle: 'Deux joueurs sur cet écran • Sans connexion internet',
               icon: Icons.phone_android_rounded,
               isSelected: _selectedMode == DuelMode.passAndPlay,
-              color: Colors.blueGrey,
+              color: AltaColors.primaryLight,
               onTap: () {
                 HapticFeedback.selectionClick();
                 setState(() => _selectedMode = DuelMode.passAndPlay);
               },
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 22),
 
             // ── 3. SÉLECTION DE LA MATIÈRE DU PROGRAMME ─────────────────────
             Text(
-              '2. Choisis la Matière (${userState.classShortLabel})',
+              '2. Matière au Programme (${userState.classShortLabel})',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: textPri,
               ),
@@ -811,26 +861,27 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
             const SizedBox(height: 12),
 
             Wrap(
-              spacing: 10,
-              runSpacing: 10,
+              spacing: 8,
+              runSpacing: 8,
               children: _subjects.map((sub) {
                 final isSelected = _selectedSubject == sub;
                 return ChoiceChip(
                   label: Text(sub),
                   labelStyle: GoogleFonts.plusJakartaSans(
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    fontSize: 12,
                     color: isSelected ? Colors.white : textPri,
                   ),
                   selected: isSelected,
-                  selectedColor: AppColors.primary,
+                  selectedColor: AltaColors.primary,
                   backgroundColor: isDark
-                      ? const Color(0xFF1E2844)
-                      : const Color(0xFFE2E8F0),
+                      ? AltaColors.surfaceAltDark
+                      : AltaColors.surfaceAltLight,
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                     side: BorderSide(
-                      color: isSelected ? AppColors.secondary : Colors.transparent,
+                      color: isSelected ? AltaColors.primary : borderCol,
                     ),
                   ),
                   onSelected: (val) {
@@ -843,20 +894,19 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
               }).toList(),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 28),
 
-            // ── 4. BOUTON ACTION LANCER LE DUEL SELON LE MODE ───────────────
+            // ── 4. BOUTON ACTION LANCER LE DUEL ─────────────────────────────
             SizedBox(
               width: double.infinity,
-              height: 56,
+              height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
+                  backgroundColor: AltaColors.accent,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  elevation: 6,
-                  shadowColor: AppColors.accent.withValues(alpha: 0.4),
+                  elevation: 0,
                 ),
                 onPressed: () {
                   HapticFeedback.heavyImpact();
@@ -868,7 +918,6 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                   } else if (_selectedMode == DuelMode.matchmakingMali) {
                     _handleMatchmakeMali(firstName, userState.studentClassId, userState.classShortLabel);
                   } else {
-                    // Solo vs IA ou Pass & Play
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -878,34 +927,26 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                           mode: _selectedMode,
                           playerName: firstName,
                           opponentName: _selectedMode == DuelMode.vsAi
-                              ? 'Prof. Henri IA'
+                              ? 'Professeur Henri'
                               : 'Camarade',
                         ),
                       ),
                     );
                   }
                 },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.flash_on_rounded, color: Colors.white, size: 22),
-                    const SizedBox(width: 8),
-                    Text(
-                      _selectedMode == DuelMode.createRoomWithCode
-                          ? 'GÉNÉRER LE CODE DE VALIDATION 🔑'
-                          : (_selectedMode == DuelMode.joinRoomWithCode
-                              ? 'ENTRER LE CODE DUEL 📥'
-                              : (_selectedMode == DuelMode.matchmakingMali
-                                  ? 'TROUVER UN ÉLÈVE AU MALI 🇲🇱'
-                                  : 'LANCER LE DUEL CHRONO ⚔️')),
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  _selectedMode == DuelMode.createRoomWithCode
+                      ? 'Générer le code de validation'
+                      : (_selectedMode == DuelMode.joinRoomWithCode
+                          ? 'Entrer le code de validation'
+                          : (_selectedMode == DuelMode.matchmakingMali
+                              ? 'Rechercher un élève au Mali'
+                              : 'Démarrer le duel chronométré')),
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -925,7 +966,6 @@ class _ModeSelectTile extends StatelessWidget {
     required this.isSelected,
     required this.color,
     required this.onTap,
-    this.isRecommended = false,
   });
 
   final String title;
@@ -934,87 +974,59 @@ class _ModeSelectTile extends StatelessWidget {
   final bool isSelected;
   final Color color;
   final VoidCallback onTap;
-  final bool isRecommended;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AltaColors.surfaceDark : AltaColors.surfaceLight;
+    final borderCol = isDark ? AltaColors.borderDark : AltaColors.borderLight;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSec = isDark ? Colors.white70 : const Color(0xFF475569);
 
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(16),
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: isSelected
-              ? color.withValues(alpha: isDark ? 0.2 : 0.12)
-              : (isDark ? const Color(0xFF141D33) : Colors.white),
-          borderRadius: BorderRadius.circular(20),
+              ? (isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight)
+              : cardBg,
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isSelected ? color : (isDark ? const Color(0xFF222F4C) : const Color(0xFFE2E8F0)),
-            width: isSelected ? 2.0 : 1.0,
+            color: isSelected ? AltaColors.primary : borderCol,
+            width: isSelected ? 1.8 : 1.0,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [],
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.2),
+                color: color.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 24),
+              child: Icon(icon, color: color, size: 22),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        title,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                      ),
-                      if (isRecommended) ...[
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: color,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'POPULAIRE',
-                            style: TextStyle(
-                              fontSize: 8,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
+                  Text(
+                    title,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: textPri,
+                    ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
                     subtitle,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
-                      color: isDark ? Colors.white60 : Colors.black54,
+                      color: textSec,
                     ),
                   ),
                 ],
@@ -1022,8 +1034,8 @@ class _ModeSelectTile extends StatelessWidget {
             ),
             Icon(
               isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-              color: isSelected ? color : Colors.grey,
-              size: 22,
+              color: isSelected ? AltaColors.primary : Colors.grey,
+              size: 20,
             ),
           ],
         ),
@@ -1052,20 +1064,24 @@ class _MiniModeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AltaColors.surfaceDark : AltaColors.surfaceLight;
+    final borderCol = isDark ? AltaColors.borderDark : AltaColors.borderLight;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSec = isDark ? Colors.white70 : const Color(0xFF475569);
 
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(14),
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected
-              ? color.withValues(alpha: isDark ? 0.2 : 0.12)
-              : (isDark ? const Color(0xFF141D33) : Colors.white),
-          borderRadius: BorderRadius.circular(20),
+              ? (isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight)
+              : cardBg,
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isSelected ? color : (isDark ? const Color(0xFF222F4C) : const Color(0xFFE2E8F0)),
-            width: isSelected ? 2.0 : 1.0,
+            color: isSelected ? AltaColors.primary : borderCol,
+            width: isSelected ? 1.8 : 1.0,
           ),
         ),
         child: Column(
@@ -1074,26 +1090,26 @@ class _MiniModeCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.2),
+                color: color.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 20),
+              child: Icon(icon, color: color, size: 18),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Text(
               title,
               style: GoogleFonts.plusJakartaSans(
                 fontWeight: FontWeight.bold,
-                fontSize: 13,
-                color: isDark ? Colors.white : Colors.black87,
+                fontSize: 12,
+                color: textPri,
               ),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 2),
             Text(
               subtitle,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10,
-                color: isDark ? Colors.white60 : Colors.black54,
+                color: textSec,
               ),
             ),
           ],
