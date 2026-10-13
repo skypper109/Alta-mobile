@@ -219,7 +219,7 @@ class _ClassSelectionRequiredSheetContentState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
-                'L\'espace Éducation adapte les cours, les annales du BAC et le tuteur IA au programme officiel malien correspondant à ta filière.',
+                'L\'espace Éducation adapte les cours, les annales (DEF / BAC) et le tuteur IA au programme officiel malien correspondant à ta classe.',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12.5,
                   color: textSec,
@@ -230,7 +230,7 @@ class _ClassSelectionRequiredSheetContentState
 
             const SizedBox(height: 14),
 
-            // ── Onglets de niveau (10ème, 11ème, Terminale) ───────────────────
+            // ── Onglets de niveau (Fondamental, 10ème, 11ème, Terminale) ──────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
@@ -249,7 +249,8 @@ class _ClassSelectionRequiredSheetContentState
                         behavior: HitTestBehavior.opaque,
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 2, vertical: 8),
                           decoration: BoxDecoration(
                             color:
                                 isSelected ? AppColors.primary : Colors.transparent,
@@ -265,13 +266,16 @@ class _ClassSelectionRequiredSheetContentState
                                   ]
                                 : null,
                           ),
-                          child: Text(
-                            lvl,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w700,
-                              color: isSelected ? Colors.white : textSec,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              lvl,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: isSelected ? Colors.white : textSec,
+                              ),
                             ),
                           ),
                         ),

@@ -339,6 +339,230 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  void _showSchoolSelectorDialog(
+      BuildContext context, WidgetRef ref, String currentSchool) {
+    final searchCtrl = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSec = isDark ? AppColors.textSecondary : const Color(0xFF475569);
+    final surfaceColor =
+        isDark ? AppColors.surfaceAlt : const Color(0xFFF8FAFC);
+    final borderColor = isDark ? AppColors.border : const Color(0xFFE2E8F0);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? AppColors.surface : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (modalCtx, setModalState) {
+            final query = searchCtrl.text.trim().toLowerCase();
+            final filteredSchools = defaultMalianSchools
+                .where((s) => s.toLowerCase().contains(query))
+                .toList();
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+              ),
+              child: SizedBox(
+                height: MediaQuery.of(ctx).size.height * 0.7,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppColors.border
+                              : const Color(0xFFCBD5E1),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Mon établissement / École (Mali)',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: textPri,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Sélectionnez ou saisissez votre école ou lycée.',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        color: textSec,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: surfaceColor,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: borderColor),
+                      ),
+                      child: TextField(
+                        controller: searchCtrl,
+                        onChanged: (_) => setModalState(() {}),
+                        style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14, color: textPri),
+                        decoration: InputDecoration(
+                          hintText: 'Rechercher ou saisir votre école…',
+                          hintStyle: GoogleFonts.plusJakartaSans(
+                              fontSize: 13, color: textSec),
+                          prefixIcon: Icon(Icons.search_rounded,
+                              size: 18, color: textSec),
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                    if (searchCtrl.text.trim().isNotEmpty &&
+                        !defaultMalianSchools
+                            .contains(searchCtrl.text.trim())) ...[
+                      const SizedBox(height: 10),
+                      InkWell(
+                        onTap: () {
+                          final custom = searchCtrl.text.trim();
+                          ref
+                              .read(userPrefsProvider.notifier)
+                              .updateSchool(custom);
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content:
+                                  Text('Établissement enregistré : $custom'),
+                              backgroundColor: AppColors.primary,
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: AppColors.secondary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: AppColors.secondary
+                                    .withValues(alpha: 0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.add_business_rounded,
+                                  color: AppColors.secondary, size: 18),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'Valider : "${searchCtrl.text.trim()}"',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.secondary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: ListView.separated(
+                        itemCount: filteredSchools.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 6),
+                        itemBuilder: (context, idx) {
+                          final school = filteredSchools[idx];
+                          final isSelected = school == currentSchool;
+
+                          return GestureDetector(
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              ref
+                                  .read(userPrefsProvider.notifier)
+                                  .updateSchool(school);
+                              Navigator.pop(ctx);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'Établissement sélectionné : $school'),
+                                  backgroundColor: AppColors.primary,
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? AppColors.primary.withValues(alpha: 0.15)
+                                    : surfaceColor,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : borderColor,
+                                  width: isSelected ? 2 : 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    school.contains('Fondamentale')
+                                        ? Icons.menu_book_rounded
+                                        : Icons.account_balance_rounded,
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : textSec,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      school,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.w500,
+                                        color: isSelected
+                                            ? AppColors.primary
+                                            : textPri,
+                                      ),
+                                    ),
+                                  ),
+                                  if (isSelected)
+                                    const Icon(Icons.check_circle_rounded,
+                                        color: AppColors.primary, size: 18),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _showResetConfirmationDialog(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
@@ -517,30 +741,80 @@ class ProfileScreen extends ConsumerWidget {
                             ],
                           ),
                           const SizedBox(height: 5),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 3.5),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary
-                                  .withValues(alpha: isDark ? 0.2 : 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color:
-                                    AppColors.primary.withValues(alpha: 0.35),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 9, vertical: 3.5),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary
+                                      .withValues(alpha: isDark ? 0.2 : 0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color:
+                                        AppColors.primary.withValues(alpha: 0.35),
+                                  ),
+                                ),
+                                child: Text(
+                                  userState.classFullLabel,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark
+                                        ? AppColors.secondary
+                                        : AppColors.primary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              userState.classFullLabel,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: isDark
-                                    ? AppColors.secondary
-                                    : AppColors.primary,
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 9, vertical: 3.5),
+                                decoration: BoxDecoration(
+                                  color: (isDark
+                                          ? AppColors.secondary
+                                          : AppColors.accent)
+                                      .withValues(alpha: isDark ? 0.2 : 0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: (isDark
+                                            ? AppColors.secondary
+                                            : AppColors.accent)
+                                        .withValues(alpha: 0.35),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.school_rounded,
+                                      size: 11,
+                                      color: isDark
+                                          ? AppColors.secondary
+                                          : AppColors.primary,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        userState.schoolDisplay,
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark
+                                              ? AppColors.secondary
+                                              : AppColors.primary,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                            ],
                           ),
                         ],
                       ),
@@ -556,18 +830,27 @@ class ProfileScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: _CompactActionButton(
-                        label: 'Modifier nom',
+                        label: 'Nom',
                         icon: Icons.edit_rounded,
                         onTap: () => _showEditNameDialog(context, ref, rawName),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: _CompactActionButton(
-                        label: 'Changer classe',
+                        label: 'Classe',
                         icon: Icons.tune_rounded,
                         onTap: () => _showClassSelectorDialog(
                             context, ref, userState.studentClassId),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _CompactActionButton(
+                        label: 'École',
+                        icon: Icons.school_rounded,
+                        onTap: () => _showSchoolSelectorDialog(
+                            context, ref, userState.school),
                       ),
                     ),
                   ],

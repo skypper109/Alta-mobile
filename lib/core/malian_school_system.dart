@@ -6,12 +6,92 @@ import '../domain/entities/malian_class.dart';
 export '../domain/entities/malian_class.dart';
 
 const List<MalianClass> malianClasses = [
+  // ── 6ÈME — 6ème Année Fondamentale (1er Cycle) ───────────────────────────
+  MalianClass(
+    id: '6eme',
+    label: '6ème Année Fondamentale',
+    shortLabel: '6ème',
+    level: 'Fondamental',
+    emoji: '🌱',
+    iconData: Icons.child_care_rounded,
+    description: 'Enseignement fondamental (Fin du 1er cycle)',
+    subjects: [
+      'Français',
+      'Mathématiques',
+      'Sciences d\'Observation (SVT)',
+      'Histoire-Géographie',
+      'Éducation Civique & Morale',
+      'Dessin & Travaux Pratiques',
+    ],
+    suggestedQuestions: [
+      'Comment poser et calculer une division euclidienne ?',
+      'Quels sont les différents états de la matière (solide, liquide, gaz) ?',
+      'Quels sont les symboles de la République du Mali (drapeau, hymne, devise) ?',
+      'Comment accorder le participe passé avec l\'auxiliaire être et avoir ?',
+    ],
+    color: 0xFF10B981,
+  ),
+
+  // ── 7ÈME — 7ème Année Fondamentale (2ème Cycle) ───────────────────────────
+  MalianClass(
+    id: '7eme',
+    label: '7ème Année Fondamentale',
+    shortLabel: '7ème',
+    level: 'Fondamental',
+    emoji: '📚',
+    iconData: Icons.menu_book_rounded,
+    description: 'Enseignement fondamental (Début du 2ème cycle)',
+    subjects: [
+      'Mathématiques',
+      'Physique-Chimie',
+      'Biologie (SVT)',
+      'Histoire-Géographie',
+      'Français',
+      'Anglais',
+      'Éducation Civique & Morale',
+    ],
+    suggestedQuestions: [
+      'Qu\'est-ce qu\'un nombre décimal relatif et comment les additionner ?',
+      'Comment fonctionne la reproduction chez les plantes à fleurs ?',
+      'Quelles sont les grandes étapes de l\'histoire de l\'Empire du Mali ?',
+      'Quelles sont les propriétés de l\'air et de la pression atmosphérique ?',
+    ],
+    color: 0xFF059669,
+  ),
+
+  // ── 8ÈME — 8ème Année Fondamentale (2ème Cycle) ───────────────────────────
+  MalianClass(
+    id: '8eme',
+    label: '8ème Année Fondamentale',
+    shortLabel: '8ème',
+    level: 'Fondamental',
+    emoji: '📐',
+    iconData: Icons.square_foot_rounded,
+    description: 'Enseignement fondamental (2ème cycle intermédiaire)',
+    subjects: [
+      'Mathématiques',
+      'Physique-Chimie',
+      'Biologie (SVT)',
+      'Histoire-Géographie',
+      'Français',
+      'Anglais',
+      'Éducation Civique & Morale',
+    ],
+    suggestedQuestions: [
+      'Comment calculer l\'aire d\'un triangle, d\'un trapèze et d\'un cercle ?',
+      'Explique le cycle de l\'eau et les changements d\'état physique.',
+      'Quels sont les rôles du cœur et de la circulation sanguine dans le corps humain ?',
+      'Quels sont les pays limitrophes du Mali et leur situation géographique ?',
+    ],
+    color: 0xFF0D9488,
+  ),
+
   // ── DEF — 9ème Année Fondamentale ──────────────────────────────────────────
   MalianClass(
     id: 'def',
     label: 'DEF — 9ème Année Fondamentale',
-    shortLabel: 'DEF',
-    level: 'DEF',
+    shortLabel: '9ème (DEF)',
+    level: 'Fondamental',
     emoji: '🎓',
     iconData: Icons.school_rounded,
     description: 'Diplôme d\'Études Fondamentales (Examen National)',
@@ -311,14 +391,49 @@ const List<MalianClass> malianClasses = [
   ),
 ];
 
-const List<String> malianLevels = ['DEF', '10ème', '11ème', 'Terminale'];
+const List<String> malianLevels = ['Fondamental', '10ème', '11ème', 'Terminale'];
 
-List<MalianClass> classesByLevel(String level) =>
-    malianClasses.where((c) => c.level == level).toList();
+/// Liste de référence des établissements scolaires réputés du Mali (Fondamental & Lycées)
+const List<String> defaultMalianSchools = [
+  // Écoles Fondamentales de Référence
+  'École Fondamentale Mamadou Konaté (Bamako)',
+  'École Fondamentale de Torokorobougou (Bamako)',
+  'École Fondamentale de Banankabougou (Bamako)',
+  'École Fondamentale de Dravela (Bamako)',
+  'École Fondamentale Babemba Traoré (Sikasso)',
+  'École Fondamentale de Médine (Mopti)',
+  'École Fondamentale Robert Cissé (Ségou)',
+  'Complexe Scolaire Les Castors (Bamako)',
+  'Complexe Scolaire Kany (Bamako)',
+  'Collège Horizon (Bamako)',
+  // Lycées de Référence
+  'Lycée Askia Mohamed (Bamako)',
+  'Lycée Ba Aminata Diallo (LBAD, Bamako)',
+  'Lycée Technique de Bamako (LTB)',
+  'Lycée Notre Dame du Niger (Bamako)',
+  'Lycée Kankou Moussa (Bamako)',
+  'Lycée Progrès de Ségou',
+  'Lycée Hamadoun Dicko (Sévaré / Mopti)',
+  'Lycée Dougoukolo Konaré (Kayes)',
+  'Lycée Public de Sikasso',
+  'Lycée Mahamane Alassane Haïdara (Tombouctou)',
+  'Lycée Yana Maïga (Gao)',
+];
+
+List<MalianClass> classesByLevel(String level) => malianClasses.where((c) {
+      if (level == 'Fondamental' || level == 'DEF') {
+        return c.level == 'Fondamental' || c.level == 'DEF';
+      }
+      return c.level == level;
+    }).toList();
 
 MalianClass? classById(String id) {
   try {
-    return malianClasses.firstWhere((c) => c.id == id);
+    final clean = id.trim().toLowerCase();
+    if (clean == '9eme' || clean == '9' || clean == '9e') {
+      return malianClasses.firstWhere((c) => c.id == 'def' || c.id == '9eme');
+    }
+    return malianClasses.firstWhere((c) => c.id.toLowerCase() == clean);
   } catch (_) {
     return null;
   }

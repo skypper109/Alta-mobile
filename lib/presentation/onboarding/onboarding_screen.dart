@@ -22,8 +22,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   int _currentStep = 0;
   bool _wantsClassSelection = true;
-  String _selectedLevel = 'Terminale';
-  String _selectedClassId = defaultClassId;
+  String _selectedLevel = 'Fondamental';
+  String _selectedClassId = '6eme';
+  String _selectedSchool = defaultMalianSchools.first;
 
   @override
   void dispose() {
@@ -71,6 +72,220 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _goToPage(1);
   }
 
+  void _showSchoolSelectionModal(
+    BuildContext context,
+    bool isDark,
+    Color surfaceColor,
+    Color borderColor,
+    Color textPri,
+    Color textSec,
+  ) {
+    HapticFeedback.lightImpact();
+    final searchCtrl = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (modalCtx, setModalState) {
+            final query = searchCtrl.text.trim().toLowerCase();
+            final filteredSchools = defaultMalianSchools
+                .where((s) => s.toLowerCase().contains(query))
+                .toList();
+
+            return Container(
+              height: MediaQuery.of(modalCtx).size.height * 0.75,
+              padding: EdgeInsets.only(
+                top: 16,
+                left: 20,
+                right: 20,
+                bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 16,
+              ),
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(24)),
+                border: Border.all(color: borderColor),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: borderColor,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Choisir ton établissement',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: textPri,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(modalCtx),
+                        icon: const Icon(Icons.close_rounded, size: 20),
+                        color: textSec,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Champ de recherche / saisie
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF0F172A)
+                          : const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: borderColor),
+                    ),
+                    child: TextField(
+                      controller: searchCtrl,
+                      onChanged: (_) => setModalState(() {}),
+                      style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14, color: textPri),
+                      decoration: InputDecoration(
+                        hintText: 'Rechercher ou saisir ton école…',
+                        hintStyle: GoogleFonts.plusJakartaSans(
+                            fontSize: 13, color: textSec),
+                        prefixIcon: Icon(Icons.search_rounded,
+                            size: 18, color: textSec),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                  if (searchCtrl.text.trim().isNotEmpty &&
+                      !defaultMalianSchools
+                          .contains(searchCtrl.text.trim())) ...[
+                    const SizedBox(height: 10),
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedSchool = searchCtrl.text.trim();
+                        });
+                        Navigator.pop(modalCtx);
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: AltaColors.secondary
+                              .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                              color: AltaColors.secondary
+                                  .withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.add_business_rounded,
+                                color: AltaColors.secondary, size: 18),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Utiliser : "${searchCtrl.text.trim()}"',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: AltaColors.secondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: ListView.separated(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: filteredSchools.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 6),
+                      itemBuilder: (context, idx) {
+                        final school = filteredSchools[idx];
+                        final isSelected = _selectedSchool == school;
+                        return InkWell(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() {
+                              _selectedSchool = school;
+                            });
+                            Navigator.pop(modalCtx);
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AltaColors.primary.withValues(
+                                      alpha: isDark ? 0.2 : 0.08)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                  color: isSelected
+                                      ? AltaColors.secondary
+                                      : borderColor),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  school.contains('Fondamentale')
+                                      ? Icons.menu_book_rounded
+                                      : Icons.account_balance_rounded,
+                                  color: isSelected
+                                      ? AltaColors.secondary
+                                      : textSec,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    school,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13.5,
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.w500,
+                                      color: isSelected
+                                          ? AltaColors.secondary
+                                          : textPri,
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  const Icon(Icons.check_circle_rounded,
+                                      color: AltaColors.secondary, size: 18),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _onStep2DecisionContinue() {
     HapticFeedback.lightImpact();
     if (_wantsClassSelection) {
@@ -116,6 +331,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     await ref.read(userPrefsProvider.notifier).saveRegistration(
           name: name,
           classId: classToSave,
+          school: _selectedSchool,
         );
 
     if (mounted) {
@@ -372,6 +588,78 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
               onSubmitted: (_) => _onStep1Next(),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Sélection de l'école / établissement
+          GestureDetector(
+            onTap: () => _showSchoolSelectionModal(
+              context,
+              isDark,
+              surfaceColor,
+              borderColor,
+              textPri,
+              textSec,
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: borderColor, width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.school_rounded,
+                    color: AltaColors.secondary,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'ÉTABLISSEMENT / ÉCOLE',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: AltaColors.secondary,
+                            letterSpacing: 0.6,
+                          ),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          _selectedSchool,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: textPri,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_drop_down_circle_outlined,
+                    color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                    size: 20,
+                  ),
+                ],
+              ),
             ),
           ),
 
@@ -1065,9 +1353,83 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   height: 1.45,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
 
-              // Onglets Niveaux (10ème, 11ème, Terminale)
+              // Sélecteur d'école actif
+              GestureDetector(
+                onTap: () => _showSchoolSelectionModal(
+                  context,
+                  isDark,
+                  surfaceColor,
+                  borderColor,
+                  textPri,
+                  textSec,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: surfaceColor,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: borderColor),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.school_rounded,
+                        color: AltaColors.secondary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'ÉTABLISSEMENT SÉLECTIONNÉ',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w800,
+                                color: AltaColors.secondary,
+                                letterSpacing: 0.6,
+                              ),
+                            ),
+                            const SizedBox(height: 1),
+                            Text(
+                              _selectedSchool,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: textPri,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AltaColors.primary.withValues(alpha: isDark ? 0.3 : 0.08),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Changer',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: AltaColors.secondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Onglets Niveaux (Fondamental, 10ème, 11ème, Terminale)
               Row(
                 children: malianLevels.map((lvl) {
                   final isSelected = _selectedLevel == lvl;
@@ -1085,7 +1447,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
                           color: isSelected ? AltaColors.primary : surfaceColor,
@@ -1106,13 +1468,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 ]
                               : null,
                         ),
-                        child: Text(
-                          lvl,
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : textSec,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Text(
+                              lvl,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: isSelected ? Colors.white : textSec,
+                              ),
+                            ),
                           ),
                         ),
                       ),
