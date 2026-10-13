@@ -14,18 +14,15 @@ abstract final class AltaApiConfig {
   static const String cloudTunnelUrl = 'https://api.alterniamali.com';
 
   /// URLs candidates testées automatiquement par l'application :
-  /// Priorité absolue donnée au domaine permanent officiel, puis aux sous-domaines, puis au local.
+  /// Priorité aux adresses locales et Wi-Fi LAN directes du boîtier/serveur, puis au cloud.
   static const List<String> candidateBaseUrls = [
-    'https://api.alterniamali.com',
-    'https://alterniamali.com',
-    'https://admin.alterniamali.com',
-    'https://device.alterniamali.com',
+    'http://172.20.10.14:8000',
     'http://127.0.0.1:8000',
     'http://localhost:8000',
-    'http://172.20.10.14:8000',
     'http://10.0.2.2:8000',
     'http://192.168.4.1:8000',
     'http://192.168.1.100:8000',
+    'https://api.alterniamali.com',
   ];
 }
 

@@ -157,7 +157,7 @@ class MonumentScannerController extends StateNotifier<ScannerState> {
         },
       );
 
-      if (result != null && result.confidence >= 0.55) {
+      if (result != null && result.confidence >= 0.45) {
         _onRecognitionSuccess(result);
       } else {
         _onRecognitionUnrecognized();

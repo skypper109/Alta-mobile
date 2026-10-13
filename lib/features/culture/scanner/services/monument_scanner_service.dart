@@ -81,7 +81,7 @@ class MonumentScannerService {
         longitude: longitude,
         hintTarget: hintTarget,
       );
-      if (result != null && result.confidence >= 0.58) {
+      if (result != null && result.confidence >= 0.45) {
         onProgress?.call('Monument reconnu !', 1.0);
         return result;
       } else {

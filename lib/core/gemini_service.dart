@@ -208,39 +208,92 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
     };
   }
 
-  /// Génère une vidéo de l'avatar AlternIA pour une question ou phrase
+  static String? _cachedActiveBaseUrl;
+  static DateTime? _lastHealthCheckTime;
+  static bool _lastHealthStatus = false;
+
+  /// Détermine en moins de 1.5s si un backend AlternIA est en ligne
+  Future<String?> getActiveBaseUrlFast() async {
+    final custom = _customBaseUrl;
+    if (custom != null && custom.isNotEmpty) return custom;
+
+    final now = DateTime.now();
+    if (_cachedActiveBaseUrl != null &&
+        _lastHealthCheckTime != null &&
+        now.difference(_lastHealthCheckTime!).inSeconds < 30 &&
+        _lastHealthStatus) {
+      return _cachedActiveBaseUrl;
+    }
+
+    final priorityUrls = [
+      if (_cachedActiveBaseUrl != null) _cachedActiveBaseUrl!,
+      AltaApiConfig.serverBaseUrl,
+      'http://127.0.0.1:8000',
+      'http://10.0.2.2:8000',
+      'http://172.20.10.14:8000',
+    ];
+
+    for (final baseUrl in priorityUrls) {
+      try {
+        final res = await _dio.get(
+          '$baseUrl/api/health',
+          options: Options(
+            connectTimeout: const Duration(milliseconds: 1500),
+            receiveTimeout: const Duration(milliseconds: 1500),
+          ),
+        );
+        if (res.statusCode == 200) {
+          _cachedActiveBaseUrl = baseUrl;
+          _lastHealthCheckTime = now;
+          _lastHealthStatus = true;
+          return baseUrl;
+        }
+      } catch (_) {}
+    }
+
+    _lastHealthCheckTime = now;
+    _lastHealthStatus = false;
+    return null;
+  }
+
+  /// Génère une vidéo de l'avatar AlternIA pour une question ou phrase (non bloquant)
   Future<String?> generateAlternIAAvatarVideo({
     required String text,
     String? subject,
     String? voice,
     String? faceId,
   }) async {
-    for (final baseUrl in _candidateBaseUrls) {
-      try {
-        final response = await _dio.post(
-          '$baseUrl/api/avatars/generate-video',
-          data: {
-            'question': text,
-            'phrase': text,
-            'matiere': subject ?? 'Général',
-            'voice': voice ?? 'henri',
-            'faceId': faceId ?? 'bb1212ec-2cc5-4ca0-ad32-4a4427600345',
-          },
-          options: Options(
-            connectTimeout: const Duration(seconds: 6),
-            receiveTimeout: const Duration(seconds: 60),
-          ),
-        );
-
-        if (response.statusCode == 200 && response.data is Map) {
-          final data = response.data as Map;
-          final videoUrl = data['video_url'] as String?;
-          if (videoUrl != null && videoUrl.isNotEmpty) {
-            return videoUrl.startsWith('http') ? videoUrl : '$baseUrl$videoUrl';
-          }
-        }
-      } catch (_) {}
+    final activeUrl = await getActiveBaseUrlFast();
+    if (activeUrl == null) {
+      _logger.d('[AlterniA] Backend indisponible : le téléphone utilise l\'avatar local animé.');
+      return null;
     }
+
+    try {
+      final response = await _dio.post(
+        '$activeUrl/api/avatars/generate-video',
+        data: {
+          'question': text,
+          'phrase': text,
+          'matiere': subject ?? 'Général',
+          'voice': voice ?? 'henri',
+          'faceId': faceId ?? 'bb1212ec-2cc5-4ca0-ad32-4a4427600345',
+        },
+        options: Options(
+          connectTimeout: const Duration(seconds: 4),
+          receiveTimeout: const Duration(seconds: 18),
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data is Map) {
+        final data = response.data as Map;
+        final videoUrl = data['video_url'] as String?;
+        if (videoUrl != null && videoUrl.isNotEmpty) {
+          return videoUrl.startsWith('http') ? videoUrl : '$activeUrl$videoUrl';
+        }
+      }
+    } catch (_) {}
+
     return null;
   }
 
@@ -252,31 +305,31 @@ Tu es AlterniA, le tuteur pédagogique de correction d'exercices du programme ma
     final cleanText = text.trim();
     if (cleanText.isEmpty) return null;
 
-    for (final baseUrl in _candidateBaseUrls) {
-      try {
-        _logger.i(
-            '[AlterniA TTS] Requête synthèse vocale ($voice) → $baseUrl/api/tts');
-        final response = await _dio.post(
-          '$baseUrl/api/tts',
-          data: {
-            'text': cleanText,
-            'voice': voice,
-          },
-          options: Options(
-            responseType: ResponseType.bytes,
-            connectTimeout: const Duration(seconds: 4),
-            receiveTimeout: const Duration(seconds: 25),
-          ),
-        );
+    final activeUrl = await getActiveBaseUrlFast();
+    if (activeUrl == null) return null;
 
-        if (response.statusCode == 200 && response.data != null) {
-          final bytes = response.data;
-          if (bytes is Uint8List) return bytes;
-          if (bytes is List<int>) return Uint8List.fromList(bytes);
-        }
-      } catch (e) {
-        _logger.w('[AlterniA TTS] Échec sur $baseUrl : $e');
+    try {
+      _logger.i('[AlterniA TTS] Requête synthèse vocale ($voice) → $activeUrl/api/tts');
+      final response = await _dio.post(
+        '$activeUrl/api/tts',
+        data: {
+          'text': cleanText,
+          'voice': voice,
+        },
+        options: Options(
+          responseType: ResponseType.bytes,
+          connectTimeout: const Duration(seconds: 3),
+          receiveTimeout: const Duration(seconds: 15),
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final bytes = response.data;
+        if (bytes is Uint8List) return bytes;
+        if (bytes is List<int>) return Uint8List.fromList(bytes);
       }
+    } catch (e) {
+      _logger.w('[AlterniA TTS] Échec sur $activeUrl : $e');
     }
     return null;
   }

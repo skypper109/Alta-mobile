@@ -43,6 +43,11 @@ import '../portal/universe_gateway_screen.dart';
 import '../../core/services/vivienne_tts_service.dart';
 import '../profile/profile_screen.dart';
 import '../splash/splash_screen.dart';
+import '../../features/education/duel/duel_lobby_screen.dart';
+import '../../features/education/duel/duel_leaderboard_screen.dart';
+import '../../features/education/podcasts/podcasts_home_screen.dart';
+import '../../features/education/flashcards/flashcards_screen.dart';
+import '../../features/education/grin/grin_hub_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -519,6 +524,34 @@ GoRouter appRouter(Ref ref) {
         path: '/holo-salon',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const HolographicSalonPage(),
+      ),
+      GoRoute(
+        path: '/education/duel',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const DuelLobbyScreen(),
+      ),
+      GoRoute(
+        path: '/education/duel/leaderboard',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const DuelLeaderboardScreen(),
+      ),
+      GoRoute(
+        path: '/education/podcasts',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PodcastsHomeScreen(),
+      ),
+      GoRoute(
+        path: '/education/grin',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const GrinHubScreen(),
+      ),
+      GoRoute(
+        path: '/education/flashcards',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final subject = state.extra is String ? state.extra as String : null;
+          return FlashcardsScreen(selectedSubject: subject);
+        },
       ),
       GoRoute(
         path: '/splash',

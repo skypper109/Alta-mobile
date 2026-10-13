@@ -33,19 +33,20 @@ class DeviceRepository implements IDeviceRepository {
     required DetWebSocketManager wsManager,
     Dio? dio,
     this.detectorPort = 8000,
-    this.scanTimeout  = const Duration(seconds: 3),
+    this.scanTimeout = const Duration(seconds: 3),
   })  : _wsManager = wsManager,
-        _dio = dio ?? Dio(BaseOptions(connectTimeout: const Duration(seconds: 2)));
+        _dio =
+            dio ?? Dio(BaseOptions(connectTimeout: const Duration(seconds: 2)));
 
   final DetWebSocketManager _wsManager;
-  final Dio                 _dio;
-  final int                 detectorPort;
-  final Duration            scanTimeout;
+  final Dio _dio;
+  final int detectorPort;
+  final Duration scanTimeout;
   final _logger = Logger();
 
   static final geminiVirtualDevice = DeviceEntity(
     id: 'alternia-server',
-    name: 'Serveur AlternIA (IA & RAG Mali)',
+    name: 'Serveur AlternIA',
     ipAddress: AltaApiConfig.serverBaseUrl,
     port: 443,
     signalStrength: -20,
@@ -91,31 +92,39 @@ class DeviceRepository implements IDeviceRepository {
   Future<DeviceEntity?> _probeDevice(String ip) async {
     for (final port in [8000, 8080]) {
       try {
-        final url = ip.startsWith('http') ? '$ip/api/info' : 'http://$ip:$port/api/info';
+        final url = ip.startsWith('http')
+            ? '$ip/api/info'
+            : 'http://$ip:$port/api/info';
         final response = await _dio.get(
           url,
           options: Options(
             receiveTimeout: const Duration(seconds: 2),
-            sendTimeout:    const Duration(seconds: 2),
+            sendTimeout: const Duration(seconds: 2),
           ),
         );
 
         if (response.statusCode == 200 && response.data is Map) {
-          return _parseDeviceInfo(ip, port, response.data as Map<String, dynamic>);
+          return _parseDeviceInfo(
+              ip, port, response.data as Map<String, dynamic>);
         }
       } catch (_) {}
     }
     return null;
   }
 
-  DeviceEntity _parseDeviceInfo(String ip, int port, Map<String, dynamic> data) {
+  DeviceEntity _parseDeviceInfo(
+      String ip, int port, Map<String, dynamic> data) {
     return DeviceEntity(
-      id:              data['device_id'] as String? ?? data['id'] as String? ?? ip,
-      name:            data['device_name'] as String? ?? data['name'] as String? ?? 'Boîtier AlternIA',
-      ipAddress:       ip,
-      port:            port,
-      firmwareVersion: data['firmware'] as String? ?? data['firmware_version'] as String? ?? 'v2.0',
-      lastSeen:        DateTime.now(),
+      id: data['device_id'] as String? ?? data['id'] as String? ?? ip,
+      name: data['device_name'] as String? ??
+          data['name'] as String? ??
+          'Boîtier AlternIA',
+      ipAddress: ip,
+      port: port,
+      firmwareVersion: data['firmware'] as String? ??
+          data['firmware_version'] as String? ??
+          'v2.0',
+      lastSeen: DateTime.now(),
     );
   }
 
@@ -147,6 +156,5 @@ class DeviceRepository implements IDeviceRepository {
   }
 
   @override
-  Stream<WsConnectionState> watchConnectionState() =>
-      _wsManager.stateStream;
+  Stream<WsConnectionState> watchConnectionState() => _wsManager.stateStream;
 }

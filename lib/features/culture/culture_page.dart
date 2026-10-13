@@ -208,53 +208,50 @@ class _CulturePageState extends ConsumerState<CulturePage> {
     }
   }
 
-  /// Charge la réponse vidéo Simli et ne l'affiche qu'une fois le rendu terminé
+  /// Réponse vocale et visuelle immédiate du Vieux Sage (fonctionne en ligne et hors-ligne)
   Future<void> _loadSageResponse(String replyText, {String? subject}) async {
     await _stopAudio();
 
-    // 1. Appel du backend pour générer la vidéo Simli
-    // Tant que Simli n'a pas fini et renvoyé la vidéo, on n'affiche rien sur le téléphone
-    final videoUrl = await _cultureService.generateSageVideo(
-      text: replyText,
-      subject: subject,
-    );
-
     if (!mounted) return;
 
-    if (videoUrl != null && videoUrl.isNotEmpty) {
-      // Vidéo et audio Henri prêts : affichage simultané du texte et de la vidéo
-      setState(() {
-        _currentVideoUrl = videoUrl;
-        _liveSpeechText = replyText;
-        _avatarState = AvatarState.speaking;
-      });
-    } else {
-      // Fallback si la vidéo échoue : attendre le flux TTS Henri avant d'afficher la réponse
-      Uint8List? audioBytes;
-      try {
-        audioBytes = await _geminiService.fetchBackendTtsAudio(
-          text: replyText,
-          voice: 'henri',
-        );
-      } catch (_) {}
+    // 1. Affichage et animation IMMÉDIATS de l'avatar photoréaliste (zéro freeze)
+    setState(() {
+      _currentVideoUrl = null;
+      _liveSpeechText = replyText;
+      _avatarState = AvatarState.speaking;
+    });
 
-      if (!mounted) return;
-
-      setState(() {
-        _liveSpeechText = replyText;
-        _avatarState = AvatarState.speaking;
-      });
-
-      if (audioBytes != null && audioBytes.isNotEmpty) {
-        try {
-          await GeminiService.playAudioBytes(_audioPlayer, audioBytes);
-        } catch (_) {
-          await _flutterTts.speak(replyText);
-        }
-      } else {
-        await _flutterTts.speak(replyText);
+    // 2. Lancement immédiat de la voix audio (Edge-TTS serveur si en ligne, sinon voix locale Flutter)
+    bool audioStarted = false;
+    try {
+      final audioBytes = await _geminiService.fetchBackendTtsAudio(
+        text: replyText,
+        voice: 'henri',
+      );
+      if (audioBytes != null && audioBytes.isNotEmpty && mounted) {
+        await GeminiService.playAudioBytes(_audioPlayer, audioBytes);
+        audioStarted = true;
       }
+    } catch (_) {}
+
+    if (!audioStarted && mounted) {
+      try {
+        await _flutterTts.speak(replyText);
+      } catch (_) {}
     }
+
+    // 3. Demande de vidéo Simli en tâche de fond (si le serveur est actif)
+    // Ne bloque JAMAIS l'utilisateur : si la vidéo arrive, elle s'affiche en douceur
+    _cultureService.generateSageVideo(
+      text: replyText,
+      subject: subject,
+    ).then((videoUrl) {
+      if (mounted && videoUrl != null && videoUrl.isNotEmpty && _liveSpeechText == replyText) {
+        setState(() {
+          _currentVideoUrl = videoUrl;
+        });
+      }
+    }).catchError((_) {});
   }
 
   void _enterProtagonistMode(String title) {
@@ -593,13 +590,26 @@ class _CulturePageState extends ConsumerState<CulturePage> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: AlterniaVideoPlayer(
               videoUrl: _currentVideoUrl!,
+              fallbackImagePath: CultureAlternIAService.defaultSageImagePath,
               onTap: _onAvatarTapped,
+              onError: () {
+                if (mounted) setState(() => _currentVideoUrl = null);
+              },
+              onCompleted: () {
+                if (mounted) {
+                  setState(() {
+                    _currentVideoUrl = null;
+                    _avatarState = AvatarState.idle;
+                  });
+                }
+              },
             ),
           )
         else
           AlterniaAvatar(
             size: 190,
             state: _avatarState,
+            imagePath: CultureAlternIAService.defaultSageImagePath,
             onTap: _onAvatarTapped,
           ),
 

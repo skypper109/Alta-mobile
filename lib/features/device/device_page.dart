@@ -63,19 +63,21 @@ class DeviceDiscoveryPage extends ConsumerStatefulWidget {
   const DeviceDiscoveryPage({super.key});
 
   @override
-  ConsumerState<DeviceDiscoveryPage> createState() => _DeviceDiscoveryPageState();
+  ConsumerState<DeviceDiscoveryPage> createState() =>
+      _DeviceDiscoveryPageState();
 }
 
 class _DeviceDiscoveryPageState extends ConsumerState<DeviceDiscoveryPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _scanCtrl;
-  late final Animation<double>   _scanAnim;
+  late final Animation<double> _scanAnim;
 
   @override
   void initState() {
     super.initState();
-    _scanCtrl = AnimationController(vsync: this, duration: const Duration(seconds: 3))
-      ..repeat();
+    _scanCtrl =
+        AnimationController(vsync: this, duration: const Duration(seconds: 3))
+          ..repeat();
     _scanAnim = Tween<double>(begin: 0.0, end: 1.0).animate(_scanCtrl);
   }
 
@@ -162,7 +164,8 @@ class _DeviceDiscoveryPageState extends ConsumerState<DeviceDiscoveryPage>
             DetEmptyState(
               icon: Icons.wifi_tethering_off_rounded,
               title: 'Aucun boîtier Wi-Fi détecté',
-              subtitle: 'Vous pouvez scanner le réseau local ou vous connecter directement au serveur local AlternIA (LLM + RAG Mali).',
+              subtitle:
+                  'Vous pouvez scanner le réseau local ou vous connecter directement au serveur local AlTA.',
             ),
             const SizedBox(height: DetSizes.lg),
             DetButton(
@@ -196,7 +199,8 @@ class _DeviceDiscoveryPageState extends ConsumerState<DeviceDiscoveryPage>
       children: [
         Row(
           children: [
-            const Expanded(child: DetSectionHeader(title: 'Boîtiers & Serveurs')),
+            const Expanded(
+                child: DetSectionHeader(title: 'Boîtiers & Serveurs')),
             StatusBrick(
               label: 'ALTERNIA READY',
               color: DetColors.accentGreen,
@@ -204,7 +208,6 @@ class _DeviceDiscoveryPageState extends ConsumerState<DeviceDiscoveryPage>
           ],
         ),
         const SizedBox(height: DetSizes.md),
-
         if (state.isScanning)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: DetSizes.xxl),
@@ -212,18 +215,21 @@ class _DeviceDiscoveryPageState extends ConsumerState<DeviceDiscoveryPage>
           )
         else ...[
           if (state.connectedDevice?.id == 'alternia-server' ||
-              (state.devices.length == 1 && state.devices.first.id == 'alternia-server')) ...[
+              (state.devices.length == 1 &&
+                  state.devices.first.id == 'alternia-server')) ...[
             Container(
               margin: const EdgeInsets.only(bottom: DetSizes.md),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: DetColors.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: DetColors.primary.withValues(alpha: 0.3)),
+                border:
+                    Border.all(color: DetColors.primary.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.cloud_done_rounded, color: DetColors.primary, size: 20),
+                  const Icon(Icons.cloud_done_rounded,
+                      color: DetColors.primary, size: 20),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -256,9 +262,7 @@ class _DeviceDiscoveryPageState extends ConsumerState<DeviceDiscoveryPage>
               ),
             ),
           ),
-
           const SizedBox(height: DetSizes.lg),
-
           DetButton(
             label: state.devices.isEmpty ? DetStrings.deviceScan : 'Rescanner',
             icon: Icons.refresh_rounded,
@@ -269,7 +273,6 @@ class _DeviceDiscoveryPageState extends ConsumerState<DeviceDiscoveryPage>
             },
           ),
         ],
-
         const SizedBox(height: DetSizes.xxxl),
       ],
     );
@@ -284,7 +287,7 @@ class _RadarZone extends StatelessWidget {
   const _RadarZone({required this.animation, required this.state});
 
   final Animation<double> animation;
-  final DeviceState       state;
+  final DeviceState state;
 
   @override
   Widget build(BuildContext context) {
@@ -294,7 +297,8 @@ class _RadarZone extends StatelessWidget {
       decoration: const BoxDecoration(
         color: DetColors.surface,
         border: Border(
-          bottom: BorderSide(color: DetColors.border, width: DetSizes.borderWidth),
+          bottom:
+              BorderSide(color: DetColors.border, width: DetSizes.borderWidth),
         ),
       ),
       child: Stack(
@@ -316,7 +320,8 @@ class _RadarZone extends StatelessWidget {
 
           // Icône centrale
           Container(
-            width: 52, height: 52,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
               color: DetColors.background,
               shape: BoxShape.circle,
@@ -377,18 +382,20 @@ class _DeviceCard extends StatelessWidget {
     required this.onOpenSession,
   });
 
-  final DeviceEntity      device;
-  final bool              isConnected;
+  final DeviceEntity device;
+  final bool isConnected;
   final WsConnectionState connectionState;
-  final VoidCallback      onConnect;
-  final VoidCallback      onOpenSession;
+  final VoidCallback onConnect;
+  final VoidCallback onOpenSession;
 
   @override
   Widget build(BuildContext context) {
     final isConnecting = connectionState == WsConnectionState.connecting;
 
     return DetCard(
-      borderColor: isConnected ? DetColors.accentGreen.withValues(alpha: 0.4) : DetColors.border,
+      borderColor: isConnected
+          ? DetColors.accentGreen.withValues(alpha: 0.4)
+          : DetColors.border,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -396,19 +403,26 @@ class _DeviceCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 44, height: 44,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: isConnected ? DetColors.accentGreenBg : DetColors.surfaceAlt,
+                  color: isConnected
+                      ? DetColors.accentGreenBg
+                      : DetColors.surfaceAlt,
                   borderRadius: DetSizes.borderRadiusMd,
                   border: Border.all(
-                    color: isConnected ? DetColors.accentGreen.withValues(alpha: 0.4) : DetColors.border,
+                    color: isConnected
+                        ? DetColors.accentGreen.withValues(alpha: 0.4)
+                        : DetColors.border,
                     width: DetSizes.borderWidth,
                   ),
                 ),
                 child: Icon(
                   Icons.router_rounded,
                   size: DetSizes.iconMd,
-                  color: isConnected ? DetColors.accentGreen : DetColors.textSecondary,
+                  color: isConnected
+                      ? DetColors.accentGreen
+                      : DetColors.textSecondary,
                 ),
               ),
               const SizedBox(width: DetSizes.md),
@@ -420,7 +434,8 @@ class _DeviceCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       device.ipAddress,
-                      style: DetTextStyles.codeSm.copyWith(color: DetColors.textSecondary),
+                      style: DetTextStyles.codeSm
+                          .copyWith(color: DetColors.textSecondary),
                     ),
                   ],
                 ),
@@ -481,9 +496,9 @@ class _SignalBars extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: List.generate(3, (i) {
         final threshold = (i + 1) / 3;
-        final active    = quality >= threshold;
+        final active = quality >= threshold;
         return Container(
-          width:  5,
+          width: 5,
           height: 6.0 + i * 4.0,
           margin: const EdgeInsets.only(left: 2),
           decoration: BoxDecoration(
@@ -520,7 +535,8 @@ class _MetaChip extends StatelessWidget {
             TextSpan(text: '$label ', style: DetTextStyles.caption),
             TextSpan(
               text: value,
-              style: DetTextStyles.codeSm.copyWith(color: DetColors.textPrimary),
+              style:
+                  DetTextStyles.codeSm.copyWith(color: DetColors.textPrimary),
             ),
           ],
         ),

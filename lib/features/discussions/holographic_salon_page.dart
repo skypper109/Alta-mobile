@@ -390,61 +390,49 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
 
       final cleanReply = reply.replaceAll('*', '');
 
-      // 2. Appel synchrone pour générer la vidéo labiale Simli / AlternIA
-      // On ATTEND que Simli ait fini et renvoyé la vidéo avant d'afficher la réponse sur le téléphone
-      final videoUrl = await _geminiService.generateAlternIAAvatarVideo(
+      // 2. Affichage immédiat du texte et animation vocale de l'avatar photoréaliste
+      setState(() {
+        _currentVideoUrl = null;
+        _avatarState = AvatarState.speaking;
+        _transcript.add(_SalonMessage(
+          sender: 'Professeur Henri (AlternIA)',
+          text: cleanReply,
+          isUser: false,
+          timestamp: 'Maintenant',
+        ));
+      });
+      _scrollToBottom();
+
+      // 3. Audio instantané (TTS Henri serveur ou FlutterTTS local si hors-ligne)
+      bool audioStarted = false;
+      try {
+        final audioBytes = await _geminiService.fetchBackendTtsAudio(
+          text: cleanReply,
+          voice: 'henri',
+        );
+        if (audioBytes != null && audioBytes.isNotEmpty && mounted) {
+          await GeminiService.playAudioBytes(_audioPlayer, audioBytes);
+          audioStarted = true;
+        }
+      } catch (_) {}
+
+      if (!audioStarted && mounted) {
+        try {
+          await _flutterTts.speak(cleanReply);
+        } catch (_) {}
+      }
+
+      // 4. Génération vidéo Simli en tâche de fond (non bloquante)
+      _geminiService.generateAlternIAAvatarVideo(
         text: cleanReply,
         voice: 'henri',
-      );
-
-      if (!mounted) return;
-
-      if (videoUrl != null && videoUrl.isNotEmpty) {
-        // La vidéo Simli et la voix Henri sont prêtes : affichage simultané du texte et de la vidéo
-        setState(() {
-          _currentVideoUrl = videoUrl;
-          _avatarState = AvatarState.speaking;
-          _transcript.add(_SalonMessage(
-            sender: 'Professeur Henri (AlternIA)',
-            text: cleanReply,
-            isUser: false,
-            timestamp: 'Maintenant',
-          ));
-        });
-        _scrollToBottom();
-      } else {
-        // Si la génération vidéo échoue ou est hors-ligne : attendre le TTS Henri avant d'afficher
-        Uint8List? audioBytes;
-        try {
-          audioBytes = await _geminiService.fetchBackendTtsAudio(
-            text: cleanReply,
-            voice: 'henri',
-          );
-        } catch (_) {}
-
-        if (!mounted) return;
-
-        setState(() {
-          _avatarState = AvatarState.speaking;
-          _transcript.add(_SalonMessage(
-            sender: 'Professeur Henri (AlternIA)',
-            text: cleanReply,
-            isUser: false,
-            timestamp: 'Maintenant',
-          ));
-        });
-        _scrollToBottom();
-
-        if (audioBytes != null && audioBytes.isNotEmpty) {
-          try {
-            await GeminiService.playAudioBytes(_audioPlayer, audioBytes);
-          } catch (_) {
-            await _flutterTts.speak(cleanReply);
-          }
-        } else {
-          await _flutterTts.speak(cleanReply);
+      ).then((videoUrl) {
+        if (mounted && videoUrl != null && videoUrl.isNotEmpty) {
+          setState(() {
+            _currentVideoUrl = videoUrl;
+          });
         }
-      }
+      }).catchError((_) {});
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -840,12 +828,25 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
         if (_currentVideoUrl != null && _currentVideoUrl!.isNotEmpty)
           AlterniaVideoPlayer(
             videoUrl: _currentVideoUrl!,
+            fallbackImagePath: 'assets/images/avatar_prof.png',
             onTap: () => _sendLiveQuestion('Explique-moi les principes essentiels du cours.'),
+            onError: () {
+              if (mounted) setState(() => _currentVideoUrl = null);
+            },
+            onCompleted: () {
+              if (mounted) {
+                setState(() {
+                  _currentVideoUrl = null;
+                  _avatarState = AvatarState.idle;
+                });
+              }
+            },
           )
         else
           AlterniaAvatar(
             size: 150,
             state: _avatarState,
+            imagePath: 'assets/images/avatar_prof.png',
             onTap: () => _sendLiveQuestion(
                 'Explique-moi les principes essentiels du cours.'),
           ),
