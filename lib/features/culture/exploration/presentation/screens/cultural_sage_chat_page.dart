@@ -556,13 +556,17 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
               children: [
                 Row(
                   children: [
-                    Text(
-                      'LE VIEUX SAGE DU MALI',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
-                        color: CultureTheme.accentOrange,
+                    Flexible(
+                      child: Text(
+                        'LE VIEUX SAGE DU MALI',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                          color: CultureTheme.accentOrange,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 6),

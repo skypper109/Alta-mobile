@@ -1060,12 +1060,16 @@ class ProfileScreen extends ConsumerWidget {
                           color: Colors.white,
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          'Voir le Classement National des Lycées',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                        Flexible(
+                          child: Text(
+                            'Classement National des Lycées',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 6),

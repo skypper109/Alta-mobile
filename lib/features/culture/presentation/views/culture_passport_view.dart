@@ -322,38 +322,45 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: CultureTheme.accentOrange.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: CultureTheme.accentOrange.withValues(alpha: 0.25),
-                        width: 1,
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: CultureTheme.accentOrange.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: CultureTheme.accentOrange.withValues(alpha: 0.25),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.stars_rounded,
+                          size: 20,
+                          color: CultureTheme.accentOrange,
+                        ),
                       ),
                     ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.stars_rounded,
-                        size: 20,
-                        color: CultureTheme.accentOrange,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Passeport d\'Exploration',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w800,
+                          color: titleColor,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Passeport d\'Exploration',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w800,
-                      color: titleColor,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               // Badge de niveau épuré (uniquement le niveau)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

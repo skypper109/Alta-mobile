@@ -267,12 +267,16 @@ class HomeScreen extends ConsumerWidget {
                       children: [
                         Row(
                           children: [
-                            Text(
-                              'Grand Défi National',
-                              style: GoogleFonts.plusJakartaSans(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                            Flexible(
+                              child: Text(
+                                'Grand Défi National',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 6),
@@ -296,6 +300,8 @@ class HomeScreen extends ConsumerWidget {
                         const SizedBox(height: 3),
                         Text(
                           '20 questions · 300 pièces en jeu · Classement national',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.plusJakartaSans(
                             color: Colors.white70,
                             fontSize: 11,
