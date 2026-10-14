@@ -5,12 +5,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:permission_handler/permission_handler.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'app.dart';
 import 'core/constants/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ── Polices Google Fonts hors-ligne (zéro crash / zéro requête réseau) ─────
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   // ── Orientation portrait ────────────────────────────────────────────────
   await SystemChrome.setPreferredOrientations([

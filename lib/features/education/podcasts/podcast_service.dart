@@ -22,8 +22,8 @@ class PodcastService {
 
   final Dio _dio = Dio(
     BaseOptions(
-      connectTimeout: const Duration(seconds: 8),
-      receiveTimeout: const Duration(seconds: 15),
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(minutes: 20),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -149,8 +149,10 @@ class PodcastService {
             'student_name': studentName ?? 'Élève',
           },
           options: Options(
-            connectTimeout: const Duration(seconds: 10),
-            receiveTimeout: const Duration(seconds: 50),
+            connectTimeout: const Duration(seconds: 30),
+            // Temps d'attente prolongé (20 minutes) pour laisser le modèle IA local
+            // (llama.cpp / Qwen / Mistral) rédiger l'intégralité du cours pédagogique sans coupure.
+            receiveTimeout: const Duration(minutes: 20),
           ),
         );
 

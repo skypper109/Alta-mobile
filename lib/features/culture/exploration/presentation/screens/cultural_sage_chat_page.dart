@@ -275,15 +275,11 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
         },
       );
     } catch (_) {
-      try {
-        await _tts.speak(msg.text);
-      } catch (_) {
-        if (mounted) {
-          setState(() {
-            _currentlySpeakingMessageId = null;
-            _sageState = _SageState.idle;
-          });
-        }
+      if (mounted) {
+        setState(() {
+          _currentlySpeakingMessageId = null;
+          _sageState = _SageState.idle;
+        });
       }
     }
   }
@@ -379,9 +375,12 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
             },
           );
         } catch (_) {
-          try {
-            await _tts.speak(reply);
-          } catch (_) {}
+          if (mounted) {
+            setState(() {
+              _currentlySpeakingMessageId = null;
+              _sageState = _SageState.idle;
+            });
+          }
         }
       }
     } catch (_) {

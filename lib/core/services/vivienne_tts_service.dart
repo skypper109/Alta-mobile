@@ -10,6 +10,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../constants.dart';
+
 /// Statuts de lecture du moteur vocal Vivienne Neural
 enum VivienneTtsStatus {
   idle,
@@ -51,7 +53,6 @@ class VivienneTtsService {
   static const String vivienneLanguage = 'fr-FR';
 
   final AudioPlayer _audioPlayer = AudioPlayer();
-  final FlutterTts _fallbackTts = FlutterTts();
 
   VivienneTtsStatus _status = VivienneTtsStatus.idle;
   String? _currentText;
@@ -61,6 +62,7 @@ class VivienneTtsService {
   // File d'attente pour la lecture continue fluide
   final List<String> _playbackQueue = [];
   bool _isPlayingQueue = false;
+  bool _isAdvancingQueue = false;
   int _currentQueueIndex = 0;
 
   VoidCallback? _onStartCallback;
@@ -84,9 +86,12 @@ class VivienneTtsService {
           if (!_isPlayingQueue) {
             _status = VivienneTtsStatus.stopped;
           }
-        } else if (state == PlayerState.completed) {
-          _handleChunkCompleted();
         }
+      });
+
+      // Écouteur unique et prioritaire de fin de piste pour iOS AVPlayer / Android
+      _audioPlayer.onPlayerComplete.listen((_) {
+        _handleChunkCompleted();
       });
     } catch (e) {
       debugPrint('[VivienneTts] Erreur init AudioPlayer: $e');
@@ -349,6 +354,79 @@ class VivienneTtsService {
   // 3. GESTION DU CACHE DISQUE LOCAL & PRÉ-SYNTHÈSE
   // ─────────────────────────────────────────────────────────────────────────────
 
+  static String? _workingBackendUrl;
+
+  /// Résolution immédiate de l'URL active du serveur en moins de 15ms
+  static Future<String?> _resolveWorkingBackendUrl() async {
+    if (_workingBackendUrl != null) return _workingBackendUrl;
+
+    // Priorité aux adresses locales ultra-rapides pour éviter tout timeout réseau
+    final priorityCandidates = [
+      'http://127.0.0.1:8000',
+      'http://localhost:8000',
+      'http://10.0.2.2:8000',
+      ...AltaApiConfig.candidateBaseUrls,
+    ];
+
+    final uniqueUrls = <String>[];
+    for (final u in priorityCandidates) {
+      if (!uniqueUrls.contains(u)) uniqueUrls.add(u);
+    }
+
+    final client = HttpClient()..connectionTimeout = const Duration(milliseconds: 600);
+
+    for (final base in uniqueUrls) {
+      try {
+        final req = await client.getUrl(Uri.parse('$base/health'));
+        final resp = await req.close().timeout(const Duration(milliseconds: 700));
+        if (resp.statusCode == 200) {
+          _workingBackendUrl = base;
+          client.close();
+          return base;
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+    client.close();
+    return null;
+  }
+
+  /// Synthèse vocale haute fidélité Vivienne directement via le backend AlternIA (/api/tts)
+  Future<Uint8List?> _fetchFromBackendTts(String cleanText) async {
+    final activeUrl = await _resolveWorkingBackendUrl();
+    if (activeUrl == null) return null;
+
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 5);
+
+    try {
+      final uri = Uri.parse('$activeUrl/api/tts');
+      final req = await client.postUrl(uri);
+      req.headers.set(HttpHeaders.contentTypeHeader, 'application/json; charset=utf-8');
+      final body = jsonEncode({
+        'text': cleanText,
+        'voice': 'vivienne',
+      });
+      req.add(utf8.encode(body));
+      final resp = await req.close().timeout(const Duration(seconds: 25));
+      if (resp.statusCode == 200) {
+        final builder = BytesBuilder();
+        await for (final chunk in resp) {
+          builder.add(chunk);
+        }
+        final bytes = builder.toBytes();
+        if (bytes.isNotEmpty) {
+          return bytes;
+        }
+      }
+    } catch (e) {
+      debugPrint('[VivienneTts] Erreur appel HTTP /api/tts: $e');
+    } finally {
+      client.close();
+    }
+    return null;
+  }
+
   /// Obtient ou synthétise le fichier audio MP3 de la phrase demandée
   Future<File> getOrSynthesizeAudioFile(String text) async {
     final cleanText = cleanForSpeech(text);
@@ -365,7 +443,23 @@ class VivienneTtsService {
       return cachedFile;
     }
 
-    // Synthèse haute fidélité via protocole neural
+    // 1. Synthèse prioritaire directement sur le serveur backend AlternIA (avec retry)
+    for (var attempt = 1; attempt <= 2; attempt++) {
+      try {
+        final backendBytes = await _fetchFromBackendTts(cleanText);
+        if (backendBytes != null && backendBytes.isNotEmpty) {
+          await cachedFile.writeAsBytes(backendBytes, flush: true);
+          return cachedFile;
+        }
+      } catch (e) {
+        debugPrint('[VivienneTts] Tentative $attempt échouée pour: $cleanText ($e)');
+        if (attempt < 2) {
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
+      }
+    }
+
+    // 2. Synthèse haute fidélité via protocole direct de secours
     try {
       final audioBytes = await _synthesizeNeuralBytes(cleanText);
       if (audioBytes.isNotEmpty) {
@@ -373,10 +467,88 @@ class VivienneTtsService {
         return cachedFile;
       }
     } catch (e) {
-      debugPrint('[VivienneTts] Exception synthèse neurale: $e');
+      debugPrint('[VivienneTts] Exception synthèse neurale direct: $e');
     }
 
-    throw Exception('Impossible de synthétiser le fichier audio neural');
+    throw Exception('Impossible de synthétiser le fichier audio neural avec Vivienne');
+  }
+
+  /// Répertoire de stockage permanent des fichiers audio complets de podcasts
+  Future<Directory> getPodcastsAudioDirectory() async {
+    final docDir = await getApplicationDocumentsDirectory();
+    final dir = Directory('${docDir.path}/podcasts_audio');
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+    return dir;
+  }
+
+  /// Récupère le fichier audio complet du podcast s'il est déjà en cache
+  Future<File?> getCachedPodcastAudio(String podcastId) async {
+    try {
+      final dir = await getPodcastsAudioDirectory();
+      final file = File('${dir.path}/podcast_$podcastId.mp3');
+      if (await file.exists() && await file.length() > 5000) {
+        return file;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  /// Synthétise et enregistre l'INTÉGRALITÉ du podcast dans le cache du téléphone
+  /// avant de permettre son écoute.
+  /// Concatène tous les blocs audio en un fichier MP3 unique et fluide.
+  Future<File> preheatAndCacheFullPodcastAudio({
+    required String podcastId,
+    required String fullScript,
+    Function(double progress, String status)? onProgress,
+  }) async {
+    final dir = await getPodcastsAudioDirectory();
+    final targetFile = File('${dir.path}/podcast_$podcastId.mp3');
+
+    if (await targetFile.exists() && await targetFile.length() > 5000) {
+      onProgress?.call(1.0, 'Cours audio prêt !');
+      return targetFile;
+    }
+
+    onProgress?.call(0.05, 'Préparation de la narration...');
+    final cleaned = cleanForSpeech(fullScript);
+    if (cleaned.isEmpty) {
+      throw Exception('Le script du podcast est vide');
+    }
+
+    final sentences = _splitIntoSentences(cleaned);
+    if (sentences.isEmpty) {
+      throw Exception('Aucune phrase valide extraite du script');
+    }
+
+    final total = sentences.length;
+    final audioChunks = BytesBuilder(copy: false);
+
+    for (var i = 0; i < total; i++) {
+      final phrase = sentences[i];
+      final currentProgress = 0.05 + ((i / total) * 0.90);
+      onProgress?.call(
+        currentProgress,
+        'Enregistrement vocal Vivienne (${i + 1}/$total phrases)...',
+      );
+
+      final chunkFile = await getOrSynthesizeAudioFile(phrase);
+      final bytes = await chunkFile.readAsBytes();
+      if (bytes.isNotEmpty) {
+        audioChunks.add(bytes);
+      }
+    }
+
+    onProgress?.call(0.96, 'Assemblage de l\'audio HD dans le cache...');
+    final fullBytes = audioChunks.toBytes();
+    if (fullBytes.isEmpty) {
+      throw Exception('Échec de la génération audio du podcast');
+    }
+
+    await targetFile.writeAsBytes(fullBytes, flush: true);
+    onProgress?.call(1.0, 'Cours audio prêt !');
+    return targetFile;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -425,42 +597,43 @@ class VivienneTtsService {
       _onStartCallback?.call();
       await _audioPlayer.play(DeviceFileSource(file.path, mimeType: 'audio/mpeg'));
 
-      // Pré-synthèse en tâche de fond de la phrase suivante pour 0ms de coupure
+      // Pré-synthèse séquentielle de la SEULE phrase suivante (pour ne pas saturer le backend)
       final nextIndex = _currentQueueIndex + 1;
       if (nextIndex < _playbackQueue.length) {
         getOrSynthesizeAudioFile(_playbackQueue[nextIndex]).catchError((_) => file);
       }
     } catch (e) {
-      debugPrint('[VivienneTts] Erreur lecture phrase neurale: $e');
-      // Repli immédiat de secours
-      _fallbackSpeak(currentPhrase);
+      debugPrint('[VivienneTts] Erreur sur la phrase $_currentQueueIndex : $e. Nouvelle tentative avec Vivienne...');
+      await Future.delayed(const Duration(milliseconds: 800));
+      if (!_isPlayingQueue || _isDisposed) return;
+      try {
+        final file = await getOrSynthesizeAudioFile(currentPhrase);
+        if (_isDisposed || !_isPlayingQueue) return;
+        _status = VivienneTtsStatus.speaking;
+        await _audioPlayer.play(DeviceFileSource(file.path, mimeType: 'audio/mpeg'));
+      } catch (err) {
+        // Avancer sur la phrase suivante sans jamais basculer sur une autre voix
+        _onErrorCallback?.call(err.toString());
+        _handleChunkCompleted();
+      }
     }
   }
 
   void _handleChunkCompleted() {
-    if (!_isPlayingQueue) return;
+    if (!_isPlayingQueue || _isAdvancingQueue) return;
+    _isAdvancingQueue = true;
     _currentQueueIndex++;
     if (_currentQueueIndex < _playbackQueue.length) {
-      _playQueue();
+      _playQueue().whenComplete(() {
+        _isAdvancingQueue = false;
+      });
     } else {
+      _isAdvancingQueue = false;
       _isPlayingQueue = false;
       _status = VivienneTtsStatus.stopped;
       final cb = _onCompletionCallback;
       _onCompletionCallback = null;
       cb?.call();
-    }
-  }
-
-  /// Repli automatique si le réseau est totalement indisponible et qu'aucun cache n'existe
-  Future<void> _fallbackSpeak(String text) async {
-    try {
-      await _fallbackTts.setLanguage(vivienneLanguage);
-      await _fallbackTts.setPitch(viviennePitch);
-      await _fallbackTts.setSpeechRate(vivienneSpeechRate);
-      await _fallbackTts.speak(text);
-    } catch (e) {
-      _status = VivienneTtsStatus.error;
-      _onErrorCallback?.call(e.toString());
     }
   }
 
@@ -516,13 +689,13 @@ class VivienneTtsService {
   /// Arrêter la lecture vocale immédiatement
   Future<void> stop() async {
     _isPlayingQueue = false;
+    _isAdvancingQueue = false;
     _playbackQueue.clear();
     _status = VivienneTtsStatus.stopped;
     _onCompletionCallback = null;
 
     try {
       await _audioPlayer.stop();
-      await _fallbackTts.stop();
     } catch (_) {}
   }
 
@@ -555,7 +728,6 @@ class VivienneTtsService {
   void dispose() {
     _isDisposed = true;
     _audioPlayer.dispose();
-    _fallbackTts.stop();
   }
 }
 

@@ -977,54 +977,61 @@ class ProfileScreen extends ConsumerWidget {
                     const SizedBox(width: 10),
                     // Pièces AlterniA
                     Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColors.surface : Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: borderCol),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(7),
-                              decoration: BoxDecoration(
-                                color: AppColors.accent.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(10),
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/wallet');
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: isDark ? AppColors.surface : Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: borderCol),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                  color: AppColors.accent.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  Icons.monetization_on_rounded,
+                                  size: 18,
+                                  color: AppColors.accent,
+                                ),
                               ),
-                              child: const Icon(
-                                Icons.monetization_on_rounded,
-                                size: 18,
-                                color: AppColors.accent,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${gamification.coins} Pièces',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: textPri,
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${gamification.coins} Pièces',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: textPri,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    'Gagnées en duel',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 10,
-                                      color: textSec,
+                                    Text(
+                                      'Portefeuille & Retraits >',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.accent,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -1118,6 +1125,50 @@ class ProfileScreen extends ConsumerWidget {
                 onTap: () => context.push('/education/grin'),
               ),
             ],
+          ),
+
+          const SizedBox(height: 18),
+
+          // ── SECTION SERVICES & MONÉTISATION ────────────────────────────
+          _ProfileNavTile(
+            title: 'Portefeuille & Retraits Mobile Money',
+            subtitle: 'Gérer vos pièces, historique et retraits en FCFA',
+            icon: Icons.account_balance_wallet_rounded,
+            color: AppColors.accent,
+            onTap: () {
+              HapticFeedback.lightImpact();
+              context.push('/wallet');
+            },
+          ),
+          _ProfileNavTile(
+            title: 'Programme de Parrainage',
+            subtitle: 'Partager votre code et débloquer 1 mois Premium offert',
+            icon: Icons.share_rounded,
+            color: AppColors.secondary,
+            onTap: () {
+              HapticFeedback.lightImpact();
+              context.push('/referral');
+            },
+          ),
+          _ProfileNavTile(
+            title: 'Abonnement & Avantages Premium',
+            subtitle: '2 500 FCFA/mois · Cours, IA et podcasts illimités',
+            icon: Icons.workspace_premium_rounded,
+            color: AppColors.primary,
+            onTap: () {
+              HapticFeedback.lightImpact();
+              context.push('/subscription');
+            },
+          ),
+          _ProfileNavTile(
+            title: 'Grand Défi National du Mali',
+            subtitle: 'Compétition nationale officielle avec pièces en jeu',
+            icon: Icons.emoji_events_rounded,
+            color: const Color(0xFFE0823D),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              context.push('/national-challenge');
+            },
           ),
 
           const SizedBox(height: 18),
@@ -1575,3 +1626,89 @@ class _ProfileStatCard extends StatelessWidget {
     );
   }
 }
+
+class _ProfileNavTile extends StatelessWidget {
+  const _ProfileNavTile({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.surface : Colors.white;
+    final borderCol = isDark ? AppColors.surfaceAlt : const Color(0xFFE2E8F0);
+    final textPri = isDark ? AppColors.textPrimary : const Color(0xFF0F172A);
+    final textSec = isDark ? AppColors.textMuted : const Color(0xFF64748B);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderCol, width: 1.1),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(9),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, size: 20, color: color),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.bold,
+                          color: textPri,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          color: textSec,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 13,
+                  color: textSec,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+

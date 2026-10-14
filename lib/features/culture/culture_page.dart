@@ -221,23 +221,24 @@ class _CulturePageState extends ConsumerState<CulturePage> {
       _avatarState = AvatarState.speaking;
     });
 
-    // 2. Lancement immédiat de la voix audio (Edge-TTS serveur si en ligne, sinon voix locale Flutter)
-    bool audioStarted = false;
+    // 2. Lancement de la voix audio haute fidélité Vivienne Neural (zéro Siri)
     try {
-      final audioBytes = await _geminiService.fetchBackendTtsAudio(
-        text: replyText,
-        voice: 'henri',
+      await VivienneTtsService.instance.speak(
+        replyText,
+        onComplete: () {
+          if (mounted && _liveSpeechText == replyText) {
+            setState(() {
+              _avatarState = AvatarState.idle;
+            });
+          }
+        },
       );
-      if (audioBytes != null && audioBytes.isNotEmpty && mounted) {
-        await GeminiService.playAudioBytes(_audioPlayer, audioBytes);
-        audioStarted = true;
+    } catch (_) {
+      if (mounted && _liveSpeechText == replyText) {
+        setState(() {
+          _avatarState = AvatarState.idle;
+        });
       }
-    } catch (_) {}
-
-    if (!audioStarted && mounted) {
-      try {
-        await _flutterTts.speak(replyText);
-      } catch (_) {}
     }
 
     // 3. Demande de vidéo Simli en tâche de fond (si le serveur est actif)

@@ -14,6 +14,7 @@ import '../../../core/constants.dart';
 import '../../device/device_notifier.dart';
 import '../../device/device_page.dart';
 import '../../profile/user_prefs_notifier.dart';
+import '../../../core/services/vivienne_tts_service.dart';
 import 'podcast_model.dart';
 import 'podcast_player_screen.dart';
 import 'podcast_service.dart';
@@ -569,7 +570,14 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final nav = Navigator.of(context);
 
-    // Dialogue d'attente animé
+    final stepNotifier =
+        ValueNotifier<String>('Rédaction pédagogique du cours par l\'IA...');
+    final subNotifier = ValueNotifier<String>(
+      'Adaptation didactique au programme malien...\nLe modèle IA synthétise le cours complet, veuillez patienter...',
+    );
+    final progressNotifier = ValueNotifier<double?>(null);
+
+    // Dialogue d'attente animé à deux étapes (Rédaction IA + Enregistrement vocal)
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -585,30 +593,66 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           content: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CircularProgressIndicator(color: AltaColors.secondary),
-                const SizedBox(height: 18),
-                Text(
-                  'AlternIA compose ton cours audio...',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.bold,
-                    color: dlgTextPri,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Adaptation didactique au programme malien & narration vocale.',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(
-                    color: dlgTextSec,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
+            child: AnimatedBuilder(
+              animation: Listenable.merge(
+                  [stepNotifier, subNotifier, progressNotifier]),
+              builder: (context, _) {
+                final prog = progressNotifier.value;
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (prog == null)
+                      const CircularProgressIndicator(
+                          color: AltaColors.secondary)
+                    else ...[
+                      SizedBox(
+                        width: 52,
+                        height: 52,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              value: prog,
+                              color: AltaColors.accent,
+                              backgroundColor:
+                                  AltaColors.secondary.withValues(alpha: 0.2),
+                              strokeWidth: 5,
+                            ),
+                            Text(
+                              '${(prog * 100).toInt()}%',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: dlgTextPri,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 18),
+                    Text(
+                      stepNotifier.value,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.bold,
+                        color: dlgTextPri,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      subNotifier.value,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.plusJakartaSans(
+                        color: dlgTextSec,
+                        fontSize: 11,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         );
@@ -616,6 +660,7 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
     );
 
     try {
+      // 1. Rédaction du cours par le LLM
       final podcast = await PodcastService.instance.generatePodcast(
         subject: subject,
         topic: topic,
@@ -623,11 +668,26 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
         studentName: userState.name,
       );
 
+      // 2. Enregistrement vocal complet de Vivienne dans le cache du téléphone
+      stepNotifier.value = 'Mise en cache vocale de Vivienne...';
+      subNotifier.value =
+          'Enregistrement de la voix complète dans le cache de ton téléphone avant écoute...';
+      progressNotifier.value = 0.05;
+
+      await VivienneTtsService.instance.preheatAndCacheFullPodcastAudio(
+        podcastId: podcast.id,
+        fullScript: podcast.fullScript,
+        onProgress: (prog, status) {
+          progressNotifier.value = prog;
+          subNotifier.value = status;
+        },
+      );
+
       if (mounted) {
         nav.pop(); // Ferme le dialogue de chargement
         await _loadPodcastsAndQuota();
 
-        // Ouvre directement le lecteur de podcast avec la voix Vivienne
+        // Ouvre le lecteur avec le cours audio déjà 100% prêt et en cache
         nav.push(
           MaterialPageRoute(
             builder: (_) => PodcastPlayerScreen(podcast: podcast),
@@ -1031,10 +1091,8 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
                       color: cardBg,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: podcast.isCustomGenerated
-                            ? AltaColors.secondary.withValues(alpha: 0.50)
-                            : borderCol,
-                        width: podcast.isCustomGenerated ? 1.5 : 1.0,
+                        color: borderCol,
+                        width: 1.0,
                       ),
                       boxShadow: [
                         BoxShadow(
@@ -1045,156 +1103,136 @@ class _PodcastsHomeScreenState extends ConsumerState<PodcastsHomeScreen> {
                         ),
                       ],
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Colored accent top strip
-                        Container(
-                          height: 3,
-                          decoration: BoxDecoration(
-                            color: podcast.accentColor,
-                            borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(20)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          // Subject icon box
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color:
+                                  podcast.accentColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Icon(
+                              podcast.icon,
+                              color: podcast.accentColor,
+                              size: 25,
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(14),
-                          child: Row(
-                            children: [
-                              // Subject icon box
-                              Container(
-                                width: 52,
-                                height: 52,
-                                decoration: BoxDecoration(
-                                  color: podcast.accentColor
-                                      .withValues(alpha: 0.14),
-                                  borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(
-                                    color: podcast.accentColor
-                                        .withValues(alpha: 0.30),
-                                  ),
-                                ),
-                                child: Icon(
-                                  podcast.icon,
-                                  color: podcast.accentColor,
-                                  size: 25,
-                                ),
-                              ),
-                              const SizedBox(width: 13),
+                          const SizedBox(width: 13),
 
-                              // Info column
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                          // Info column
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
                                   children: [
-                                    Row(
-                                      children: [
-                                        Flexible(
-                                          fit: FlexFit.loose,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 7, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: podcast.accentColor
-                                                  .withValues(alpha: 0.15),
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                            ),
-                                            child: Text(
-                                              podcast.subject.toUpperCase(),
-                                              style:
-                                                  GoogleFonts.plusJakartaSans(
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w800,
-                                                color: podcast.accentColor,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
+                                    Flexible(
+                                      fit: FlexFit.loose,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 7, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: podcast.accentColor
+                                              .withValues(alpha: 0.15),
+                                          borderRadius:
+                                              BorderRadius.circular(6),
                                         ),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                          child: Text(
-                                            '${podcast.classLevel} • ${podcast.durationMinutes} min',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 10,
-                                              color: textSec,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
+                                        child: Text(
+                                          podcast.subject.toUpperCase(),
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w800,
+                                            color: podcast.accentColor,
                                           ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      podcast.title,
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: textPri,
-                                        height: 1.25,
                                       ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      podcast.summary,
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 11,
-                                        color: textSec,
-                                        height: 1.35,
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        '${podcast.classLevel} • ${podcast.durationMinutes} min',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 10,
+                                          color: textSec,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-
-                              // Action column
-                              Column(
-                                children: [
-                                  Container(
-                                    width: 42,
-                                    height: 42,
-                                    decoration: BoxDecoration(
-                                      color: AltaColors.accent,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.play_arrow_rounded,
-                                      color: Colors.white,
-                                      size: 24,
-                                    ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  podcast.title,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: textPri,
+                                    height: 1.25,
                                   ),
-                                  if (podcast.isCustomGenerated) ...[
-                                    const SizedBox(height: 6),
-                                    GestureDetector(
-                                      onTap: () =>
-                                          _deleteCustomPodcast(podcast),
-                                      child: Icon(
-                                        Icons.delete_outline_rounded,
-                                        size: 18,
-                                        color: AltaColors.error
-                                            .withValues(alpha: 0.7),
-                                      ),
-                                    ),
-                                  ],
-                                ],
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  podcast.summary,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11,
+                                    color: textSec,
+                                    height: 1.35,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+
+                          // Action column
+                          Column(
+                            children: [
+                              Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: AltaColors.accent,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.play_arrow_rounded,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
                               ),
+                              if (podcast.isCustomGenerated) ...[
+                                const SizedBox(height: 6),
+                                GestureDetector(
+                                  onTap: () => _deleteCustomPodcast(podcast),
+                                  child: Icon(
+                                    Icons.delete_outline_rounded,
+                                    size: 18,
+                                    color:
+                                        AltaColors.error.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-            ],
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
+            ]
           ],
         ),
       ),

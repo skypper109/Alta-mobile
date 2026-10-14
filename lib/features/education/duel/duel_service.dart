@@ -57,22 +57,24 @@ class DuelService {
     required String subject,
     required String classLevel,
     int count = 5,
+    String period = 'trimestre_1',
   }) async {
     final activeUrl = await getActiveBaseUrlFast();
 
     if (activeUrl != null) {
       try {
-        _logger.i('[DuelService] Requête questions IA en direct ($count questions) → $activeUrl/api/duel/generate');
+        _logger.i('[DuelService] Requête questions IA en direct ($count questions, $period) → $activeUrl/api/duel/generate');
         final response = await _dio.post(
           '$activeUrl/api/duel/generate',
           data: {
             'subject': subject,
             'class_level': classLevel,
             'count': count,
+            'period': period,
           },
           options: Options(
-            connectTimeout: const Duration(seconds: 10),
-            receiveTimeout: const Duration(seconds: 35),
+            connectTimeout: const Duration(seconds: 15),
+            receiveTimeout: const Duration(minutes: 5),
           ),
         );
 
@@ -116,6 +118,7 @@ class DuelService {
     required String classLevel,
     required String subject,
     int count = 5,
+    String period = 'trimestre_1',
   }) async {
     final activeUrl = await getActiveBaseUrlFast();
     if (activeUrl == null) return null;
@@ -128,10 +131,11 @@ class DuelService {
           'class_level': classLevel,
           'subject': subject,
           'count': count,
+          'period': period,
         },
         options: Options(
-          connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 35),
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(minutes: 5),
         ),
       );
 
@@ -159,16 +163,51 @@ class DuelService {
           'room_code': roomCode.trim().toUpperCase(),
           'player_name': playerName,
         },
-        options: Options(connectTimeout: const Duration(seconds: 6)),
+        options: Options(
+          connectTimeout: const Duration(seconds: 6),
+          validateStatus: (status) => status != null && status < 500,
+        ),
       );
 
       if (res.statusCode == 200 && res.data is Map) {
         return Map<String, dynamic>.from(res.data as Map);
+      } else if (res.data is Map) {
+        final data = Map<String, dynamic>.from(res.data as Map);
+        data['status'] = 'error';
+        return data;
       }
+    } on DioException catch (e) {
+      if (e.response?.data is Map) {
+        final data = Map<String, dynamic>.from(e.response!.data as Map);
+        data['status'] = 'error';
+        return data;
+      }
+      _logger.w('[DuelService] Validation code salon impossible : ${e.message}');
     } catch (e) {
-      _logger.e('[DuelService] Erreur validation code salon : $e');
+      _logger.w('[DuelService] Erreur validation code salon : $e');
     }
     return null;
+  }
+
+  /// Lance le duel pour les deux joueurs (appelé par l'Hôte)
+  Future<bool> startRoom({
+    required String roomCode,
+    required String playerName,
+  }) async {
+    final activeUrl = await getActiveBaseUrlFast();
+    if (activeUrl == null) return false;
+
+    try {
+      final res = await _dio.post(
+        '$activeUrl/api/duel/room/${roomCode.trim().toUpperCase()}/start',
+        data: {'player_name': playerName},
+        options: Options(connectTimeout: const Duration(seconds: 4)),
+      );
+      return res.statusCode == 200;
+    } catch (e) {
+      _logger.e('[DuelService] Erreur startRoom : $e');
+      return false;
+    }
   }
 
   /// Consulte l'état de la salle en direct (statut, adversaire, scores)
@@ -219,6 +258,7 @@ class DuelService {
     required String classLevel,
     required String subject,
     int count = 5,
+    String period = 'trimestre_1',
   }) async {
     final activeUrl = await getActiveBaseUrlFast();
     if (activeUrl == null) return null;
@@ -231,10 +271,11 @@ class DuelService {
           'class_level': classLevel,
           'subject': subject,
           'count': count,
+          'period': period,
         },
         options: Options(
-          connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 35),
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(minutes: 5),
         ),
       );
 

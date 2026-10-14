@@ -110,6 +110,10 @@ class HomeScreen extends ConsumerWidget {
                   value: gamification.coins,
                   icon: Icons.monetization_on_rounded,
                   color: AppColors.accentLight,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    context.push('/wallet');
+                  },
                 ),
               ),
             ],
@@ -222,6 +226,92 @@ class HomeScreen extends ConsumerWidget {
               HapticFeedback.selectionClick();
               context.push('/education/duel/leaderboard');
             },
+          ),
+          const SizedBox(height: 12),
+
+          // BANNIÈRE GRAND DÉFI NATIONAL DU MALI
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              context.push('/national-challenge');
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppColors.accent.withValues(alpha: 0.4)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.emoji_events_rounded,
+                      color: AppColors.accent,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Grand Défi National',
+                              style: GoogleFonts.plusJakartaSans(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.accent,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'SESSION OUVERTE',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          '20 questions · 300 pièces en jeu · Classement national',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.white70,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: AppColors.accent,
+                    size: 14,
+                  ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 12),
 
@@ -532,12 +622,14 @@ class _TeenStatBadge extends StatelessWidget {
     required this.value,
     required this.icon,
     required this.color,
+    this.onTap,
   });
 
   final String label;
   final String value;
   final IconData icon;
   final Color color;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -546,6 +638,7 @@ class _TeenStatBadge extends StatelessWidget {
     final labelColor = isDark ? AppColors.textMuted : const Color(0xFF475569);
 
     return CustomCard(
+      onTap: onTap,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: Row(
         children: [

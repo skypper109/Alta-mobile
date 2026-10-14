@@ -4,7 +4,9 @@
 library;
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -27,12 +29,17 @@ class PodcastPlayerScreen extends StatefulWidget {
 
 class _PodcastPlayerScreenState extends State<PodcastPlayerScreen>
     with SingleTickerProviderStateMixin {
+  final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlaying = false;
   double _playbackSpeed = 1.0;
 
   int _currentSeconds = 0;
   late int _totalSeconds;
-  Timer? _progressTimer;
+
+  bool _isPreparingAudio = false;
+  double _prepareProgress = 0.0;
+  String _prepareStatus = '';
+  File? _cachedAudioFile;
 
   late AnimationController _waveController;
 
@@ -44,78 +51,130 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
-    _startNarration();
+    _initAudioListeners();
+    _loadAndPlayAudio();
   }
 
-  Future<void> _startNarration() async {
-    await VivienneTtsService.instance.stop();
-    setState(() => _isPlaying = true);
-    _waveController.repeat(reverse: true);
-
-    _progressTimer?.cancel();
-    _progressTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+  void _initAudioListeners() {
+    _audioPlayer.onPositionChanged.listen((d) {
       if (!mounted) return;
-      if (_currentSeconds < _totalSeconds) {
-        setState(() => _currentSeconds++);
+      setState(() => _currentSeconds = d.inSeconds);
+    });
+
+    _audioPlayer.onDurationChanged.listen((d) {
+      if (!mounted) return;
+      if (d.inSeconds > 0) {
+        setState(() => _totalSeconds = d.inSeconds);
+      }
+    });
+
+    _audioPlayer.onPlayerStateChanged.listen((state) {
+      if (!mounted) return;
+      final playing = state == PlayerState.playing;
+      setState(() => _isPlaying = playing);
+      if (playing) {
+        _waveController.repeat(reverse: true);
       } else {
-        _progressTimer?.cancel();
-        setState(() => _isPlaying = false);
         _waveController.stop();
       }
     });
 
-    try {
-      await VivienneTtsService.instance.speak(widget.podcast.fullScript);
-    } catch (_) {}
+    _audioPlayer.onPlayerComplete.listen((_) {
+      if (!mounted) return;
+      setState(() {
+        _isPlaying = false;
+        _currentSeconds = _totalSeconds;
+      });
+      _waveController.stop();
+    });
+  }
+
+  Future<void> _loadAndPlayAudio() async {
+    // Arrêter toute lecture en cours
+    await VivienneTtsService.instance.stop();
+
+    // 1. Vérifier si le cours audio est déjà dans le cache du téléphone
+    var file = await VivienneTtsService.instance.getCachedPodcastAudio(widget.podcast.id);
+
+    if (file == null) {
+      setState(() {
+        _isPreparingAudio = true;
+        _prepareProgress = 0.05;
+        _prepareStatus = 'Enregistrement de la voix dans le cache...';
+      });
+
+      try {
+        file = await VivienneTtsService.instance.preheatAndCacheFullPodcastAudio(
+          podcastId: widget.podcast.id,
+          fullScript: widget.podcast.fullScript,
+          onProgress: (p, s) {
+            if (!mounted) return;
+            setState(() {
+              _prepareProgress = p;
+              _prepareStatus = s;
+            });
+          },
+        );
+      } catch (e) {
+        debugPrint('[PodcastPlayer] Erreur mise en cache audio: $e');
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _isPreparingAudio = false;
+      _cachedAudioFile = file;
+    });
+
+    if (file != null && await file.exists()) {
+      await _audioPlayer.setSource(DeviceFileSource(file.path, mimeType: 'audio/mpeg'));
+      await _audioPlayer.setPlaybackRate(_playbackSpeed);
+      await _audioPlayer.resume();
+    }
   }
 
   @override
   void dispose() {
-    _progressTimer?.cancel();
     _waveController.dispose();
-    VivienneTtsService.instance.stop();
+    _audioPlayer.stop();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
   void _togglePlay() async {
     HapticFeedback.mediumImpact();
     if (_isPlaying) {
-      await VivienneTtsService.instance.stop();
-      _progressTimer?.cancel();
-      _waveController.stop();
-      setState(() => _isPlaying = false);
+      await _audioPlayer.pause();
     } else {
-      setState(() => _isPlaying = true);
-      _waveController.repeat(reverse: true);
-      _progressTimer?.cancel();
-      _progressTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (!mounted) return;
-        if (_currentSeconds < _totalSeconds) {
-          setState(() => _currentSeconds++);
-        } else {
-          _progressTimer?.cancel();
-          setState(() => _isPlaying = false);
-          _waveController.stop();
-        }
-      });
-      try {
-        await VivienneTtsService.instance.speak(widget.podcast.fullScript);
-      } catch (_) {}
+      if (_cachedAudioFile == null) {
+        await _loadAndPlayAudio();
+        return;
+      }
+      if (_currentSeconds >= _totalSeconds) {
+        await _audioPlayer.seek(Duration.zero);
+      }
+      await _audioPlayer.resume();
     }
   }
 
-  void _seekBy(int seconds) {
+  void _seekBy(int seconds) async {
     HapticFeedback.selectionClick();
-    setState(() {
-      _currentSeconds = (_currentSeconds + seconds).clamp(0, _totalSeconds);
-    });
+    final target = (_currentSeconds + seconds).clamp(0, _totalSeconds);
+    await _audioPlayer.seek(Duration(seconds: target));
   }
 
-  void _cycleSpeed() {
+  void _seekTo(int seconds) async {
+    final target = seconds.clamp(0, _totalSeconds);
+    await _audioPlayer.seek(Duration(seconds: target));
+  }
+
+  void _cycleSpeed() async {
     HapticFeedback.selectionClick();
     final speeds = [0.8, 1.0, 1.25, 1.5];
     final nextIndex = (speeds.indexOf(_playbackSpeed) + 1) % speeds.length;
-    setState(() => _playbackSpeed = speeds[nextIndex]);
+    final newSpeed = speeds[nextIndex];
+    setState(() => _playbackSpeed = newSpeed);
+    await _audioPlayer.setPlaybackRate(newSpeed);
   }
 
   String _formatTime(int sec) {
@@ -325,7 +384,7 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen>
               children: [
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                   decoration: BoxDecoration(
                     color: AltaColors.secondary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
@@ -336,11 +395,14 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.record_voice_over_rounded,
-                          size: 13, color: AltaColors.secondary),
+                      const Icon(
+                        Icons.record_voice_over_rounded,
+                        size: 13,
+                        color: AltaColors.secondary,
+                      ),
                       const SizedBox(width: 5),
                       Text(
-                        'Voix AlternIA · Vivienne',
+                        'Voix Neurale HD · Vivienne (AlternIA)',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -380,6 +442,56 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen>
                       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
                       child: Column(
                         children: [
+                          if (_isPreparingAudio) ...[
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: AltaColors.accent
+                                    .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AltaColors.accent
+                                      .withValues(alpha: 0.35),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.2,
+                                      color: AltaColors.accent,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      _prepareStatus.isNotEmpty
+                                          ? _prepareStatus
+                                          : 'Enregistrement de la voix dans le cache...',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: AltaColors.accent,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    '${(_prepareProgress * 100).toInt()}%',
+                                    style: GoogleFonts.spaceMono(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: AltaColors.accent,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+
                           // Slider de progression
                           SliderTheme(
                             data: SliderTheme.of(context).copyWith(
@@ -397,10 +509,8 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen>
                             child: Slider(
                               value: progress,
                               onChanged: (val) {
-                                setState(() {
-                                  _currentSeconds =
-                                      (val * _totalSeconds).toInt();
-                                });
+                                final target = (val * _totalSeconds).toInt();
+                                _seekTo(target);
                               },
                             ),
                           ),

@@ -48,6 +48,10 @@ import '../../features/education/duel/duel_leaderboard_screen.dart';
 import '../../features/education/podcasts/podcasts_home_screen.dart';
 import '../../features/education/flashcards/flashcards_screen.dart';
 import '../../features/education/grin/grin_hub_screen.dart';
+import '../../features/wallet/wallet_screen.dart';
+import '../../features/referral/referral_screen.dart';
+import '../../features/subscription/subscription_screen.dart';
+import '../../features/national_challenge/national_challenge_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -552,6 +556,26 @@ GoRouter appRouter(Ref ref) {
           final subject = state.extra is String ? state.extra as String : null;
           return FlashcardsScreen(selectedSubject: subject);
         },
+      ),
+      GoRoute(
+        path: '/wallet',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const WalletScreen(),
+      ),
+      GoRoute(
+        path: '/referral',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ReferralScreen(),
+      ),
+      GoRoute(
+        path: '/subscription',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SubscriptionScreen(),
+      ),
+      GoRoute(
+        path: '/national-challenge',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const NationalChallengeScreen(),
       ),
       GoRoute(
         path: '/splash',

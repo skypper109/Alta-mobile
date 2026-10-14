@@ -28,6 +28,11 @@ class GamificationState {
     return int.tryParse(cleaned) ?? 3450;
   }
 
+  int get streakInt {
+    final cleaned = streak.replaceAll(RegExp(r'[^0-9]'), '');
+    return int.tryParse(cleaned) ?? 0;
+  }
+
   int get coinsInt {
     final cleaned = coins.replaceAll(RegExp(r'[^0-9]'), '');
     return int.tryParse(cleaned) ?? 240;
@@ -273,6 +278,51 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
       };
       await prefs.setString(_prefsKey, jsonEncode(cacheData));
     } catch (_) {}
+  }
+
+  /// Sauvegarde l'état courant dans le cache SharedPreferences local
+  Future<void> _saveLocalCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheData = {
+        'streak': state.streak,
+        'streak_label': state.streak,
+        'xp': state.xpInt,
+        'xp_label': state.xp,
+        'coins': state.coins,
+        'coins_label': state.coins,
+        'seances': state.seances,
+        'seances_label': state.seances,
+        'subjects_progress': state.subjectsProgress,
+      };
+      await prefs.setString(_prefsKey, jsonEncode(cacheData));
+    } catch (_) {}
+  }
+
+  /// Crédite instantanément de l'XP au profil global et persiste le cache local
+  Future<void> addXp(int xpGained) async {
+    final newXpVal = state.xpInt + xpGained;
+    state = state.copyWith(
+      xp: _formatNumber(newXpVal),
+    );
+    await _saveLocalCache();
+  }
+
+  /// Incrémente le streak de jours consécutifs
+  Future<void> incrementStreak([int amount = 1]) async {
+    final newStreakVal = state.streakInt + amount;
+    state = state.copyWith(
+      streak: '${newStreakVal}j',
+    );
+    await _saveLocalCache();
+  }
+
+  /// Définit manuellement la valeur du streak
+  Future<void> setStreak(int streakCount) async {
+    state = state.copyWith(
+      streak: '${streakCount}j',
+    );
+    await _saveLocalCache();
   }
 }
 

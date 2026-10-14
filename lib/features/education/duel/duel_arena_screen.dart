@@ -28,6 +28,7 @@ class DuelArenaScreen extends ConsumerStatefulWidget {
     this.roomCode,
     this.initialQuestions,
     this.questionCount = 5,
+    this.period = 'trimestre_1',
   });
 
   final String subject;
@@ -38,6 +39,7 @@ class DuelArenaScreen extends ConsumerStatefulWidget {
   final String? roomCode;
   final List<DuelQuestion>? initialQuestions;
   final int questionCount;
+  final String period;
 
   @override
   ConsumerState<DuelArenaScreen> createState() => _DuelArenaScreenState();
@@ -74,6 +76,11 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
       duration: const Duration(milliseconds: 1000),
     )..repeat(reverse: true);
 
+    // Synchronisation en temps réel du score adverse pour les salons multijoueurs
+    if (widget.roomCode != null && widget.roomCode!.isNotEmpty) {
+      _startOpponentScoreSync();
+    }
+
     if (widget.initialQuestions != null &&
         widget.initialQuestions!.isNotEmpty) {
       _questions = widget.initialQuestions!;
@@ -82,6 +89,29 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
     } else {
       _loadQuestions();
     }
+  }
+
+  void _startOpponentScoreSync() {
+    _opponentPollTimer?.cancel();
+    _opponentPollTimer =
+        Timer.periodic(const Duration(milliseconds: 900), (t) async {
+      if (!mounted) return;
+      final status = await duelServiceProvider.getRoomStatus(widget.roomCode!);
+      if (status != null && mounted) {
+        final creatorName =
+            (status['creator_name'] ?? '').toString().trim().toLowerCase();
+        final isHost = widget.playerName.trim().toLowerCase() == creatorName;
+        final realOpponentScore = isHost
+            ? (status['guest_score'] as num?)?.toInt() ?? 0
+            : (status['creator_score'] as num?)?.toInt() ?? 0;
+
+        if (realOpponentScore != _opponentScore) {
+          setState(() {
+            _opponentScore = realOpponentScore;
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -98,6 +128,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
       subject: widget.subject,
       classLevel: widget.classLevel,
       count: widget.questionCount,
+      period: widget.period,
     );
     if (!mounted) return;
     setState(() {
@@ -141,6 +172,16 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
       _selectedOption = -1;
       _simulateOpponent();
     });
+
+    if (widget.roomCode != null && widget.roomCode!.isNotEmpty) {
+      duelServiceProvider.updateScore(
+        roomCode: widget.roomCode!,
+        playerName: widget.playerName,
+        score: _playerScore,
+        questionIndex: _currentIndex,
+      );
+    }
+
     _showExplanationDialog();
   }
 
@@ -161,7 +202,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
       _simulateOpponent();
     });
 
-    if (widget.roomCode != null) {
+    if (widget.roomCode != null && widget.roomCode!.isNotEmpty) {
       duelServiceProvider.updateScore(
         roomCode: widget.roomCode!,
         playerName: widget.playerName,
@@ -174,6 +215,12 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
   }
 
   void _simulateOpponent() {
+    // Si nous sommes dans un salon multijoueur réel avec un camarade,
+    // le vrai score adverse est mis à jour en direct via _opponentPollTimer !
+    if (widget.roomCode != null && widget.roomCode!.isNotEmpty) {
+      return;
+    }
+
     if (widget.mode == DuelMode.vsAi) {
       final aiIsCorrect = (_currentIndex % 4 != 3);
       if (aiIsCorrect) {
@@ -184,8 +231,6 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
       if (peerCorrect) {
         _opponentScore += 100 + ((_secondsRemaining + 1) * 8);
       }
-    } else if (widget.roomCode != null) {
-      _opponentScore += 95 + (_secondsRemaining * 6);
     }
   }
 
@@ -209,6 +254,16 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
   void _finishDuel() {
     _timer?.cancel();
     _opponentPollTimer?.cancel();
+
+    if (widget.roomCode != null && widget.roomCode!.isNotEmpty) {
+      duelServiceProvider.updateScore(
+        roomCode: widget.roomCode!,
+        playerName: widget.playerName,
+        score: _playerScore,
+        questionIndex: _questions.length,
+      );
+    }
+
     final isDraw = _playerScore == _opponentScore;
     final playerWon = _playerScore > _opponentScore;
 

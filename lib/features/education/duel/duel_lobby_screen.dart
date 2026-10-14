@@ -29,6 +29,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
   String _selectedSubject = 'Mathématiques';
   DuelMode _selectedMode = DuelMode.vsAi;
   int _selectedQuestionCount = 5;
+  String _selectedPeriod = 'trimestre_1';
   bool _isOnline = false;
   bool _isCheckingConnection = true;
 
@@ -88,6 +89,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
       classLevel: classId,
       subject: _selectedSubject,
       count: questionCount,
+      period: _selectedPeriod,
     );
 
     if (!mounted) return;
@@ -145,10 +147,17 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
               }
             });
 
-            void launchArena() {
+            void launchArena() async {
               if (isStarting) return;
               isStarting = true;
               pollTimer?.cancel();
+
+              // Démarrage officiel synchronisé de la salle sur le serveur
+              await duelServiceProvider.startRoom(
+                roomCode: roomCode,
+                playerName: playerName,
+              );
+
               if (sheetCtx.mounted) Navigator.pop(sheetCtx);
               if (mounted) {
                 HapticFeedback.heavyImpact();
@@ -165,6 +174,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                       initialQuestions:
                           questions.isNotEmpty ? questions : null,
                       questionCount: questions.length,
+                      period: _selectedPeriod,
                     ),
                   ),
                 );
@@ -475,20 +485,40 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
     }
 
     final codeController = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AltaColors.surfaceDark : AltaColors.surfaceLight;
+    final borderCol = isDark ? AltaColors.borderDark : AltaColors.borderLight;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSec = isDark ? Colors.white70 : const Color(0xFF475569);
 
     showDialog(
       context: context,
       builder: (dlgCtx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        backgroundColor: cardBg,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: borderCol),
+        ),
         title: Row(
           children: [
-            const Icon(Icons.login_rounded, color: AltaColors.secondary),
-            const SizedBox(width: 8),
-            Text(
-              'Rejoindre un Défi',
-              style: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AltaColors.secondary.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.login_rounded,
+                  color: AltaColors.secondary, size: 20),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Rejoindre un Défi',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: textPri,
+                ),
               ),
             ),
           ],
@@ -497,38 +527,72 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Saisis le code de validation reçu de ton camarade (ex: ML-4821) :',
-              style: TextStyle(fontSize: 13),
+            Text(
+              'Saisis le code PIN partagé par ton camarade (ex: ML-4821) :',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12.5,
+                color: textSec,
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: codeController,
+              autofocus: true,
               textCapitalization: TextCapitalization.characters,
               textAlign: TextAlign.center,
               style: GoogleFonts.spaceMono(
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
-                letterSpacing: 2,
+                letterSpacing: 3,
+                color: AltaColors.secondary,
               ),
               decoration: InputDecoration(
                 hintText: 'ML-XXXX',
+                hintStyle: GoogleFonts.spaceMono(
+                  color: Colors.grey.withValues(alpha: 0.4),
+                  letterSpacing: 3,
+                ),
                 filled: true,
+                fillColor: isDark
+                    ? AltaColors.surfaceAltDark
+                    : const Color(0xFFF1F5F9),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: borderCol),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: borderCol),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(
+                      color: AltaColors.secondary, width: 2.0),
                 ),
               ),
             ),
           ],
         ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dlgCtx),
-            child: const Text('Annuler'),
+            child: Text(
+              'Annuler',
+              style: GoogleFonts.plusJakartaSans(
+                color: textSec,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AltaColors.accent,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -557,26 +621,12 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
 
               if (res != null && res['status'] == 'success') {
                 HapticFeedback.heavyImpact();
-                final rawQs =
-                    (res['room']?['questions'] as List<dynamic>?) ?? [];
-                final questions = rawQs
-                    .map(
-                        (q) => DuelQuestion.fromJson(q as Map<String, dynamic>))
-                    .toList();
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DuelArenaScreen(
-                      subject: res['room']?['subject'] ?? _selectedSubject,
-                      classLevel: classId,
-                      mode: DuelMode.joinRoomWithCode,
-                      playerName: playerName,
-                      opponentName: res['opponent_name'] ?? 'Ami Connecté',
-                      roomCode: code,
-                      initialQuestions: questions.isNotEmpty ? questions : null,
-                    ),
-                  ),
+                // Ouvre l'écran d'attente synchronisé pour le joueur invité
+                _showGuestWaitingSheet(
+                  roomCode: code,
+                  playerName: playerName,
+                  classId: classId,
+                  joinResponse: res,
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -590,12 +640,319 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                 );
               }
             },
-            child: const Text('Valider & Démarrer',
+            child: const Text('Valider & Rejoindre',
                 style: TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
+    );
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // SALLE D'ATTENTE SYNCHRONISÉE POUR LE JOUEUR INVITÉ
+  // ───────────────────────────────────────────────────────────────────────────
+  void _showGuestWaitingSheet({
+    required String roomCode,
+    required String playerName,
+    required String classId,
+    required Map<String, dynamic> joinResponse,
+  }) {
+    final creatorName = joinResponse['opponent_name'] ?? 'Hôte du Salon';
+    final subject = joinResponse['room']?['subject'] ?? _selectedSubject;
+    final period = joinResponse['room']?['period'] ?? _selectedPeriod;
+    final rawQs = (joinResponse['room']?['questions'] as List<dynamic>?) ?? [];
+    List<DuelQuestion> questions = rawQs
+        .map((q) => DuelQuestion.fromJson(q as Map<String, dynamic>))
+        .toList();
+
+    Timer? guestPollTimer;
+    bool hasStarted = false;
+
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) {
+        final isDark = Theme.of(sheetCtx).brightness == Brightness.dark;
+        final cardBg = isDark ? AltaColors.surfaceDark : AltaColors.surfaceLight;
+        final borderCol = isDark ? AltaColors.borderDark : AltaColors.borderLight;
+        final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+        final textSec = isDark ? Colors.white70 : const Color(0xFF475569);
+
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            guestPollTimer ??=
+                Timer.periodic(const Duration(milliseconds: 900), (t) async {
+              if (hasStarted) return;
+              final status = await duelServiceProvider.getRoomStatus(roomCode);
+              if (status != null) {
+                if (questions.isEmpty && status['questions'] is List) {
+                  final sRaw = status['questions'] as List;
+                  questions = sRaw
+                      .map((q) =>
+                          DuelQuestion.fromJson(q as Map<String, dynamic>))
+                      .toList();
+                }
+
+                if (status['status'] == 'IN_PROGRESS') {
+                  hasStarted = true;
+                  guestPollTimer?.cancel();
+                  if (sheetCtx.mounted) Navigator.pop(sheetCtx);
+                  if (mounted) {
+                    HapticFeedback.heavyImpact();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => DuelArenaScreen(
+                          subject: status['subject'] ?? subject,
+                          classLevel: classId,
+                          mode: DuelMode.joinRoomWithCode,
+                          playerName: playerName,
+                          opponentName: status['creator_name'] ?? creatorName,
+                          roomCode: roomCode,
+                          initialQuestions:
+                              questions.isNotEmpty ? questions : null,
+                          period: period,
+                        ),
+                      ),
+                    );
+                  }
+                }
+              }
+            });
+
+            return PopScope(
+              onPopInvokedWithResult: (didPop, _) {
+                guestPollTimer?.cancel();
+              },
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(32)),
+                  border: Border.all(color: borderCol),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.meeting_room_rounded,
+                            size: 24, color: AltaColors.secondary),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'SALON DE DUEL IA • $subject',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.1,
+                              color: AltaColors.secondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Tu as rejoint le salon avec succès !',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: textPri,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AltaColors.surfaceAltDark
+                            : AltaColors.surfaceAltLight,
+                        borderRadius: BorderRadius.circular(16),
+                        border:
+                            Border.all(color: AltaColors.secondary, width: 1.5),
+                      ),
+                      child: Text(
+                        roomCode,
+                        style: GoogleFonts.spaceMono(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 3,
+                          color: AltaColors.secondary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Participants
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AltaColors.surfaceAltDark
+                            : AltaColors.surfaceAltLight,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: borderCol),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Participants dans le salon (2/2) :',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: textSec,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const CircleAvatar(
+                                radius: 14,
+                                backgroundColor: AltaColors.primary,
+                                child: Icon(Icons.person_rounded,
+                                    size: 16, color: Colors.white),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '$creatorName (Hôte)',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: textPri,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Text(
+                                  'Hôte 👑',
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const CircleAvatar(
+                                radius: 14,
+                                backgroundColor: AltaColors.secondary,
+                                child: Icon(Icons.person_rounded,
+                                    size: 16, color: Colors.white),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '$playerName (Toi)',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: textPri,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Text(
+                                  'Prêt 🟢',
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: AltaColors.secondary),
+                        ),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Text(
+                            'En attente que $creatorName lance le duel...',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              color: AltaColors.secondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Le chrono et les questions démarreront en direct dès le clic de l\'hôte.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11, color: textSec),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                        ),
+                        onPressed: () {
+                          guestPollTimer?.cancel();
+                          Navigator.pop(sheetCtx);
+                        },
+                        child: Text('Quitter le salon',
+                            style: TextStyle(color: textPri)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -655,6 +1012,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
       classLevel: classId,
       subject: _selectedSubject,
       count: questionCount,
+      period: _selectedPeriod,
     );
 
     if (!mounted) return;
@@ -682,6 +1040,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
             roomCode: res['room_code'],
             initialQuestions: questions.isNotEmpty ? questions : null,
             questionCount: questionCount,
+            period: _selectedPeriod,
           ),
         ),
       );
@@ -1055,10 +1414,12 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                     subtitle: 'Saisis le code de ton camarade',
                     icon: Icons.login_rounded,
                     isSelected: _selectedMode == DuelMode.joinRoomWithCode,
+                    isAction: true,
                     color: AltaColors.secondary,
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      HapticFeedback.mediumImpact();
                       setState(() => _selectedMode = DuelMode.joinRoomWithCode);
+                      _handleJoinRoomDialog(firstName, userState.studentClassId);
                     },
                   ),
                 ),
@@ -1153,9 +1514,85 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
 
             const SizedBox(height: 22),
 
-            // ── 3. SÉLECTION DE LA MATIÈRE DU PROGRAMME ─────────────────────
+            // ── 3. PÉRIODE DU PROGRAMME SCOLAIRE (RAG ADAPTATIF) ───────────
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '3. Période Scolaire du Programme',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: textPri,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AltaColors.secondary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Filtre RAG Début / Fin 🛡️',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: AltaColors.secondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            _PeriodSelectOption(
+              periodKey: 'trimestre_1',
+              title: '1er Trimestre',
+              subtitle:
+                  'Début d\'année (Oct - Déc) • Fondamentaux & leçons initiales',
+              badge: 'Début d\'année',
+              isSelected: _selectedPeriod == 'trimestre_1',
+              onTap: () {
+                HapticFeedback.selectionClick();
+                setState(() => _selectedPeriod = 'trimestre_1');
+              },
+            ),
+            const SizedBox(height: 8),
+
+            _PeriodSelectOption(
+              periodKey: 'trimestre_2',
+              title: '2ème Trimestre',
+              subtitle:
+                  'Milieu d\'année (Jan - Mar) • Chapitres intermédiaires',
+              badge: 'Milieu d\'année',
+              isSelected: _selectedPeriod == 'trimestre_2',
+              onTap: () {
+                HapticFeedback.selectionClick();
+                setState(() => _selectedPeriod = 'trimestre_2');
+              },
+            ),
+            const SizedBox(height: 8),
+
+            _PeriodSelectOption(
+              periodKey: 'trimestre_3',
+              title: '3ème Trimestre / Tout le programme',
+              subtitle:
+                  'Fin d\'année (Avr - Juin) & Préparation intensive Bac / DEF',
+              badge: 'Examens Finaux',
+              isSelected: _selectedPeriod == 'trimestre_3',
+              onTap: () {
+                HapticFeedback.selectionClick();
+                setState(() => _selectedPeriod = 'trimestre_3');
+              },
+            ),
+
+            const SizedBox(height: 22),
+
+            // ── 4. SÉLECTION DE LA MATIÈRE DU PROGRAMME ─────────────────────
             Text(
-              '3. Matière au Programme (${userState.classShortLabel})',
+              '4. Matière au Programme (${userState.classShortLabel})',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -1201,7 +1638,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
 
             const SizedBox(height: 28),
 
-            // ── 4. BOUTON ACTION LANCER LE DUEL ─────────────────────────────
+            // ── 5. BOUTON ACTION LANCER LE DUEL ─────────────────────────────
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -1237,6 +1674,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                               ? 'Professeur IA'
                               : 'Camarade',
                           questionCount: _selectedQuestionCount,
+                          period: _selectedPeriod,
                         ),
                       ),
                     );
@@ -1358,28 +1796,35 @@ class _ModeSelectTile extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
           color: isSelected
               ? (isDark
                   ? AltaColors.surfaceAltDark
-                  : AltaColors.surfaceAltLight)
+                  : AltaColors.primary.withValues(alpha: 0.05))
               : cardBg,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isSelected ? AltaColors.primary : borderCol,
             width: isSelected ? 1.8 : 1.0,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(9),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
+                color: color.withValues(alpha: 0.13),
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, color: color, size: 22),
+              child: Icon(icon, color: color, size: 21),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -1390,7 +1835,7 @@ class _ModeSelectTile extends StatelessWidget {
                     title,
                     style: GoogleFonts.plusJakartaSans(
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                      fontSize: 13.5,
                       color: textPri,
                     ),
                   ),
@@ -1400,17 +1845,23 @@ class _ModeSelectTile extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       color: textSec,
+                      height: 1.3,
                     ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 8),
             Icon(
               isSelected
                   ? Icons.check_circle_rounded
                   : Icons.radio_button_unchecked_rounded,
-              color: isSelected ? AltaColors.primary : Colors.grey,
-              size: 20,
+              color: isSelected
+                  ? AltaColors.primary
+                  : (isDark
+                      ? Colors.white24
+                      : Colors.grey.withValues(alpha: 0.4)),
+              size: 21,
             ),
           ],
         ),
@@ -1427,6 +1878,7 @@ class _MiniModeCard extends StatelessWidget {
     required this.isSelected,
     required this.color,
     required this.onTap,
+    this.isAction = false,
   });
 
   final String title;
@@ -1435,6 +1887,7 @@ class _MiniModeCard extends StatelessWidget {
   final bool isSelected;
   final Color color;
   final VoidCallback onTap;
+  final bool isAction;
 
   @override
   Widget build(BuildContext context) {
@@ -1443,50 +1896,223 @@ class _MiniModeCard extends StatelessWidget {
     final borderCol = isDark ? AltaColors.borderDark : AltaColors.borderLight;
     final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
     final textSec = isDark ? Colors.white70 : const Color(0xFF475569);
+    final highlight = isAction ? AltaColors.secondary : AltaColors.primary;
 
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(13),
         decoration: BoxDecoration(
           color: isSelected
               ? (isDark
                   ? AltaColors.surfaceAltDark
-                  : AltaColors.surfaceAltLight)
+                  : highlight.withValues(alpha: 0.05))
               : cardBg,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isSelected ? AltaColors.primary : borderCol,
+            color: isSelected ? highlight : borderCol,
             width: isSelected ? 1.8 : 1.0,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 18),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.13),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: color, size: 19),
+                ),
+                if (isAction)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AltaColors.secondary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Saisir',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: AltaColors.secondary,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 11,
+                          color: AltaColors.secondary,
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Icon(
+                    isSelected
+                        ? Icons.check_circle_rounded
+                        : Icons.radio_button_unchecked_rounded,
+                    color: isSelected
+                        ? AltaColors.primary
+                        : (isDark
+                            ? Colors.white24
+                            : Colors.grey.withValues(alpha: 0.4)),
+                    size: 19,
+                  ),
+              ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
               title,
               style: GoogleFonts.plusJakartaSans(
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
+                fontSize: 12.5,
                 color: textPri,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 3),
             Text(
               subtitle,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 10,
+                fontSize: 10.5,
                 color: textSec,
+                height: 1.25,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PeriodSelectOption extends StatelessWidget {
+  const _PeriodSelectOption({
+    required this.periodKey,
+    required this.title,
+    required this.subtitle,
+    required this.badge,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String periodKey;
+  final String title;
+  final String subtitle;
+  final String badge;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderCol = isDark ? AltaColors.borderDark : AltaColors.borderLight;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSec = isDark ? Colors.white70 : const Color(0xFF475569);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AltaColors.secondary.withValues(alpha: 0.12)
+              : (isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? AltaColors.secondary : borderCol,
+            width: isSelected ? 2.0 : 1.0,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AltaColors.secondary
+                    : (isDark ? AltaColors.surfaceDark : const Color(0xFFE2E8F0)),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isSelected
+                    ? Icons.check_circle_rounded
+                    : Icons.calendar_month_rounded,
+                size: 16,
+                color: isSelected ? Colors.white : textSec,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          title,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: isSelected
+                                ? FontWeight.w800
+                                : FontWeight.w700,
+                            fontSize: 13,
+                            color: isSelected ? AltaColors.secondary : textPri,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AltaColors.secondary.withValues(alpha: 0.2)
+                              : Colors.grey.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          badge,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? AltaColors.secondary : textSec,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      color: textSec,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

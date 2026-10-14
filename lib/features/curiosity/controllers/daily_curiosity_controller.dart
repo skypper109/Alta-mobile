@@ -115,8 +115,8 @@ class DailyCuriosityController extends StateNotifier<DailyCuriosityState> {
 
       // Créditer l'XP et le streak dans le profil global
       try {
-        _ref.read(gamificationProvider.notifier).addXp(state.todayItem.challenge.xpReward);
-        _ref.read(gamificationProvider.notifier).incrementStreak();
+        await _ref.read(gamificationProvider.notifier).addXp(state.todayItem.challenge.xpReward);
+        await _ref.read(gamificationProvider.notifier).incrementStreak();
       } catch (_) {}
 
       state = state.copyWith(
