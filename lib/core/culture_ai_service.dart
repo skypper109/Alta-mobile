@@ -9,10 +9,28 @@ import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 
 import 'constants.dart';
+import '../features/culture/core/datasources/malian_names_knowledge.dart';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // CULTURE AI SERVICE — Moteur de Recherche & Guide Culturel Mali
 // ══════════════════════════════════════════════════════════════════════════════
+
+/// Résultat complet d'un échange avec Grand-mère Mah sous le baobab
+class SageChatResponse {
+  final String answer;
+  final String scenicAction;
+  final MalianNameInfo? matchedName;
+  final List<String> sources;
+  final bool isFromBackend;
+
+  const SageChatResponse({
+    required this.answer,
+    required this.scenicAction,
+    this.matchedName,
+    this.sources = const [],
+    this.isFromBackend = true,
+  });
+}
 
 /// Résultat d'une recherche culturelle IA
 class CultureSearchResult {
@@ -561,6 +579,203 @@ class CultureAiService {
 
     // 4. FALLBACK LOCAL AUTONOME : Le Vieux Sage répond TOUJOURS avec authenticité
     return generateLocalSageResponse(cleanMsg, additionalContext);
+  }
+
+  // ── CHAT AVEC GRAND-MÈRE MAH SOUS LE BAOBAB (BACKEND DB PRIORITAIRE) ─────
+
+  Future<SageChatResponse> chatWithGrandmereMah({
+    required String userMessage,
+    List<Map<String, String>> history = const [],
+    String? additionalContext,
+  }) async {
+    final cleanMsg = userMessage.trim();
+    if (cleanMsg.isEmpty) {
+      return const SageChatResponse(
+        answer:
+            'I ni sou, mon enfant ! Approche, assieds-toi près du feu sous le grand baobab. '
+            'Je suis Grand-mère Mah, mémoire vivante et conteuse du Mandé. '
+            'Dis-moi quel est ton nom de famille ou ton prénom, et je te révèlerai son histoire sacrée !',
+        scenicAction:
+            "Grand-mère Mah attise le feu de bois d'un geste tranquille et rajuste son moussor",
+        isFromBackend: false,
+      );
+    }
+
+    final payload = {
+      'message': cleanMsg,
+      'history': history,
+      'context': additionalContext,
+    };
+
+    // 1. APPEL PRIORITAIRE DU NOUVEL ENDPOINT FASTAPI : /api/v1/culture/sage/chat
+    for (final baseUrl in _candidateUrls) {
+      try {
+        _logger.i('[GrandmereMah] Requête vers $baseUrl/api/v1/culture/sage/chat');
+        final response = await _dio.post(
+          '$baseUrl/api/v1/culture/sage/chat',
+          data: payload,
+          options: Options(
+            headers: {'Content-Type': 'application/json'},
+            connectTimeout: const Duration(milliseconds: 3000),
+            receiveTimeout: const Duration(seconds: 14),
+          ),
+        );
+
+        if (response.statusCode == 200 && response.data is Map) {
+          final data = response.data as Map<String, dynamic>;
+          final rawAnswer = (data['answer'] ?? data['reponse'] as String? ?? '').trim();
+          final scenicAction = (data['scenicAction'] as String? ?? '').trim();
+          final matchedData = data['matchedName'] as Map<String, dynamic>?;
+          final sources = (data['sources'] as List<dynamic>? ?? [])
+              .map((s) => s.toString())
+              .toList();
+
+          MalianNameInfo? matchedNameInfo;
+          if (matchedData != null) {
+            matchedNameInfo = MalianNameInfo.fromJson(matchedData);
+          }
+
+          if (rawAnswer.isNotEmpty) {
+            final cleaned = _stripClassificationTags(rawAnswer);
+            return SageChatResponse(
+              answer: cleaned,
+              scenicAction: scenicAction.isNotEmpty
+                  ? scenicAction
+                  : "Grand-mère Mah esquisse un sourire bienveillant et incline doucement la tête vers les flammes",
+              matchedName: matchedNameInfo,
+              sources: sources,
+              isFromBackend: true,
+            );
+          }
+        }
+      } on DioException catch (e) {
+        _logger.d('[GrandmereMah] Backend injoignable sur $baseUrl (${e.message})');
+      } catch (e) {
+        _logger.d('[GrandmereMah] Erreur sur $baseUrl : $e');
+      }
+    }
+
+    // 2. Repli secondaire : Interrogation de /api/v1/culture/names/{query} pour la généalogie
+    final backendName = await fetchNameDetailsFromBackend(cleanMsg);
+    if (backendName != null) {
+      return SageChatResponse(
+        answer: backendName.toNarrativeText(),
+        scenicAction:
+            "Grand-mère Mah fait tinter discrètement ses perles d'ambre et pose sa main sur la calebasse",
+        matchedName: backendName,
+        sources: [
+          'Base de Données Généalogique AlterniA (Direct)',
+          'Terroir : ${backendName.origin}',
+        ],
+        isFromBackend: true,
+      );
+    }
+
+    // 3. Repli tertiaire : Appel RAG classique /api/v1/culture/ask
+    try {
+      final askAnswer = await culturalChat(
+        userMessage: cleanMsg,
+        history: history,
+        additionalContext: additionalContext,
+      );
+      final localMatched = MalianNamesKnowledge.findNameInfo(cleanMsg);
+      return SageChatResponse(
+        answer: askAnswer,
+        scenicAction:
+            "Grand-mère Mah lève les yeux vers le ciel étoilé du Mandé avant de répondre avec douceur",
+        matchedName: localMatched,
+        sources: const ['Mémoire vivante du Mandé'],
+        isFromBackend: false,
+      );
+    } catch (_) {}
+
+    // 4. REPLI HORS-LIGNE LOCAL COMPLET
+    final localName = MalianNamesKnowledge.findNameInfo(cleanMsg);
+    if (localName != null) {
+      return SageChatResponse(
+        answer: localName.toNarrativeText(),
+        scenicAction:
+            "Grand-mère Mah jette une poignée de brindilles parfumées sur les braises rougeoyantes",
+        matchedName: localName,
+        sources: const ['Dictionnaire Généalogique AlterniA (Local Embarqué)'],
+        isFromBackend: false,
+      );
+    }
+
+    return SageChatResponse(
+      answer: generateLocalSageResponse(cleanMsg, additionalContext),
+      scenicAction:
+          "Grand-mère Mah attise le feu de bois d'un geste tranquille et rajuste son moussor",
+      matchedName: null,
+      sources: const ['Sagesse Ancestrale du Mali (Local)'],
+      isFromBackend: false,
+    );
+  }
+
+  /// Récupère la fiche détaillée d'un nom ou prénom directement depuis la BDD backend
+  Future<MalianNameInfo?> fetchNameDetailsFromBackend(String nameQuery) async {
+    final clean = nameQuery.trim();
+    if (clean.isEmpty) return null;
+
+    for (final baseUrl in _candidateUrls) {
+      try {
+        final encoded = Uri.encodeComponent(clean);
+        final response = await _dio.get(
+          '$baseUrl/api/v1/culture/names/$encoded',
+          options: Options(
+            connectTimeout: const Duration(milliseconds: 2500),
+            receiveTimeout: const Duration(seconds: 10),
+          ),
+        );
+
+        if (response.statusCode == 200 && response.data is Map) {
+          return MalianNameInfo.fromJson(response.data as Map<String, dynamic>);
+        }
+      } catch (_) {}
+    }
+
+    // Fallback local
+    return MalianNamesKnowledge.findNameInfo(clean);
+  }
+
+  /// Récupère le catalogue complet des patronymes et prénoms depuis la BDD backend
+  Future<List<MalianNameInfo>> fetchNamesFromBackend({
+    String? type,
+    String? query,
+  }) async {
+    for (final baseUrl in _candidateUrls) {
+      try {
+        final qParams = <String, dynamic>{};
+        if (type != null) qParams['type'] = type;
+        if (query != null && query.isNotEmpty) qParams['q'] = query;
+
+        final response = await _dio.get(
+          '$baseUrl/api/v1/culture/names',
+          queryParameters: qParams,
+          options: Options(
+            connectTimeout: const Duration(milliseconds: 2500),
+            receiveTimeout: const Duration(seconds: 10),
+          ),
+        );
+
+        if (response.statusCode == 200 && response.data is Map) {
+          final items = response.data['items'] as List<dynamic>? ?? [];
+          return items
+              .map((it) => MalianNameInfo.fromJson(it as Map<String, dynamic>))
+              .toList();
+        }
+      } catch (_) {}
+    }
+
+    // Repli local
+    final allLocal = MalianNamesKnowledge.allNames;
+    if (query != null && query.isNotEmpty) {
+      final qNorm = query.toLowerCase();
+      return allLocal
+          .where((n) => n.name.toLowerCase().contains(qNorm))
+          .toList();
+    }
+    return allLocal;
   }
 
   // ── GÉNÉRATEUR DE SAGESSE LOCALE AUTONOME (HORS-LIGNE) ───────────────────

@@ -360,51 +360,6 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
     _promptCtrl.clear();
     _scrollToBottom();
 
-    // 1. RECHERCHE PRIORITAIRE : Dictionnaire d'Origine des Noms & Patronymes du Mali
-    final nameInfo = MalianNamesKnowledge.findNameInfo(query);
-    final nameExplanation =
-        nameInfo?.toNarrativeText() ?? MalianNamesKnowledge.findExplanation(query);
-    if (nameExplanation != null) {
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (!mounted) return;
-
-      final actionIndex = _messages.length % _scenicActionsPool.length;
-      final vision = _detectVision(nameExplanation, query);
-      final botMsg = _SageMessage(
-        text: nameExplanation,
-        isUser: false,
-        timestamp: DateTime.now(),
-        scenicAction: _scenicActionsPool[actionIndex],
-        visionImagePath: vision?.path,
-        visionCaption: vision?.caption,
-        nameHeritage: nameInfo,
-      );
-
-      setState(() {
-        _isLoading = false;
-        _sageState = _SageState.speaking;
-        _messages.add(botMsg);
-        _currentlySpeakingMessageId = botMsg.id;
-      });
-      _scrollToBottom();
-
-      try {
-        await VivienneTtsService.instance.speak(
-          nameExplanation,
-          onComplete: () {
-            if (mounted) {
-              setState(() {
-                _currentlySpeakingMessageId = null;
-                _sageState = _SageState.idle;
-              });
-            }
-          },
-        );
-      } catch (_) {}
-      return;
-    }
-
-    // 2. RECHERCHE CULTURELLE IA
     final contextStr = widget.guideContext != null
         ? 'Guide: ${widget.guideContext!.contentTitle} (${widget.guideContext!.regionName})'
         : widget.contextRegion != null
@@ -412,23 +367,25 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
             : 'Tout le Mali';
 
     try {
-      final reply = await _cultureAi.culturalChat(
+      // 1. APPEL PRIORITAIRE DU BACKEND ALIA (Base de données des Noms & Grand-mère Mah)
+      final sageResponse = await _cultureAi.chatWithGrandmereMah(
         userMessage: query,
         additionalContext: contextStr,
         history: _history,
       );
+
       if (mounted) {
-        final actionIndex = _messages.length % _scenicActionsPool.length;
-        final vision = _detectVision(reply, query);
+        final vision = _detectVision(sageResponse.answer, query);
         final botMsg = _SageMessage(
-          text: reply,
+          text: sageResponse.answer,
           isUser: false,
           timestamp: DateTime.now(),
-          scenicAction: _scenicActionsPool[actionIndex],
+          scenicAction: sageResponse.scenicAction,
           visionImagePath: vision?.path,
           visionCaption: vision?.caption,
-          nameHeritage: nameInfo,
+          nameHeritage: sageResponse.matchedName,
         );
+
         setState(() {
           _isLoading = false;
           _sageState = _SageState.speaking;
@@ -436,9 +393,10 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
           _currentlySpeakingMessageId = botMsg.id;
         });
         _scrollToBottom();
+
         try {
           await VivienneTtsService.instance.speak(
-            reply,
+            sageResponse.answer,
             onComplete: () {
               if (mounted) {
                 setState(() {
@@ -450,14 +408,15 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
           );
         } catch (_) {
           try {
-            await _tts.speak(reply);
+            await _tts.speak(sageResponse.answer);
           } catch (_) {}
         }
       }
     } catch (_) {
+      // 2. REPLI DE SECOURS EN CAS D'INDISPONIBILITÉ TOTALE DU RÉSEAU
       if (mounted) {
-        final fallback =
-            _cultureAi.generateLocalSageResponse(query, contextStr);
+        final fallback = _cultureAi.generateLocalSageResponse(query, contextStr);
+        final nameInfo = MalianNamesKnowledge.findNameInfo(query);
         final actionIndex = _messages.length % _scenicActionsPool.length;
         final vision = _detectVision(fallback, query);
         final botMsg = _SageMessage(
@@ -653,6 +612,30 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
             const SizedBox(height: 8),
             ListTile(
               contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.menu_book_rounded, color: AppColors.accent),
+              title: Text(
+                'Dictionnaire des Noms & Totems',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              subtitle: Text(
+                'Consulter les patronymes, clans et devises du Mali (BDD)',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showNamesCatalogModal();
+              },
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.refresh_rounded,
                   color: AppColors.accent),
               title: Text(
@@ -670,6 +653,30 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showNamesCatalogModal() {
+    HapticFeedback.selectionClick();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+        side: BorderSide(color: AppColors.border, width: 1.2),
+      ),
+      builder: (ctx) => _NamesCatalogSheet(
+        cultureAi: _cultureAi,
+        onSelectName: (nameInfo) {
+          Navigator.pop(ctx);
+          _sendMessage(
+            nameInfo.type == 'prenom'
+                ? 'Grand-mère Mah, conte-moi la bénédiction et la signification du prénom « ${nameInfo.name} »'
+                : 'Grand-mère Mah, conte-moi la véritable histoire, le clan et le totem du nom « ${nameInfo.name} »',
+          );
+        },
       ),
     );
   }
@@ -765,6 +772,10 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
               'prompt': s.questionText,
             }),
       {
+        'label': 'Dictionnaire des Noms (BDD)',
+        'prompt': 'catalog',
+      },
+      {
         'label': 'Mon Nom de Famille',
         'prompt':
             'Dis-moi l\'origine sacrée, la signification et le clan historique de mon nom de famille.',
@@ -821,26 +832,44 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
         separatorBuilder: (_, __) => const SizedBox(width: 7),
         itemBuilder: (context, i) {
           final t = allTopics[i];
+          final isCatalog = t['prompt'] == 'catalog';
+
           return GestureDetector(
-            onTap: () => _sendMessage(t['prompt']!),
+            onTap: () {
+              if (isCatalog) {
+                _showNamesCatalogModal();
+              } else {
+                _sendMessage(t['prompt']!);
+              }
+            },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.surfaceAlt,
+                color: isCatalog ? const Color(0x33D97706) : AppColors.surfaceAlt,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: AppColors.border,
+                  color: isCatalog ? AppColors.accentLight : AppColors.border,
                   width: 1.0,
                 ),
               ),
               alignment: Alignment.center,
-              child: Text(
-                t['label']!,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isCatalog) ...[
+                    const Icon(Icons.menu_book_rounded,
+                        size: 13, color: AppColors.accentLight),
+                    const SizedBox(width: 5),
+                  ],
+                  Text(
+                    t['label']!,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: isCatalog ? AppColors.accentLight : AppColors.textPrimary,
+                    ),
+                  ),
+                ],
               ),
             ),
           );
@@ -1690,3 +1719,415 @@ class _VoiceWaveIndicatorState extends State<_VoiceWaveIndicator>
     );
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MODAL DU DICTIONNAIRE DES NOMS ET TOTEMS (CONNECTÉ BDD BACKEND)
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _NamesCatalogSheet extends StatefulWidget {
+  final CultureAiService cultureAi;
+  final ValueChanged<MalianNameInfo> onSelectName;
+
+  const _NamesCatalogSheet({
+    required this.cultureAi,
+    required this.onSelectName,
+  });
+
+  @override
+  State<_NamesCatalogSheet> createState() => _NamesCatalogSheetState();
+}
+
+class _NamesCatalogSheetState extends State<_NamesCatalogSheet> {
+  final _searchCtrl = TextEditingController();
+  String _selectedFilter = 'all'; // 'all', 'nom', 'prenom'
+  List<MalianNameInfo> _allNames = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNames();
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadNames() async {
+    setState(() => _isLoading = true);
+    try {
+      final names = await widget.cultureAi.fetchNamesFromBackend();
+      if (mounted) {
+        setState(() {
+          _allNames = names;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _allNames = MalianNamesKnowledge.allNames;
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  List<MalianNameInfo> get _filteredNames {
+    final query = _searchCtrl.text.trim().toLowerCase();
+    return _allNames.where((n) {
+      if (_selectedFilter != 'all' && n.type != _selectedFilter) {
+        return false;
+      }
+      if (query.isEmpty) return true;
+      return n.name.toLowerCase().contains(query) ||
+          n.origin.toLowerCase().contains(query) ||
+          n.meaning.toLowerCase().contains(query) ||
+          n.totem.toLowerCase().contains(query) ||
+          n.clanRole.toLowerCase().contains(query) ||
+          n.senankouya.toLowerCase().contains(query);
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final items = _filteredNames;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (ctx, scrollController) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Poignée de glissement
+            Center(
+              child: Container(
+                width: 44,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            // En-tête
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceAlt,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.accent, width: 1.2),
+                  ),
+                  child: const Icon(
+                    Icons.menu_book_rounded,
+                    color: AppColors.accentLight,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Mémoire Généalogique du Mali',
+                        style: GoogleFonts.cinzel(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        '${_allNames.length} Patronymes & Prénoms sacrés (BDD)',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.accentLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // Champ de recherche
+            TextField(
+              controller: _searchCtrl,
+              onChanged: (_) => setState(() {}),
+              style: GoogleFonts.plusJakartaSans(
+                color: AppColors.textPrimary,
+                fontSize: 13,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Rechercher un patronyme, totem ou terroir...',
+                hintStyle: GoogleFonts.plusJakartaSans(
+                  color: AppColors.textMuted,
+                  fontSize: 12,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search_rounded,
+                  color: AppColors.accent,
+                  size: 20,
+                ),
+                suffixIcon: _searchCtrl.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear_rounded,
+                            size: 16, color: AppColors.textMuted),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          setState(() {});
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: AppColors.surfaceAlt,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.accent, width: 1.2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // Filtres de sélection
+            Row(
+              children: [
+                _buildFilterChip('Tous (${_allNames.length})', 'all'),
+                const SizedBox(width: 8),
+                _buildFilterChip(
+                  'Patronymes (${_allNames.where((n) => n.type == 'nom').length})',
+                  'nom',
+                ),
+                const SizedBox(width: 8),
+                _buildFilterChip(
+                  'Prénoms (${_allNames.where((n) => n.type == 'prenom').length})',
+                  'prenom',
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Liste des noms
+            Expanded(
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: AppColors.accent),
+                    )
+                  : items.isEmpty
+                      ? Center(
+                          child: Text(
+                            'Aucun nom ne correspond à votre recherche.',
+                            style: GoogleFonts.plusJakartaSans(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          controller: scrollController,
+                          itemCount: items.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 8),
+                          itemBuilder: (context, i) {
+                            final item = items[i];
+                            return _buildNameCard(item);
+                          },
+                        ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, String value) {
+    final isSelected = _selectedFilter == value;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedFilter = value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.accent : AppColors.surfaceAlt,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.accentLight : AppColors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: isSelected ? Colors.white : AppColors.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNameCard(MalianNameInfo item) {
+    final isNom = item.type == 'nom';
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.border,
+          width: 1.0,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                item.name,
+                style: GoogleFonts.cinzel(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.accentLight,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isNom
+                      ? const Color(0x33D97706)
+                      : const Color(0x332563EB),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  isNom ? 'Patronyme (Jamu)' : 'Prénom',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w700,
+                    color: isNom ? const Color(0xFFFBBF24) : const Color(0xFF93C5FD),
+                  ),
+                ),
+              ),
+              const Spacer(),
+              ElevatedButton.icon(
+                onPressed: () => widget.onSelectName(item),
+                icon: const Icon(Icons.forum_outlined, size: 12),
+                label: Text(
+                  'Conter',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: const Size(0, 26),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Text(
+            item.meaning,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              const Icon(Icons.place_outlined,
+                  size: 12, color: AppColors.textSecondary),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  item.origin,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10.5,
+                    color: AppColors.textSecondary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          if (item.totem.isNotEmpty) ...[
+            const SizedBox(height: 3),
+            Row(
+              children: [
+                const Icon(Icons.pets_outlined,
+                    size: 12, color: AppColors.accentLight),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    'Totem : ${item.totem}',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.accentLight,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (item.senankouya.isNotEmpty) ...[
+            const SizedBox(height: 3),
+            Row(
+              children: [
+                const Icon(Icons.people_outline,
+                    size: 12, color: AppColors.textMuted),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    'Senankouya : ${item.senankouya}',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10.5,
+                      color: AppColors.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+

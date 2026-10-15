@@ -13,6 +13,7 @@ class MalianNameInfo {
   final String totem;
   final String senankouya;
   final String anecdote;
+  final String? deviseOuLouange;
 
   const MalianNameInfo({
     required this.name,
@@ -23,23 +24,67 @@ class MalianNameInfo {
     required this.totem,
     required this.senankouya,
     required this.anecdote,
+    this.deviseOuLouange,
   });
 
+  factory MalianNameInfo.fromJson(Map<String, dynamic> json) {
+    return MalianNameInfo(
+      name: (json['name'] ?? json['nom'] ?? '') as String,
+      type: (json['type'] ?? 'nom') as String,
+      origin: (json['origin'] ?? json['ethnieOuRegion'] ?? json['ethnie_ou_region'] ?? '') as String,
+      meaning: (json['meaning'] ?? json['signification'] ?? '') as String,
+      clanRole: (json['clanRole'] ?? json['clan_role'] ?? '') as String,
+      totem: (json['totem'] ?? '') as String,
+      senankouya: (json['senankouya'] ?? '') as String,
+      anecdote: (json['anecdote'] ?? '') as String,
+      deviseOuLouange: (json['deviseOuLouange'] ?? json['devise_ou_louange']) as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'nom': name,
+    'type': type,
+    'origin': origin,
+    'ethnieOuRegion': origin,
+    'meaning': meaning,
+    'signification': meaning,
+    'clanRole': clanRole,
+    'clan_role': clanRole,
+    'totem': totem,
+    'senankouya': senankouya,
+    'anecdote': anecdote,
+    if (deviseOuLouange != null) 'deviseOuLouange': deviseOuLouange,
+  };
+
   String toNarrativeText() {
+    final deviseSection = (deviseOuLouange != null && deviseOuLouange!.isNotEmpty)
+        ? '\n\nRetiens cette noble louange des griots : $deviseOuLouange'
+        : '';
+
     if (type == 'prenom') {
       return '« Mon enfant, approche et écoute ce que Grand-mère Mah lit dans le chant des flammes sur ton prénom, « $name ».\n\n'
           'Sais-tu ce que signifie réellement porter ce prénom ? $meaning. '
           'Ce n\'est pas un simple mot que l\'on crie dans la cour : dans nos terroirs de $origin, c\'est une bénédiction soufflée à l\'oreille du nouveau-né au septième jour pour guider chacun de ses pas.\n\n'
-          'Les anciens racontent que $anecdote. $clanRole.\n\n'
+          'Les anciens racontent que $anecdote. $clanRole.$deviseSection\n\n'
           'Garde toujours la tête haute : un prénom n\'est pas donné par hasard dans notre savane, il est une graine d\'honneur semée en toi. Fais-en un arbre bienveillant dont l\'ombre protègera les autres. »';
     }
+
+    final totemPhrase = (totem.isNotEmpty)
+        ? 'Vois-tu ces étincelles qui s\'élèvent vers les étoiles ? C\'est ainsi que doit briller ta conduite. Ton animal totem (*Tanan*) est $totem — non pour te vanter, mais pour te rappeler l\'alliance sacrée avec la nature et la parole donnée.'
+        : '';
+
+    final senankouyaPhrase = (senankouya.isNotEmpty)
+        ? 'Et si un $senankouya vient te taquiner au bord du fleuve en prétendant être ton maître, souris : c\'est le Senankouya, notre pacte millénaire de paix et de fraternité par le rire.'
+        : '';
 
     return '« Mon enfant, assieds-toi plus près des braises. Laisse Grand-mère Mah te conter la véritable histoire du nom « $name ».\n\n'
         'Vois-tu, beaucoup croient qu\'un nom n\'est qu\'une suite de lettres sur une carte. Mais chez nous, $name signifie $meaning ! '
         'Tes racines plongent au cœur de $origin, là où tes nobles aïeux étaient reconnus comme $clanRole.\n\n'
         'Écoute bien cette histoire que les griots se transmettent depuis la nuit des temps : $anecdote.\n\n'
-        'Vois-tu ces étincelles qui s\'élèvent vers les étoiles ? C\'est ainsi que doit briller ta conduite. Ton animal totem (*Tanan*) est $totem — non pour te vanter, mais pour te rappeler l\'alliance sacrée avec la nature et la parole donnée. '
-        'Et si un $senankouya vient te taquiner au bord du fleuve en prétendant être ton maître, souris : c\'est le Senankouya, notre pacte millénaire de paix et de fraternité par le rire.\n\n'
+        '$totemPhrase\n\n'
+        '$senankouyaPhrase'
+        '$deviseSection\n\n'
         'Porte ton nom avec la fierté tranquille du baobab, car en toi coule la mémoire de mille veillées. »';
   }
 }
@@ -382,4 +427,16 @@ abstract final class MalianNamesKnowledge {
 
     return null;
   }
+
+  /// Liste complète des patronymes et prénoms disponibles localement en repli hors-ligne
+  static List<MalianNameInfo> get allNames => [
+        ..._surnames.values,
+        ..._firstNames.values,
+      ];
+
+  /// Liste des patronymes maliens de référence
+  static List<MalianNameInfo> get surnames => _surnames.values.toList();
+
+  /// Liste des prénoms maliens de référence
+  static List<MalianNameInfo> get firstNames => _firstNames.values.toList();
 }

@@ -17,7 +17,6 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../../core/constants/app_colors.dart';
 import '../../core/culture_ai_service.dart';
 import '../../core/culture_simli_service.dart';
-import '../../core/gemini_service.dart';
 import '../../core/services/vivienne_tts_service.dart';
 import '../../presentation/common/widgets/alternia_avatar.dart';
 import '../../presentation/common/widgets/alternia_video_player.dart';
@@ -41,7 +40,6 @@ class _CulturePageState extends ConsumerState<CulturePage> {
   String? _currentVideoUrl;
 
   final CultureAlternIAService _cultureService = CultureAlternIAService();
-  final GeminiService _geminiService = GeminiService();
   final CultureAiService _cultureAiService = CultureAiService();
   final FlutterTts _flutterTts = FlutterTts();
   final AudioPlayer _audioPlayer = AudioPlayer();
