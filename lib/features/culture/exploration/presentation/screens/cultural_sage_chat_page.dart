@@ -1,102 +1,60 @@
-// ─── AlterniA — Le Vieux Sage de la Culture (Assistant IA Malien) ──────────────
-// Expérience de discussion immersive calquée sur la page de discussion éducation.
-// Supporte à la fois :
-// - Contexte culturel précis (CulturalGuideContext : personnage, monument, ville, conte, etc.)
-// - Contexte régional (MaliRegion)
-// - Discussion libre générale sur le Mali
-// Intègre :
-// - Avatar animé du Vieux Sage / Griot avec ondes vocales et états (idle, listening, thinking, speaking)
-// - Moteur IA : CultureAiService (direct LLM Mali, sans RAG)
-// - Suggestions contextuelles dynamiques (MockCulturalGuideKnowledge)
-// - Écoute vocale TTS personnalisée (voix posée et sage)
-// - Actions par message (Écouter TTS, Copier, Supprimer)
+// ─── AlterniA — Veillée au Coin du Feu & La Doyenne Vivienne ─────────────────
+// Interface immersive complète de veillée sous le baobab sacré.
+// - En-tête : VillageCampfireWidget (Ciel étoilé, feu de camp 3D, Doyenne Vivienne conteuse)
+// - Généalogie & Origine des Noms : Dictionnaire des patronymes (Jamu) et prénoms du Mali
+// - Contes du clair de lune et devises des anciens
+// - Couleurs harmonisées à 100% avec la charte officielle AlterniA (AppColors & CultureTheme)
 library;
 
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
+import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/theme/app_theme.dart';
 import '../../../../../core/culture_ai_service.dart';
 import '../../../../../core/services/vivienne_tts_service.dart';
+import '../../../core/datasources/malian_names_knowledge.dart';
 import '../../../core/datasources/mock_cultural_guide_knowledge.dart';
 import '../../../core/models/cultural_guide_models.dart';
 import '../../../core/theme/culture_theme.dart';
 import '../../data/models/mali_region.dart';
+import '../widgets/village_campfire_widget.dart';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // MODÈLES
 // ══════════════════════════════════════════════════════════════════════════════
 
-enum _SageState { idle, listening, thinking, speaking }
+enum _SageState { idle, thinking, speaking }
 
 class _SageMessage {
   _SageMessage({
     required this.text,
     required this.isUser,
     required this.timestamp,
+    this.scenicAction,
+    this.visionImagePath,
+    this.visionCaption,
+    this.nameHeritage,
   }) : id = DateTime.now().microsecondsSinceEpoch.toString();
 
   final String id;
   final String text;
   final bool isUser;
   final DateTime timestamp;
+  final String? scenicAction;
+  final String? visionImagePath;
+  final String? visionCaption;
+  final MalianNameInfo? nameHeritage;
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// THÈMES CULTURELS GÉNÉRAUX
-// ══════════════════════════════════════════════════════════════════════════════
-
-class _CultureTopic {
-  final String label;
-  final IconData icon;
-  final String promptHint;
-
-  const _CultureTopic({
-    required this.label,
-    required this.icon,
-    required this.promptHint,
-  });
-}
-
-const _generalTopics = <_CultureTopic>[
-  _CultureTopic(
-    label: 'Tout le Mali',
-    icon: Icons.public_rounded,
-    promptHint: 'Posez  importe quelle question sur le Mali',
-  ),
-  _CultureTopic(
-    label: 'Contes & Légendes',
-    icon: Icons.auto_stories_rounded,
-    promptHint: 'Raconte-moi un conte traditionnel malien',
-  ),
-  _CultureTopic(
-    label: 'Histoire des Rois',
-    icon: Icons.history_edu_rounded,
-    promptHint: 'Parle-moi des grands empereurs et souverains du Mali',
-  ),
-  _CultureTopic(
-    label: 'Devinettes  ',
-    icon: Icons.quiz_rounded,
-    promptHint: 'Pose-moi une devinette traditionnelle malienne',
-  ),
-  _CultureTopic(
-    label: '19 Régions',
-    icon: Icons.map_rounded,
-    promptHint: 'Présente-moi les richesses des 19 régions du Mali',
-  ),
-  _CultureTopic(
-    label: 'Traditions & Rites',
-    icon: Icons.celebration_rounded,
-    promptHint: 'Explique-moi les traditions et valeurs ancestrales du Mandé',
-  ),
-];
-
-// ══════════════════════════════════════════════════════════════════════════════
-// PAGE PRINCIPALE DU VIEUX SAGE
+// PAGE PRINCIPALE : CulturalSageChatPage
 // ══════════════════════════════════════════════════════════════════════════════
 
 class CulturalSageChatPage extends StatefulWidget {
@@ -120,37 +78,31 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
   final _cultureAi = CultureAiService();
   final _tts = FlutterTts();
 
-  late final AnimationController _sageAnim;
-  late final AnimationController _pulseAnim;
-  late final AnimationController _thinkingAnim;
-
   _SageState _sageState = _SageState.idle;
-  int _selectedTopicIndex = 0;
   bool _isLoading = false;
+  bool _isVillageSoundActive = true;
   String? _currentlySpeakingMessageId;
+
+  // ── Reconnaissance Vocale (Speech-To-Text) ──
+  final stt.SpeechToText _speechToText = stt.SpeechToText();
+  bool _isListening = false;
+  String _liveSpokenWords = '';
 
   final List<_SageMessage> _messages = [];
   final List<Map<String, String>> _history = [];
   List<GuideSuggestion> _contextualSuggestions = [];
 
+  static const List<String> _scenicActionsPool = [
+    "Grand-mère Mah attise le feu de bois d'un geste tranquille et rajuste son moussor",
+    "Grand-mère Mah jette une poignée de brindilles parfumées sur les braises rougeoyantes",
+    "Grand-mère Mah esquisse un sourire bienveillant et incline doucement la tête vers les flammes",
+    "Grand-mère Mah fait tinter discrètement ses perles d'ambre et pose sa main sur la calebasse",
+    "Grand-mère Mah lève les yeux vers le ciel étoilé du Mandé avant de répondre avec douceur",
+  ];
+
   @override
   void initState() {
     super.initState();
-
-    _sageAnim = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 5),
-    )..repeat();
-
-    _pulseAnim = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    )..repeat(reverse: true);
-
-    _thinkingAnim = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    )..repeat(reverse: true);
 
     if (widget.guideContext != null) {
       _contextualSuggestions =
@@ -173,22 +125,20 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
               ? ' de ${guide.regionName}'
               : '';
       text =
-          'I ni ce, noble voyageur ! Parlons de « ${guide.contentTitle} »$regionInfo.\n\n'
-          'Je suis le Vieux Sage et Griot de la mémoire ancestrale du Mali. '
-          'Interrogez-moi sur ses batailles, sa gouvernance, ses légendes ou son héritage. '
-          'La sagesse des anciens est à votre écoute.';
+          'I ni sou, noble voyageur ! Viens t\'asseoir près du feu pour parler de « ${guide.contentTitle} »$regionInfo.\n\n'
+          'Je suis Grand-mère Mah, gardienne de la mémoire vivante. '
+          'Interroge-moi sur son histoire ou donne-moi ton nom de famille pour découvrir ses secrets et sa devise !';
     } else if (reg != null) {
       text =
-          'I ni sôgôma, noble voyageur ! Je suis le Vieux Sage de la mémoire ancestrale.\n\n'
-          'Vous visitez la terre de ${reg.nom} (« ${reg.surnom} »). '
-          'Interrogez-moi sur son histoire, ses légendes, ses coutumes ou ses secrets. '
-          'La parole des anciens est un trésor inépuisable.';
+          'I ni sou, mon enfant ! Approche, assieds-toi près du feu. '
+          'Tu visites la noble terre de ${reg.nom} (« ${reg.surnom} »).\n\n'
+          'Donne-moi ton nom de famille ou ton prénom, et Grand-mère Mah te révélera son origine ancestrale, son clan et ses animaux totems !';
     } else {
       text =
-          'I ni ce, voyageur de la connaissance ! Je suis le Griot et Sage du Mali.\n\n'
-          'Je garde la mémoire des 3 Empires, les récits de Soundiata et de Mansa Moussa, '
-          'les secrets des 19 régions et les contes du clair de lune. '
-          'Quelle sagesse souhaitez-vous explorer aujourd\'hui ?';
+          'I ni sou, mon enfant ! Approche, assieds-toi près du feu sous le grand baobab.\n\n'
+          'Je suis Grand-mère Mah, mémoire vivante et conteuse du Mandé.\n\n'
+          'Dis-moi quel est **ton nom de famille** (ex : *Keïta, Traoré, Coulibaly, Diakité, Diallo, Touré, Cissé, Diarra...*) ou **ton prénom** : je te révélerai d\'où il vient, ce qu\'il signifie, ton animal totem (*Tanan*) et ton cousinage à plaisanterie (*Senankouya*) !\n\n'
+          'Tu peux aussi me demander un conte ou une légende de nos ancêtres.';
     }
 
     setState(() {
@@ -196,6 +146,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
         text: text,
         isUser: false,
         timestamp: DateTime.now(),
+        scenicAction:
+            "Grand-mère Mah attise le feu de bois d'un geste tranquille et rajuste son moussor",
       ));
     });
   }
@@ -225,12 +177,99 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
   void dispose() {
     _scrollCtrl.dispose();
     _promptCtrl.dispose();
-    _sageAnim.dispose();
-    _pulseAnim.dispose();
-    _thinkingAnim.dispose();
     _stopTts();
+    if (_isListening) {
+      _speechToText.stop();
+    }
     VivienneTtsService.instance.stop();
     super.dispose();
+  }
+
+  // ── Speech-To-Text : Touchez pour parler, touchez pour couper et envoyer ──
+  Future<void> _toggleVocalRecording() async {
+    HapticFeedback.heavyImpact();
+
+    if (_isListening) {
+      await _speechToText.stop();
+      final spoken = _liveSpokenWords.trim().isNotEmpty
+          ? _liveSpokenWords.trim()
+          : _promptCtrl.text.trim();
+      setState(() {
+        _isListening = false;
+        _liveSpokenWords = '';
+      });
+      if (spoken.isNotEmpty) {
+        _promptCtrl.clear();
+        _sendMessage(spoken);
+      }
+    } else {
+      await _stopTts();
+      bool available = false;
+      try {
+        available = await _speechToText.initialize(
+          onError: (err) {
+            if (mounted) setState(() => _isListening = false);
+          },
+          onStatus: (status) {
+            if (status == 'done' || status == 'notListening') {
+              if (mounted && _isListening) {
+                final spoken = _liveSpokenWords.trim().isNotEmpty
+                    ? _liveSpokenWords.trim()
+                    : _promptCtrl.text.trim();
+                setState(() {
+                  _isListening = false;
+                  _liveSpokenWords = '';
+                });
+                if (spoken.isNotEmpty) {
+                  _promptCtrl.clear();
+                  _sendMessage(spoken);
+                }
+              }
+            }
+          },
+        );
+      } catch (_) {}
+
+      if (!mounted) return;
+
+      if (available) {
+        setState(() {
+          _isListening = true;
+          _liveSpokenWords = '';
+        });
+        _speechToText.listen(
+          onResult: (result) {
+            if (mounted) {
+              setState(() {
+                _liveSpokenWords = result.recognizedWords;
+                _promptCtrl.text = result.recognizedWords;
+              });
+              if (result.finalResult &&
+                  result.recognizedWords.trim().isNotEmpty) {
+                _speechToText.stop();
+                setState(() {
+                  _isListening = false;
+                  _liveSpokenWords = '';
+                });
+                _promptCtrl.clear();
+                _sendMessage(result.recognizedWords.trim());
+              }
+            }
+          },
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Microphone non disponible ou permission requise. Vous pouvez taper directement votre message.',
+              style: GoogleFonts.plusJakartaSans(color: AppColors.accentLight),
+            ),
+            backgroundColor: AppColors.surfaceAlt,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _stopTts() async {
@@ -275,11 +314,15 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
         },
       );
     } catch (_) {
-      if (mounted) {
-        setState(() {
-          _currentlySpeakingMessageId = null;
-          _sageState = _SageState.idle;
-        });
+      try {
+        await _tts.speak(msg.text);
+      } catch (_) {
+        if (mounted) {
+          setState(() {
+            _currentlySpeakingMessageId = null;
+            _sageState = _SageState.idle;
+          });
+        }
       }
     }
   }
@@ -289,7 +332,7 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
       if (_scrollCtrl.hasClients) {
         _scrollCtrl.animateTo(
           _scrollCtrl.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 320),
           curve: Curves.easeOut,
         );
       }
@@ -317,44 +360,75 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
     _promptCtrl.clear();
     _scrollToBottom();
 
-    // Construction du contexte pour le LLM
-    final contextParts = <String>[];
-    if (widget.guideContext != null) {
-      final g = widget.guideContext!;
-      contextParts.add(
-          'Sujet étudié : ${g.contentTitle} (type: ${g.contentType.name}, région: ${g.regionName})');
-      if (g.subtitle != null && g.subtitle!.isNotEmpty) {
-        contextParts.add('Détail : ${g.subtitle}');
-      }
-    } else if (widget.contextRegion != null) {
-      final r = widget.contextRegion!;
-      contextParts.add(
-          'Région de focus : ${r.nom} — ${r.surnom} (${r.descriptionCourte})');
+    // 1. RECHERCHE PRIORITAIRE : Dictionnaire d'Origine des Noms & Patronymes du Mali
+    final nameInfo = MalianNamesKnowledge.findNameInfo(query);
+    final nameExplanation =
+        nameInfo?.toNarrativeText() ?? MalianNamesKnowledge.findExplanation(query);
+    if (nameExplanation != null) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return;
+
+      final actionIndex = _messages.length % _scenicActionsPool.length;
+      final vision = _detectVision(nameExplanation, query);
+      final botMsg = _SageMessage(
+        text: nameExplanation,
+        isUser: false,
+        timestamp: DateTime.now(),
+        scenicAction: _scenicActionsPool[actionIndex],
+        visionImagePath: vision?.path,
+        visionCaption: vision?.caption,
+        nameHeritage: nameInfo,
+      );
+
+      setState(() {
+        _isLoading = false;
+        _sageState = _SageState.speaking;
+        _messages.add(botMsg);
+        _currentlySpeakingMessageId = botMsg.id;
+      });
+      _scrollToBottom();
+
+      try {
+        await VivienneTtsService.instance.speak(
+          nameExplanation,
+          onComplete: () {
+            if (mounted) {
+              setState(() {
+                _currentlySpeakingMessageId = null;
+                _sageState = _SageState.idle;
+              });
+            }
+          },
+        );
+      } catch (_) {}
+      return;
     }
 
-    if (widget.guideContext == null && _selectedTopicIndex > 0) {
-      contextParts.add('Thème : ${_generalTopics[_selectedTopicIndex].label}');
-    }
-
-    final contextStr =
-        contextParts.isNotEmpty ? contextParts.join(' | ') : null;
+    // 2. RECHERCHE CULTURELLE IA
+    final contextStr = widget.guideContext != null
+        ? 'Guide: ${widget.guideContext!.contentTitle} (${widget.guideContext!.regionName})'
+        : widget.contextRegion != null
+            ? 'Région: ${widget.contextRegion!.nom}'
+            : 'Tout le Mali';
 
     try {
       final reply = await _cultureAi.culturalChat(
         userMessage: query,
-        history: List.from(_history),
         additionalContext: contextStr,
+        history: _history,
       );
-
-      _history.add({'role': 'assistant', 'text': reply});
-
       if (mounted) {
+        final actionIndex = _messages.length % _scenicActionsPool.length;
+        final vision = _detectVision(reply, query);
         final botMsg = _SageMessage(
           text: reply,
           isUser: false,
           timestamp: DateTime.now(),
+          scenicAction: _scenicActionsPool[actionIndex],
+          visionImagePath: vision?.path,
+          visionCaption: vision?.caption,
+          nameHeritage: nameInfo,
         );
-
         setState(() {
           _isLoading = false;
           _sageState = _SageState.speaking;
@@ -375,22 +449,25 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
             },
           );
         } catch (_) {
-          if (mounted) {
-            setState(() {
-              _currentlySpeakingMessageId = null;
-              _sageState = _SageState.idle;
-            });
-          }
+          try {
+            await _tts.speak(reply);
+          } catch (_) {}
         }
       }
     } catch (_) {
       if (mounted) {
-        final fallback = _cultureAi.generateLocalSageResponse(query, contextStr);
-        _history.add({'role': 'assistant', 'text': fallback});
+        final fallback =
+            _cultureAi.generateLocalSageResponse(query, contextStr);
+        final actionIndex = _messages.length % _scenicActionsPool.length;
+        final vision = _detectVision(fallback, query);
         final botMsg = _SageMessage(
           text: fallback,
           isUser: false,
           timestamp: DateTime.now(),
+          scenicAction: _scenicActionsPool[actionIndex],
+          visionImagePath: vision?.path,
+          visionCaption: vision?.caption,
+          nameHeritage: nameInfo,
         );
         setState(() {
           _isLoading = false;
@@ -416,12 +493,66 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
     }
   }
 
-  void _onGeneralTopicSelected(int index) {
-    HapticFeedback.selectionClick();
-    setState(() => _selectedTopicIndex = index);
-    if (index > 0) {
-      _sendMessage(_generalTopics[index].promptHint);
+  static ({String path, String caption})? _detectVision(
+      String text, String query) {
+    final t = ('$text $query').toLowerCase();
+    if (t.contains('soundiata')) {
+      return (
+        path: 'assets/images/culture/personnages/soundiata_redressement_realiste.jpg',
+        caption: 'Soundiata Keïta se redressant — Le Lion du Mandé',
+      );
     }
+    if (t.contains('mansa moussa') || t.contains('kankan moussa')) {
+      return (
+        path: 'assets/images/culture/personnages/mansa_moussa.jpg',
+        caption: 'Kassa Mansa Moussa — La Renommée d\'Or du Mali',
+      );
+    }
+    if (t.contains('babemba') || t.contains('sikasso') || t.contains('tata')) {
+      return (
+        path: 'assets/images/culture/personnages/babemba_traore.jpg',
+        caption: 'Babemba Traoré au Tata de Sikasso — « Plutôt la mort que la honte »',
+      );
+    }
+    if (t.contains('biton') || (t.contains('coulibaly') && t.contains('ségou'))) {
+      return (
+        path: 'assets/images/culture/personnages/biton_coulibaly.jpg',
+        caption: 'Biton Mamary Coulibaly — Fondateur du Royaume de Ségou',
+      );
+    }
+    if (t.contains('wagadou') || t.contains('bida')) {
+      return (
+        path: 'assets/images/culture/contes/wagadou_bida.jpg',
+        caption: 'Wagadou Bida — Le Grand Serpent Sacré de Koumbi Saleh',
+      );
+    }
+    if (t.contains('bouki') ||
+        t.contains('leuk') ||
+        t.contains('zoumana') ||
+        t.contains('hyène') ||
+        t.contains('lièvre')) {
+      return (
+        path: 'assets/images/culture/contes/zoumana_lievre.jpg',
+        caption: 'Zoumana le Lièvre & Namori l\'Hyène au clair de lune',
+      );
+    }
+    return null;
+  }
+
+  void _copyMessage(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    HapticFeedback.selectionClick();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Parole copiée dans le presse-papiers',
+          style: GoogleFonts.plusJakartaSans(color: AppColors.accentLight),
+        ),
+        backgroundColor: AppColors.surfaceAlt,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   void _deleteMessage(String id) {
@@ -431,19 +562,114 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
     });
   }
 
-  void _copyMessage(String text) {
+  void _toggleVillageSound() {
     HapticFeedback.lightImpact();
-    Clipboard.setData(ClipboardData(text: text));
+    setState(() {
+      _isVillageSoundActive = !_isVillageSoundActive;
+    });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Parole copiée dans le presse-papier',
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+          _isVillageSoundActive
+              ? 'Son du village activé : Crépitement du feu & brise sahélienne'
+              : 'Son d\'ambiance mis en veille',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppColors.accentLight,
+          ),
         ),
-        backgroundColor: CultureTheme.ocreTerre,
-        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppColors.surface,
         duration: const Duration(seconds: 2),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _showAmbianceSettings() {
+    HapticFeedback.selectionClick();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+        side: BorderSide(color: AppColors.border, width: 1.2),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.tune_rounded,
+                    color: AppColors.accent, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  'Ambiance de la Veillée',
+                  style: GoogleFonts.cinzel(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(
+                _isVillageSoundActive
+                    ? Icons.volume_up_rounded
+                    : Icons.volume_off_rounded,
+                color: AppColors.accent,
+              ),
+              title: Text(
+                'Sons nocturnes du village',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              subtitle: Text(
+                'Feu crépitant, grillons et chuchotements du vent',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              trailing: Switch(
+                value: _isVillageSoundActive,
+                activeThumbColor: AppColors.accent,
+                activeTrackColor: AppColors.border,
+                onChanged: (val) {
+                  Navigator.pop(ctx);
+                  _toggleVillageSound();
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.refresh_rounded,
+                  color: AppColors.accent),
+              title: Text(
+                'Recommencer la veillée',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(ctx);
+                _startNewDiscussion();
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -454,322 +680,167 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
     setState(() {
       _messages.clear();
       _history.clear();
-      _addWelcomeMessage();
     });
+    _addWelcomeMessage();
   }
 
-  // ── BUILD ─────────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════════════════════
+  // BUILD PRINCIPAL — CHARTE OFFICIELLE ALTERNIA (AppColors)
+  // ══════════════════════════════════════════════════════════════════════════
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    final campfireHeight = isKeyboardOpen ? 140.0 : 275.0;
 
-    return PopScope(
-      onPopInvokedWithResult: (didPop, result) {
-        _stopTts();
-        VivienneTtsService.instance.stop();
+    return Theme(
+      data: AppTheme.darkTheme,
+      child: PopScope(
+        onPopInvokedWithResult: (didPop, result) {
+          _stopTts();
+          VivienneTtsService.instance.stop();
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // 1. EN-TÊTE : CAMPFIRE WIDGET (Feu 3D, Doyenne Vivienne)
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                height: campfireHeight,
+                child: VillageCampfireWidget(
+                  height: campfireHeight,
+                  isThinking: _sageState == _SageState.thinking ||
+                      _sageState == _SageState.speaking ||
+                      _isLoading,
+                  visitorName: widget.guideContext?.contentTitle ??
+                      widget.contextRegion?.nom ??
+                      'Tênin Diakité',
+                  isSoundActive: _isVillageSoundActive,
+                  onSoundToggle: _toggleVillageSound,
+                  onSettingsTap: _showAmbianceSettings,
+                  onBackTap: () {
+                    HapticFeedback.lightImpact();
+                    _stopTts();
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/culture');
+                    }
+                  },
+                  onElderTap: () {
+                    _sendMessage(
+                        'Donne-moi une parole de sagesse sur l\'origine des familles du Mali.');
+                  },
+                  onFireStoked: () {
+                    // Feu attisé avec étincelles dorées
+                  },
+                ),
+              ),
+
+              // 2. LISTE DES MESSAGES DU CHAT (MAXIMUM D'ESPACE ET DE CLARTÉ)
+              Expanded(child: _buildTranscript()),
+
+              // 3. BARRE FLUIDE DE SUJETS DE STORYTELLING (Puces d'exploration 1-clic)
+              _buildUnifiedStorytellingTopicsBar(),
+
+              // 4. BARRE DE SAISIE NOCTURNE
+              _buildInputBar(),
+            ],
+          ),
+        ),
+      ),
+    ),
+    );
+  }
+
+  // ── 2. BARRE UNIQUE DE SUJETS DE STORYTELLING (Puces d'exploration 1-clic) ─
+
+  Widget _buildUnifiedStorytellingTopicsBar() {
+    final allTopics = <Map<String, String>>[
+      if (_contextualSuggestions.isNotEmpty)
+        ..._contextualSuggestions.map((s) => {
+              'label': s.questionText,
+              'prompt': s.questionText,
+            }),
+      {
+        'label': 'Mon Nom de Famille',
+        'prompt':
+            'Dis-moi l\'origine sacrée, la signification et le clan historique de mon nom de famille.',
       },
-      child: Scaffold(
-        backgroundColor:
-            isDark ? const Color(0xFF080D14) : const Color(0xFFFAF7F2),
-        body: Stack(
-          children: [
-            _buildBackground(isDark),
-            SafeArea(
-              child: Column(
-                children: [
-                  _buildHeader(isDark),
-                  _buildSuggestionsOrTopicBar(isDark),
-                  _buildSageAvatarHero(isDark),
-                  const SizedBox(height: 4),
-                  _buildDivider(isDark),
-                  Expanded(child: _buildTranscript(isDark)),
-                  _buildInputBar(isDark),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+      {
+        'label': 'Mon Prénom',
+        'prompt':
+            'Que signifie mon prénom selon les traditions maliennes et quelle bénédiction porte-t-il ?',
+      },
+      {
+        'label': 'Mon Totem (Tanan)',
+        'prompt':
+            'Quel est l\'animal totem (tanan) ou l\'interdit traditionnel associé à ma lignée ?',
+      },
+      {
+        'label': 'Mon Senankouya',
+        'prompt':
+            'Quel est le cousinage à plaisanterie (senankouya) et les pactes de concorde liés à mon nom ?',
+      },
+      {
+        'label': 'Soundiata Keïta',
+        'prompt':
+            'Raconte-moi la glorieuse épopée de Soundiata Keïta, le lion du Mandé, et la bataille de Kirina.',
+      },
+      {
+        'label': 'Babemba à Sikasso',
+        'prompt':
+            'Raconte-moi la résistance héroïque de Babemba Traoré au Tata de Sikasso.',
+      },
+      {
+        'label': 'Mansa Moussa',
+        'prompt':
+            'Conte-moi le fabuleux voyage de Mansa Moussa à travers le Sahara et la renommée d\'or du Mali.',
+      },
+      {
+        'label': 'Bouki & Leuk le Lièvre',
+        'prompt':
+            'Conte-moi l\'histoire malicieuse de Bouki l\'Hyène et Leuk le Lièvre au clair de lune.',
+      },
+      {
+        'label': 'Wagadou Bida',
+        'prompt':
+            'Raconte-moi la légende du serpent sacré Wagadou Bida de l\'ancien Empire du Ghana.',
+      },
+    ];
 
-  // ── EN-TÊTE HARMONISÉ ─────────────────────────────────────────────────────
-
-  Widget _buildHeader(bool isDark) {
-    final titleColor = isDark ? Colors.white : const Color(0xFF1B1208);
-    final borderCol =
-        isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
-
-    final String displayTitle;
-    final String contextSubtitle;
-
-    if (widget.guideContext != null) {
-      final g = widget.guideContext!;
-      displayTitle = g.contentTitle;
-      contextSubtitle = 'Contexte : ${g.contentTitle} (${g.regionName})';
-    } else if (widget.contextRegion != null) {
-      displayTitle = widget.contextRegion!.nom;
-      contextSubtitle = 'Contexte : Région de ${widget.contextRegion!.nom}';
-    } else {
-      displayTitle = 'Le Vieux Sage du Mali';
-      contextSubtitle = 'Contexte : Patrimoine & Histoire du Mali';
-    }
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
-      child: Row(
-        children: [
-          // Bouton Retour
-          GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              _stopTts();
-              VivienneTtsService.instance.stop();
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                context.go('/culture');
-              }
-            },
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: isDark ? CultureTheme.darkSurface : Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: borderCol),
-              ),
-              child: Icon(
-                Icons.arrow_back_rounded,
-                size: 20,
-                color: isDark ? Colors.white : CultureTheme.primaryBlue,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Titre & Sous-titre
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        'LE VIEUX SAGE DU MALI',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.8,
-                          color: CultureTheme.accentOrange,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 1.5),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 5,
-                            height: 5,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF10B981),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'En ligne',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 8.5,
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFF10B981),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  displayTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15.5,
-                    fontWeight: FontWeight.w800,
-                    color: titleColor,
-                  ),
-                ),
-                Text(
-                  contextSubtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: isDark
-                        ? const Color(0xFF94A3B8)
-                        : const Color(0xFF64748B),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Bouton Nouveau
-          GestureDetector(
-            onTap: _startNewDiscussion,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: isDark ? CultureTheme.darkSurface : Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: borderCol),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.refresh_rounded,
-                    size: 14,
-                    color: CultureTheme.accentOrange,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Nouveau',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: CultureTheme.accentOrange,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── SUGGESTIONS CONTEXTUELLES OU THÈMES GÉNÉRAUX ───────────────────────────
-
-  Widget _buildSuggestionsOrTopicBar(bool isDark) {
-    final borderCol =
-        isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
-    final surface = isDark ? CultureTheme.darkSurface : Colors.white;
-
-    // Si on a un contexte spécifique (ex: Soundiata Keïta, Monument, etc.)
-    if (_contextualSuggestions.isNotEmpty) {
-      return SizedBox(
-        height: 38,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: _contextualSuggestions.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 8),
-          itemBuilder: (context, i) {
-            final sug = _contextualSuggestions[i];
-            return GestureDetector(
-              onTap: () => _sendMessage(sug.questionText),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: CultureTheme.accentOrange
-                      .withValues(alpha: isDark ? 0.15 : 0.08),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: CultureTheme.accentOrange.withValues(alpha: 0.35),
-                    width: 1.2,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(sug.icon, size: 13, color: CultureTheme.accentOrange),
-                    const SizedBox(width: 6),
-                    Text(
-                      sug.questionText,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
-                        color: CultureTheme.accentOrange,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      );
-    }
-
-    // Sinon, barre de thèmes généraux
-    return SizedBox(
-      height: 38,
+    return Container(
+      height: 34,
+      margin: const EdgeInsets.only(bottom: 6),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _generalTopics.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        itemCount: allTopics.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 7),
         itemBuilder: (context, i) {
-          final t = _generalTopics[i];
-          final isSelected = _selectedTopicIndex == i;
-
+          final t = allTopics[i];
           return GestureDetector(
-            onTap: () => _onGeneralTopicSelected(i),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            onTap: () => _sendMessage(t['prompt']!),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
               decoration: BoxDecoration(
-                color: isSelected ? CultureTheme.ocreTerre : surface,
-                borderRadius: BorderRadius.circular(20),
+                color: AppColors.surfaceAlt,
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isSelected ? CultureTheme.ocreTerre : borderCol,
-                  width: 1.2,
+                  color: AppColors.border,
+                  width: 1.0,
                 ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    t.icon,
-                    size: 13,
-                    color: isSelected
-                        ? Colors.white
-                        : (isDark
-                            ? const Color(0xFF94A3B8)
-                            : const Color(0xFF64748B)),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    t.label,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11.5,
-                      fontWeight:
-                          isSelected ? FontWeight.w800 : FontWeight.w600,
-                      color: isSelected
-                          ? Colors.white
-                          : (isDark
-                              ? const Color(0xFF94A3B8)
-                              : const Color(0xFF64748B)),
-                    ),
-                  ),
-                ],
+              alignment: Alignment.center,
+              child: Text(
+                t['label']!,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
           );
@@ -778,415 +849,69 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
     );
   }
 
-  // ── HERO AVATAR VIEUX SAGE ────────────────────────────────────────────────
+  // ── 5. LISTE DES MESSAGES ──────────────────────────────────────────────────
 
-  Widget _buildSageAvatarHero(bool isDark) {
-    final String statusText;
-    final Color statusColor;
-
-    switch (_sageState) {
-      case _SageState.speaking:
-        statusText = 'Le Vieux Sage s\'exprime...';
-        statusColor = CultureTheme.accentOrange;
-        break;
-      case _SageState.thinking:
-        statusText = 'Le Griot consulte la mémoire des anciens...';
-        statusColor = CultureTheme.primaryBlue;
-        break;
-      case _SageState.listening:
-        statusText = 'Je vous écoute, noble voyageur...';
-        statusColor = CultureTheme.fleuveNiger;
-        break;
-      case _SageState.idle:
-        statusText = 'Touchez l\'Avatar pour écouter une parole de sagesse';
-        statusColor =
-            isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-        break;
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 4),
-      child: Column(
-        children: [
-          _SageAvatarWidget(
-            sageAnim: _sageAnim,
-            pulseAnim: _pulseAnim,
-            thinkingAnim: _thinkingAnim,
-            state: _sageState,
-            isDark: isDark,
-            onTap: () {
-              if (widget.guideContext != null) {
-                _sendMessage(
-                    'Raconte-moi un récit marquant sur ${widget.guideContext!.contentTitle}.');
-              } else {
-                _sendMessage('Raconte-moi un conte ou une légende du Mali.');
-              }
-            },
-          ),
-          const SizedBox(height: 6),
-          Text(
-            statusText,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w600,
-              color: statusColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDivider(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      child: Row(
-        children: [
-          Expanded(
-              child: Container(
-                  height: 1,
-                  color: CultureTheme.ocreTerre.withValues(alpha: 0.2))),
-          const SizedBox(width: 8),
-          Icon(Icons.auto_stories_rounded,
-              size: 12, color: CultureTheme.ocreTerre.withValues(alpha: 0.5)),
-          const SizedBox(width: 6),
-          Text(
-            'PAROLES DU GRIOT',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 9,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.8,
-              color: CultureTheme.ocreTerre.withValues(alpha: 0.6),
-            ),
-          ),
-          const SizedBox(width: 6),
-          Icon(Icons.auto_stories_rounded,
-              size: 12, color: CultureTheme.ocreTerre.withValues(alpha: 0.5)),
-          const SizedBox(width: 8),
-          Expanded(
-              child: Container(
-                  height: 1,
-                  color: CultureTheme.ocreTerre.withValues(alpha: 0.2))),
-        ],
-      ),
-    );
-  }
-
-  // ── LISTE DES MESSAGES ────────────────────────────────────────────────────
-
-  Widget _buildTranscript(bool isDark) {
+  Widget _buildTranscript() {
     return ListView.builder(
       controller: _scrollCtrl,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
       itemCount: _messages.length + (_isLoading ? 1 : 0),
       itemBuilder: (context, i) {
         if (_isLoading && i == _messages.length) {
-          return _buildThinkingBubble(isDark);
+          return _buildThinkingCard();
         }
-        return _buildMessageBubble(_messages[i], isDark);
+        return _buildMessageCard(_messages[i]);
       },
     );
   }
 
-  Widget _buildThinkingBubble(bool isDark) {
+  Widget _buildThinkingCard() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1A1208) : const Color(0xFFFFF8EE),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-                color: CultureTheme.ocreTerre.withValues(alpha: 0.3)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: CultureTheme.accentOrange,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                'Le Vieux Sage consulte les récits...',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: CultureTheme.ocreTerre,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMessageBubble(_SageMessage msg, bool isDark) {
-    final isUser = msg.isUser;
-    final isSpeaking = _currentlySpeakingMessageId == msg.id;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Align(
-        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.82,
-          ),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: isUser
-                ? CultureTheme.primaryBlue
-                    .withValues(alpha: isDark ? 0.35 : 0.12)
-                : (isDark ? const Color(0xFF161007) : Colors.white),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(isUser ? 18 : 4),
-              topRight: Radius.circular(isUser ? 4 : 18),
-              bottomLeft: const Radius.circular(18),
-              bottomRight: const Radius.circular(18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceAlt,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.accent, width: 1.2),
             ),
-            border: Border.all(
-              color: isUser
-                  ? CultureTheme.primaryBlue.withValues(alpha: 0.35)
-                  : (isSpeaking
-                      ? CultureTheme.accentOrange
-                      : CultureTheme.ocreTerre.withValues(alpha: 0.25)),
-              width: isSpeaking ? 1.5 : 1,
+            child: const Center(
+              child: Icon(Icons.auto_awesome, size: 16, color: AppColors.accentLight),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header du message
-              Row(
+          const SizedBox(width: 10),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
                 children: [
-                  Icon(
-                    isUser ? Icons.person_rounded : Icons.auto_stories_rounded,
-                    size: 13,
-                    color: isUser
-                        ? CultureTheme.primaryBlue
-                        : CultureTheme.accentOrange,
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.accent,
+                    ),
                   ),
-                  const SizedBox(width: 5),
+                  const SizedBox(width: 10),
                   Text(
-                    isUser ? 'Vous' : 'Le Vieux Sage',
+                    'Grand-mère Mah consulte les récits des anciens...',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w800,
-                      color: isUser
-                          ? CultureTheme.primaryBlue
-                          : CultureTheme.accentOrange,
-                    ),
-                  ),
-                  const Spacer(),
-                  // Actions pour le message du sage
-                  if (!isUser) ...[
-                    // Bouton Écouter TTS
-                    GestureDetector(
-                      onTap: () => _speakMessage(msg),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: (isSpeaking
-                                  ? CultureTheme.accentOrange
-                                  : CultureTheme.ocreTerre)
-                              .withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          isSpeaking
-                              ? Icons.stop_rounded
-                              : Icons.volume_up_rounded,
-                          size: 15,
-                          color: isSpeaking
-                              ? CultureTheme.accentOrange
-                              : CultureTheme.ocreTerre,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                  ],
-                  // Bouton Copier
-                  GestureDetector(
-                    onTap: () => _copyMessage(msg.text),
-                    child: Icon(
-                      Icons.copy_rounded,
-                      size: 13,
-                      color: isDark
-                          ? const Color(0xFF64748B)
-                          : const Color(0xFF94A3B8),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  // Bouton Supprimer
-                  GestureDetector(
-                    onTap: () => _deleteMessage(msg.id),
-                    child: Icon(
-                      Icons.close_rounded,
-                      size: 13,
-                      color: isDark
-                          ? const Color(0xFF64748B)
-                          : const Color(0xFF94A3B8),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 8),
-
-              // Contenu du message
-              Text(
-                msg.text,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13.5,
-                  height: 1.55,
-                  color: isDark
-                      ? const Color(0xFFE2D5C3)
-                      : const Color(0xFF2C1A08),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ── BARRE DE SAISIE CULTURELLE ────────────────────────────────────────────
-
-  Widget _buildInputBar(bool isDark) {
-    final surface = isDark ? const Color(0xFF100B05) : Colors.white;
-    final borderCol =
-        isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
-
-    final hintText = widget.guideContext != null
-        ? 'Posez une question sur ${widget.guideContext!.contentTitle}...'
-        : 'Posez une question au Vieux Sage...';
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      decoration: BoxDecoration(
-        color: surface,
-        border: Border(top: BorderSide(color: borderCol)),
-      ),
-      child: Row(
-        children: [
-          // Raccourci Conte
-          GestureDetector(
-            onTap: () {
-              if (widget.guideContext != null) {
-                _sendMessage(
-                    'Raconte une anecdote ou un fait marquant sur ${widget.guideContext!.contentTitle}.');
-              } else {
-                _sendMessage('Raconte-moi un conte du Mali.');
-              }
-            },
-            child: Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: CultureTheme.accentOrange.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                    color: CultureTheme.accentOrange.withValues(alpha: 0.3)),
-              ),
-              child: const Icon(
-                Icons.auto_stories_rounded,
-                size: 18,
-                color: CultureTheme.accentOrange,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-
-          // Champ de saisie
-          Expanded(
-            child: Container(
-              constraints: const BoxConstraints(minHeight: 46, maxHeight: 110),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color:
-                    isDark ? const Color(0xFF1A1208) : const Color(0xFFFFF8EE),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                    color: CultureTheme.ocreTerre.withValues(alpha: 0.3)),
-              ),
-              child: TextField(
-                controller: _promptCtrl,
-                maxLines: null,
-                onSubmitted: _sendMessage,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w600,
-                  color: isDark
-                      ? const Color(0xFFE2D5C3)
-                      : const Color(0xFF2C1A08),
-                ),
-                decoration: InputDecoration(
-                  hintText: hintText,
-                  hintStyle: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    color: isDark
-                        ? const Color(0xFF64748B)
-                        : const Color(0xFF94A3B8),
-                  ),
-                  border: InputBorder.none,
-                  isDense: true,
-                ),
-                cursorColor: CultureTheme.accentOrange,
-                textInputAction: TextInputAction.send,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-
-          // Bouton Envoyer
-          GestureDetector(
-            onTap: _isLoading ? null : () => _sendMessage(_promptCtrl.text),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: _isLoading
-                    ? CultureTheme.ocreTerre.withValues(alpha: 0.3)
-                    : CultureTheme.accentOrange,
-                shape: BoxShape.circle,
-                boxShadow: _isLoading
-                    ? []
-                    : [
-                        BoxShadow(
-                          color:
-                              CultureTheme.accentOrange.withValues(alpha: 0.4),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-              ),
-              child: Center(
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.send_rounded,
-                        color: Colors.white, size: 18),
               ),
             ),
           ),
@@ -1195,279 +920,773 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
     );
   }
 
-  // ── FOND CULTUREL MANDÉ ───────────────────────────────────────────────────
-
-  Widget _buildBackground(bool isDark) {
-    return Positioned.fill(
-      child: CustomPaint(
-        painter: _SageBackgroundPainter(
-          progress: _sageAnim,
-          isDark: isDark,
+  Widget _buildMessageCard(_SageMessage msg) {
+    if (msg.isUser) {
+      // Message Utilisateur (Bleu institutionnel AlterniA)
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.82,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(4),
+                bottomLeft: Radius.circular(16),
+                bottomRight: Radius.circular(16),
+              ),
+              border: Border.all(
+                color: AppColors.primaryLight.withValues(alpha: 0.4),
+                width: 1.1,
+              ),
+            ),
+            child: Text(
+              msg.text,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                height: 1.45,
+              ),
+            ),
+          ),
         ),
+      );
+    }
+
+    // Message de la Doyenne (Surface AlterniA & touches d'or)
+    final isSpeaking = _currentlySpeakingMessageId == msg.id;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Avatar étoile dorée de la Doyenne à gauche
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceAlt,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isSpeaking
+                    ? AppColors.accentLight
+                    : AppColors.accent,
+                width: 1.3,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accent.withValues(alpha: 0.25),
+                  blurRadius: 6,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.auto_awesome,
+                size: 16,
+                color: CultureTheme.orPatrimoine,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+
+          // Carte principale du message
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isSpeaking
+                      ? AppColors.accent
+                      : AppColors.border,
+                  width: isSpeaking ? 1.4 : 1.0,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.35),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Ligne supérieure : Titre + Bouton Écouter
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Grand-mère Mah',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.accentLight,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => _speakMessage(msg),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3.5),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceAlt,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isSpeaking
+                                  ? AppColors.accentLight
+                                  : AppColors.accent,
+                              width: 1.0,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isSpeaking) ...[
+                                const _VoiceWaveIndicator(),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'En récitation...',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.accentLight,
+                                  ),
+                                ),
+                              ] else ...[
+                                const Icon(
+                                  Icons.play_arrow_rounded,
+                                  size: 14,
+                                  color: AppColors.accentLight,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  'Écouter',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.accentLight,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Encadré scénique de narration
+                  if (msg.scenicAction != null &&
+                      msg.scenicAction!.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceAlt,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.accent.withValues(alpha: 0.5),
+                          width: 1.0,
+                        ),
+                      ),
+                      child: Text(
+                        '*[${msg.scenicAction}]*',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.accentLight,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  // 1. VISION DANS LES BRAISES (Si un héros ou conte est évoqué)
+                  if (msg.visionImagePath != null)
+                    _buildVisionCard(
+                        msg.visionImagePath!, msg.visionCaption ?? ''),
+
+                  const SizedBox(height: 8),
+
+                  // 2. CONTENU DU RÉCIT DE GRAND-MÈRE MAH
+                  Text(
+                    msg.text,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      height: 1.55,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+
+                  // 3. PARCHEMIN ANCESTRAL DU CLAN (Si un patronyme est abordé)
+                  if (msg.nameHeritage != null)
+                    _buildAncestralParchment(msg.nameHeritage!),
+
+                  const SizedBox(height: 8),
+
+                  // Actions secondaires (Copier / Supprimer)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                        onTap: () => _copyMessage(msg.text),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4),
+                          child: Icon(
+                            Icons.copy_rounded,
+                            size: 13,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      GestureDetector(
+                        onTap: () => _deleteMessage(msg.id),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4),
+                          child: Icon(
+                            Icons.close_rounded,
+                            size: 13,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── VISION DANS LES BRAISES : CARTE HISTORIQUE IMMERSIVE ──────────────────
+
+  Widget _buildVisionCard(String imagePath, String caption) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8, bottom: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E140C),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.accent.withValues(alpha: 0.6),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.5),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Stack(
+            children: [
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                ),
+              ),
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        const Color(0xFF1E140C).withValues(alpha: 0.85),
+                      ],
+                      stops: const [0.55, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.72),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppColors.accent,
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.auto_awesome,
+                          size: 10, color: AppColors.accentLight),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Vision dans les braises',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.accentLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 6, 10, 8),
+            child: Text(
+              caption,
+              style: GoogleFonts.cinzel(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppColors.accentLight,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── PARCHEMIN ANCESTRAL DU MANDÉ : FICHE TOTÉMIQUE & DANBÉ ───────────────
+
+  Widget _buildAncestralParchment(MalianNameInfo info) {
+    return Container(
+      margin: const EdgeInsets.only(top: 10, bottom: 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF20150B),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: const Color(0xFFD97706),
+          width: 1.3,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFD97706).withValues(alpha: 0.15),
+            blurRadius: 12,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.shield_outlined,
+                  size: 16, color: AppColors.accentLight),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'PARCHEMIN SACRÉ DU CLAN ${info.name.toUpperCase()}',
+                  style: GoogleFonts.cinzel(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.accentLight,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 7),
+          const Divider(color: Color(0x33D97706), height: 1),
+          const SizedBox(height: 7),
+          _buildParchmentRow('Berceau :', info.origin),
+          const SizedBox(height: 4),
+          _buildParchmentRow('Signification :', info.meaning),
+          const SizedBox(height: 4),
+          _buildParchmentRow('Totem (Tanan) :', info.totem),
+          const SizedBox(height: 4),
+          _buildParchmentRow('Senankouya :', info.senankouya),
+          const SizedBox(height: 9),
+          Align(
+            alignment: Alignment.centerRight,
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                SharePlus.instance.share(
+                  ShareParams(
+                    text:
+                        'Fierté du clan ${info.name} (Mali) :\n'
+                        'Origine : ${info.origin}\n'
+                        'Signification : ${info.meaning}\n'
+                        'Totem (Tanan) : ${info.totem}\n'
+                        'Senankouya : ${info.senankouya}\n\n'
+                        'Enseignement transmis par Grand-mère Mah sur AlterniA.',
+                    subject: 'Fiche Ancestrale du Clan ${info.name}',
+                  ),
+                );
+              },
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceAlt,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.accent, width: 1.0),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.share_rounded,
+                        size: 12, color: AppColors.accentLight),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Partager mon Danbé',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.accentLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildParchmentRow(String label, String value) {
+    return RichText(
+      text: TextSpan(
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 10.5,
+          color: AppColors.textPrimary,
+          height: 1.4,
+        ),
+        children: [
+          TextSpan(
+            text: '$label ',
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              color: AppColors.accentLight,
+            ),
+          ),
+          TextSpan(text: value),
+        ],
+      ),
+    );
+  }
+
+  // ── 7. BARRE DE SAISIE NOCTURNE HARMONISÉE & MICRO VOCAL ───────────────────
+
+  Widget _buildInputBar() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 6, 12, 8),
+      decoration: const BoxDecoration(
+        color: Color(0xFF140F0C),
+        border: Border(
+          top: BorderSide(color: Color(0x29D97706), width: 1.0),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Bannière d'écoute vocale en direct si le micro est actif
+          if (_isListening)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              margin: const EdgeInsets.only(bottom: 6),
+              decoration: BoxDecoration(
+                color: AppColors.accent.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: AppColors.accent.withValues(alpha: 0.6),
+                  width: 1.0,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFEF4444),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xFFEF4444),
+                          blurRadius: 5,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _liveSpokenWords.isNotEmpty
+                          ? '« $_liveSpokenWords »'
+                          : 'Parlez maintenant... (Touchez pour envoyer)',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.accentLight,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  GestureDetector(
+                    onTap: _toggleVocalRecording,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 7, vertical: 2.5),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'Envoyer',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+          // Ligne principale : [Micro 40px] [Champ élégant 40px] [Envoyer 40px]
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // 1. Bouton Microphone (Squircle fin 40x40 / Bordure Orange Ambrée)
+              GestureDetector(
+                onTap: _toggleVocalRecording,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _isListening
+                        ? const Color(0xFFEF4444).withValues(alpha: 0.18)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _isListening
+                          ? const Color(0xFFEF4444)
+                          : const Color(0xFFD97706),
+                      width: 1.3,
+                    ),
+                    boxShadow: _isListening
+                        ? [
+                            BoxShadow(
+                              color: const Color(0xFFEF4444)
+                                  .withValues(alpha: 0.4),
+                              blurRadius: 8,
+                              spreadRadius: 1,
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      _isListening
+                          ? Icons.stop_rounded
+                          : Icons.mic_none_rounded,
+                      size: 20,
+                      color: _isListening
+                          ? const Color(0xFFEF4444)
+                          : const Color(0xFFD97706),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 7),
+
+              // 2. Champ de saisie élégant (Exactement 40px, même taille que micro et envoi)
+              Expanded(
+                child: Container(
+                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _isListening
+                          ? const Color(0xFFEF4444)
+                          : const Color(0xFFD97706),
+                      width: 1.3,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: TextField(
+                    controller: _promptCtrl,
+                    maxLines: 1,
+                    onSubmitted: _sendMessage,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                    decoration: InputDecoration(
+                      filled: false,
+                      fillColor: Colors.transparent,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      hintText: _isListening
+                          ? 'Écoute en cours... parlez'
+                          : 'Posez une question, demandez un conte...',
+                      hintStyle: GoogleFonts.plusJakartaSans(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFFD97706),
+                      ),
+                    ),
+                    cursorColor: const Color(0xFFD97706),
+                    textInputAction: TextInputAction.send,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 7),
+
+              // 3. Bouton Envoyer élégant (40x40 / Squircle Marron Ambré)
+              GestureDetector(
+                onTap: _isLoading
+                    ? null
+                    : () {
+                        if (_isListening) {
+                          _toggleVocalRecording();
+                        } else {
+                          _sendMessage(_promptCtrl.text);
+                        }
+                      },
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _isLoading
+                        ? const Color(0xFF45220B)
+                        : const Color(0xFF7C3B0E),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 15,
+                            height: 15,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1.8,
+                              color: Color(0xFFD1D5DB),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.near_me_outlined,
+                            color: Color(0xFFD1D5DB),
+                            size: 19,
+                          ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// AVATAR VIEUX SAGE (Painter & Animation)
+// ONDE VOCALE ANIMÉE DE RÉCITATION (VOICE WAVE)
 // ══════════════════════════════════════════════════════════════════════════════
 
-class _SageAvatarWidget extends StatelessWidget {
-  final AnimationController sageAnim;
-  final AnimationController pulseAnim;
-  final AnimationController thinkingAnim;
-  final _SageState state;
-  final bool isDark;
-  final VoidCallback onTap;
+class _VoiceWaveIndicator extends StatefulWidget {
+  const _VoiceWaveIndicator();
 
-  const _SageAvatarWidget({
-    required this.sageAnim,
-    required this.pulseAnim,
-    required this.thinkingAnim,
-    required this.state,
-    required this.isDark,
-    required this.onTap,
-  });
+  @override
+  State<_VoiceWaveIndicator> createState() => _VoiceWaveIndicatorState();
+}
 
-  Color get _glowColor => switch (state) {
-        _SageState.idle => CultureTheme.ocreTerre,
-        _SageState.listening => CultureTheme.fleuveNiger,
-        _SageState.speaking => CultureTheme.accentOrange,
-        _SageState.thinking => CultureTheme.primaryBlue,
-      };
+class _VoiceWaveIndicatorState extends State<_VoiceWaveIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 650),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: RepaintBoundary(
-        child: AnimatedBuilder(
-          animation: Listenable.merge([sageAnim, pulseAnim]),
-          builder: (context, _) {
-            final scale = 1.0 + (pulseAnim.value * 0.04);
-            return Transform.scale(
-              scale: scale,
-              child: SizedBox(
-                width: 120,
-                height: 120,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Halo lumineux extérieur
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: _glowColor.withValues(
-                                alpha: 0.35 + pulseAnim.value * 0.15),
-                            blurRadius: 26,
-                            spreadRadius: 3,
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Sphère et anneaux animés
-                    CustomPaint(
-                      size: const Size(120, 120),
-                      painter: _SagePainter(
-                        progress: sageAnim.value,
-                        pulse: pulseAnim.value,
-                        state: state,
-                        coreColor: _glowColor,
-                      ),
-                    ),
-                    // Traits du visage (Yeux + Bouche / Ondes vocales)
-                    _buildFacialFeatures(),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFacialFeatures() {
     return AnimatedBuilder(
-      animation: thinkingAnim,
+      animation: _ctrl,
       builder: (context, _) {
-        final eyeColor = state == _SageState.listening
-            ? CultureTheme.fleuveNiger
-            : (state == _SageState.speaking
-                ? CultureTheme.accentOrange
-                : Colors.white);
-
-        final eyeH =
-            state == _SageState.thinking ? 4.0 + thinkingAnim.value * 4 : 10.0;
-
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        final val = _ctrl.value;
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 9,
-                  height: eyeH,
-                  decoration: BoxDecoration(
-                    color: eyeColor,
-                    borderRadius: BorderRadius.circular(5),
-                    boxShadow: [
-                      BoxShadow(
-                          color: eyeColor.withValues(alpha: 0.8),
-                          blurRadius: 4),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 18),
-                Container(
-                  width: 9,
-                  height: eyeH,
-                  decoration: BoxDecoration(
-                    color: eyeColor,
-                    borderRadius: BorderRadius.circular(5),
-                    boxShadow: [
-                      BoxShadow(
-                          color: eyeColor.withValues(alpha: 0.8),
-                          blurRadius: 4),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            if (state == _SageState.speaking)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(4, (i) {
-                  final h = 3.0 +
-                      (math
-                              .sin((sageAnim.value * math.pi * 6) + i * 1.0)
-                              .abs() *
-                          10);
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                    width: 4,
-                    height: h,
-                    decoration: BoxDecoration(
-                      color: CultureTheme.accentOrange,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  );
-                }),
-              )
-            else
-              Container(
-                width: 20,
-                height: 3,
-                decoration: BoxDecoration(
-                  color: Colors.white70,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+            _bar(3.5 + 8.5 * val),
+            const SizedBox(width: 2),
+            _bar(12.0 - 7.5 * val),
+            const SizedBox(width: 2),
+            _bar(5.5 + 6.5 * val),
           ],
         );
       },
     );
   }
-}
 
-class _SagePainter extends CustomPainter {
-  final double progress;
-  final double pulse;
-  final _SageState state;
-  final Color coreColor;
-
-  const _SagePainter({
-    required this.progress,
-    required this.pulse,
-    required this.state,
-    required this.coreColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2.2;
-
-    final baseGradient = RadialGradient(
-      colors: [
-        coreColor.withValues(alpha: 0.95),
-        const Color(0xFF5A2E0E),
-        const Color(0xFF140802),
-      ],
-      stops: const [0.0, 0.65, 1.0],
+  Widget _bar(double h) {
+    return Container(
+      width: 2.2,
+      height: h.clamp(3.0, 14.0),
+      decoration: BoxDecoration(
+        color: AppColors.accentLight,
+        borderRadius: BorderRadius.circular(2),
+      ),
     );
-
-    final paint = Paint()
-      ..shader = baseGradient
-          .createShader(Rect.fromCircle(center: center, radius: radius));
-    canvas.drawCircle(center, radius, paint);
-
-    final ringPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..shader = LinearGradient(
-        colors: [coreColor, Colors.transparent, CultureTheme.iaYellow],
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
-
-    final angle = progress * 2 * math.pi;
-
-    canvas.save();
-    canvas.translate(center.dx, center.dy);
-    canvas.rotate(angle);
-    canvas.drawOval(
-      Rect.fromCenter(
-          center: Offset.zero, width: radius * 1.8, height: radius * 0.75),
-      ringPaint,
-    );
-    canvas.restore();
-
-    canvas.save();
-    canvas.translate(center.dx, center.dy);
-    canvas.rotate(-angle * 0.8);
-    canvas.drawOval(
-      Rect.fromCenter(
-          center: Offset.zero, width: radius * 1.55, height: radius * 0.85),
-      ringPaint,
-    );
-    canvas.restore();
   }
-
-  @override
-  bool shouldRepaint(covariant _SagePainter old) =>
-      old.progress != progress || old.state != state || old.pulse != pulse;
-}
-
-class _SageBackgroundPainter extends CustomPainter {
-  final Animation<double> progress;
-  final bool isDark;
-
-  _SageBackgroundPainter({required this.progress, required this.isDark})
-      : super(repaint: progress);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5
-      ..color = CultureTheme.ocreTerre.withValues(alpha: isDark ? 0.04 : 0.03);
-
-    const step = 45.0;
-    for (double x = 0; x < size.width; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    for (double y = 0; y < size.height; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _SageBackgroundPainter old) => false;
 }

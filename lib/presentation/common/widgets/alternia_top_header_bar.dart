@@ -249,7 +249,7 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
 
         const SizedBox(width: 8),
 
-        // 3. Bouton Vieux Sage Culturel IA (Chat Immersif avec Avatar & Voix)
+        // 3. Bouton Veillée au Coin du Feu & Grand-mère Mah (Chat Immersif avec Avatar & Voix)
         Material(
           color: Colors.transparent,
           child: InkWell(
@@ -264,20 +264,20 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: CultureTheme.primaryBlue.withValues(
+                color: CultureTheme.accentOrange.withValues(
                   alpha: isDark ? 0.20 : 0.12,
                 ),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: CultureTheme.primaryBlue.withValues(alpha: 0.4),
+                  color: CultureTheme.accentOrange.withValues(alpha: 0.45),
                   width: 1.2,
                 ),
               ),
               child: const Center(
                 child: Icon(
-                  Icons.smart_toy_rounded,
+                  Icons.local_fire_department_rounded,
                   size: 20,
-                  color: CultureTheme.primaryBlue,
+                  color: CultureTheme.accentOrange,
                 ),
               ),
             ),

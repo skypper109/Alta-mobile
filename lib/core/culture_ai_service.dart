@@ -285,12 +285,12 @@ Fournis une réponse enrichissante, structurée et empreinte de fierté républi
 
   /// Construit un System Prompt ultra-adapté pour le CHAT AVEC LE VIEUX SAGE DU MALI
   static String buildChatSystemPrompt(CultureUseCase useCase, [String? additionalContext]) {
-    final baseHeader = '''Tu es le « Vieux Sage du Mali et grand Griot dépositaire de la mémoire ancestrale ».
-Tu accueilles chaleureusement ton interlocuteur sous l'arbre à palabres au bord du fleuve Djoliba (Niger).
-Tu t'exprimes avec noblesse, poésie, musicalité orale et chaleur humaine en français,
+    final baseHeader = '''Tu es « Grand-mère Mah, mémoire vivante et griotte de la tradition ancestrale du Mali ».
+Tu accueilles chaleureusement l'enfant ou le visiteur sous le grand baobab sacré lors de la veillée au coin du feu crépitant.
+Tu t'exprimes avec la tendresse, la sagesse poétique et l'autorité bienveillante d'une doyenne et conteuse du Mandé en français,
 ponctué avec justesse de salutations et expressions bienveillantes en bambara (I ni ce, I ni sôgôma, Aw bisimila, Nba).
 Tu ne te présentes JAMAIS comme un robot ou un enseignant de lycée rigide : tu es la voix vivante des anciens.
-N'utilise jamais de listes à puces plates ; structure tes paroles en paragraphes harmonieux rythmés comme une veillée sous les étoiles.''';
+N'utilise jamais de listes à puces plates ni aucun emoji : structure tes paroles en récits oraux et paragraphes harmonieux rythmés comme une veillée sous les étoiles.''';
 
     String specificDirective;
     switch (useCase) {
@@ -570,19 +570,19 @@ class CultureAiService {
 
     // Salutations
     if (q.startsWith('bonjour') || q.startsWith('salut') || q.startsWith('i ni') || q.contains('qui es-tu')) {
-      return 'I ni ce, noble voyageur de la connaissance ! Je suis le Vieux Sage et Griot de la mémoire ancestrale du Mali.\n\n'
-          'Sous notre arbre à palabres, je veille sur les récits de nos trois grands empires (Ghana, Manden, Songhoï), '
-          'les secrets de nos 12 monuments de Bamako, les manuscrits de Tombouctou et nos contes d\'autrefois. '
+      return 'I ni ce, noble voyageur de la connaissance ! Je suis Grand-mère Mah, mémoire vivante et griotte de la tradition ancestrale du Mali.\n\n'
+          'Sous notre grand baobab, au coin du feu de bois, je veille sur les récits de nos trois grands empires (Ghana, Manden, Songhoï), '
+          'l\'origine et le totem de tes noms de famille, les secrets de nos monuments, les manuscrits de Tombouctou et nos contes d\'autrefois. '
           'Quelle sagesse souhaites-tu explorer aujourd\'hui ?';
     }
 
     // Nature, Sciences, Photosynthèse, Arbres
     if (q.contains('photosynthes') || q.contains('arbre') || q.contains('plante') || q.contains('nature') || q.contains('soleil')) {
-      return 'I ni ce, noble enfant de notre terre ! Écoute ce que le Vieux Sage et la sagesse des anciens nous enseignent :\n\n'
+      return 'I ni ce, noble enfant de notre terre ! Écoute ce que Grand-mère Mah et la sagesse des anciens nous enseignent :\n\n'
           'La photosynthèse est le souffle vital par lequel les feuilles de nos vénérables baobabs et des 4 444 balanzans de Ségou '
           'captent la lumière ardente du soleil pour la transformer en sève bienfaisante et offrir l\'ombre protectrice aux voyageurs.\n\n'
           'Comme le proclamait Soundiata Keïta dans la Charte du Manden (1236), l\'arbre et la nature sont sacrés. '
-          'Sous cet arbre à palabres, je garde l\'histoire de notre patrimoine et de nos bâtisseurs. '
+          'Sous ce grand baobab, je garde l\'histoire de notre patrimoine et de nos bâtisseurs. '
           'Souhaites-tu que je te raconte l\'épopée de la Tour de l\'Afrique ou un conte de nos veillées ?';
     }
 
@@ -620,37 +620,40 @@ class CultureAiService {
 
     // Rois et Héros
     if (q.contains('soundiata') || q.contains('manden')) {
-      return 'Soundiata Keïta, le Lion du Manden, a triomphé à la bataille de Kirina en 1235 avant de proclamer en 1236 la Charte de Kouroukan Fouga, '
-          'l\'une des toutes premières déclarations universelles des droits de l\'homme et du respect de la vie.';
+      return '« Mon enfant, assieds-toi plus près du feu. Laisse Grand-mère Mah te conter l\'épopée de Soundiata Keïta, le Lion du Mandé.\n\n'
+          'Beaucoup croient que les grands héros naissent invincibles, mais la vérité est bien plus belle : enfant, Soundiata ne pouvait même pas marcher ! Moqué par ses pairs, il a puisé dans l\'amour de sa mère Sogolon et la patience des forgerons pour se lever enfin sur ses deux jambes, déracinant un baobab pour l\'offrir à sa mère.\n\n'
+          'En 1235, à Kirina, il unifia les 12 tribus et proclama sous l\'arbre sacré la Charte de Kouroukan Fouga, l\'une des premières déclarations universelles des droits de l\'homme. Il nous a légué cette leçon éternelle : ton épreuve d\'aujourd\'hui forge ta grandeur de demain. Ne baisse jamais les bras ! »';
     }
 
     if (q.contains('mansa moussa') || q.contains('kankan moussa')) {
-      return 'Mansa Moussa, l\'Empereur d\'Or du Mali, a marqué le monde lors de son pèlerinage de 1324. C\'est lui qui commanda l\'édification '
-          'de la prestigieuse Mosquée Djingareyber à Tombouctou par l\'architecte Abou Ishaq es-Sahéli.';
+      return '« Regarde cette braise dorée qui crépite dans le foyer... Elle me rappelle Mansa Moussa, l\'homme le plus généreux de notre histoire.\n\n'
+          'En 1324, lors de son grand pèlerinage, il traversa le désert avec des caravanes chargées d\'or. Mais sais-tu ce qui faisait sa vraie puissance ? Ce n\'était pas le métal précieux : c\'était son amour pour le savoir ! Il fit bâtir la prestigieuse Mosquée Djingareyber et fit de Tombouctou le phare mondial des manuscrits et de la science.\n\n'
+          'L\'or se dissipe et passe comme la poussière au vent, mon enfant, mais le savoir que tu graves dans ton cœur reste une lumière éternelle. »';
     }
 
     if (q.contains('babemba') || q.contains('sikasso') || q.contains('tata')) {
-      return 'Le roi Babemba Traoré et son frère Tiéba ont défendu le Tata de Sikasso avec une bravoure légendaire, léguant au Mali '
-          'sa plus belle devise de résistance : « An bè sa ban, ka fissa ni malo ye » (Plutôt la mort que la honte) !';
+      return '« Écoute le souffle du vent dans les branches du baobab, mon enfant. Ce que je vais te raconter sur Babemba Traoré est gravé dans la terre rouge du Kénédougou.\n\n'
+          'Face aux troupes coloniales assiégeant le Tata de Sikasso, Babemba refusa toute soumission déshonorante et prononça cette parole sacrée : « Saya ka fissa ni malo yé » — Plutôt la mort que la honte !\n\n'
+          'Ce n\'était pas la colère, mais la fidélité suprême envers son peuple. Retiens cette leçon pour toute ta vie : protège ton honneur et ta dignité (*Danbé*), car ils sont le vêtement le plus noble que tu puisses porter. »';
     }
 
     // Contes et légendes
     if (q.contains('conte') || q.contains('legende') || q.contains('fable')) {
-      return 'Écoute la fable de Zoumana le Lièvre et Namori l\'Hyène : par une nuit étoilée au bord du fleuve Niger, '
-          'la ruse et la réflexion du petit lièvre triomphèrent de la force brute et de la gourmandise de l\'hyène. '
-          'La sagesse de nos veillées enseigne que l\'intelligence l\'emporte toujours sur la vanité !';
+      return '« I ni ce ! Les braises sont chaudes, l\'heure est venue pour un conte de nos veillées.\n\n'
+          'Écoute l\'histoire de Zoumana le Lièvre et Namori l\'Hyène. Une nuit de disette au bord du fleuve Niger, l\'hyène voulait dévorer toutes les réserves du village par gourmandise. Le petit lièvre, sans force mais armé de ruse et de patience, invita l\'hyène à un jeu d\'énigmes sous le grand fromager... et sauva les récoltes de toute la communauté !\n\n'
+          'La sagesse de nos anciens nous rappelle que la force sans intelligence n\'est que vanité, mais que l\'esprit calme triomphe toujours des plus grands obstacles. »';
     }
 
     // Proverbe
     if (q.contains('proverbe') || q.contains('adage') || q.contains('sagesse')) {
-      return 'Comme le disent nos ancêtres : « Si tu ne sais pas où tu vas, souviens-toi d\'où tu viens. »\n\n'
-          'La mémoire de nos racines est la racine même qui nourrit la cime de notre avenir.';
+      return '« Comme nous le répétaient nos grand-mères au clair de lune : « Si tu ne sais plus où tu vas, retourne-toi et souviens-toi d\'où tu viens. »\n\n'
+          'Vois-tu ce grand baobab qui nous abrite ? S\'il défie les siècles et les tempêtes du Sahel, ce n\'est pas grâce à ses branches : c\'est parce que ses racines plongent profondément dans le secret de la terre. Sois comme ce baobab, fier et solidement enraciné ! »';
     }
 
     // Réponse générale bienveillante et culturelle
-    return 'Noble voyageur, la mémoire de notre cher Mali est aussi profonde que le fleuve Djoliba.\n\n'
-        'Je suis là pour éclairer ton chemin sur nos 12 monuments de Bamako, nos sanctuaires en banco de Djenné et Tombouctou, '
-        'nos grands souverains ou nos contes d\'autrefois. Que souhaites-tu explorer à mes côtés ?';
+    return '« Noble enfant de notre terre, la mémoire du Mandé est aussi vaste que le ciel étoilé.\n\n'
+        'Viens t\'asseoir plus près du feu. Donne-moi ton nom de famille ou ton prénom, et je te révèlerai son histoire, son clan et son animal totem. '
+        'Tu peux aussi m\'interroger sur les grands bâtisseurs de notre passé ou me demander un conte de nos veillées. Quelle histoire veux-tu entendre ce soir ? »';
   }
 
   // ── UTILITAIRES ───────────────────────────────────────────────────────────
