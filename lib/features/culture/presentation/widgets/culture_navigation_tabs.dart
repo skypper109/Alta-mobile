@@ -86,65 +86,71 @@ class CultureNavigationTabs extends StatelessWidget {
                   final tab = _tabs[index];
                   final isSelected = selectedIndex == index;
 
-                  return GestureDetector(
-                    onTap: () {
-                      if (selectedIndex != index) {
-                        CulturalHaptics.tabSwitch();
-                        onTabSelected(index);
-                      }
-                    },
-                    behavior: HitTestBehavior.opaque,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isSelected ? 14 : 9,
-                        vertical: 9,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? CultureTheme.accentOrange
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: CultureTheme.accentOrange
-                                      .withValues(alpha: isDark ? 0.4 : 0.3),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isSelected ? tab.selectedIcon : tab.icon,
-                            size: 21,
-                            color: isSelected
-                                ? Colors.white
-                                : (isDark
-                                    ? const Color(0xFF64748B)
-                                    : const Color(0xFF64748B)),
+                  return Expanded(
+                    flex: isSelected ? 3 : 2,
+                    child: GestureDetector(
+                      onTap: () {
+                        if (selectedIndex != index) {
+                          CulturalHaptics.tabSwitch();
+                          onTabSelected(index);
+                        }
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: Center(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isSelected ? 10 : 7,
+                            vertical: 9,
                           ),
-                          if (isSelected) ...[
-                            const SizedBox(width: 5),
-                            Flexible(
-                              child: Text(
-                                tab.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? CultureTheme.accentOrange
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: CultureTheme.accentOrange
+                                          .withValues(alpha: isDark ? 0.4 : 0.3),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                isSelected ? tab.selectedIcon : tab.icon,
+                                size: 21,
+                                color: isSelected
+                                    ? Colors.white
+                                    : (isDark
+                                        ? const Color(0xFF64748B)
+                                        : const Color(0xFF64748B)),
                               ),
-                            ),
-                          ],
-                        ],
+                              if (isSelected) ...[
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    tab.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   );

@@ -131,62 +131,72 @@ class DetShellScaffold extends ConsumerWidget {
                           final isSelected =
                               navigationShell.currentIndex == item.branchIndex;
 
-                          return GestureDetector(
-                            onTap: () {
-                              if (navigationShell.currentIndex !=
-                                  item.branchIndex) {
-                                _onTabSelected(context, ref, item.branchIndex);
-                              }
-                            },
-                            behavior: HitTestBehavior.opaque,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.easeInOut,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: isSelected ? 15 : 11,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: isSelected
-                                    ? AppColors.primaryGradient
-                                    : null,
-                                color: isSelected ? null : Colors.transparent,
-                                borderRadius: BorderRadius.circular(24),
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                          color: AppColors.primary.withValues(
-                                              alpha: isDark ? 0.4 : 0.25),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 3),
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    isSelected ? item.selectedIcon : item.icon,
-                                    size: 22,
-                                    color: isSelected
-                                        ? AppColors.secondary
-                                        : (isDark
-                                            ? AppColors.textMuted
-                                            : const Color(0xFF64748B)),
+                          return Expanded(
+                            flex: isSelected ? 3 : 2,
+                            child: GestureDetector(
+                              onTap: () {
+                                if (navigationShell.currentIndex !=
+                                    item.branchIndex) {
+                                  _onTabSelected(context, ref, item.branchIndex);
+                                }
+                              },
+                              behavior: HitTestBehavior.opaque,
+                              child: Center(
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeInOut,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isSelected ? 10 : 8,
+                                    vertical: 9,
                                   ),
-                                  if (isSelected) ...[
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      item.label,
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
+                                  decoration: BoxDecoration(
+                                    gradient: isSelected
+                                        ? AppColors.primaryGradient
+                                        : null,
+                                    color: isSelected ? null : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(24),
+                                    boxShadow: isSelected
+                                        ? [
+                                            BoxShadow(
+                                              color: AppColors.primary.withValues(
+                                                  alpha: isDark ? 0.4 : 0.25),
+                                              blurRadius: 10,
+                                              offset: const Offset(0, 3),
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        isSelected ? item.selectedIcon : item.icon,
+                                        size: 21,
+                                        color: isSelected
+                                            ? AppColors.secondary
+                                            : (isDark
+                                                ? AppColors.textMuted
+                                                : const Color(0xFF64748B)),
                                       ),
-                                    ),
-                                  ],
-                                ],
+                                      if (isSelected) ...[
+                                        const SizedBox(width: 4),
+                                        Flexible(
+                                          child: Text(
+                                            item.label,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 11.5,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                           );

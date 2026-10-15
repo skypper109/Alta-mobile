@@ -1040,26 +1040,30 @@ class _SoundiataMotionDesignReelScreenState
                 color: CultureTheme.orPatrimoine.withValues(alpha: 0.5),
               ),
               const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 3.5,
-                ),
-                decoration: BoxDecoration(
-                  color: CultureTheme.darkBackground.withValues(alpha: 0.80),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: CultureTheme.orPatrimoine.withValues(alpha: 0.4),
-                    width: 1.0,
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 3.5,
                   ),
-                ),
-                child: Text(
-                  '${chapter.chapterNumber} • ${chapter.kicker}',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w800,
-                    color: CultureTheme.orPatrimoine,
-                    letterSpacing: 1.1,
+                  decoration: BoxDecoration(
+                    color: CultureTheme.darkBackground.withValues(alpha: 0.80),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: CultureTheme.orPatrimoine.withValues(alpha: 0.4),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Text(
+                    '${chapter.chapterNumber} • ${chapter.kicker}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w800,
+                      color: CultureTheme.orPatrimoine,
+                      letterSpacing: 1.1,
+                    ),
                   ),
                 ),
               ),
