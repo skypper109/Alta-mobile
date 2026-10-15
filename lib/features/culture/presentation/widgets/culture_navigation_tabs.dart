@@ -53,22 +53,41 @@ class CultureNavigationTabs extends StatelessWidget {
     final borderColor =
         isDark ? const Color(0xFF23314D) : const Color(0xFFE2E8F0);
 
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isSmall = screenWidth < 360;
+    final isCompact = screenWidth < 390;
+
+    final outerHPad = isSmall ? 10.0 : (isCompact ? 12.0 : 16.0);
+    final outerBPad = isSmall ? 18.0 : 22.0;
+    final buttonHPad = isSmall ? 10.0 : 12.0;
+    final gap = isSmall ? 6.0 : 8.0;
+
+    final iconSize = isSmall ? 19.5 : 21.0;
+    final fontSize = isSmall ? 11.0 : (isCompact ? 11.5 : 12.0);
+    final selectedHPad = isSmall ? 9.0 : (isCompact ? 11.0 : 13.0);
+    final unselectedHPad = isSmall ? 6.5 : (isCompact ? 8.0 : 9.5);
+    final maxLabelWidth = isSmall ? 85.0 : (isCompact ? 100.0 : 125.0);
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 26),
+      padding: EdgeInsets.fromLTRB(outerHPad, 0, outerHPad, outerBPad),
       child: Row(
         children: [
           // ── Bouton retour éducation Solide Opaque ─────────────────────────
-          _BackToEducationButton(isDark: isDark),
+          _BackToEducationButton(
+            isDark: isDark,
+            horizontalPadding: buttonHPad,
+          ),
 
-          const SizedBox(width: 8),
+          SizedBox(width: gap),
 
           // ── Barre de navigation Culture Solide Opaque ─────────────────────
           Expanded(
             child: Container(
-              height: 66,
+              height: 64,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
               decoration: BoxDecoration(
                 color: navBg,
-                borderRadius: BorderRadius.circular(33),
+                borderRadius: BorderRadius.circular(32),
                 border: Border.all(color: borderColor, width: 1.2),
                 boxShadow: [
                   BoxShadow(
@@ -86,71 +105,74 @@ class CultureNavigationTabs extends StatelessWidget {
                   final tab = _tabs[index];
                   final isSelected = selectedIndex == index;
 
-                  return Expanded(
-                    flex: isSelected ? 3 : 2,
-                    child: GestureDetector(
-                      onTap: () {
-                        if (selectedIndex != index) {
-                          CulturalHaptics.tabSwitch();
-                          onTabSelected(index);
-                        }
-                      },
-                      behavior: HitTestBehavior.opaque,
-                      child: Center(
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeInOut,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isSelected ? 10 : 7,
-                            vertical: 9,
-                          ),
-                          decoration: BoxDecoration(
+                  return GestureDetector(
+                    onTap: () {
+                      if (selectedIndex != index) {
+                        CulturalHaptics.tabSwitch();
+                        onTabSelected(index);
+                      }
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeInOut,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isSelected ? selectedHPad : unselectedHPad,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? CultureTheme.accentOrange
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: CultureTheme.accentOrange
+                                      .withValues(alpha: isDark ? 0.4 : 0.3),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            isSelected ? tab.selectedIcon : tab.icon,
+                            size: iconSize,
                             color: isSelected
-                                ? CultureTheme.accentOrange
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: isSelected
-                                ? [
-                                    BoxShadow(
-                                      color: CultureTheme.accentOrange
-                                          .withValues(alpha: isDark ? 0.4 : 0.3),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ]
-                                : null,
+                                ? Colors.white
+                                : (isDark
+                                    ? const Color(0xFF64748B)
+                                    : const Color(0xFF64748B)),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                isSelected ? tab.selectedIcon : tab.icon,
-                                size: 21,
-                                color: isSelected
-                                    ? Colors.white
-                                    : (isDark
-                                        ? const Color(0xFF64748B)
-                                        : const Color(0xFF64748B)),
+                          if (isSelected) ...[
+                            const SizedBox(width: 5),
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: maxLabelWidth,
                               ),
-                              if (isSelected) ...[
-                                const SizedBox(width: 4),
-                                Flexible(
-                                  child: Text(
-                                    tab.title,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  tab.title,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: fontSize,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    letterSpacing: -0.2,
                                   ),
                                 ),
-                              ],
-                            ],
-                          ),
-                        ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   );
@@ -167,8 +189,12 @@ class CultureNavigationTabs extends StatelessWidget {
 // ── Bouton retour Éducation avec Splash Transition ───────────────────────────
 class _BackToEducationButton extends ConsumerWidget {
   final bool isDark;
+  final double horizontalPadding;
 
-  const _BackToEducationButton({required this.isDark});
+  const _BackToEducationButton({
+    required this.isDark,
+    this.horizontalPadding = 12.0,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -195,8 +221,8 @@ class _BackToEducationButton extends ConsumerWidget {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        height: 66,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        height: 64,
+        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(24),

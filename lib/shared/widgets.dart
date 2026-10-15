@@ -102,52 +102,70 @@ class DetShellScaffold extends ConsumerWidget {
       ),
       bottomNavigationBar: isCultureTab
           ? const SizedBox.shrink()
-          : Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 26),
-              child: Row(
-                children: [
-                  // ── Barre de navigation Éducation Solide Opaque ───────────
-                  Expanded(
-                    child: Container(
-                      height: 66,
-                      decoration: BoxDecoration(
-                        color: navBg,
-                        borderRadius: BorderRadius.circular(33),
-                        border: Border.all(color: borderColor, width: 1.2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (isDark ? Colors.black : AppColors.primary)
-                                .withValues(alpha: isDark ? 0.45 : 0.12),
-                            blurRadius: 22,
-                            spreadRadius: 2,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(items.length, (index) {
-                          final item = items[index];
-                          final isSelected =
-                              navigationShell.currentIndex == item.branchIndex;
+          : Builder(
+              builder: (context) {
+                final screenWidth = MediaQuery.sizeOf(context).width;
+                final isSmall = screenWidth < 360;
+                final isCompact = screenWidth < 390;
 
-                          return Expanded(
-                            flex: isSelected ? 3 : 2,
-                            child: GestureDetector(
-                              onTap: () {
-                                if (navigationShell.currentIndex !=
-                                    item.branchIndex) {
-                                  _onTabSelected(context, ref, item.branchIndex);
-                                }
-                              },
-                              behavior: HitTestBehavior.opaque,
-                              child: Center(
+                final outerHPad = isSmall ? 10.0 : (isCompact ? 12.0 : 16.0);
+                final outerBPad = isSmall ? 18.0 : 22.0;
+                final buttonHPad = isSmall ? 10.0 : 12.0;
+                final gap = isSmall ? 6.0 : 8.0;
+
+                final iconSize = isSmall ? 19.5 : 21.0;
+                final fontSize = isSmall ? 11.0 : (isCompact ? 11.5 : 12.0);
+                final selectedHPad = isSmall ? 9.0 : (isCompact ? 11.0 : 13.0);
+                final unselectedHPad = isSmall ? 6.5 : (isCompact ? 8.0 : 9.5);
+                final maxLabelWidth = isSmall ? 85.0 : (isCompact ? 100.0 : 125.0);
+
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(outerHPad, 0, outerHPad, outerBPad),
+                  child: Row(
+                    children: [
+                      // ── Barre de navigation Éducation Solide Opaque ───────────
+                      Expanded(
+                        child: Container(
+                          height: 64,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: navBg,
+                            borderRadius: BorderRadius.circular(32),
+                            border: Border.all(color: borderColor, width: 1.2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: (isDark ? Colors.black : AppColors.primary)
+                                    .withValues(alpha: isDark ? 0.45 : 0.12),
+                                blurRadius: 22,
+                                spreadRadius: 2,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: List.generate(items.length, (index) {
+                              final item = items[index];
+                              final isSelected =
+                                  navigationShell.currentIndex == item.branchIndex;
+
+                              return GestureDetector(
+                                onTap: () {
+                                  if (navigationShell.currentIndex !=
+                                      item.branchIndex) {
+                                    _onTabSelected(context, ref, item.branchIndex);
+                                  }
+                                },
+                                behavior: HitTestBehavior.opaque,
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 250),
                                   curve: Curves.easeInOut,
                                   padding: EdgeInsets.symmetric(
-                                    horizontal: isSelected ? 10 : 8,
-                                    vertical: 9,
+                                    horizontal: isSelected ? selectedHPad : unselectedHPad,
+                                    vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
                                     gradient: isSelected
@@ -172,7 +190,7 @@ class DetShellScaffold extends ConsumerWidget {
                                     children: [
                                       Icon(
                                         isSelected ? item.selectedIcon : item.icon,
-                                        size: 21,
+                                        size: iconSize,
                                         color: isSelected
                                             ? AppColors.secondary
                                             : (isDark
@@ -180,16 +198,24 @@ class DetShellScaffold extends ConsumerWidget {
                                                 : const Color(0xFF64748B)),
                                       ),
                                       if (isSelected) ...[
-                                        const SizedBox(width: 4),
-                                        Flexible(
-                                          child: Text(
-                                            item.label,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 11.5,
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors.white,
+                                        const SizedBox(width: 5),
+                                        ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxWidth: maxLabelWidth,
+                                          ),
+                                          child: FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(
+                                              item.label,
+                                              maxLines: 1,
+                                              softWrap: false,
+                                              style: GoogleFonts.plusJakartaSans(
+                                                fontSize: fontSize,
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.white,
+                                                letterSpacing: -0.2,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -197,23 +223,24 @@ class DetShellScaffold extends ConsumerWidget {
                                     ],
                                   ),
                                 ),
-                              ),
-                            ),
-                          );
-                        }),
+                              );
+                            }),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
 
-                  const SizedBox(width: 8),
+                      SizedBox(width: gap),
 
-                  // ── Bouton aller à la Culture Solide avec Splash (placé à droite) ──
-                  _GoToCultureButton(
-                    isDark: isDark,
-                    onTap: () => _onTabSelected(context, ref, 3),
+                      // ── Bouton aller à la Culture Solide avec Splash (placé à droite) ──
+                      _GoToCultureButton(
+                        isDark: isDark,
+                        horizontalPadding: buttonHPad,
+                        onTap: () => _onTabSelected(context, ref, 3),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
     );
   }
@@ -223,10 +250,12 @@ class _GoToCultureButton extends StatelessWidget {
   const _GoToCultureButton({
     required this.isDark,
     required this.onTap,
+    this.horizontalPadding = 12.0,
   });
 
   final bool isDark;
   final VoidCallback onTap;
+  final double horizontalPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -244,8 +273,8 @@ class _GoToCultureButton extends StatelessWidget {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        height: 66,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        height: 64,
+        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(24),
