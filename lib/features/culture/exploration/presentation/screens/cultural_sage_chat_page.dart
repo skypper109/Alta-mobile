@@ -609,30 +609,7 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                 },
               ),
             ),
-            const SizedBox(height: 8),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.menu_book_rounded, color: AppColors.accent),
-              title: Text(
-                'Dictionnaire des Noms & Totems',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              subtitle: Text(
-                'Consulter les patronymes, clans et devises du Mali (BDD)',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showNamesCatalogModal();
-              },
-            ),
+
             const SizedBox(height: 8),
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -771,10 +748,6 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
               'label': s.questionText,
               'prompt': s.questionText,
             }),
-      {
-        'label': 'Dictionnaire des Noms (BDD)',
-        'prompt': 'catalog',
-      },
       {
         'label': 'Mon Nom de Famille',
         'prompt':
@@ -932,12 +905,16 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    'Grand-mère Mah consulte les récits des anciens...',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
+                  Expanded(
+                    child: Text(
+                      'Grand-mère Mah consulte les récits des anciens...',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                 ],

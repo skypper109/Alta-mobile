@@ -89,9 +89,216 @@ class CultureHomeView extends ConsumerWidget {
               child: DailyCuriosityCard(),
             ),
 
-            // ── 1. SECTION « À LA UNE » ─────────────────────────────────────────
+            // ── 1. LE GRAND BAOBAB : CHAT AVEC GRAND-MÈRE MAH (MIS EN VALEUR) ──
             AnimatedCulturalReveal(
-              delay: const Duration(milliseconds: 120),
+              delay: const Duration(milliseconds: 90),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF131B2A) : Colors.white,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: CultureTheme.accentOrange,
+                    width: 1.8,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: CultureTheme.accentOrange
+                          .withValues(alpha: isDark ? 0.35 : 0.18),
+                      blurRadius: 20,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      context.push('/culture/sage');
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Visuel photographique immersif du Baobab et Grand-mère Mah
+                        SizedBox(
+                          height: 125,
+                          width: double.infinity,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.asset(
+                                'assets/images/culture/contes/manden_baobab_stage.jpg',
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  color: const Color(0xFF131B2A),
+                                ),
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.black.withValues(alpha: 0.35),
+                                      const Color(0xFF0F172A).withValues(alpha: 0.88),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 10,
+                                left: 12,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: CultureTheme.accentOrange,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: CultureTheme.accentOrange
+                                            .withValues(alpha: 0.45),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.fireplace_rounded,
+                                        size: 13,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        'VEILLÉE SOUS LE GRAND BAOBAB',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 9.5,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 0.5,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 10,
+                                left: 12,
+                                right: 12,
+                                child: Text(
+                                  'Parle avec Grand-mère Mah',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                    letterSpacing: 0.3,
+                                    shadows: const [
+                                      Shadow(color: Colors.black, blurRadius: 6),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Descriptif & Actions
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Découvre l\'origine sacrée et le totem de ton nom de famille (Jamu), et écoute la sagesse du Mandé au coin du feu.',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11.5,
+                                  height: 1.4,
+                                  color: subtitleColor,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Wrap(
+                                alignment: WrapAlignment.spaceBetween,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF22C55E),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Conteuse & Généalogie active',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: CultureTheme.accentOrange,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: CultureTheme.accentOrange,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: CultureTheme.accentOrange
+                                              .withValues(alpha: 0.35),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Entrer dans la veillée',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        const Icon(Icons.arrow_forward_rounded,
+                                            size: 13, color: Colors.white),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 18),
+
+            // ── 2. SECTION « À LA UNE » (FORMAT ÉPURÉ ET COMPACT) ─────────────
+            AnimatedCulturalReveal(
+              delay: const Duration(milliseconds: 140),
               child: Row(
                 children: [
                   Container(
@@ -128,9 +335,9 @@ class CultureHomeView extends ConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
-            // Grande carte À la une interactive avec ornementation soudanaise
+            // Carte À la une compacte et interactive avec ornementation soudanaise
             AnimatedCulturalReveal(
               delay: const Duration(milliseconds: 180),
               child: CulturalInteractiveCard(
@@ -142,13 +349,13 @@ class CultureHomeView extends ConsumerWidget {
                 activeAccentColor: CultureTheme.accentOrange,
                 padding: EdgeInsets.zero,
                 showSudaneseCorners: true,
-                borderRadius: 22,
+                borderRadius: 20,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Bandeau visuel photographique réel
+                    // Bandeau visuel photographique compact (hauteur réduite à 110px)
                     SizedBox(
-                      height: 145,
+                      height: 110,
                       width: double.infinity,
                       child: Stack(
                         fit: StackFit.expand,
@@ -163,20 +370,21 @@ class CultureHomeView extends ConsumerWidget {
                                 color: CultureTheme.primaryDark,
                                 child: const Center(
                                   child: Icon(Icons.shield_rounded,
-                                      size: 40, color: Colors.white54),
+                                      size: 36, color: Colors.white54),
                                 ),
                               ),
                             )
                           else
                             Container(color: CultureTheme.primaryDark),
 
-                          // Overlay sombre uni pour contraste texte (strictement sans dégradé)
+                          // Overlay sombre uni pour contraste texte
                           Container(
                             color: Colors.black.withValues(alpha: 0.45),
                           ),
 
                           Padding(
-                            padding: const EdgeInsets.all(14),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -187,7 +395,7 @@ class CultureHomeView extends ConsumerWidget {
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
+                                          horizontal: 7, vertical: 3),
                                       decoration: BoxDecoration(
                                         color: CultureTheme.accentOrange,
                                         borderRadius: BorderRadius.circular(6),
@@ -203,7 +411,7 @@ class CultureHomeView extends ConsumerWidget {
                                       child: Text(
                                         featured.tag.toUpperCase(),
                                         style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 10,
+                                          fontSize: 9.5,
                                           fontWeight: FontWeight.w800,
                                           color: Colors.white,
                                           letterSpacing: 0.4,
@@ -214,7 +422,7 @@ class CultureHomeView extends ConsumerWidget {
                                     ),
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
+                                          horizontal: 7, vertical: 3),
                                       decoration: BoxDecoration(
                                         color: Colors.black
                                             .withValues(alpha: 0.55),
@@ -237,7 +445,7 @@ class CultureHomeView extends ConsumerWidget {
                                           Text(
                                             featured.regionName,
                                             style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 11,
+                                              fontSize: 10.5,
                                               fontWeight: FontWeight.w700,
                                               color: Colors.white,
                                             ),
@@ -250,7 +458,7 @@ class CultureHomeView extends ConsumerWidget {
                                 Text(
                                   featured.info,
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11,
+                                    fontSize: 10.5,
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
                                     shadows: const [
@@ -266,69 +474,85 @@ class CultureHomeView extends ConsumerWidget {
                       ),
                     ),
 
-                    // Corps éditorial
+                    // Corps éditorial compact
                     Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            featured.title,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-                              color: titleColor,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            featured.subtitle,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: CultureTheme.accentOrange,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            featured.description,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              color: subtitleColor,
-                              height: 1.4,
-                            ),
-                          ),
-                          const SizedBox(height: 14),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      featured.title,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 15.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: titleColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      featured.subtitle,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: CultureTheme.accentOrange,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                               InkWell(
                                 onTap: () {
                                   HapticFeedback.mediumImpact();
                                   context.push(
                                       '/culture/personnage/perso_soundiata');
                                 },
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Découvrir Soundiata Keïta',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 9, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: CultureTheme.accentOrange
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Découvrir',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: CultureTheme.accentOrange,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 3),
+                                      const Icon(
+                                        Icons.arrow_forward_rounded,
+                                        size: 13,
                                         color: CultureTheme.accentOrange,
                                       ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    const Icon(
-                                      Icons.arrow_forward_rounded,
-                                      size: 14,
-                                      color: CultureTheme.accentOrange,
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            featured.description,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11.5,
+                              color: subtitleColor,
+                              height: 1.35,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
