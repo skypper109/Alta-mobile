@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../../../../../core/constants/app_colors.dart';
@@ -23,6 +22,7 @@ import '../../../core/datasources/malian_names_knowledge.dart';
 import '../../../core/datasources/mock_cultural_guide_knowledge.dart';
 import '../../../core/models/cultural_guide_models.dart';
 import '../../../core/theme/culture_theme.dart';
+import '../../../presentation/widgets/malian_name_share_sheet.dart';
 import '../../data/models/mali_region.dart';
 import '../widgets/village_campfire_widget.dart';
 
@@ -1114,7 +1114,7 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                     ],
                   ),
 
-                  // Encadré scénique de narration
+                  // Encadré scénique de narration épuré (zéro étoile, icône chaleureuse)
                   if (msg.scenicAction != null &&
                       msg.scenicAction!.isNotEmpty) ...[
                     const SizedBox(height: 8),
@@ -1126,19 +1126,32 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
                         color: AppColors.surfaceAlt,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: AppColors.accent.withValues(alpha: 0.5),
+                          color: AppColors.accent.withValues(alpha: 0.4),
                           width: 1.0,
                         ),
                       ),
-                      child: Text(
-                        '*[${msg.scenicAction}]*',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.accentLight,
-                          height: 1.35,
-                        ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.fireplace_rounded,
+                            size: 14,
+                            color: CultureTheme.accentOrange,
+                          ),
+                          const SizedBox(width: 7),
+                          Expanded(
+                            child: Text(
+                              _cleanScenicAction(msg.scenicAction!),
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontStyle: FontStyle.italic,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.accentLight,
+                                height: 1.35,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -1150,16 +1163,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
 
                   const SizedBox(height: 8),
 
-                  // 2. CONTENU DU RÉCIT DE GRAND-MÈRE MAH
-                  Text(
-                    msg.text,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      height: 1.55,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
+                  // 2. CONTENU DU RÉCIT DE GRAND-MÈRE MAH (Mise en page riche, zéro étoile)
+                  _FormattedNarrativeText(text: msg.text),
 
                   // 3. PARCHEMIN ANCESTRAL DU CLAN (Si un patronyme est abordé)
                   if (msg.nameHeritage != null)
@@ -1364,55 +1369,96 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
             const SizedBox(height: 4),
             _buildParchmentRow('Devise :', info.deviseOuLouange!),
           ],
-          const SizedBox(height: 9),
-          Align(
-            alignment: Alignment.centerRight,
-            child: GestureDetector(
-              onTap: () {
-                HapticFeedback.selectionClick();
-                final shareDetails = StringBuffer('Fierté du clan ${info.name} (Mali) :\n');
-                shareDetails.writeln('Origine : ${info.origin}');
-                shareDetails.writeln('Signification : ${info.meaning}');
-                if (info.totem.isNotEmpty) shareDetails.writeln('Totem (Tanan) : ${info.totem}');
-                if (info.senankouya.isNotEmpty) shareDetails.writeln('Senankouya : ${info.senankouya}');
-                if (info.deviseOuLouange != null && info.deviseOuLouange!.isNotEmpty) {
-                  shareDetails.writeln('Devise : ${info.deviseOuLouange}');
-                }
-                shareDetails.writeln('\nEnseignement transmis par Grand-mère Mah sur AlterniA.');
-
-                SharePlus.instance.share(
-                  ShareParams(
-                    text: shareDetails.toString(),
-                    subject: 'Fiche Ancestrale du Clan ${info.name}',
-                  ),
-                );
-              },
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceAlt,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.accent, width: 1.0),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.share_rounded,
-                        size: 12, color: AppColors.accentLight),
-                    const SizedBox(width: 5),
-                    Text(
-                      'Partager mon Danbé',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.accentLight,
+          const SizedBox(height: 12),
+          // Boutons de Partage : WhatsApp Statut et Réseaux Sociaux
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              // Bouton Statut WhatsApp avec visuel haute définition
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  MalianNameShareSheet.show(
+                    context: context,
+                    info: info,
+                    autoTriggerWhatsApp: true,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 11, vertical: 6.5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF25D366),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF25D366).withValues(alpha: 0.35),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.chat_bubble_rounded,
+                          size: 13, color: Colors.white),
+                      const SizedBox(width: 5),
+                      Text(
+                        'Statut WhatsApp',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
+
+              // Bouton Partager la carte
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  MalianNameShareSheet.show(
+                    context: context,
+                    info: info,
+                    autoTriggerWhatsApp: false,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 11, vertical: 6.5),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceAlt,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: AppColors.accent,
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.share_rounded,
+                          size: 12, color: AppColors.accentLight),
+                      const SizedBox(width: 5),
+                      Text(
+                        'Partager la carte',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.accentLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -2043,6 +2089,23 @@ class _NamesCatalogSheetState extends State<_NamesCatalogSheet> {
                 ),
               ),
               const Spacer(),
+              IconButton(
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  MalianNameShareSheet.show(
+                    context: context,
+                    info: item,
+                    autoTriggerWhatsApp: false,
+                  );
+                },
+                icon: const Icon(Icons.share_rounded,
+                    size: 14, color: AppColors.accentLight),
+                padding: EdgeInsets.zero,
+                constraints:
+                    const BoxConstraints(minWidth: 28, minHeight: 28),
+                tooltip: 'Partager sur Statut WhatsApp',
+              ),
+              const SizedBox(width: 4),
               ElevatedButton.icon(
                 onPressed: () => widget.onSelectName(item),
                 icon: const Icon(Icons.forum_outlined, size: 12),
@@ -2140,6 +2203,110 @@ class _NamesCatalogSheetState extends State<_NamesCatalogSheet> {
         ],
       ),
     );
+  }
+}
+
+/// Nettoie les actions scéniques pour enlever les astérisques et crochets résiduels
+String _cleanScenicAction(String action) {
+  var cleaned = action.trim();
+  while (cleaned.startsWith('*') ||
+      cleaned.startsWith('[') ||
+      cleaned.startsWith('(')) {
+    cleaned = cleaned.substring(1).trim();
+  }
+  while (cleaned.endsWith('*') ||
+      cleaned.endsWith(']') ||
+      cleaned.endsWith(')')) {
+    cleaned = cleaned.substring(0, cleaned.length - 1).trim();
+  }
+  return cleaned;
+}
+
+/// Widget de mise en page riche pour les paroles de Grand-mère Mah
+/// Formate les mots clés en doré gras et termes traditionnels en italique
+/// sans laisser apparaître d'étoiles parasites.
+class _FormattedNarrativeText extends StatelessWidget {
+  final String text;
+
+  const _FormattedNarrativeText({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return SelectableText.rich(
+      TextSpan(
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 13,
+          height: 1.55,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimary,
+        ),
+        children: _buildSpans(text),
+      ),
+    );
+  }
+
+  List<InlineSpan> _buildSpans(String raw) {
+    final List<InlineSpan> spans = [];
+    final lines = raw.split('\n');
+
+    for (int l = 0; l < lines.length; l++) {
+      final line = lines[l];
+      if (line.isEmpty) {
+        if (l < lines.length - 1) {
+          spans.add(const TextSpan(text: '\n'));
+        }
+        continue;
+      }
+
+      // Capture **gras**, *italique*, ou texte ordinaire
+      final regex = RegExp(r'(\*\*[^*]+\*\*|\*[^*]+\*|[^*]+)');
+      final matches = regex.allMatches(line);
+
+      for (final match in matches) {
+        final segment = match.group(0) ?? '';
+        if (segment.startsWith('**') &&
+            segment.endsWith('**') &&
+            segment.length >= 4) {
+          final content = segment.substring(2, segment.length - 2);
+          spans.add(
+            TextSpan(
+              text: content,
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w800,
+                color: CultureTheme.orPatrimoine,
+                letterSpacing: 0.2,
+              ),
+            ),
+          );
+        } else if (segment.startsWith('*') &&
+            segment.endsWith('*') &&
+            segment.length >= 2) {
+          final content = segment.substring(1, segment.length - 1);
+          spans.add(
+            TextSpan(
+              text: content,
+              style: GoogleFonts.plusJakartaSans(
+                fontStyle: FontStyle.italic,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFFFDE68A),
+              ),
+            ),
+          );
+        } else {
+          // Texte ordinaire : on s'assure d'éliminer toute étoile isolée
+          final clean = segment.replaceAll('*', '');
+          if (clean.isNotEmpty) {
+            spans.add(TextSpan(text: clean));
+          }
+        }
+      }
+
+      if (l < lines.length - 1) {
+        spans.add(const TextSpan(text: '\n'));
+      }
+    }
+
+    return spans;
   }
 }
 
