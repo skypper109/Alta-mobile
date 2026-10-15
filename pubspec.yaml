@@ -79,9 +79,6 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   image: ^4.10.1
 
-dependency_overrides:
-  camera_android_camerax: 0.7.5+1
-
 flutter:
   uses-material-design: true
 
