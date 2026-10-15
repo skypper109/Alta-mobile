@@ -1,7 +1,6 @@
 // ─── AlterniA — Dictionnaire & Généalogie des Noms & Patronymes du Mali ────────
-// Base de connaissances des patronymes (Jamu / Djamou) et prénoms traditionnels.
-// Fournit pour chaque nom : origine géographique, signification étymologique,
-// rôle de clan/caste, totem ancestral (tanan) et cousinage à plaisanterie (senankouya).
+// Base de connaissances certifiée des patronymes (Jamu / Djamou) et prénoms traditionnels.
+// Règle éditoriale : données rigoureusement attestées par la tradition orale et l'histoire.
 library;
 
 class MalianNameInfo {
@@ -58,238 +57,350 @@ class MalianNameInfo {
   };
 
   String toNarrativeText() {
-    final deviseSection = (deviseOuLouange != null && deviseOuLouange!.isNotEmpty)
-        ? '\n\nRetiens cette noble louange des griots : $deviseOuLouange'
-        : '';
+    final parts = <String>[];
 
     if (type == 'prenom') {
-      return '« Mon enfant, approche et écoute ce que Grand-mère Mah lit dans le chant des flammes sur ton prénom, « $name ».\n\n'
-          'Sais-tu ce que signifie réellement porter ce prénom ? $meaning. '
-          'Ce n\'est pas un simple mot que l\'on crie dans la cour : dans nos terroirs de $origin, c\'est une bénédiction soufflée à l\'oreille du nouveau-né au septième jour pour guider chacun de ses pas.\n\n'
-          'Les anciens racontent que $anecdote. $clanRole.$deviseSection\n\n'
-          'Garde toujours la tête haute : un prénom n\'est pas donné par hasard dans notre savane, il est une graine d\'honneur semée en toi. Fais-en un arbre bienveillant dont l\'ombre protègera les autres. »';
+      parts.add('« Mon enfant, écoute ce que Grand-mère Mah sait du prénom « $name ».');
+      if (meaning.isNotEmpty) parts.add(meaning);
+      if (clanRole.isNotEmpty) parts.add(clanRole);
+      if (anecdote.isNotEmpty) parts.add('Les anciens racontent ceci : $anecdote');
+      parts.add(
+          'Chez nous, le prénom est donné lors du baptême, au septième jour après la naissance. Porte-le avec honneur. »');
+      return parts.join('\n\n');
     }
 
-    final totemPhrase = (totem.isNotEmpty)
-        ? 'Vois-tu ces étincelles qui s\'élèvent vers les étoiles ? C\'est ainsi que doit briller ta conduite. Ton animal totem (*Tanan*) est $totem — non pour te vanter, mais pour te rappeler l\'alliance sacrée avec la nature et la parole donnée.'
-        : '';
+    parts.add('« Mon enfant, assieds-toi près des braises. Voici ce que la tradition sait du nom « $name ».');
+    if (meaning.isNotEmpty) parts.add(meaning);
+    final berceau = origin.isNotEmpty ? 'Berceau : $origin.' : '';
+    final role = clanRole.isNotEmpty ? clanRole : '';
+    final originAndRole = [berceau, role].where((s) => s.isNotEmpty).join(' ');
+    if (originAndRole.isNotEmpty) parts.add(originAndRole);
 
-    final senankouyaPhrase = (senankouya.isNotEmpty)
-        ? 'Et si un $senankouya vient te taquiner au bord du fleuve en prétendant être ton maître, souris : c\'est le Senankouya, notre pacte millénaire de paix et de fraternité par le rire.'
-        : '';
+    if (anecdote.isNotEmpty) {
+      parts.add('Écoute ce que racontent les griots : $anecdote');
+    }
+    if (totem.isNotEmpty) {
+      parts.add('Le tana (interdit) associé à ce clan : $totem');
+    }
+    if (senankouya.isNotEmpty) {
+      parts.add('Ton senankun (cousin à plaisanterie) : $senankouya Entre vous, on se taquine, mais jamais on ne se fâche.');
+    }
+    if (deviseOuLouange != null && deviseOuLouange!.isNotEmpty) {
+      parts.add('Les griots disent : $deviseOuLouange');
+    }
+    parts.add(
+        'Chaque lignée garde aussi ses propres récits et ses propres interdits : demande aux anciens de ta famille, ils compléteront ce que je t\'ai dit. »');
 
-    return '« Mon enfant, assieds-toi plus près des braises. Laisse Grand-mère Mah te conter la véritable histoire du nom « $name ».\n\n'
-        'Vois-tu, beaucoup croient qu\'un nom n\'est qu\'une suite de lettres sur une carte. Mais chez nous, $name signifie $meaning ! '
-        'Tes racines plongent au cœur de $origin, là où tes nobles aïeux étaient reconnus comme $clanRole.\n\n'
-        'Écoute bien cette histoire que les griots se transmettent depuis la nuit des temps : $anecdote.\n\n'
-        '$totemPhrase\n\n'
-        '$senankouyaPhrase'
-        '$deviseSection\n\n'
-        'Porte ton nom avec la fierté tranquille du baobab, car en toi coule la mémoire de mille veillées. »';
+    return parts.join('\n\n');
   }
 }
 
 abstract final class MalianNamesKnowledge {
+  static const String _pactePeulsForgerons =
+      'Les forgerons (numu : Kanté, Doumbia, Fané…), selon le grand pacte de cousinage à plaisanterie entre Peuls et forgerons.';
+  static const String _pacteForgeronsPeuls =
+      'Les Peuls (Diallo, Diakité, Sidibé, Sangaré…), selon le grand pacte de cousinage à plaisanterie entre forgerons et Peuls.';
+
   static const Map<String, MalianNameInfo> _surnames = {
     'keita': MalianNameInfo(
       name: 'Keïta',
       type: 'nom',
-      origin: 'Mandé ancestral (Kangaba, Niani, Kita)',
-      meaning: '« Les Héritiers » ou « Ceux qui ont pris possession de la royauté » (*Ké-I-Ta* en Mandingue).',
-      clanRole: 'Dynastie impériale fondatrice du Mali (*Mansa*), noblesse guerrière et gardiens de la Charte de Kouroukan Fouga.',
-      totem: 'L\'Hippopotame (*Mali*) et le Lion (*Jara*).',
-      senankouya: 'Coulibaly, Soumaoro, Diarra, Samaké.',
-      anecdote: 'Lignée directe de Soundiata Keïta, le héros au destin prophétisé qui unifia les 12 royaumes du Mandé en 1235 après la bataille de Kirina.',
+      origin: 'Mandé (Niani, Kangaba, Kita) — Malinké',
+      meaning:
+          'Selon l\'explication la plus répandue chez les griots, Keïta viendrait de « kè ita » : « prendre l\'héritage », c\'est-à-dire « celui qui a reçu l\'héritage ».',
+      clanRole:
+          'Lignée royale du Mandé : la dynastie des Mansa de l\'Empire du Mali (Soundiata Keïta, Mansa Moussa).',
+      totem: '',
+      senankouya: 'Coulibaly (le pacte Keïta–Coulibaly est l\'un des plus connus du Mali).',
+      deviseOuLouange: '« Keïta, descendants de Soundiata, le lion du Mandé ! »',
+      anecdote:
+          'Soundiata Keïta, fils de Naré Maghan Kon Fatta et de Sogolon Kédjou, vainquit Soumaoro Kanté à Kirina (vers 1235) et fonda l\'Empire du Mali ; la tradition lui attribue la Charte de Kouroukan Fouga. Depuis Balla Fasséké, les griots Kouyaté sont les griots attitrés des Keïta.',
     ),
     'traore': MalianNameInfo(
       name: 'Traoré',
       type: 'nom',
-      origin: 'Mandé et Kénédougou (Sikasso, Bougouni, Kolondiéba)',
-      meaning: '« Les Clairvoyants » ou « Nous avons vu la piste » (*An bè tara*), maîtres de la confrérie des chasseurs (*Donson*).',
-      clanRole: 'Conquérants, grands stratèges de guerre et fondateurs du fier Royaume du Kénédougou.',
-      totem: 'La Panthère (*Wara*) et le Chien de chasse.',
-      senankouya: 'Diarra, Coulibaly, Konaté.',
-      anecdote: 'Descendants de Tiramakhan Traoré, général intrépide de Soundiata Keïta. Plus tard, Babemba Traoré illustra la devise : « Plutôt la mort que la honte » (*Saya ka fisa malo yé*) face aux troupes coloniales à Sikasso.',
+      origin: 'Mandé, Kénédougou (Sikasso) et tout l\'espace mandingue',
+      meaning:
+          'Traoré est la forme francisée de Tarawele. Une étymologie populaire rapportée par les griots y voit « tara wele » (« va l\'appeler »), en souvenir du guerrier qu\'on allait chercher dans les moments de péril ; ce sens reste une tradition, pas une certitude.',
+      clanRole:
+          'Clan noble guerrier du Mandé, issu selon l\'épopée de Tiramakan Traoré, général de Soundiata. Au XIXe siècle, des Traoré régnèrent sur le royaume du Kénédougou (Sikasso).',
+      totem: '',
+      senankouya: 'Diarra (le pacte Traoré–Diarra est l\'un des plus célèbres du Mali).',
+      deviseOuLouange: '« Tarawele, descendants de Tiramakan ! »',
+      anecdote:
+          'Après Kirina, Tiramakan Traoré mena la conquête de l\'ouest, jusqu\'au Kaabu. En 1898, à Sikasso, le roi Babemba Traoré préféra la mort à la reddition face aux troupes coloniales ; on lui prête la parole « Plutôt la mort que la honte ».',
     ),
     'coulibaly': MalianNameInfo(
       name: 'Coulibaly',
       type: 'nom',
-      origin: 'Ségou, Kaarta et Bélédougou',
-      meaning: '« Sans Pirogue » (*Kouloun-bali*), ceux dont la bravoure et la force permettent de traverser les fleuves sans embarcation.',
-      clanRole: 'Fondateurs du puissant Royaume Bambara de Ségou, seigneurs de la terre et bâtisseurs d\'armées (*Tônjon*).',
-      totem: 'Le Silure géant (*Mankoro*) et le Crocodile.',
-      senankouya: 'Keïta, Samaké, Traoré, Cissé.',
-      anecdote: 'Biton Mamary Coulibaly fonda Ségou en unifiant les jeunes chasseurs en une confrérie indomptable qui fit de la cité aux balanzans la maîtresse du Niger.',
+      origin: 'Ségou, Kaarta et Bélédougou — Bambara',
+      meaning: '« Sans pirogue », du bambara « kulun » (pirogue) et « bali » (sans, absence de).',
+      clanRole:
+          'Fondateurs du royaume bambara de Ségou (Biton Coulibaly, début du XVIIIe siècle) et du royaume du Kaarta (les Massassi).',
+      totem: 'Le silure (poisson-chat), qui selon la légende fit traverser le fleuve aux ancêtres du clan.',
+      senankouya: 'Keïta.',
+      anecdote:
+          'La légende raconte que deux frères ancêtres du clan, Niangolo et Baramangolo, poursuivis par leurs ennemis, arrivèrent au bord du Niger sans pirogue. Un silure les fit traverser : d\'où le nom « sans pirogue » et l\'interdit de manger ce poisson. Plus tard, Biton Coulibaly transforma l\'association des jeunes (ton) en armée et fit de Ségou un royaume puissant.',
     ),
     'diakite': MalianNameInfo(
       name: 'Diakité',
       type: 'nom',
-      origin: 'Wassoulou, Macina, Foulassaba et Fouta',
-      meaning: '« Les Veilleurs des Pâturages » et nobles cavaliers peuls intégrés à l\'espace mandingue.',
-      clanRole: 'Chefs pastoraux, cavaliers réputés et maîtres de la liberté des grands espaces.',
-      totem: 'La Vache blanche sans tache et l\'Oiseau migrateur.',
-      senankouya: 'Diallo, Sidibé, Sangaré.',
-      anecdote: 'Les Diakité du Wassoulou ont allié la fierté pastorale peule à la magie musicale des chasseurs mandingues, donnant naissance au cœur battant du terroir Wassoulou.',
+      origin: 'Wassoulou, Macina et Mandé — famille d\'origine peule',
+      meaning:
+          'Nom d\'origine peule porté par des familles intégrées au monde mandingue ; la tradition le rattache au clan peul des Diallo. Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole:
+          'Avec les Diallo, Sidibé et Sangaré, les Diakité forment dans la tradition du Wassoulou les « quatre frères » peuls.',
+      totem: '',
+      senankouya: _pactePeulsForgerons,
+      anecdote:
+          'Au Wassoulou, Peuls et Malinké se sont tant mêlés que les Diakité, Sidibé et Sangaré parlent le malinké ou le bambara tout en revendiquant fièrement leur ascendance peule.',
     ),
     'diallo': MalianNameInfo(
       name: 'Diallo',
       type: 'nom',
-      origin: 'Macina (Mopti, Ténenkou, Djenné) et Sahel',
-      meaning: '« Les Nobles Pasteurs » (*Jallo* en Pulaar), hommes d\'honneur, de parole et de tempérance.',
-      clanRole: 'Lignée guerrière et royale de l\'Empire Peul du Macina (Sékou Amadou).',
-      totem: 'Le Bélier blanc et l\'eau du Djoliba.',
-      senankouya: 'Diakité, Sangaré, Dicko.',
-      anecdote: 'Les Diallo incarnent le « Pulaaku », le code d\'honneur peul fondé sur la retenue, la patience, le courage stoïque et la générosité sans faille.',
+      origin: 'Macina, Sahel et toute l\'Afrique de l\'Ouest — Peul',
+      meaning:
+          'Forme de « Jallo », l\'un des grands clans peuls (Jallube), aux côtés des Bâ, Sow et Barry. Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole: 'Clan peul parmi les plus répandus, du Macina au Fouta-Djalon.',
+      totem: '',
+      senankouya: _pactePeulsForgerons,
+      anecdote:
+          'Les Diallo, comme tous les Peuls, se réfèrent au pulaaku, le code de conduite peul fondé sur la retenue (semteende), la patience (munyal) et la sagesse (hakkille).',
     ),
     'toure': MalianNameInfo(
       name: 'Touré',
       type: 'nom',
-      origin: 'Tombouctou, Gao, San et boucle du Niger',
-      meaning: '« Les Bâtisseurs de Cités » et grands dignitaires de l\'Empire Songhoï.',
-      clanRole: 'Dynastie des Askia (Askia Mohammed Touré), érudits coraniques, diplomates et grands marchands du commerce transsaharien.',
-      totem: 'L\'Éléphant et la Grue couronnée.',
-      senankouya: 'Cissé, Haïdara, Sylla.',
-      anecdote: 'Sous Askia Mohammed Touré au XVIᵉ siècle, Tombouctou et l\'Université Sankoré devinrent le phare mondial du savoir où les livres se vendaient plus cher que l\'or.',
+      origin: 'Boucle du Niger (Tombouctou, Gao), pays soninké et mandingue',
+      meaning: 'Patronyme d\'origine soninké et mandingue. Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole:
+          'Nombreuses familles maraboutiques et commerçantes ; la tradition nomme Mohammed Touré le fondateur de la dynastie des Askia.',
+      totem: '',
+      senankouya: 'Cissé (selon plusieurs traditions).',
+      anecdote:
+          'Askia Mohammed, appelé Mohammed Touré par la tradition, prit le pouvoir dans l\'Empire songhaï en 1493. Sous son règne, Tombouctou et ses mosquées-universités (Sankoré, Djingareyber) connurent un grand rayonnement intellectuel.',
     ),
     'cisse': MalianNameInfo(
       name: 'Cissé',
       type: 'nom',
-      origin: 'Ancien Empire du Ghana / Wagadou (Koumbi Saleh, Nara)',
-      meaning: '« Les Premiers Cavaliers » (*Si-ssé*), première dynastie impériale d\'Afrique de l\'Ouest.',
-      clanRole: 'Empereurs fondateurs du Wagadou (*Kaya Magan Cissé*), marabouts prestigieux et gardiens des pactes ancestraux.',
-      totem: 'Le Cheval et le serpent mythique Wagadou Bida.',
-      senankouya: 'Touré, Traoré, Sylla.',
-      anecdote: 'Les Cissé régnaient sur la terre de l\'or où les chevaux s\'abritaient sous des tentures de soie, ouvrant la voie à la grandeur de toutes les civilisations sahéliennes.',
+      origin: 'Ancien Ghana / Wagadou (Nara, Nioro, Kayes) — Soninké',
+      meaning: 'Patronyme soninké lié à l\'ancien royaume du Wagadou. Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole:
+          'Selon la tradition soninké, les Cissé (Cissé Tounkara) fournissaient les rois du Wagadou, l\'ancien Ghana.',
+      totem: '',
+      senankouya: 'Touré (selon plusieurs traditions).',
+      anecdote:
+          'Selon la légende du Wagadou, la prospérité du royaume dépendait du serpent Bida, à qui l\'on offrait chaque année une jeune fille. Quand Mamadi le Taciturne tua le serpent pour sauver sa fiancée Sia Yatabaré, la pluie d\'or cessa, le Wagadou déclina et les Soninké se dispersèrent.',
     ),
     'diarra': MalianNameInfo(
       name: 'Diarra',
       type: 'nom',
-      origin: 'Ségou, Bélédougou et pays Bambara',
-      meaning: '« Le Lion » (*Jara* en Bambara), incarnation de la force majestueuse et de l\'intrépidité.',
-      clanRole: 'Dynastie régnante de Ségou (Ngolo Diarra, Monzon Diarra), maîtres de la savane et souverains indomptés.',
-      totem: 'Le Lion (*Jara*).',
-      senankouya: 'Traoré, Coulibaly.',
-      anecdote: 'Ngolo Diarra, par sa sagesse et sa bravoure, rétablit la paix à Ségou et étendit le royaume jusqu\'à Tombouctou, faisant rugir le lion sur les deux rives du fleuve.',
+      origin: 'Ségou, Kaarta et Bélédougou — Bambara',
+      meaning: '« Le lion », du bambara « jara ».',
+      clanRole:
+          'Dynastie qui régna sur le royaume bambara de Ségou après les Coulibaly, fondée par Ngolo Diarra vers 1766.',
+      totem: '',
+      senankouya: 'Traoré.',
+      deviseOuLouange: '« Diarra, jara : le lion ! »',
+      anecdote:
+          'Ngolo Diarra, ancien captif de la cour de Biton Coulibaly, prit le pouvoir à Ségou. Son fils Monzon Diarra, puis son petit-fils Da Monzon Diarra, portèrent le royaume à son apogée au tournant du XIXe siècle.',
     ),
     'camara': MalianNameInfo(
       name: 'Camara',
       type: 'nom',
-      origin: 'Siby, Mandé montagneux et Tabon',
-      meaning: '« Ceux qui tranchent la roche », maîtres forgerons et dompteurs de la montagne.',
-      clanRole: 'Rois alliés de Soundiata (Kamandjan Camara), forgerons sacrés et gardiens des secrets telluriques.',
-      totem: 'Le Singe ou le Varan des rochers.',
-      senankouya: 'Sanogo, Doumbia, Koné.',
-      anecdote: 'À Siby, Kamandjan Camara transperça la montagne d\'un coup de sabre pour prouver la victoire future sur Soumaoro Kanté : l\'Arche de Kamandjan se dresse encore aujourd\'hui.',
+      origin: 'Mandé (Siby, Tabon, Kita) — Malinké',
+      meaning: 'Patronyme mandingue parmi les plus anciens. Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole:
+          'Clan noble du Mandé, réputé pour ses chasseurs ; les Camara de Siby et de Tabon figurent parmi les alliés de Soundiata.',
+      totem: '',
+      senankouya: '',
+      anecdote:
+          'Dans l\'épopée, Kamandjan Camara, roi de Siby, rejoint Soundiata contre Soumaoro. Près de Siby, l\'arche de pierre naturelle porte son nom : l\'Arche de Kamandjan.',
     ),
     'maiga': MalianNameInfo(
       name: 'Maïga',
       type: 'nom',
-      origin: 'Empire Songhoï (Gao, Ansongo, Tombouctou, Bourem)',
-      meaning: '« Le Maître / Le Chef Suprême » en langue Songhoï.',
-      clanRole: 'Princes, gouverneurs et cavaliers d\'élite de l\'Empire Songhoï.',
-      totem: 'L\'Aigle pêcheur et le Cheval bai.',
-      senankouya: 'Touré, Soumaré, Cissé.',
-      anecdote: 'Les Maïga perpétuent la gloire de Sonni Ali Ber et des guerriers du fleuve qui patrouillaient sur des centaines de pirogues de guerre entre Gao et Djenné.',
+      origin: 'Gao, Bourem, Ansongo, Tombouctou — Songhaï',
+      meaning: 'Grand patronyme songhaï. Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole: 'Patronyme emblématique du pays songhaï, berceau de l\'Empire de Gao.',
+      totem: '',
+      senankouya: '',
+      anecdote:
+          'L\'Empire songhaï, dont Gao était la capitale, domina la boucle du Niger aux XVe et XVIe siècles, sous Sonni Ali Ber puis les Askia.',
     ),
     'sidibe': MalianNameInfo(
       name: 'Sidibé',
       type: 'nom',
-      origin: 'Wassoulou (Yanfolila, Bougouni)',
-      meaning: '« La Noblesse pastorale et les voix mélodieuses du Wassoulou ».',
-      clanRole: 'Cavaliers d\'honneur, conteurs et dépositaires de l\'âme musicale du sud du Mali.',
-      totem: 'La Tourterelle et le Zébu.',
-      senankouya: 'Diakité, Diallo, Sangaré.',
-      anecdote: 'Le terroir Sidibé est le berceau du Kamalen N\'goni et des chansons qui célèbrent la bravoure paysanne et la beauté des femmes peules du Wassoulou.',
+      origin: 'Wassoulou (Yanfolila, Bougouni) — famille d\'origine peule',
+      meaning:
+          'Nom peul du Wassoulou, souvent considéré comme l\'équivalent mandingue du patronyme peul Sow. Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole: 'L\'un des « quatre frères » peuls du Wassoulou, avec les Diallo, Diakité et Sangaré.',
+      totem: '',
+      senankouya: _pactePeulsForgerons,
+      anecdote:
+          'Le Wassoulou, terre des Sidibé, Diakité et Sangaré, a donné naissance à la musique wassoulou, portée par des chanteuses comme Coumba Sidibé.',
     ),
     'sangare': MalianNameInfo(
       name: 'Sangaré',
       type: 'nom',
-      origin: 'Wassoulou, Mopti et Mandé sud',
-      meaning: '« Les Puissants de la savane », clan lié à la force tranquille de la nature.',
-      clanRole: 'Nobles pasteurs et gardiens des troupeaux ancestraux.',
-      totem: 'L\'Éléphant et le Serpent d\'eau.',
-      senankouya: 'Diakité, Diallo, Samaké.',
-      anecdote: 'Partout au Mali, un Sangaré et un Diakité qui se croisent débutent immédiatement les joutes de cousinage à plaisanterie, ciment de la paix nationale.',
+      origin: 'Wassoulou, Macina — famille d\'origine peule',
+      meaning:
+          'Nom peul, souvent rapproché du patronyme Barry ; on le retrouve sous les formes Sankara (Burkina Faso) ou Shagari (Nigeria). Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole: 'L\'un des « quatre frères » peuls du Wassoulou, avec les Diallo, Diakité et Sidibé.',
+      totem: '',
+      senankouya: _pactePeulsForgerons,
+      anecdote:
+          'Oumou Sangaré, grande voix du Wassoulou, a fait connaître dans le monde entier la musique de cette région.',
     ),
     'samake': MalianNameInfo(
       name: 'Samaké',
       type: 'nom',
-      origin: 'Mandé (Ménaka, Kangaba, Ouelessebougou)',
-      meaning: '« La Force de l\'Éléphant » (*Sama* = Éléphant en Bambara).',
-      clanRole: 'Grands chasseurs et maîtres de la forêt dense.',
-      totem: 'L\'Éléphant (*Sama*).',
-      senankouya: 'Coulibaly, Diakité.',
-      anecdote: 'Les Samaké incarnent la mémoire de la forêt : calmes et inébranlables comme l\'éléphant, mais invincibles quand leur honneur est bravé.',
+      origin: 'Mandé et région de Bamako — Bambara',
+      meaning: 'Généralement expliqué par le bambara « sama » (éléphant) et « kɛ » (mâle) : « l\'éléphant mâle ».',
+      clanRole: 'Patronyme bambara du Mandé.',
+      totem: '',
+      senankouya: '',
+      anecdote: 'L\'éléphant, que le nom évoque, est dans les contes mandingues le symbole de la force tranquille.',
     ),
     'kouyate': MalianNameInfo(
       name: 'Kouyaté',
       type: 'nom',
-      origin: 'Mandé (Kéla, Kangaba)',
-      meaning: '« Il y a un secret entre nous » (*Kouya-té*), première lignée sacrée de griots (*Jeli*).',
-      clanRole: 'Dépositaires suprêmes de la parole, détenteurs du Balafon sacré Sosso-Bala et conseillers intimes des rois.',
-      totem: 'Aucun interdit alimentaire (le verbe purifie tout).',
-      senankouya: 'Tous les nobles du Mandé (le griot est le cousin de tout le monde).',
-      anecdote: 'Balla Fasséké Kouyaté reçut de Soundiata Keïta le privilège éternel de conter l\'Histoire et de réconcilier les rois en colère par le chant des louanges.',
+      origin: 'Mandé (Niagassola, Kita, Kangaba) — griots malinké',
+      meaning:
+          'Selon la tradition, le nom signifierait « il y a un secret entre nous », parole liée au lien unissant Balla Fasséké à son roi.',
+      clanRole:
+          'Première lignée de griots (jeli) du Mandé, descendants de Balla Fasséké, griot de Soundiata ; griots attitrés des Keïta.',
+      totem: '',
+      senankouya: '',
+      anecdote:
+          'Balla Fasséké, captif chez Soumaoro Kanté, joua du Sosso-Bala, le balafon sacré du roi du Sosso. Ce balafon est aujourd\'hui gardé par les Kouyaté à Niagassola (Guinée) et inscrit au patrimoine immatériel de l\'UNESCO.',
     ),
     'diabate': MalianNameInfo(
       name: 'Diabaté',
       type: 'nom',
-      origin: 'Kita (la capitale des griots), Mandé',
-      meaning: '« Rien ne peut nous abattre » (*Djan-bali-té*).',
-      clanRole: 'Maîtres virtuoses de la Kora à 21 cordes et de la poésie épique.',
-      totem: 'La Parole sacrée et le Bois de Vène.',
-      senankouya: 'Sissoko, Kouyaté, N\'Diaye.',
-      anecdote: 'À Kita, au pied de la colline sacrée Kita Kourou, les Diabaté font vibrer les cordes de la kora depuis des siècles pour apaiser les cœurs et immortaliser la grandeur du Mali.',
+      origin: 'Mandé (Kéla, Kangaba, Kita) — griots malinké',
+      meaning: 'Grande lignée de griots. Plusieurs étymologies populaires circulent, mais aucune n\'est établie.',
+      clanRole: 'Griots (jeli) : les Diabaté de Kéla récitent l\'histoire du Mandé lors du Kamablon de Kangaba.',
+      totem: '',
+      senankouya: '',
+      anecdote:
+          'Tous les sept ans, à Kangaba, on refait le toit de la case sacrée Kamablon ; les griots Diabaté de Kéla y récitent l\'histoire du Mandé. Cette cérémonie est inscrite au patrimoine immatériel de l\'UNESCO (2009). Le joueur de kora Toumani Diabaté est issu de cette tradition.',
     ),
     'doumbia': MalianNameInfo(
       name: 'Doumbia',
       type: 'nom',
-      origin: 'Mandé, Bélédougou et Bougouni',
-      meaning: '« Maîtres des Forges et des Mystères souterrains ».',
-      clanRole: 'Héritiers du grand Fakoli Doumbia (Koumba Fakoli), grand maître de guerre et forgeron mystique allié de Soundiata.',
-      totem: 'L\'Aigle et l\'Enclume.',
-      senankouya: 'Camara, Sanogo, Koné.',
-      anecdote: 'Fakoli Doumbia portait un bonnet orné de cornes magiques et commandait aux forgerons pour équiper en pointes de flèches l\'armée du Mandé.',
+      origin: 'Mandé, Bélédougou, Wassoulou — Malinké et Bambara',
+      meaning: 'Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole:
+          'Patronyme souvent associé aux forgerons (numu) ; la tradition rattache des Doumbia à Fakoli, neveu de Soumaoro Kanté devenu général de Soundiata.',
+      totem: '',
+      senankouya: _pacteForgeronsPeuls,
+      anecdote:
+          'Selon l\'épopée, Fakoli abandonna son oncle Soumaoro, qui lui avait pris son épouse Kéléya, et rejoignit Soundiata avec ses guerriers.',
     ),
     'konate': MalianNameInfo(
       name: 'Konaté',
       type: 'nom',
-      origin: 'Mandé historique (Toron, Kankan)',
-      meaning: '« Ceux qui détiennent le pouvoir premier ».',
-      clanRole: 'Ancienne dynastie royale dont est issu Naré Maghann Konaté, père de Soundiata Keïta.',
-      totem: 'Le Python d\'eau et le Lion.',
-      senankouya: 'Keïta, Traoré.',
-      anecdote: 'Avant que Soundiata ne prenne le nom de Keïta, la couronne du Manden reposait sur le front des fiers Konaté.',
+      origin: 'Mandé (Niani, Kangaba) — Malinké',
+      meaning: 'Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole:
+          'Lignée royale ancienne du Mandé, étroitement liée aux Keïta : la tradition rattache aux Konaté le père de Soundiata, Naré Maghan Kon Fatta.',
+      totem: '',
+      senankouya: '',
+      anecdote:
+          'Les Konaté et les Keïta partagent une même souche dans la tradition : avant de devenir la marque de la dynastie impériale, les ancêtres de Soundiata sont aussi désignés comme Konaté.',
     ),
     'dembele': MalianNameInfo(
       name: 'Dembélé',
       type: 'nom',
-      origin: 'Pays Sénoufo et Bwa (Koutiala, San, Sikasso)',
-      meaning: '« Les Bâtisseurs infatigables de greniers ».',
-      clanRole: 'Maîtres de l\'agriculture héroïque et des danses rituelles au balafon sénoufo.',
-      totem: 'Le Calao et la Perdrix.',
-      senankouya: 'Camara, Traoré, Sanogo.',
-      anecdote: 'Les Dembélé ont fait du grenier plein le symbole ultime de la dignité de l\'homme et de la prospérité du village.',
+      origin: 'Centre et sud du Mali — Bambara, Minianka',
+      meaning: 'Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole: 'Patronyme répandu chez les Bambara et les Minianka.',
+      totem: '',
+      senankouya: '',
+      anecdote: '',
     ),
     'sacko': MalianNameInfo(
       name: 'Sacko',
       type: 'nom',
-      origin: 'Khasso et pays Soninké (Kayes, Bafoulabé)',
-      meaning: '« Les Cavaliers du Khasso » et gardiens du fleuve Sénégal.',
-      clanRole: 'Noblesse soninkée et khassonkée, guerriers d\'honneur.',
-      totem: 'Le Cheval et le Poisson blanc.',
-      senankouya: 'Niakaté, Cissé, Bathily.',
-      anecdote: 'Au confluent du Bafing et du Bakoye à Bafoulabé, les Sacko ont régné avec panache sur les royaumes du Khasso.',
+      origin: 'Région de Kayes — Soninké et Khassonké',
+      meaning: 'Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole: 'Patronyme soninké et khassonké de la région de Kayes.',
+      totem: '',
+      senankouya: '',
+      anecdote: '',
     ),
     'haidara': MalianNameInfo(
       name: 'Haïdara',
       type: 'nom',
-      origin: 'Tombouctou, Djenné et Sahel',
-      meaning: '« Le Lion de Dieu » (lignée chérifienne).',
-      clanRole: 'Gardiens des manuscrits anciens de Tombouctou et érudits de paix.',
-      totem: 'L\'Encre sacrée et la Colombe.',
-      senankouya: 'Touré, Cissé, Dramé.',
-      anecdote: 'Les bibliothèques familiales Haïdara abritent encore des milliers de manuscrits médiévaux sur l\'astronomie, les mathématiques et la tolérance.',
+      origin: 'Tombouctou, Djenné, Gao — familles chérifiennes',
+      meaning: 'De l\'arabe « Haydar », « le lion », surnom d\'Ali, gendre du Prophète.',
+      clanRole: 'Familles chérifiennes (se réclamant de la descendance du Prophète) et lettrées, gardiennes de bibliothèques de manuscrits.',
+      totem: '',
+      senankouya: '',
+      anecdote:
+          'En 2012-2013, Abdel Kader Haïdara organisa l\'évacuation clandestine de centaines de milliers de manuscrits de Tombouctou vers Bamako pour les sauver de la destruction.',
+    ),
+    'kone': MalianNameInfo(
+      name: 'Koné',
+      type: 'nom',
+      origin: 'Sud du Mali, Côte d\'Ivoire, Burkina Faso — Bambara, Malinké, Sénoufo',
+      meaning: 'Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole: 'Patronyme très répandu chez les Bambara, les Malinké et les Sénoufo.',
+      totem: '',
+      senankouya: '',
+      anecdote: '',
+    ),
+    'fofana': MalianNameInfo(
+      name: 'Fofana',
+      type: 'nom',
+      origin: 'Pays soninké et mandingue',
+      meaning: 'Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole: 'Patronyme soninké et mandingue.',
+      totem: '',
+      senankouya: '',
+      anecdote: '',
+    ),
+    'bagayoko': MalianNameInfo(
+      name: 'Bagayoko',
+      type: 'nom',
+      origin: 'Mandé, Tombouctou — Bambara et familles lettrées',
+      meaning: 'Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole: 'Patronyme mandingue, porté aussi par une célèbre lignée de savants de Tombouctou.',
+      totem: '',
+      senankouya: '',
+      anecdote:
+          'Au XVIe siècle, le savant Mohammed Bagayogo (1523-1594) enseignait à Tombouctou ; il fut le maître du grand érudit Ahmed Baba.',
+    ),
+    'sissoko': MalianNameInfo(
+      name: 'Sissoko',
+      type: 'nom',
+      origin: 'Khasso (Kayes), Kita, Mandé — Malinké et Khassonké',
+      meaning: 'Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole: 'Patronyme porté à la fois par des familles nobles et par des lignées de griots.',
+      totem: '',
+      senankouya: '',
+      anecdote: 'Le joueur de kora Ballaké Sissoko perpétue aujourd\'hui l\'art des griots mandingues.',
+    ),
+    'guindo': MalianNameInfo(
+      name: 'Guindo',
+      type: 'nom',
+      origin: 'Pays dogon (falaise de Bandiagara, Bankass, Koro)',
+      meaning: 'Patronyme dogon. Son sens littéral n\'est pas établi de façon fiable.',
+      clanRole: 'L\'un des patronymes dogon les plus répandus, avec Dolo, Togo, Ongoïba ou Kassogué.',
+      totem: '',
+      senankouya: 'Les Bozo (pacte Dogon–Bozo).',
+      anecdote:
+          'Dogon et Bozo sont liés par un pacte ancien : ils se doivent assistance, ne peuvent se faire de mal et, selon la tradition, ne se marient pas entre eux.',
+    ),
+    'thiero': MalianNameInfo(
+      name: 'Thiéro',
+      type: 'nom',
+      origin: 'Région de Mopti et delta intérieur du Niger',
+      meaning: 'Son sens et son rattachement ethnique précis ne sont pas documentés de façon fiable.',
+      clanRole: 'Patronyme présent dans la région de Mopti.',
+      totem: '',
+      senankouya: '',
+      anecdote: '',
     ),
   };
 
@@ -297,92 +408,129 @@ abstract final class MalianNamesKnowledge {
     'mamadou': MalianNameInfo(
       name: 'Mamadou',
       type: 'prenom',
-      origin: 'Forme mandingue et peule de Muhammad.',
-      meaning: '« Celui qui est digne d\'éloges et de respect universel ».',
-      clanRole: 'Prénom de sagesse, attribué traditionnellement à l\'aîné des garçons pour qu\'il veille sur ses cadets.',
+      origin: 'Tout le Mali (Bambara, Peuls, Soninké, Songhaï…)',
+      meaning: 'Forme ouest-africaine de Muhammad, de l\'arabe : « le loué », « celui qui est digne de louanges ».',
+      clanRole: 'Prénom donné en hommage au Prophète de l\'islam ; diminutifs courants : Madou, Mady.',
       totem: '',
       senankouya: '',
-      anecdote: 'Au Mali, Mamadou est souvent surnommé Madou ou Baba, symbole d\'affection et de responsabilité familiale.',
-    ),
-    'modibo': MalianNameInfo(
-      name: 'Modibo',
-      type: 'prenom',
-      origin: 'Tradition peule et soninkée du Macina et de Tombouctou.',
-      meaning: '« Le Lettré, le Grand Érudit, le Savant » (*Moodibo* en Pulaar).',
-      clanRole: 'Titre d\'honneur donné à celui qui maîtrise les sciences et l\'écriture sacrée.',
-      totem: '',
-      senankouya: '',
-      anecdote: 'Porté par le premier président du Mali indépendant, Modibo Keïta, apôtre du panafricanisme et de la dignité africaine.',
-    ),
-    'soundiata': MalianNameInfo(
-      name: 'Soundiata',
-      type: 'prenom',
-      origin: 'Mandé ancestral (contraction de Sogolon-Djata).',
-      meaning: '« Le Lion de Sogolon » (*Sogolon-Jata*).',
-      clanRole: 'Prénom impérial de bravoure surmontant tous les obstacles du destin.',
-      totem: '',
-      senankouya: '',
-      anecdote: 'Né infirme, il marcha à l\'aide d\'un bâton de fer pour venger l\'honneur de sa mère et bâtit le plus grand empire d\'Afrique de l\'Ouest.',
+      anecdote: '',
     ),
     'fatoumata': MalianNameInfo(
       name: 'Fatoumata',
       type: 'prenom',
-      origin: 'Racine islamique et sahélienne, très populaire au Mandé.',
-      meaning: '« Celle qui protège, sèvre et nourrit l\'âme » (surnommée Fanta, Fatou ou Tehou).',
-      clanRole: 'Prénom de reine-mère, pilier de concorde et de bénédiction dans la cour familiale.',
+      origin: 'Tout le Mali',
+      meaning: 'Forme ouest-africaine de Fatima, de l\'arabe : « celle qui sèvre (son enfant) ».',
+      clanRole: 'Prénom donné en hommage à Fatima, fille du Prophète ; diminutifs courants : Fatou, Fanta.',
       totem: '',
       senankouya: '',
-      anecdote: 'Au Mali, une Fatoumata est respectée comme une mère de famille dont la bénédiction apporte la prospérité.',
+      anecdote: '',
+    ),
+    'soundiata': MalianNameInfo(
+      name: 'Soundiata',
+      type: 'prenom',
+      origin: 'Mandé — prénom historique',
+      meaning:
+          'Contraction de « Sogolon Jara », « le lion de Sogolon », du nom de sa mère et du mot bambara/malinké « jara » (lion).',
+      clanRole: 'Prénom du fondateur de l\'Empire du Mali, aussi appelé Mari Djata.',
+      totem: '',
+      senankouya: '',
+      anecdote:
+          'Selon l\'épopée, l\'enfant ne pouvait pas marcher et était moqué. Un jour, humilié pour sa mère, il se leva en s\'appuyant sur une barre de fer forgée, puis arracha un jeune baobab pour en offrir les feuilles à Sogolon.',
+    ),
+    'awa': MalianNameInfo(
+      name: 'Awa',
+      type: 'prenom',
+      origin: 'Tout le Mali',
+      meaning:
+          'Forme de Hawwa, Ève en arabe, nom généralement compris comme « la vivante », « celle qui donne la vie ».',
+      clanRole: 'Prénom donné en hommage à la première femme de la tradition biblique et coranique.',
+      totem: '',
+      senankouya: '',
+      anecdote:
+          'Aoua Keïta, sage-femme et militante, fut en 1959 la première femme élue députée au Soudan français, futur Mali.',
+    ),
+    'modibo': MalianNameInfo(
+      name: 'Modibo',
+      type: 'prenom',
+      origin: 'Tout le Mali (d\'origine peule)',
+      meaning: 'Du peul « moodibbo » : « le savant, le lettré » (en sciences islamiques).',
+      clanRole: 'Titre d\'érudit devenu prénom.',
+      totem: '',
+      senankouya: '',
+      anecdote: 'Modibo Keïta fut le premier président du Mali indépendant, proclamé le 22 septembre 1960.',
     ),
     'aminata': MalianNameInfo(
       name: 'Aminata',
       type: 'prenom',
-      origin: 'Sahara et Sahel (surnommée Ami ou Amita).',
-      meaning: '« La femme digne de confiance, fidèle et sereine ».',
-      clanRole: 'Prénom de pureté de cœur et de loyauté indéfectible.',
+      origin: 'Tout le Mali',
+      meaning: 'Forme ouest-africaine d\'Amina, de l\'arabe : « digne de confiance, fidèle ».',
+      clanRole: 'Prénom donné en hommage à Amina, mère du Prophète.',
       totem: '',
       senankouya: '',
-      anecdote: 'Porté par Aminata Traoré, grande voix de la culture et de l\'artisanat malien.',
+      anecdote: 'L\'essayiste Aminata Dramane Traoré fut ministre de la Culture du Mali de 1997 à 2000.',
     ),
     'sekou': MalianNameInfo(
       name: 'Sékou',
       type: 'prenom',
-      origin: 'Forme mandingue et peule de Cheick / Sheikh.',
-      meaning: '« Le Guide spirituel, le Patriarche, le Sage vénéré ».',
-      clanRole: 'Désigne l\'autorité morale et l\'écoute bienveillante.',
+      origin: 'Tout le Mali',
+      meaning: 'Forme mandingue de Cheikh, de l\'arabe : « l\'ancien », « le maître (spirituel) ».',
+      clanRole: 'Prénom de respect, lié au savoir religieux.',
       totem: '',
       senankouya: '',
-      anecdote: 'Attribué souvent en hommage aux grands érudits comme Sékou Amadou, fondateur de l\'Empire théocratique du Macina.',
+      anecdote:
+          'Sékou Amadou (Cheikou Amadou Barry) fonda en 1818 la Diina, l\'État peul du Macina, avec Hamdallaye pour capitale.',
     ),
     'tenin': MalianNameInfo(
       name: 'Tênin',
       type: 'prenom',
-      origin: 'Tradition mandingue et bambara des jours de naissance.',
-      meaning: '« Enfant née un lundi » (*Tênin-don*), jour béni des marchés et de l\'abondance.',
-      clanRole: 'Symbole de fertilité, de renouveau et de douceur de vivre.',
+      origin: 'Bambara et Malinké',
+      meaning: 'Du bambara « tɛnɛn » : « lundi ». Prénom donné à une fille née un lundi.',
+      clanRole: 'Fait partie des prénoms liés au jour de naissance.',
       totem: '',
       senankouya: '',
-      anecdote: 'Chez les Bambaras, les enfants nés le lundi (*Tênin*) apportent la prospérité marchande et le sourire dans la concession.',
+      anecdote: '',
     ),
-    'kankou': MalianNameInfo(
-      name: 'Kankou',
+    'bintou': MalianNameInfo(
+      name: 'Bintou',
       type: 'prenom',
-      origin: 'Royauté du Mandé.',
-      meaning: '« La noble souveraine » (hommage à la mère de Mansa Moussa).',
-      clanRole: 'Prénom féminin d\'élégance et de haute dignité.',
+      origin: 'Tout le Mali',
+      meaning: 'Généralement rattaché à l\'arabe « bint » : « la fille ».',
+      clanRole: 'Prénom féminin courant ; variante : Binta.',
       totem: '',
       senankouya: '',
-      anecdote: 'L\'Empereur Mansa Moussa signait souvent Kankou Moussa pour honorer sa prestigieuse mère.',
+      anecdote: '',
     ),
-    'amadou': MalianNameInfo(
-      name: 'Amadou',
+    'boubacar': MalianNameInfo(
+      name: 'Boubacar',
       type: 'prenom',
-      origin: 'Peul, Bambara et Songhoï (forme locale d\'Ahmad).',
-      meaning: '« Le plus digne de louanges et le plus humble ».',
-      clanRole: 'Prénom d\'homme d\'honneur et de dévouement.',
+      origin: 'Tout le Mali',
+      meaning: 'Forme ouest-africaine d\'Abou Bakr, de l\'arabe : « le père du jeune chameau ».',
+      clanRole:
+          'Prénom donné en hommage à Abou Bakr, compagnon du Prophète et premier calife ; formes mandingues : Bakary, Bocar.',
       totem: '',
       senankouya: '',
-      anecdote: 'Amadou Hampâté Bâ grava pour l\'éternité la maxime : « En Afrique, un vieillard qui meurt est une bibliothèque qui brûle ».',
+      anecdote: '',
+    ),
+    'sogolon': MalianNameInfo(
+      name: 'Sogolon',
+      type: 'prenom',
+      origin: 'Mandé — prénom historique',
+      meaning: 'Nom de la mère de Soundiata, Sogolon Kédjou (Sogolon Condé). Son sens littéral n\'est pas établi.',
+      clanRole: 'Prénom porté en hommage à la mère du fondateur de l\'Empire du Mali.',
+      totem: '',
+      senankouya: '',
+      anecdote:
+          'Selon l\'épopée, deux chasseurs vainquirent la femme-buffle du pays de Dô et reçurent en récompense Sogolon, jeune femme bossue et laide, qu\'ils conduisirent au roi Naré Maghan. Elle devint la mère de Soundiata.',
+    ),
+    'kadiatou': MalianNameInfo(
+      name: 'Kadiatou',
+      type: 'prenom',
+      origin: 'Tout le Mali',
+      meaning: 'Forme ouest-africaine de Khadija, de l\'arabe : « née avant terme », « la prématurée ».',
+      clanRole: 'Prénom donné en hommage à Khadija, première épouse du Prophète ; diminutifs : Kadia, Kadidia.',
+      totem: '',
+      senankouya: '',
+      anecdote: '',
     ),
   };
 
@@ -413,16 +561,15 @@ abstract final class MalianNamesKnowledge {
     }
 
     final lower = query.toLowerCase();
-    // Si la requête demande généralement son nom ou son prénom sans précision
     if (lower.contains('mon nom') ||
         lower.contains('mon prénom') ||
         lower.contains('mon prenom') ||
         lower.contains('nom de famille') ||
         lower.contains('djamou') ||
         lower.contains('jamu')) {
-      return '« I ni ce, mon enfant ! Chaque patronyme au Mali (*Jamu*) est un trésor vivant.\n\n'
-          'Dis-moi simplement quel est **ton nom de famille** (ex : *Keïta, Traoré, Coulibaly, Diakité, Diallo, Touré, Cissé, Diarra, Camara, Maïga, Sidibé, Doumbia, Dembélé...*) ou **ton prénom** (ex : *Modibo, Soundiata, Fatoumata, Aminata, Sékou, Tênin...*).\n\n'
-          'Je te révèlerai aussitôt son origine sacrée, sa signification, son clan historique, son animal totem (*Tanan*) et ton cousinage à plaisanterie (*Senankouya*) ! »';
+      return '« I ni ce, mon enfant ! Chaque patronyme au Mali (*Jamu*) porte l\'histoire de nos terroirs.\n\n'
+          'Dis-moi simplement quel est **ton nom de famille** (ex : *Keïta, Traoré, Coulibaly, Diakité, Diallo, Touré, Cissé, Diarra, Camara, Maïga, Sidibé, Doumbia, Dembélé, Guindo...*) ou **ton prénom** (ex : *Mamadou, Fatoumata, Soundiata, Modibo, Aminata, Sékou, Tênin...*).\n\n'
+          'Je te dirai ce que la tradition rapporte de son origine, de son berceau et de ses liens d\'alliance (*Senankouya*) ! »';
     }
 
     return null;

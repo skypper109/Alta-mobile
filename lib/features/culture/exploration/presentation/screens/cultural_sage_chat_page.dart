@@ -1352,25 +1352,37 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
           _buildParchmentRow('Berceau :', info.origin),
           const SizedBox(height: 4),
           _buildParchmentRow('Signification :', info.meaning),
-          const SizedBox(height: 4),
-          _buildParchmentRow('Totem (Tanan) :', info.totem),
-          const SizedBox(height: 4),
-          _buildParchmentRow('Senankouya :', info.senankouya),
+          if (info.totem.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            _buildParchmentRow('Totem (Tanan) :', info.totem),
+          ],
+          if (info.senankouya.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            _buildParchmentRow('Senankouya :', info.senankouya),
+          ],
+          if (info.deviseOuLouange != null && info.deviseOuLouange!.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            _buildParchmentRow('Devise :', info.deviseOuLouange!),
+          ],
           const SizedBox(height: 9),
           Align(
             alignment: Alignment.centerRight,
             child: GestureDetector(
               onTap: () {
                 HapticFeedback.selectionClick();
+                final shareDetails = StringBuffer('Fierté du clan ${info.name} (Mali) :\n');
+                shareDetails.writeln('Origine : ${info.origin}');
+                shareDetails.writeln('Signification : ${info.meaning}');
+                if (info.totem.isNotEmpty) shareDetails.writeln('Totem (Tanan) : ${info.totem}');
+                if (info.senankouya.isNotEmpty) shareDetails.writeln('Senankouya : ${info.senankouya}');
+                if (info.deviseOuLouange != null && info.deviseOuLouange!.isNotEmpty) {
+                  shareDetails.writeln('Devise : ${info.deviseOuLouange}');
+                }
+                shareDetails.writeln('\nEnseignement transmis par Grand-mère Mah sur AlterniA.');
+
                 SharePlus.instance.share(
                   ShareParams(
-                    text:
-                        'Fierté du clan ${info.name} (Mali) :\n'
-                        'Origine : ${info.origin}\n'
-                        'Signification : ${info.meaning}\n'
-                        'Totem (Tanan) : ${info.totem}\n'
-                        'Senankouya : ${info.senankouya}\n\n'
-                        'Enseignement transmis par Grand-mère Mah sur AlterniA.',
+                    text: shareDetails.toString(),
                     subject: 'Fiche Ancestrale du Clan ${info.name}',
                   ),
                 );
