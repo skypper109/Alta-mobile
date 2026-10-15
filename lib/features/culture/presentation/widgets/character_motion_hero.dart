@@ -22,6 +22,7 @@ class CharacterMotionHero extends StatefulWidget {
   final VoidCallback? onBack;
   final bool isBookmarked;
   final VoidCallback? onToggleBookmark;
+  final VoidCallback? onPlayEpic;
 
   const CharacterMotionHero({
     super.key,
@@ -30,6 +31,7 @@ class CharacterMotionHero extends StatefulWidget {
     this.onBack,
     this.isBookmarked = false,
     this.onToggleBookmark,
+    this.onPlayEpic,
   });
 
   @override
@@ -590,7 +592,12 @@ class _CharacterMotionHeroState extends State<CharacterMotionHero>
                       GestureDetector(
                         onTap: () {
                           HapticFeedback.heavyImpact();
-                          context.push('/culture/personnage/${widget.figure.id}/reel');
+                          if (widget.onPlayEpic != null) {
+                            widget.onPlayEpic!();
+                          } else {
+                            context.push(
+                                '/culture/personnage/${widget.figure.id}/reel');
+                          }
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(

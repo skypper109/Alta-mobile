@@ -263,8 +263,8 @@ class _PersonnageCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        HapticFeedback.mediumImpact();
-        context.push('/culture/personnage/${item.id}', extra: heroTag);
+        HapticFeedback.heavyImpact();
+        context.push('/culture/personnage/${item.id}/reel');
       },
       child: Container(
         decoration: BoxDecoration(

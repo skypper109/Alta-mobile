@@ -214,6 +214,14 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
 
             // ── 2. SOUS-UNIVERS 1 : CONTES & RÉCITS DES VEILLÉES ───────────────
             if (_selectedFilterIndex == 0) ...[
+              // Carte héroïque immersive de la Veillée au Coin du Feu avec Grand-mère Mah
+              AnimatedCulturalReveal(
+                delay: const Duration(milliseconds: 40),
+                child: _buildCampfireVeilleeHero(
+                  context: context,
+                  isDark: isDark,
+                ),
+              ),
 
               // Section Tous les Contes
               _buildSectionHeader(
@@ -1591,6 +1599,179 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                   ],
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCampfireVeilleeHero({
+    required BuildContext context,
+    required bool isDark,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      child: CulturalInteractiveCard(
+        padding: EdgeInsets.zero,
+        showSudaneseCorners: false,
+        activeAccentColor: CultureTheme.accentOrange,
+        backgroundColor: isDark ? const Color(0xFF181008) : Colors.white,
+        borderRadius: 20,
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push('/culture/sage');
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+              child: Stack(
+                children: [
+                  Image.asset(
+                    'assets/images/culture/doyenne_vivienne_campfire_wide.jpg',
+                    height: 165,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withValues(alpha: 0.35),
+                    ),
+                  ),
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: CultureTheme.accentOrange,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: CultureTheme.accentOrange
+                                .withValues(alpha: 0.4),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.local_fire_department_rounded,
+                              size: 13, color: Colors.white),
+                          const SizedBox(width: 4),
+                          Text(
+                            'VEILLÉE AU COIN DU FEU',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.6,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 12,
+                    left: 14,
+                    right: 14,
+                    child: Text(
+                      'Rejoins Grand-mère Mah sous le grand baobab',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        shadows: const [
+                          Shadow(color: Colors.black, blurRadius: 6),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Écoute les récits des anciens, découvre l\'origine sacrée et le totem de ton nom de famille (Jamu), et plonge dans la sagesse du Mandé.',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      height: 1.45,
+                      color: isDark
+                          ? const Color(0xFFD1D5DB)
+                          : const Color(0xFF4B5563),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF22C55E),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Conteuse & Généalogie active',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: CultureTheme.accentOrange,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: CultureTheme.accentOrange,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: CultureTheme.accentOrange
+                                  .withValues(alpha: 0.35),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Entrer dans la veillée',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.arrow_forward_rounded,
+                                size: 14, color: Colors.white),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),

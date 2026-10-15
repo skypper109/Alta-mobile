@@ -10,7 +10,6 @@ import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_detail_models.dart';
 import '../../core/models/culture_passport_models.dart';
-import '../../core/datasources/historical_figure_sagas_data.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/services/cultural_haptics.dart';
 import '../../../../core/services/vivienne_tts_service.dart';
@@ -18,6 +17,7 @@ import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/character_motion_hero.dart';
 import '../widgets/connected_contents_section.dart';
 import '../widgets/documentary_scene_player.dart';
+import '../widgets/historical_figure_motion_player.dart';
 import '../widgets/historical_sacred_parchment_card.dart';
 import '../widgets/passport_stamp_toast.dart';
 
@@ -27,12 +27,16 @@ class HistoricalFigureDetailScreen extends ConsumerStatefulWidget {
   final String id;
   final HistoricalFigureDetail? figure;
   final String? heroTag;
+  final bool startInReadingMode;
+  final int initialChapterIndex;
 
   const HistoricalFigureDetailScreen({
     super.key,
     required this.id,
     this.figure,
     this.heroTag,
+    this.startInReadingMode = false,
+    this.initialChapterIndex = 0,
   });
 
   @override
@@ -46,11 +50,46 @@ class _HistoricalFigureDetailScreenState
   bool _isScrolled = false;
   bool _isBookmarked = false;
 
+  // Gestion de l'affichage prioritaire de l'épopée vidéo et du mode lecture
+  bool _showReadingSection = false;
+  int _activeChapterIndex = 0;
+  final GlobalKey _readingSectionKey = GlobalKey();
+  final GlobalKey _playerKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
+    _showReadingSection = widget.startInReadingMode;
+    _activeChapterIndex = widget.initialChapterIndex;
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
+  }
+
+  void _scrollToPlayer() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_playerKey.currentContext != null) {
+        Scrollable.ensureVisible(
+          _playerKey.currentContext!,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOutCubic,
+        );
+      }
+    });
+  }
+
+  void _openReadingSection() {
+    setState(() {
+      _showReadingSection = true;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_readingSectionKey.currentContext != null) {
+        Scrollable.ensureVisible(
+          _readingSectionKey.currentContext!,
+          duration: const Duration(milliseconds: 550),
+          curve: Curves.easeInOutCubic,
+        );
+      }
+    });
   }
 
   void _onScroll() {
@@ -213,22 +252,29 @@ class _HistoricalFigureDetailScreenState
               physics: const BouncingScrollPhysics(),
               slivers: [
                 // ── 1. HERO 2D MOTION DESIGN (AURA + PARTICULES + TILT) ───────
-                SliverToBoxAdapter(
-                  child: CharacterMotionHero(
-                    figure: item,
-                    heroTag: widget.heroTag ?? 'culture_figure_${item.id}',
-                    onBack: () {
-                      VivienneTtsService.instance.stop();
-                      Navigator.of(context).pop();
-                    },
-                    isBookmarked: _isBookmarked,
-                    onToggleBookmark: _toggleBookmark,
+                if (!widget.startInReadingMode)
+                  SliverToBoxAdapter(
+                    child: CharacterMotionHero(
+                      figure: item,
+                      heroTag: widget.heroTag ?? 'culture_figure_${item.id}',
+                      onBack: () {
+                        VivienneTtsService.instance.stop();
+                        Navigator.of(context).pop();
+                      },
+                      isBookmarked: _isBookmarked,
+                      onToggleBookmark: _toggleBookmark,
+                      onPlayEpic: _scrollToPlayer,
+                    ),
                   ),
-                ),
 
                 // ── 2. CORPS ÉDITORIAL & ÉPOPÉE INTERACTIVE ───────────────────
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+                  padding: EdgeInsets.fromLTRB(
+                    20,
+                    widget.startInReadingMode ? (topPadding + 56) : 20,
+                    20,
+                    40,
+                  ),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       // Contexte régional transversal si actif
@@ -254,142 +300,217 @@ class _HistoricalFigureDetailScreenState
                         const SizedBox(height: 12),
                       ],
 
-                      // ── EXPÉRIENCE IMMERSIVE UNIFIÉE : ÉPOPÉE DU PERSONNAGE (MOTION DESIGN VIDÉO) ──
-                      Builder(
-                        builder: (context) {
-                          final saga = HistoricalFigureSagas.getSaga(item.id);
-                          return GestureDetector(
-                            onTap: () {
-                              HapticFeedback.heavyImpact();
-                              context.push('/culture/personnage/${item.id}/reel');
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 24),
-                              padding: const EdgeInsets.all(18),
-                              decoration: BoxDecoration(
-                                color: CultureTheme.darkSurface,
-                                borderRadius: BorderRadius.circular(22),
-                                border: Border.all(
-                                  color: saga.primaryAccent.withValues(alpha: 0.6),
-                                  width: 1.5,
+                      // Bannière spéciale d'indication et raccourci vidéo quand le mode lecture est actif
+                      if (widget.startInReadingMode) ...[
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 18),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: CultureTheme.darkSurface,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: CultureTheme.orPatrimoine.withValues(alpha: 0.4),
+                              width: 1.2,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                  color: CultureTheme.orPatrimoine.withValues(alpha: 0.15),
+                                  shape: BoxShape.circle,
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: saga.primaryAccent.withValues(alpha: 0.22),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
+                                child: const Icon(
+                                  Icons.menu_book_rounded,
+                                  color: CultureTheme.orPatrimoine,
+                                  size: 18,
+                                ),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 3.5,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: saga.secondaryAccent.withValues(alpha: 0.2),
-                                          borderRadius: BorderRadius.circular(6),
-                                          border: Border.all(
-                                            color: saga.secondaryAccent.withValues(alpha: 0.6),
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          'ÉPOPÉE HISTORIQUE',
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 9.5,
-                                            fontWeight: FontWeight.w900,
-                                            color: saga.secondaryAccent,
-                                            letterSpacing: 0.6,
-                                          ),
-                                        ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${item.name} • Récit & Décrets',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w800,
+                                        color: CultureTheme.sable,
                                       ),
-                                      const Spacer(),
-                                      Icon(
-                                        Icons.auto_stories_rounded,
-                                        size: 16,
-                                        color: saga.primaryAccent,
+                                    ),
+                                    Text(
+                                      'Lecture intégrale de l\'épopée historique',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 10.5,
+                                        color: CultureTheme.sable.withValues(alpha: 0.8),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  VivienneTtsService.instance.stop();
+                                  if (context.canPop()) {
+                                    context.pop();
+                                  } else {
+                                    context.push('/culture/personnage/${item.id}/reel');
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: CultureTheme.accentOrange,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.play_arrow_rounded,
+                                        color: Colors.white,
+                                        size: 15,
+                                      ),
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        'Vidéo',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    saga.sagaTitle,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w900,
-                                      color: CultureTheme.sable,
-                                      letterSpacing: -0.2,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    saga.sagaSubtitle,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12.5,
-                                      color: CultureTheme.sable.withValues(alpha: 0.85),
-                                      height: 1.45,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                      vertical: 11,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: saga.secondaryAccent,
-                                      borderRadius: BorderRadius.circular(14),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: saga.secondaryAccent.withValues(alpha: 0.4),
-                                          blurRadius: 12,
-                                          offset: const Offset(0, 3),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.play_circle_fill_rounded,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          'DÉCOUVRIR L\'ÉPOPÉE',
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w900,
-                                            color: Colors.white,
-                                            letterSpacing: 0.6,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
+                            ],
+                          ),
+                        ),
+                      ],
 
-                      // ── 1. NARRATION VIVANTE ADAPTÉE AU PERSONNAGE ──
-                      DocumentaryScenePlayer(
-                        figure: item,
-                        isDark: isDark,
-                      ),
+                      // ── 1. EN 1ÈRE POSITION : LECTEUR ÉPOPÉE MOTION DESIGN (CINÉMATIQUE & INTERACTIF) ──
+                      if (!widget.startInReadingMode)
+                        KeyedSubtree(
+                          key: _playerKey,
+                          child: HistoricalFigureMotionPlayer(
+                            figure: item,
+                            isDark: isDark,
+                            initialChapterIndex: _activeChapterIndex,
+                            onChapterChanged: (idx) {
+                              setState(() {
+                                _activeChapterIndex = idx;
+                              });
+                            },
+                            onReadingModeRequested: _openReadingSection,
+                          ),
+                        ),
+
+                      // ── 2. SI L'UTILISATEUR VEUT LIRE : AFFICHAGE DU RÉCIT SANS REDONDANCE ──
+                      if (_showReadingSection) ...[
+                        KeyedSubtree(
+                          key: _readingSectionKey,
+                          child: DocumentaryScenePlayer(
+                            figure: item,
+                            isDark: isDark,
+                            initialSceneIndex: _activeChapterIndex,
+                            onSceneChanged: (idx) {
+                              setState(() {
+                                _activeChapterIndex = idx;
+                              });
+                            },
+                            onCloseReadingMode: () {
+                              setState(() {
+                                _showReadingSection = false;
+                              });
+                            },
+                          ),
+                        ),
+                      ] else ...[
+                        GestureDetector(
+                          key: const ValueKey('open_reading_mode_button'),
+                          onTap: _openReadingSection,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? CultureTheme.darkSurface
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: borderCol),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(
+                                      alpha: isDark ? 0.2 : 0.04),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: CultureTheme.orPatrimoine
+                                        .withValues(alpha: 0.15),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.menu_book_rounded,
+                                    size: 18,
+                                    color: CultureTheme.orPatrimoine,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Mode Lecture & Scènes Documentaires',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w800,
+                                          color: titleColor,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Consulter le récit textuel complet et les citations historiques',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 11,
+                                          color: isDark
+                                              ? const Color(0xFF94A3B8)
+                                              : const Color(0xFF64748B),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  size: 13,
+                                  color: CultureTheme.orPatrimoine,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
 
                       const SizedBox(height: 24),
 
-                      // ── 2. PARCHEMIN SACRÉ & DÉCRET HISTORIQUE FONDOTEUR ──
+                      // ── 3. PARCHEMIN SACRÉ & DÉCRET HISTORIQUE FONDATEUR ──
                       HistoricalSacredParchmentCard(
                         figure: item,
                         isDark: isDark,
@@ -443,18 +564,20 @@ class _HistoricalFigureDetailScreenState
                   right: 16,
                 ),
                 decoration: BoxDecoration(
-                  color: _isScrolled
+                  color: (_isScrolled || widget.startInReadingMode)
                       ? (isDark
                           ? CultureTheme.darkSurface.withValues(alpha: 0.96)
                           : Colors.white.withValues(alpha: 0.96))
                       : Colors.transparent,
                   border: Border(
                     bottom: BorderSide(
-                      color: _isScrolled ? borderCol : Colors.transparent,
+                      color: (_isScrolled || widget.startInReadingMode)
+                          ? borderCol
+                          : Colors.transparent,
                       width: 1.0,
                     ),
                   ),
-                  boxShadow: _isScrolled
+                  boxShadow: (_isScrolled || widget.startInReadingMode)
                       ? [
                           BoxShadow(
                             color: Colors.black
@@ -481,16 +604,18 @@ class _HistoricalFigureDetailScreenState
                       },
                     ),
                     const SizedBox(width: 12),
-                    // Centre : Badge pill quand unscrolled, Nom du personnage quand scrolled
+                    // Centre : Titre en mode lecture ou quand scrolled, sinon Badge pill
                     Expanded(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 220),
-                        child: _isScrolled
+                        child: (_isScrolled || widget.startInReadingMode)
                             ? Align(
                                 key: const ValueKey('header_title_scrolled'),
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                  item.name,
+                                  widget.startInReadingMode
+                                      ? '${item.name} • Mode Lecture'
+                                      : item.name,
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 15.5,
                                     fontWeight: FontWeight.w800,

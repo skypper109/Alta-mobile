@@ -80,11 +80,7 @@ class _SoundiataMotionDesignReelScreenState
 
   Timer? _playbackTicker;
 
-  // Mode Duel / Antagoniste historique
-  bool _showKirinaAntagonist = false;
 
-  // Mode Déplié du Texte Narratif Intégral (lecture approfondie sans ellipsis)
-  bool _isNarrativeExpanded = false;
 
   // Caméra tactile interactive 3D (tilt au doigt)
   double _tiltX = 0.0;
@@ -226,7 +222,6 @@ class _SoundiataMotionDesignReelScreenState
   }
 
   void _onChapterTransitioned(int newIndex) {
-    _showKirinaAntagonist = false;
     _chapterElapsedSeconds = 0.0;
 
     // Réinitialiser le scroll du texte narratif
@@ -281,17 +276,6 @@ class _SoundiataMotionDesignReelScreenState
     _impactFlashController.forward(from: 0.0);
     _screenShakeController.forward(from: 0.0);
     HapticFeedback.heavyImpact();
-  }
-
-  void _toggleKirinaDuelAntagonist() {
-    if (_saga.antagonistChapterId == null ||
-        _chapters[_currentChapterIndex].id != _saga.antagonistChapterId) {
-      return;
-    }
-    setState(() {
-      _showKirinaAntagonist = !_showKirinaAntagonist;
-    });
-    _triggerKirinaImpact();
   }
 
   void _openLandmarkCharterModal() {
@@ -636,16 +620,19 @@ class _SoundiataMotionDesignReelScreenState
               // ── 6. DÉGRADÉ CINÉMATIQUE SOMBRE (PROTECTION DE LECTURE) ─────────
               _buildCinematicVignette(),
 
-              // ── 7. TITRES CINÉMATIQUES & CITATIONS HISTORIQUES DU CHAPITRE ───
+              // ── 7. PLAN HÉROÏQUE 2.5D & DUEL DE KIRINA AU CENTRE DE L'ÉCRAN ───
+              _buildCenterStageMotionDesign(currentChapter),
+
+              // ── 8. TYPOGRAPHIE CINÉTIQUE & FAITS HISTORIQUES EN HAUT ─────────
               _buildCinematicTypographyOverlay(currentChapter),
 
-              // ── 8. BARRE SUPÉRIEURE ÉPURÉE ET RESPONSIVE SANS OVERFLOW ────────
+              // ── 9. BARRE SUPÉRIEURE ÉPURÉE ET RESPONSIVE SANS OVERFLOW ────────
               _buildTopHeaderControls(),
 
-              // ── 9. DOCK VIDÉO CONTINU : NARRATION INTÉGRALE & SCRUBBER FLUIDE ─
+              // ── 10. SOUS-TITRES SYNCHRONISÉS & CONTRÔLES VIDÉO SANS ACTES ─────
               _buildContinuousVideoPlayerDock(currentChapter),
 
-              // ── 10. MODAL / TIROIR DU TEXTE INTÉGRAL DE L'ÉPOPÉE ──────────────
+              // ── 11. MODAL / TIROIR DU TEXTE INTÉGRAL DE L'ÉPOPÉE ──────────────
               if (_showFullTranscriptDrawer) _buildFullTranscriptDrawer(),
             ],
           ),
@@ -658,10 +645,19 @@ class _SoundiataMotionDesignReelScreenState
   // 1. CANVAS PLEIN ÉCRAN PHOTORÉALISTE 9:16 (FULL BLEED SANS BORDURES)
   // ══════════════════════════════════════════════════════════════════════════════
 
+  String _getChapterStageBackground(CharacterStoryChapter chapter) {
+    if (chapter.id == 'prophetie') return 'assets/images/culture/scenes/scene_niani_prophetie.jpg';
+    if (chapter.id == 'eveil') return 'assets/images/culture/contes/manden_baobab_stage.jpg';
+    if (chapter.id == 'exil') return 'assets/images/culture/scenes/carte_ancienne_mande.jpg';
+    if (chapter.id == 'appel') return 'assets/images/culture/contes/savane_crepuscule_stage.jpg';
+    if (chapter.id == 'kirina') return 'assets/images/culture/scenes/scene_kirina_1235.jpg';
+    if (chapter.id == 'charte') return 'assets/images/culture/scenes/scene_kouroukan_fouga.jpg';
+    if (chapter.id == 'heritage') return 'assets/images/culture/contes/segou_djoliba_stage.jpg';
+    return chapter.mainImage;
+  }
+
   Widget _buildFullBleedCanvas(SoundiataStoryChapter chapter) {
-    final imagePath = (_showKirinaAntagonist && chapter.antagonistImage != null)
-        ? chapter.antagonistImage!
-        : chapter.mainImage;
+    final bgPath = _getChapterStageBackground(chapter);
 
     return AnimatedBuilder(
       animation: Listenable.merge([
@@ -670,8 +666,8 @@ class _SoundiataMotionDesignReelScreenState
       ]),
       builder: (context, child) {
         final driftVal = _cameraDriftController.value;
-        final scale = 1.05 + (driftVal * 0.08);
-        final panX = math.sin(driftVal * math.pi) * 10.0;
+        final scale = 1.08 + (driftVal * 0.08);
+        final panX = math.sin(driftVal * math.pi) * 12.0;
         final panY = math.cos(driftVal * math.pi) * 8.0;
 
         // Secousse d'impact caméra
@@ -680,10 +676,8 @@ class _SoundiataMotionDesignReelScreenState
         if (_screenShakeController.isAnimating) {
           final shakeVal = math.sin(_screenShakeController.value * math.pi * 8);
           final damp = 1.0 - _screenShakeController.value;
-          shakeX = shakeVal * 14.0 * damp;
-          shakeY = math.cos(_screenShakeController.value * math.pi * 6) *
-              10.0 *
-              damp;
+          shakeX = shakeVal * 16.0 * damp;
+          shakeY = math.cos(_screenShakeController.value * math.pi * 6) * 12.0 * damp;
         }
 
         // Matrice de perspective 3D au doigt
@@ -704,18 +698,18 @@ class _SoundiataMotionDesignReelScreenState
                 switchInCurve: Curves.easeInOut,
                 switchOutCurve: Curves.easeInOut,
                 child: Image.asset(
-                  imagePath,
-                  key: ValueKey<String>(imagePath),
+                  bgPath,
+                  key: ValueKey<String>(bgPath),
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: double.infinity,
                   alignment: Alignment.center,
                   errorBuilder: (_, __, ___) => Container(
                     color: CultureTheme.darkSurface,
-                    child: const Center(
+                    child: Center(
                       child: Icon(
                         Icons.auto_stories_rounded,
-                        color: CultureTheme.orPatrimoine,
+                        color: _saga.primaryAccent,
                         size: 56,
                       ),
                     ),
@@ -726,6 +720,239 @@ class _SoundiataMotionDesignReelScreenState
           ),
         );
       },
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // PLAN HÉROÏQUE 2.5D & DUEL DE KIRINA AU CENTRE DE L'ÉCRAN (VRAI MOTION DESIGN)
+  // ══════════════════════════════════════════════════════════════════════════════
+
+  Widget _buildCenterStageMotionDesign(SoundiataStoryChapter chapter) {
+    final size = MediaQuery.of(context).size;
+    final isKirina = chapter.id == 'kirina';
+
+    return Positioned(
+      top: size.height * 0.28,
+      left: 16,
+      right: 16,
+      bottom: size.height * 0.24,
+      child: AnimatedBuilder(
+        animation: Listenable.merge([
+          _cameraDriftController,
+          _screenShakeController,
+        ]),
+        builder: (context, _) {
+          final drift = _cameraDriftController.value;
+          final floatY = math.sin(drift * math.pi * 2) * 5.0;
+
+          // Perspective 3D interactive
+          final matrix = Matrix4.identity()
+            ..setEntry(3, 2, 0.0012)
+            ..rotateX(_tiltX * 0.8)
+            ..rotateY(_tiltY * 0.8);
+
+          if (isKirina) {
+            // ── DUEL DE KIRINA (1235) : SOUNDIATA VS SOUMAORO EN VIS-À-VIS ──
+            return Transform(
+              transform: matrix,
+              alignment: Alignment.center,
+              child: Transform.translate(
+                offset: Offset(0, floatY),
+                child: Center(
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: size.width * 0.92,
+                      maxHeight: size.height * 0.35,
+                    ),
+                    child: Row(
+                      children: [
+                        // Héros : Soundiata à l'arc
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: _saga.primaryAccent,
+                                width: 2.0,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _saga.primaryAccent.withValues(alpha: 0.45),
+                                  blurRadius: 18,
+                                ),
+                              ],
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.asset(
+                                  chapter.mainImage,
+                                  fit: BoxFit.cover,
+                                ),
+                                Positioned(
+                                  bottom: 6,
+                                  left: 6,
+                                  right: 6,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                                    decoration: BoxDecoration(
+                                      color: CultureTheme.darkBackground.withValues(alpha: 0.85),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      'SOUNDIATA',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w900,
+                                        color: _saga.primaryAccent,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Badge central VS & Éclair
+                        GestureDetector(
+                          onTap: _triggerKirinaImpact,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: _saga.secondaryAccent.withValues(alpha: 0.25),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: _saga.secondaryAccent,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.flash_on_rounded,
+                                    color: _saga.secondaryAccent,
+                                    size: 18,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'VS',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w900,
+                                    color: CultureTheme.sable,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Adversaire : Soumaoro Kanté
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: _saga.secondaryAccent,
+                                width: 2.0,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _saga.secondaryAccent.withValues(alpha: 0.45),
+                                  blurRadius: 18,
+                                ),
+                              ],
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.asset(
+                                  chapter.antagonistImage ?? 'assets/images/culture/personnages/soumaoro_kante_realiste.jpg',
+                                  fit: BoxFit.cover,
+                                ),
+                                Positioned(
+                                  bottom: 6,
+                                  left: 6,
+                                  right: 6,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                                    decoration: BoxDecoration(
+                                      color: CultureTheme.darkBackground.withValues(alpha: 0.85),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      'SOUMAORO',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w900,
+                                        color: _saga.secondaryAccent,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          // ── PLAN CENTRAL DU HÉROS EN 2.5D AVEC AURA DORÉE ──
+          return Transform(
+            transform: matrix,
+            alignment: Alignment.center,
+            child: Transform.translate(
+              offset: Offset(0, floatY),
+              child: Center(
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: size.width * 0.70,
+                    maxHeight: size.height * 0.36,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: _saga.primaryAccent.withValues(alpha: 0.85),
+                      width: 2.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _saga.primaryAccent.withValues(alpha: 0.35),
+                        blurRadius: 26,
+                        spreadRadius: 2,
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.7),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Image.asset(
+                    chapter.mainImage,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -912,21 +1139,26 @@ class _SoundiataMotionDesignReelScreenState
 
           const SizedBox(width: 8),
 
-          // Bouton Récit Complet (Transcrit complet de l'épopée)
+          // Bouton Mode Lecture & Décrets Historiques
           GestureDetector(
             onTap: () {
               HapticFeedback.selectionClick();
+              VivienneTtsService.instance.stop();
               setState(() {
-                _showFullTranscriptDrawer = true;
+                _isPlaying = false;
               });
+              context.push(
+                '/culture/personnage/${_saga.figureId}/lecture',
+                extra: _currentChapterIndex,
+              );
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
               decoration: BoxDecoration(
-                color: CultureTheme.darkSurface.withValues(alpha: 0.85),
+                color: CultureTheme.darkSurface.withValues(alpha: 0.90),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: CultureTheme.accentOrange.withValues(alpha: 0.5),
+                  color: CultureTheme.accentOrange.withValues(alpha: 0.6),
                   width: 1.0,
                 ),
               ),
@@ -935,15 +1167,15 @@ class _SoundiataMotionDesignReelScreenState
                 children: [
                   const Icon(
                     Icons.menu_book_rounded,
-                    size: 12,
+                    size: 13,
                     color: CultureTheme.accentOrange,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    'Récit',
+                    'Mode Lecture',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10.5,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                       color: CultureTheme.sable,
                     ),
                   ),
@@ -1015,140 +1247,47 @@ class _SoundiataMotionDesignReelScreenState
   }
 
   // ══════════════════════════════════════════════════════════════════════════════
-  // 4. TYPOGRAPHIE CINÉMATIQUE ET CITATION HÉROÏQUE
+  // 4. TYPOGRAPHIE CINÉTIQUE HAUTE (DATE, TITRE & PUNCHLINES DE SCÈNE)
   // ══════════════════════════════════════════════════════════════════════════════
 
   Widget _buildCinematicTypographyOverlay(SoundiataStoryChapter chapter) {
-    // Si le panneau de lecture intégrale est déplié, on allège la typographie haute
-    final bottomOffset = _isNarrativeExpanded ? 245.0 : 190.0;
+    final topPadding = MediaQuery.of(context).padding.top;
+
+    // Détermination de la citation cinétique active selon le temps écoulé
+    final quoteCount = chapter.kineticQuotes.length;
+    final activeQuoteIdx = quoteCount > 0
+        ? ((_chapterElapsedSeconds ~/ 7) % quoteCount).clamp(0, quoteCount - 1)
+        : 0;
+    final activeQuote = quoteCount > 0 ? chapter.kineticQuotes[activeQuoteIdx] : '';
 
     return Positioned(
-      left: 18,
-      right: 18,
-      bottom: bottomOffset,
+      top: topPadding + 48.0,
+      left: 14,
+      right: 14,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Ligne de repère chronologique & lieu
+          // ── REPERE DE TEMPS ET DE LIEU HISTORIQUE ─────────────────────────
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 20,
+                width: 14,
                 height: 1,
-                color: CultureTheme.orPatrimoine.withValues(alpha: 0.5),
+                color: _saga.primaryAccent.withValues(alpha: 0.5),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 3.5,
+                  horizontal: 8,
+                  vertical: 3,
                 ),
                 decoration: BoxDecoration(
-                  color: CultureTheme.darkBackground.withValues(alpha: 0.80),
+                  color: CultureTheme.darkBackground.withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                    color: CultureTheme.orPatrimoine.withValues(alpha: 0.4),
-                    width: 1.0,
-                  ),
-                ),
-                child: Text(
-                  '${chapter.chapterNumber} • ${chapter.kicker}',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w800,
-                    color: CultureTheme.orPatrimoine,
-                    letterSpacing: 1.1,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                width: 20,
-                height: 1,
-                color: CultureTheme.orPatrimoine.withValues(alpha: 0.5),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 6),
-
-          // Titre Majeur du Chapitre en Or Pur AlterniA
-          Text(
-            chapter.title.toUpperCase(),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 19,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.4,
-              color: CultureTheme.sable,
-              shadows: [
-                Shadow(
-                  color: Colors.black.withValues(alpha: 0.9),
-                  blurRadius: 16,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Cartouche de citation héroïque en verre sombre et bordure or
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: CultureTheme.darkSurface.withValues(alpha: 0.75),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: CultureTheme.orPatrimoine.withValues(alpha: 0.35),
-                  ),
-                ),
-                child: Text(
-                  '« ${chapter.kineticQuotes.first} »',
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
-                    color: CultureTheme.sable,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // Bouton duel / antagoniste dynamique selon le personnage
-          if (_saga.antagonistChapterId != null &&
-              chapter.id == _saga.antagonistChapterId &&
-              chapter.antagonistImage != null) ...[
-            const SizedBox(height: 6),
-            GestureDetector(
-              onTap: _toggleKirinaDuelAntagonist,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4.5,
-                ),
-                decoration: BoxDecoration(
-                  color: _showKirinaAntagonist
-                      ? _saga.secondaryAccent.withValues(alpha: 0.35)
-                      : CultureTheme.darkSurface.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: _saga.secondaryAccent,
+                    color: _saga.primaryAccent.withValues(alpha: 0.5),
                     width: 1.0,
                   ),
                 ),
@@ -1156,41 +1295,157 @@ class _SoundiataMotionDesignReelScreenState
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.swap_horiz_rounded,
-                      size: 13,
-                      color: _saga.secondaryAccent,
+                      Icons.location_on_rounded,
+                      size: 11,
+                      color: _saga.primaryAccent,
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      _showKirinaAntagonist
-                          ? (_saga.antagonistPrimaryLabel ?? 'VOIR LE HÉROS')
-                          : (_saga.antagonistSecondaryLabel ?? 'VOIR L\'ADVERSAIRE'),
+                      chapter.dateAndPlace.toUpperCase(),
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 9,
+                        fontSize: 8.5,
                         fontWeight: FontWeight.w800,
-                        color: CultureTheme.sable,
-                        letterSpacing: 0.5,
+                        color: _saga.primaryAccent,
+                        letterSpacing: 0.6,
                       ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(width: 6),
+              Container(
+                width: 14,
+                height: 1,
+                color: _saga.primaryAccent.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 4),
+
+          // ── TITRE MAJEUR DE LA SCÈNE CINÉMATIQUE ─────────────────────────
+          Text(
+            chapter.title.toUpperCase(),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.2,
+              color: CultureTheme.sable,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withValues(alpha: 0.95),
+                  blurRadius: 16,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 5),
+
+          // ── CITATION CINÉTIQUE ROTATIVE ───────────────────────────────────
+          if (activeQuote.isNotEmpty)
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: 0.95, end: 1.0).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: ClipRRect(
+                key: ValueKey<String>(activeQuote),
+                borderRadius: BorderRadius.circular(8),
+                child: BackdropFilter(
+                  filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: CultureTheme.darkSurface.withValues(alpha: 0.82),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: _saga.primaryAccent.withValues(alpha: 0.35),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Text(
+                      '« $activeQuote »',
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w800,
+                        color: CultureTheme.sable,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // ── FAIT HISTORIQUE MARQUANT DU CHAPITRE ──────────────────────────
+          if (chapter.historicalMetric != null) ...[
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: CultureTheme.darkBackground.withValues(alpha: 0.8),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: _saga.secondaryAccent.withValues(alpha: 0.4),
+                  width: 0.8,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    chapter.heraldicIcon ?? Icons.military_tech_rounded,
+                    size: 11,
+                    color: _saga.secondaryAccent,
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      chapter.historicalMetric!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        color: CultureTheme.sable,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
 
-          // Bouton interactif Décret / Charte / Pacte Historique du personnage
+          // Bouton Charte Historique si Kouroukan Fouga
           if (_saga.landmarkChapterId.isNotEmpty &&
               chapter.id == _saga.landmarkChapterId) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: 5),
             GestureDetector(
               onTap: _openLandmarkCharterModal,
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
-                  vertical: 4.5,
+                  vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: _saga.primaryAccent.withValues(alpha: 0.20),
+                  color: _saga.primaryAccent.withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
                     color: _saga.primaryAccent,
@@ -1202,17 +1457,17 @@ class _SoundiataMotionDesignReelScreenState
                   children: [
                     Icon(
                       Icons.gavel_rounded,
-                      size: 13,
+                      size: 12,
                       color: _saga.primaryAccent,
                     ),
                     const SizedBox(width: 5),
                     Text(
                       _saga.landmarkModalButtonText,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 9,
+                        fontSize: 8.5,
                         fontWeight: FontWeight.w800,
                         color: CultureTheme.sable,
-                        letterSpacing: 0.5,
+                        letterSpacing: 0.4,
                       ),
                     ),
                   ],
@@ -1226,7 +1481,7 @@ class _SoundiataMotionDesignReelScreenState
   }
 
   // ══════════════════════════════════════════════════════════════════════════════
-  // 5. DOCK VIDÉO CONTINU : NARRATION COMPLÈTE SANS COUPURE NI ELLIPSIS
+  // 5. DOCK VIDÉO ÉPURÉ : SOUS-TITRES SYNCHRONISÉS & CONTRÔLES (SANS ACTES)
   // ══════════════════════════════════════════════════════════════════════════════
 
   Widget _buildContinuousVideoPlayerDock(SoundiataStoryChapter currentChapter) {
@@ -1234,110 +1489,80 @@ class _SoundiataMotionDesignReelScreenState
     final progressFactor =
         (_currentAbsoluteSeconds / _totalDurationSeconds).clamp(0.0, 1.0);
 
+    // Découpage du récit en phrases synchronisées pour sous-titrage documentaire fluide
+    final sentences = currentChapter.fullNarrative
+        .split(RegExp(r'(?<=[.!?])\s+'))
+        .where((s) => s.trim().isNotEmpty)
+        .toList();
+    final activeSentenceIdx = sentences.isNotEmpty
+        ? ((_chapterElapsedSeconds /
+                    (currentChapter.readingDurationSeconds.toDouble() + 0.1)) *
+                sentences.length)
+            .floor()
+            .clamp(0, sentences.length - 1)
+        : 0;
+    final currentSentence = sentences.isNotEmpty ? sentences[activeSentenceIdx] : '';
+
     return Positioned(
       left: 14,
       right: 14,
-      bottom: bottomPadding > 0 ? bottomPadding + 4 : 10,
+      bottom: bottomPadding > 0 ? bottomPadding + 6 : 10,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── PANNEAU DU RÉCIT INTÉGRAL (AUCUNE COUPURE, SCROLLABLE ET DÉPLIABLE)
+          // ── SOUS-TITRES CINÉMATIQUES FLUIDES (STYLE DOCUMENTAIRE) ─────────
           ClipRRect(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             child: BackdropFilter(
               filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                constraints: BoxConstraints(
-                  maxHeight: _isNarrativeExpanded ? 130 : 64,
-                ),
+              child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
-                  vertical: 8,
+                  vertical: 7,
                 ),
                 decoration: BoxDecoration(
-                  color: CultureTheme.darkSurface.withValues(alpha: 0.88),
-                  borderRadius: BorderRadius.circular(14),
+                  color: CultureTheme.darkBackground.withValues(alpha: 0.88),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: CultureTheme.orPatrimoine.withValues(alpha: 0.35),
+                    color: _saga.primaryAccent.withValues(alpha: 0.35),
                     width: 1.0,
                   ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                child: Row(
                   children: [
-                    // Barre d'état de narration et bascule mode déplié
-                    Row(
-                      children: [
-                        _buildAudioWaveVisualizer(),
-                        const SizedBox(width: 8),
-                        Text(
-                          _isMuted
-                              ? 'Lecture Silencieuse'
-                              : 'Narration Vocale',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w700,
-                            color: CultureTheme.orPatrimoine,
-                          ),
-                        ),
-                        const Spacer(),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isNarrativeExpanded = !_isNarrativeExpanded;
-                            });
-                            HapticFeedback.selectionClick();
-                          },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                _isNarrativeExpanded
-                                    ? 'Réduire'
-                                    : 'Lire tout le texte',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: CultureTheme.accentOrange,
-                                ),
-                              ),
-                              const SizedBox(width: 3),
-                              Icon(
-                                _isNarrativeExpanded
-                                    ? Icons.keyboard_arrow_down_rounded
-                                    : Icons.keyboard_arrow_up_rounded,
-                                size: 14,
-                                color: CultureTheme.accentOrange,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    // Corps du texte narratif complet (scrollable au doigt sans aucune coupure)
+                    _buildAudioWaveVisualizer(),
+                    const SizedBox(width: 8),
                     Expanded(
-                      child: RawScrollbar(
-                        controller: _narrativeScrollController,
-                        thumbColor:
-                            CultureTheme.orPatrimoine.withValues(alpha: 0.4),
-                        radius: const Radius.circular(4),
-                        thickness: 2.5,
-                        child: SingleChildScrollView(
-                          controller: _narrativeScrollController,
-                          physics: const BouncingScrollPhysics(),
-                          child: Text(
-                            currentChapter.fullNarrative,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w500,
-                              color: CultureTheme.sable,
-                              height: 1.45,
-                            ),
-                          ),
+                      child: Text(
+                        currentSentence,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: CultureTheme.sable,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _showFullTranscriptDrawer = true;
+                        });
+                        HapticFeedback.selectionClick();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: CultureTheme.darkSurfaceAlt,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.article_rounded,
+                          size: 14,
+                          color: CultureTheme.accentOrange,
                         ),
                       ),
                     ),
@@ -1347,14 +1572,14 @@ class _SoundiataMotionDesignReelScreenState
             ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
 
-          // ── DOCK DES CONTRÔLES MÉDIA & SCRUBBER FLUIDE ──────────────────────
+          // ── CONTRÔLES MÉDIA ÉPURÉS & SCRUBBER MODERNE ─────────────────────
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: CultureTheme.darkBackground.withValues(alpha: 0.90),
-              borderRadius: BorderRadius.circular(16),
+              color: CultureTheme.darkBackground.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: CultureTheme.darkBorder,
                 width: 1.0,
@@ -1363,192 +1588,127 @@ class _SoundiataMotionDesignReelScreenState
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Slider continu et progression
+                // Barre de progression
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Barre de fond continue
                     Container(
-                      height: 4,
+                      height: 3.5,
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: CultureTheme.darkSurfaceAlt,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-
-                    // Barre de progression remplie continue en Or Patrimoine
                     FractionallySizedBox(
                       alignment: Alignment.centerLeft,
                       widthFactor: progressFactor,
                       child: Container(
-                        height: 4,
+                        height: 3.5,
                         decoration: BoxDecoration(
-                          color: CultureTheme.orPatrimoine,
+                          color: _saga.primaryAccent,
                           borderRadius: BorderRadius.circular(2),
                           boxShadow: [
                             BoxShadow(
-                              color: CultureTheme.orPatrimoine
-                                  .withValues(alpha: 0.6),
+                              color: _saga.primaryAccent.withValues(alpha: 0.6),
                               blurRadius: 6,
                             ),
                           ],
                         ),
                       ),
                     ),
-
-                    // Slider pour naviguer au toucher
                     SliderTheme(
                       data: SliderTheme.of(context).copyWith(
-                        trackHeight: 4,
-                        thumbShape: const RoundSliderThumbShape(
-                          enabledThumbRadius: 6,
-                        ),
-                        overlayShape: const RoundSliderOverlayShape(
-                          overlayRadius: 12,
-                        ),
+                        trackHeight: 3.5,
+                        thumbShape:
+                            const RoundSliderThumbShape(enabledThumbRadius: 5),
+                        overlayShape:
+                            const RoundSliderOverlayShape(overlayRadius: 10),
                         activeTrackColor: Colors.transparent,
                         inactiveTrackColor: Colors.transparent,
                         thumbColor: CultureTheme.sable,
                         overlayColor:
-                            CultureTheme.orPatrimoine.withValues(alpha: 0.2),
+                            _saga.primaryAccent.withValues(alpha: 0.2),
                       ),
                       child: Slider(
                         value: _currentAbsoluteSeconds,
                         min: 0.0,
                         max: _totalDurationSeconds,
-                        onChanged: (val) {
-                          _seekTo(val);
-                        },
+                        onChanged: (val) => _seekTo(val),
                       ),
                     ),
                   ],
                 ),
 
-                // Ligne du temps & titre du chapitre
+                // Ligne chrono & contrôles
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       _formatTime(_currentAbsoluteSeconds),
                       style: GoogleFonts.jetBrainsMono(
-                        fontSize: 10,
+                        fontSize: 9.5,
                         fontWeight: FontWeight.w700,
-                        color: CultureTheme.orPatrimoine,
+                        color: _saga.primaryAccent,
                       ),
                     ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          '${currentChapter.chapterNumber} : ${currentChapter.title}',
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w700,
-                            color: CultureTheme.sable.withValues(alpha: 0.8),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.replay_10_rounded),
+                          color: CultureTheme.sable,
+                          iconSize: 20,
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () => _seekRelative(-10),
+                        ),
+                        const SizedBox(width: 14),
+                        GestureDetector(
+                          onTap: _togglePlayPause,
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: CultureTheme.accentOrange,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: CultureTheme.accentOrange
+                                      .withValues(alpha: 0.45),
+                                  blurRadius: 10,
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              _isPlaying
+                                  ? Icons.pause_rounded
+                                  : Icons.play_arrow_rounded,
+                              size: 22,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 14),
+                        IconButton(
+                          icon: const Icon(Icons.forward_10_rounded),
+                          color: CultureTheme.sable,
+                          iconSize: 20,
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () => _seekRelative(10),
+                        ),
+                      ],
                     ),
                     Text(
                       _formatTime(_totalDurationSeconds),
                       style: GoogleFonts.jetBrainsMono(
-                        fontSize: 10,
+                        fontSize: 9.5,
                         fontWeight: FontWeight.w600,
                         color: CultureTheme.textMutedDark,
                       ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 4),
-
-                // Boutons de navigation cinématiques : Chapitre Précédent, Recul 10s, Play/Pause, Avance 10s, Suivant
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Chapitre Précédent
-                    IconButton(
-                      icon: const Icon(Icons.skip_previous_rounded),
-                      color: CultureTheme.sable.withValues(alpha: 0.7),
-                      iconSize: 22,
-                      visualDensity: VisualDensity.compact,
-                      tooltip: 'Chapitre précédent',
-                      onPressed: () {
-                        if (_currentChapterIndex > 0) {
-                          _jumpToChapter(_currentChapterIndex - 1);
-                        }
-                      },
-                    ),
-
-                    // Recul de 10 secondes
-                    IconButton(
-                      icon: const Icon(Icons.replay_10_rounded),
-                      color: CultureTheme.sable,
-                      iconSize: 24,
-                      visualDensity: VisualDensity.compact,
-                      tooltip: '-10 secondes',
-                      onPressed: () => _seekRelative(-10),
-                    ),
-
-                    const SizedBox(width: 10),
-
-                    // Bouton Play / Pause avec aura Or & Orange AlterniA
-                    GestureDetector(
-                      onTap: _togglePlayPause,
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: CultureTheme.accentOrange,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: CultureTheme.accentOrange
-                                  .withValues(alpha: 0.45),
-                              blurRadius: 12,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          _isPlaying
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
-                          size: 26,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 10),
-
-                    // Avance de 10 secondes
-                    IconButton(
-                      icon: const Icon(Icons.forward_10_rounded),
-                      color: CultureTheme.sable,
-                      iconSize: 24,
-                      visualDensity: VisualDensity.compact,
-                      tooltip: '+10 secondes',
-                      onPressed: () => _seekRelative(10),
-                    ),
-
-                    // Chapitre Suivant
-                    IconButton(
-                      icon: const Icon(Icons.skip_next_rounded),
-                      color: CultureTheme.sable.withValues(alpha: 0.7),
-                      iconSize: 22,
-                      visualDensity: VisualDensity.compact,
-                      tooltip: 'Chapitre suivant',
-                      onPressed: () {
-                        if (_currentChapterIndex <
-                            _chapters.length - 1) {
-                          _jumpToChapter(_currentChapterIndex + 1);
-                        }
-                      },
                     ),
                   ],
                 ),

@@ -15,6 +15,11 @@ class CharacterStoryChapter {
   final List<String> kineticQuotes;
   final Color accentColor;
   final int readingDurationSeconds;
+  // Métadonnées du Motion Design Documentaire & Factuel (Style Un Peu Mieux)
+  final String? historicalMetric;
+  final String? strategicKey;
+  final List<String>? keyFigures;
+  final IconData? heraldicIcon;
 
   const CharacterStoryChapter({
     required this.id,
@@ -28,6 +33,10 @@ class CharacterStoryChapter {
     required this.kineticQuotes,
     required this.accentColor,
     required this.readingDurationSeconds,
+    this.historicalMetric,
+    this.strategicKey,
+    this.keyFigures,
+    this.heraldicIcon,
   });
 }
 
@@ -157,6 +166,10 @@ class HistoricalFigureSagas {
         kicker: 'L\'AUBE DU MANDEN • NIANI',
         dateAndPlace: 'Cité Royale de Niani • Vers 1190',
         mainImage: 'assets/images/culture/personnages/soundiata_enfant_realiste.jpg',
+        historicalMetric: '7 années de paralysie et de patience',
+        strategicKey: 'Prophétie du Chasseur Sacré annonçant le Roi des Rois',
+        keyFigures: ['Sogolon Kèdjou', 'Naré Maghann', 'Sassouma Bérété', 'Dankaran Touman'],
+        heraldicIcon: Icons.auto_stories_rounded,
         fullNarrative:
             'Au cœur du Manden, dans la cité royale de Niani, le roi Naré Maghann Konaté reçoit la visite d\'un mystérieux devin chasseur. La prédiction des anciens est formelle : de son union avec une femme mystique, Sogolon Kedjou, naîtra le plus grand souverain d\'Afrique. Mais à sa naissance, le jeune Soundiata est paralysé des jambes et rampe dans la poussière. Moqué cruellement par la première reine Sassouma Bérété pour favoriser son propre fils Dankaran Touman, l\'enfant endure l\'humiliation avec patience, forgeant dans le silence le destin d\'un empire millénaire.',
         kineticQuotes: [
@@ -174,6 +187,10 @@ class HistoricalFigureSagas {
         kicker: 'L\'ARC D\'ACIER DES MAÎTRES FORGERONS',
         dateAndPlace: 'Cour royale de Niani • Vers 1205',
         mainImage: 'assets/images/culture/personnages/soundiata_redressement_realiste.jpg',
+        historicalMetric: 'Barre de fer de 10 forgerons courbée par sa poigne',
+        strategicKey: 'Le baobab géant déraciné offert en triomphe à Sogolon',
+        keyFigures: ['Soundiata', 'Sogolon Kèdjou', 'Maîtres Forgerons de Niani', 'Sassouma Bérété'],
+        heraldicIcon: Icons.fitness_center_rounded,
         fullNarrative:
             'À la mort du roi, Sassouma installe son fils sur le trône et humilie Sogolon en lui refusant avec mépris une poignée de feuilles de baobab. Devant les larmes brûlantes de sa mère, Soundiata prononce un serment inoubliable : « Mère, sèche tes larmes, aujourd\'hui je t\'apporterai le baobab tout entier avec ses racines ! » Il ordonne aux forgerons du feu de lui fondre une barre de fer colossale. S\'appuyant de toute la force de sa volonté, la barre d\'acier plie sous sa poigne surhumaine. Dans un cri titanesque qui fait trembler la terre, Soundiata se dresse enfin sur ses deux jambes, déracine l\'arbre géant et le dépose aux pieds de sa mère. Le Lion du Manden s\'est éveillé !',
         kineticQuotes: [
@@ -191,6 +208,10 @@ class HistoricalFigureSagas {
         kicker: 'LES PISTES DU SAHEL & LE ROYAUME DE MÉMA',
         dateAndPlace: 'Pistes de Tabon, Ghana & Royaume de Méma • 1215 – 1234',
         mainImage: 'assets/images/culture/personnages/soundiata_portrait_realiste.jpg',
+        historicalMetric: '20 ans d\'apprentissage tactique et diplomatique',
+        strategicKey: 'Généralissime de la cavalerie d\'élite du roi de Méma',
+        keyFigures: ['Moussa Tounkara (Roi de Méma)', 'Mandieng Bory', 'Sogolon Kèdjou'],
+        heraldicIcon: Icons.shield_rounded,
         fullNarrative:
             'Pour échapper aux complots mortels de Sassouma, Sogolon prend les routes de l\'exil avec ses enfants. De royaume en royaume, de Tabon jusqu\'aux confins du Sahel, Soundiata s\'endurcit. Au royaume de Méma, le roi Moussa Tounkara l\'accueille en fils et en frère d\'armes. Là-bas, Soundiata devient un cavalier d\'élite hors pair, un maître archer et un diplomate respecté de tous les chefs de clans. Respecté pour sa loyauté et sa force sage, il prend le commandement des troupes de Méma tout en préservant intacte la mémoire sacrée de sa patrie d\'origine.',
         kineticQuotes: [
@@ -206,8 +227,12 @@ class HistoricalFigureSagas {
         chapterNumber: 'CHAPITRE IV',
         title: 'L\'Appel du Manden & Le Soulèvement des Clans',
         kicker: 'L\'INVASION DU SOSSO & L\'UNION SACRÉE',
-        dateAndPlace: 'Aux frontières du Manden • 1234',
+        dateAndPlace: 'Aux frontières du Manden & Falaise de Siby • 1234',
         mainImage: 'assets/images/culture/personnages/soundiata_portrait_realiste.jpg',
+        historicalMetric: '12 clans et généraux confédérés unis pour la liberté',
+        strategicKey: 'L\'Arche de Siby percée par la lance sacrée de Kamandjan',
+        keyFigures: ['Soundiata Keïta', 'Kamandjan Camara', 'Fakoli Doumbia', 'Balla Fasséké'],
+        heraldicIcon: Icons.groups_rounded,
         fullNarrative:
             'Au Manden, le roi-sorcier forgeron Soumaoro Kanté du Sosso envahit le pays avec ses légions de fer, massacre la famille royale et instaure un régime de terreur. Face au désespoir, des notables mandingues et des griots traversent le continent, apportant des légumes de la terre ancestrale pour supplier l\'héritier légitime de revenir. Entendant les cris de détresse de son peuple, Soundiata quitte Méma et rallie tous les souverains frères : Kamandjan Camara qui fend la montagne de Siby, Fakoli Doumbia et les fiers chasseurs mandingues s\'unissent dans une coalition invincible pour la liberté.',
         kineticQuotes: [
@@ -226,6 +251,10 @@ class HistoricalFigureSagas {
         dateAndPlace: 'Plaines de Kirina, Koulikoro • 1235',
         mainImage: 'assets/images/culture/personnages/soundiata_kirina_realiste.jpg',
         antagonistImage: 'assets/images/culture/personnages/soumaoro_kante_realiste.jpg',
+        historicalMetric: 'Le choc décisif : Armée Mandingue vs Légions Sosso',
+        strategicKey: 'Flèche à l\'ergot de coq blanc brisant la magie de Soumaoro',
+        keyFigures: ['Soundiata Keïta', 'Soumaoro Kanté', 'Nana Triban', 'Balla Fasséké'],
+        heraldicIcon: Icons.flash_on_rounded,
         fullNarrative:
             'En 1235, dans la plaine brûlante de Kirina, les armées du Sosso et du Manden s\'affrontent dans un fracas légendaire. Face aux sortilèges terrifiants de Soumaoro qui le rendent invulnérable aux lames, Soundiata utilise le secret mystique percé par sa sœur Nana Triban et le griot Balla Fasséké : le seul totem capable de briser sa magie est un ergot de coq blanc. D\'un tir d\'arc magistral guidé par les ancêtres, Soundiata décoche la flèche sacrée qui érafle le roi-sorcier. Privé de sa force occulte, Soumaoro s\'enfuit affolé et s\'évanouit à tout jamais dans les falaises rocheuses de Koulikoro. Le Manden est libéré !',
         kineticQuotes: [
@@ -243,6 +272,10 @@ class HistoricalFigureSagas {
         kicker: 'PREMIÈRE DÉCLARATION DES DROITS HUMAINS • UNESCO',
         dateAndPlace: 'Kangaba, sous le grand baobab sacré • 1236',
         mainImage: 'assets/images/culture/personnages/soundiata_charte_realiste.jpg',
+        historicalMetric: '44 Articles constitutionnels • Patrimoine Mondial UNESCO',
+        strategicKey: 'Sacralisation de la vie humaine et pacte de paix Sanankouya',
+        keyFigures: ['Soundiata Mansa', 'Assemblée des Sages & Femmes', 'Les 44 Clans'],
+        heraldicIcon: Icons.gavel_rounded,
         fullNarrative:
             'Au lendemain de la victoire, Soundiata réunit l\'assemblée générale des sages, des reines, des maîtres forgerons et des chasseurs sous le grand baobab de Kangaba à Kouroukan Fouga. Proclamé Mansa suprême, il dicte une constitution orale révolutionnaire de quarante-quatre articles sacrés : la Charte du Manden. Elle sacralise l\'existence humaine en décrétant que « Toute vie est une vie, et nul ne doit humilier son semblable ». Elle protège la dignité de la femme, abolit les supplices de la servitude, instaure la paix éternelle par la parenté à plaisanterie (Sinankunya) et défend la nature. Première constitution humaniste de l\'humanité, elle fonde l\'Empire du Mali.',
         kineticQuotes: [
@@ -260,6 +293,10 @@ class HistoricalFigureSagas {
         kicker: 'HUIT SIÈCLES DE GLOIRE & DE CONCORDE SOCIALE',
         dateAndPlace: 'Du Sahara à l\'Atlantique • 1236 – 1255 & Aujourd\'hui',
         mainImage: 'assets/images/culture/personnages/soundiata_portrait_realiste.jpg',
+        historicalMetric: 'Plus de 800 ans de transmission orale vivante par les djélis',
+        strategicKey: 'Apogée de l\'Empire du Mali reliant le Djoliba à l\'Océan',
+        keyFigures: ['Soundiata Mansa', 'Djéli Balla Fasséké', 'Peuples du Manden'],
+        heraldicIcon: Icons.menu_book_rounded,
         fullNarrative:
             'Mansa Soundiata Keïta fit régner la justice, la prospérité et la concorde jusqu\'en 1255, léguant au monde l\'un des empires les plus florissants et respectés de l\'histoire humaine, reliant les mines d\'or du Djoliba aux universités de Tombouctou. Huit siècles plus tard, la voix des griots et le chant de la kora continuent de célébrer sa mémoire le long du fleuve Niger. De l\'enfant rampant dans la poussière au bâtisseur immortel de l\'Empire du Mali, Soundiata Keïta demeure le flambeau éternel du courage, de la dignité et de la grandeur africaine.',
         kineticQuotes: [

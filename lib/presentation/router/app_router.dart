@@ -302,7 +302,26 @@ GoRouter appRouter(Ref ref) {
         ),
       ),
 
-      // ── Culture : Motion Design Vidéo pour tous les Personnages Historiques ──
+      // ── Culture : Immersion Directe Vidéo Motion Design Plein Écran pour tous les Personnages ──
+      GoRoute(
+        path: '/culture/personnage/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          final id = state.pathParameters['id'] ?? 'perso_soundiata';
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: CharacterMotionDesignReelScreen(figureId: id),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: CurveTween(curve: Curves.easeInOut).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+
+      // Alias /reel pour compatibilité
       GoRoute(
         path: '/culture/personnage/:id/reel',
         parentNavigatorKey: _rootNavigatorKey,
@@ -321,14 +340,20 @@ GoRouter appRouter(Ref ref) {
         },
       ),
 
-      // ── Culture Étape 3 : Fiches Immersives de Consultation ──────────────
+      // ── Culture : Mode Lecture & Récit Documentaire Complet (si l'utilisateur veut lire) ──
       GoRoute(
-        path: '/culture/personnage/:id',
+        path: '/culture/personnage/:id/lecture',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
           final heroTag = state.extra is String ? state.extra as String : null;
-          return HistoricalFigureDetailScreen(id: id, heroTag: heroTag);
+          final initialChapter = state.extra is int ? state.extra as int : 0;
+          return HistoricalFigureDetailScreen(
+            id: id,
+            heroTag: heroTag,
+            startInReadingMode: true,
+            initialChapterIndex: initialChapter,
+          );
         },
       ),
       GoRoute(

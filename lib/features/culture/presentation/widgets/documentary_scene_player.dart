@@ -52,11 +52,17 @@ class DocuSceneData {
 class DocumentaryScenePlayer extends StatefulWidget {
   final HistoricalFigureDetail figure;
   final bool isDark;
+  final int? initialSceneIndex;
+  final ValueChanged<int>? onSceneChanged;
+  final VoidCallback? onCloseReadingMode;
 
   const DocumentaryScenePlayer({
     super.key,
     required this.figure,
     required this.isDark,
+    this.initialSceneIndex,
+    this.onSceneChanged,
+    this.onCloseReadingMode,
   });
 
   @override
@@ -84,6 +90,9 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
   void initState() {
     super.initState();
     _initScenes();
+    if (widget.initialSceneIndex != null && _scenes.isNotEmpty) {
+      _currentSceneIndex = widget.initialSceneIndex!.clamp(0, _scenes.length - 1);
+    }
 
     // 1. Contrôleur d'entrée de scène et des personnages
     _sceneEntryController = AnimationController(
@@ -520,6 +529,21 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(covariant DocumentaryScenePlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialSceneIndex != null &&
+        widget.initialSceneIndex != oldWidget.initialSceneIndex &&
+        widget.initialSceneIndex != _currentSceneIndex &&
+        _scenes.isNotEmpty) {
+      setState(() {
+        _currentSceneIndex =
+            widget.initialSceneIndex!.clamp(0, _scenes.length - 1);
+      });
+      _replayScene();
+    }
+  }
+
   void _goToScene(int index) {
     if (index == _currentSceneIndex || index < 0 || index >= _scenes.length) {
       return;
@@ -528,6 +552,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
     setState(() {
       _currentSceneIndex = index;
     });
+    widget.onSceneChanged?.call(index);
     _replayScene();
   }
 
@@ -631,6 +656,45 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                 ),
               ),
             ),
+            if (widget.onCloseReadingMode != null) ...[
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  CulturalHaptics.cardPress();
+                  widget.onCloseReadingMode!();
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? CultureTheme.darkSurfaceAlt
+                        : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: borderCol),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.keyboard_arrow_up_rounded,
+                        size: 15,
+                        color: subtitleColor,
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        'Réduire',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: subtitleColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
 
