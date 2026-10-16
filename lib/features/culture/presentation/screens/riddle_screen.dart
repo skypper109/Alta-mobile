@@ -78,11 +78,7 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
       _stopTts();
     } else {
       if (mounted) setState(() => _isSpeaking = true);
-      final formula = (_currentRiddle.formulaIntro.trim().isNotEmpty &&
-              !_currentRiddle.formulaIntro.contains('  !'))
-          ? _currentRiddle.formulaIntro
-          : "« Kôkô ! » — « N'sira ! »";
-      final text = '$formula. ${_currentRiddle.riddleText}';
+      final text = _currentRiddle.riddleText;
       await VivienneTtsService.instance.speak(
         text,
         onStart: () {
@@ -438,48 +434,6 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Formule rituelle des anciens (« Kôkô ! » — « N'sira ! »)
-                          Center(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 7),
-                              decoration: BoxDecoration(
-                                color: CultureTheme.accentOrange
-                                    .withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: CultureTheme.accentOrange
-                                      .withValues(alpha: 0.35),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.record_voice_over_rounded,
-                                    size: 14,
-                                    color: CultureTheme.accentOrange,
-                                  ),
-                                  const SizedBox(width: 7),
-                                  Text(
-                                    riddle.formulaIntro.trim().isNotEmpty &&
-                                            !riddle.formulaIntro.contains('  !')
-                                        ? riddle.formulaIntro
-                                        : "« Kôkô ! » — « N'sira ! »",
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w800,
-                                      color: CultureTheme.accentOrange,
-                                      letterSpacing: 0.3,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 16),
-
                           // Carte de l'Énigme
                           Container(
                             width: double.infinity,

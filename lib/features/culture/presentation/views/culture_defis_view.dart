@@ -441,10 +441,7 @@ class CultureDefisView extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            daily.formulaIntro.trim().isNotEmpty &&
-                    !daily.formulaIntro.contains('  !')
-                ? daily.formulaIntro
-                : "« Kôkô ! » — Défi du Jour des Anciens",
+            'Défi du Jour des Anciens',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12.5,
               fontWeight: FontWeight.w700,
