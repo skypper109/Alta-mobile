@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import '../models/culture_challenge_models.dart';
 import '../theme/culture_theme.dart';
 
-/// Banques de données authentiques des Devinettes «   ! », Quiz et Missions
+/// Banques de données authentiques des Devinettes (« Kôkô ! » — « N'sira ! »), Quiz et Missions
 abstract final class MockCultureChallengesData {
-  // ── 1. DEVINETTES TRADITIONNELLES («   ! ») ─────────────────────────────
+  // ── 1. DEVINETTES TRADITIONNELLES (« Kôkô ! » — « N'sira ! ») ──────────────
   static const List<TraditionalRiddle> riddles = [
     // Devinette 1 : Le Vent (Fonyo)
     TraditionalRiddle(
       id: 'riddle_vent',
-      formulaIntro: "«   ! » — «   n'sira ! »",
+      formulaIntro: "« Kôkô ! » — « N'sira ! »",
       riddleText:
           'Je voyage sans jambes et je parle sans bouche.\nJe caresse la tête du roi comme celle du mendiant.\nNul ne peut me voir, mais chacun entend mon passage.\n\nQui suis-je ?',
       hints: [
@@ -39,7 +39,7 @@ abstract final class MockCultureChallengesData {
     // Devinette 2 : L'Ombre
     TraditionalRiddle(
       id: 'riddle_ombre',
-      formulaIntro: "«   ! » — «   n'sira ! »",
+      formulaIntro: "« Kôkô ! » — « N'sira ! »",
       riddleText:
           'Si tu marches, il marche avec toi.\nSi tu cours à perdre haleine, il court à tes côtés.\nMais dès que la nuit noire tombe, il s\'évanouit sans bruit.\n\nQui suis-je ?',
       hints: [
@@ -69,7 +69,7 @@ abstract final class MockCultureChallengesData {
     // Devinette 3 : Le Tam-tam / Djembé
     TraditionalRiddle(
       id: 'riddle_tamtam',
-      formulaIntro: "«   ! » — «   n'sira ! »",
+      formulaIntro: "« Kôkô ! » — « N'sira ! »",
       riddleText:
           'Un tronc d\'arbre mort, coiffé de la peau d\'une chèvre.\nOn le frappe avec les mains, et pourtant tout le village se met à danser de joie.\n\nQui suis-je ?',
       hints: [
@@ -99,7 +99,7 @@ abstract final class MockCultureChallengesData {
     // Devinette 4 : La Pirogue sur le Djoliba
     TraditionalRiddle(
       id: 'riddle_pirogue',
-      formulaIntro: "«   ! » — «   n'sira ! »",
+      formulaIntro: "« Kôkô ! » — « N'sira ! »",
       riddleText:
           'Un grand arbre couché qui glisse sur l\'eau sans jamais boire.\nIl porte cent sacs de mil et cinquante hommes sans couler,\nmais une simple goutte d\'eau au fond peut le faire pleurer.\n\nQui suis-je ?',
       hints: [
@@ -129,7 +129,7 @@ abstract final class MockCultureChallengesData {
     // Devinette 5 : Le Feu et la Cendre
     TraditionalRiddle(
       id: 'riddle_feu',
-      formulaIntro: "«   ! » — «   n'sira ! »",
+      formulaIntro: "« Kôkô ! » — « N'sira ! »",
       riddleText:
           'La mère donne naissance à son fils dans la rougeur.\nMais quand le fils grandit et devient tout blanc,\nil étouffe et enterre sa propre mère.\n\nQui sommes-nous ?',
       hints: [
@@ -159,7 +159,7 @@ abstract final class MockCultureChallengesData {
     // Devinette 6 : L'Aiguille et le Fil
     TraditionalRiddle(
       id: 'riddle_aiguille',
-      formulaIntro: "«   ! » — «   n'sira ! »",
+      formulaIntro: "« Kôkô ! » — « N'sira ! »",
       riddleText:
           'J\'ai un seul œil percé dans la tête.\nJe traverse sans crainte les étoffes les plus denses,\nen traînant derrière moi une longue queue qui ne me quitte jamais.\n\nQui suis-je ?',
       hints: [
@@ -704,7 +704,7 @@ abstract final class MockCultureChallengesData {
   // ── 4. DÉFI DU JOUR ────────────────────────────────────────────────────────
   static const TraditionalRiddle dailyChallenge = TraditionalRiddle(
     id: 'riddle_daily',
-    formulaIntro: "«   ! » — Défi du Jour des Anciens",
+    formulaIntro: "« Kôkô ! » — Défi du Jour des Anciens",
     riddleText:
         'Je suis petite comme une perle, mais je traverse les siècles.\nLes reines du Manden m\'arboraient dans leurs tresses, et j\'achetais des chevaux au temps de Kankan Moussa.\n\nQui suis-je ?',
     hints: [

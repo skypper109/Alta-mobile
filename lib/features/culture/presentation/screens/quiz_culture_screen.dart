@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import '../../../../core/services/vivienne_tts_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -40,15 +39,42 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
   // Historique des réponses pour le bilan d'apprentissage
   final List<int?> _userAnswers = [];
 
-  // Narration vocale du Griot (TTS)
-  final FlutterTts _flutterTts = FlutterTts();
+  // Narration vocale du Griot (TTS unifié Vivienne avec repli système)
   bool _isSpeaking = false;
+
+  void _stopTts() {
+    try {
+      VivienneTtsService.instance.stop();
+    } catch (_) {}
+    if (mounted) setState(() => _isSpeaking = false);
+  }
+
+  void _shareCurrentChallenge() {
+    CulturalHaptics.audioToggle();
+    CulturalContentShareSheet.show(
+      context: context,
+      title: _pack.title,
+      subtitle: _pack.subtitle,
+      categoryTag: 'DÉFI DU SAVOIR MALIEN 🇲🇱',
+      regionName: _pack.regionName,
+      imageUrl: _pack.photoUrl,
+      description: _pack.description,
+      era: '${_pack.questionsCount} questions • ~${_pack.timeMinutes} min',
+      keyFacts: [
+        'Questions : ${_pack.questionsCount}',
+        'Gain : +${_pack.xpReward} XP',
+        'Sceau : ${_pack.stampBadgeTitle}',
+        'Région : ${_pack.regionName}',
+        if (_hasStarted && !_isCompleted)
+          'Progression : Question ${_currentIndex + 1}/${_questions.length}',
+      ],
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     _loadQuizPack();
-    _initTts();
   }
 
   void _loadQuizPack() {
@@ -75,10 +101,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
 
   void _loadSpecificPack(CultureQuizPack nextPack) {
     CulturalHaptics.tabSwitch();
-    try {
-      VivienneTtsService.instance.stop();
-      _flutterTts.stop();
-    } catch (_) {}
+    _stopTts();
     setState(() {
       _pack = nextPack;
       _questions = _pack.questions;
@@ -96,35 +119,21 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
 
   void _startQuiz() {
     CulturalHaptics.tabSwitch();
+    _stopTts();
     setState(() {
       _hasStarted = true;
     });
   }
 
-  Future<void> _initTts() async {
-    try {
-      await VivienneTtsService.applyVivienneProfile(_flutterTts);
-      _flutterTts.setCompletionHandler(() {
-        if (mounted) setState(() => _isSpeaking = false);
-      });
-    } catch (_) {}
-  }
-
   @override
   void deactivate() {
-    try {
-      VivienneTtsService.instance.stop();
-      _flutterTts.stop();
-    } catch (_) {}
+    _stopTts();
     super.deactivate();
   }
 
   @override
   void dispose() {
-    try {
-      VivienneTtsService.instance.stop();
-      _flutterTts.stop();
-    } catch (_) {}
+    _stopTts();
     super.dispose();
   }
 
@@ -133,8 +142,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
   Future<void> _toggleTts() async {
     CulturalHaptics.audioToggle();
     if (_isSpeaking) {
-      await VivienneTtsService.instance.stop();
-      if (mounted) setState(() => _isSpeaking = false);
+      _stopTts();
     } else {
       if (mounted) setState(() => _isSpeaking = true);
       final q = _currentQuestion;
@@ -145,7 +153,13 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
       final speech = '${q.category}. ${q.question}. $optionsBuffer';
       await VivienneTtsService.instance.speak(
         speech,
+        onStart: () {
+          if (mounted) setState(() => _isSpeaking = true);
+        },
         onComplete: () {
+          if (mounted) setState(() => _isSpeaking = false);
+        },
+        onError: (_) {
           if (mounted) setState(() => _isSpeaking = false);
         },
       );
@@ -154,8 +168,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
 
   void _onSelectOption(int index) {
     if (_isAnswered) return;
-    _flutterTts.stop();
-    setState(() => _isSpeaking = false);
+    _stopTts();
 
     CulturalHaptics.cardPress();
     final isCorrect = index == _currentQuestion.correctIndex;
@@ -175,8 +188,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
 
   void _skipQuestion() {
     if (_isAnswered) return;
-    _flutterTts.stop();
-    setState(() => _isSpeaking = false);
+    _stopTts();
     CulturalHaptics.cardRelease();
 
     setState(() {
@@ -188,8 +200,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
 
   void _nextQuestion() {
     CulturalHaptics.tabSwitch();
-    _flutterTts.stop();
-    setState(() => _isSpeaking = false);
+    _stopTts();
 
     if (_currentIndex < _questions.length - 1) {
       setState(() {
@@ -237,7 +248,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
 
   void _restartQuiz() {
     CulturalHaptics.tabSwitch();
-    _flutterTts.stop();
+    _stopTts();
     setState(() {
       _loadQuizPack();
       _hasStarted = true;
@@ -257,8 +268,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
-        VivienneTtsService.instance.stop();
-        _flutterTts.stop();
+        _stopTts();
       },
       child: Scaffold(
         backgroundColor: bgColor,
@@ -281,8 +291,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
                         GestureDetector(
                           onTap: () {
                             CulturalHaptics.cardRelease();
-                            VivienneTtsService.instance.stop();
-                            _flutterTts.stop();
+                            _stopTts();
                             if (!_hasStarted || _isCompleted) {
                               if (context.canPop()) {
                                 context.pop();
@@ -372,47 +381,44 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
                           ),
                         ),
 
-                        // Actions à droite : Partage (Intro) ou Audio + Score (En jeu)
+                        // Actions à droite : Badge Région (Intro) ou Audio + Partage + Score (Quand on rentre dans le défi)
                         if (!_hasStarted) ...[
-                          GestureDetector(
-                            onTap: () {
-                              CulturalContentShareSheet.show(
-                                context: context,
-                                title: _pack.title,
-                                subtitle: _pack.subtitle,
-                                categoryTag: 'DÉFI DU SAVOIR MALIEN 🇲🇱',
-                                regionName: _pack.regionName,
-                                imageUrl: _pack.photoUrl,
-                                description: _pack.description,
-                                era: '${_pack.questionsCount} questions • ~${_pack.timeMinutes} min',
-                                keyFacts: [
-                                  'Questions : ${_pack.questionsCount}',
-                                  'Gain : +${_pack.xpReward} XP',
-                                  'Sceau : ${_pack.stampBadgeTitle}',
-                                  'Région : ${_pack.regionName}',
-                                ],
-                              );
-                            },
-                            child: Container(
-                              width: 38,
-                              height: 38,
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? CultureTheme.darkSurfaceAlt
-                                    : const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(11),
-                                border: Border.all(color: borderCol),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: CultureTheme.accentOrange
+                                  .withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: CultureTheme.accentOrange
+                                    .withValues(alpha: 0.25),
                               ),
-                              child: const Icon(
-                                Icons.share_rounded,
-                                size: 17,
-                                color: CultureTheme.accentOrange,
-                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.location_on_rounded,
+                                  size: 13,
+                                  color: CultureTheme.accentOrange,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _pack.regionName,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: CultureTheme.accentOrange,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ] else ...[
-                          // Bouton Audio Griot (TTS)
+                          // Actions actives PENDANT le défi (quand on est rentré dans les questions)
                           if (!_isCompleted) ...[
+                            // Bouton Audio Griot (TTS)
                             GestureDetector(
                               onTap: _toggleTts,
                               child: AnimatedContainer(
@@ -422,7 +428,8 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
                                 decoration: BoxDecoration(
                                   color: _isSpeaking
                                       ? CultureTheme.accentOrange
-                                      : CultureTheme.accentOrange.withValues(alpha: 0.12),
+                                      : CultureTheme.accentOrange
+                                          .withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(9),
                                   border: Border.all(
                                     color: CultureTheme.accentOrange,
@@ -457,6 +464,28 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
                               ),
                             ),
                             const SizedBox(width: 6),
+
+                            // Bouton Partager le Défi en cours
+                            GestureDetector(
+                              onTap: _shareCurrentChallenge,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? CultureTheme.darkSurfaceAlt
+                                      : const Color(0xFFF1F5F9),
+                                  borderRadius: BorderRadius.circular(9),
+                                  border: Border.all(color: borderCol),
+                                ),
+                                child: const Icon(
+                                  Icons.share_rounded,
+                                  size: 15,
+                                  color: CultureTheme.accentOrange,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
                           ],
 
                           // Badge Score Live
@@ -464,10 +493,12 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 5),
                             decoration: BoxDecoration(
-                              color: CultureTheme.primaryBlue.withValues(alpha: 0.12),
+                              color: CultureTheme.primaryBlue
+                                  .withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(9),
                               border: Border.all(
-                                color: CultureTheme.primaryBlue.withValues(alpha: 0.3),
+                                color: CultureTheme.primaryBlue
+                                    .withValues(alpha: 0.3),
                                 width: 1.0,
                               ),
                             ),
@@ -772,49 +803,6 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          // Bouton Partager le Défi
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                side: BorderSide(color: borderCol),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              onPressed: () {
-                CulturalContentShareSheet.show(
-                  context: context,
-                  title: _pack.title,
-                  subtitle: _pack.subtitle,
-                  categoryTag: 'DÉFI DU SAVOIR MALIEN 🇲🇱',
-                  regionName: _pack.regionName,
-                  imageUrl: _pack.photoUrl,
-                  description: _pack.description,
-                  era: '${_pack.questionsCount} questions • ~${_pack.timeMinutes} min',
-                  keyFacts: [
-                    'Questions : ${_pack.questionsCount}',
-                    'Gain : +${_pack.xpReward} XP',
-                    'Sceau : ${_pack.stampBadgeTitle}',
-                    'Région : ${_pack.regionName}',
-                  ],
-                );
-              },
-              icon: Icon(Icons.share_rounded, size: 17, color: titleColor),
-              label: Text(
-                'Partager ce défi',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
-                  color: titleColor,
                 ),
               ),
             ),

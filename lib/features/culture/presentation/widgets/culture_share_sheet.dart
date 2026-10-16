@@ -86,8 +86,11 @@ class _CultureShareSheetState extends State<CultureShareSheet> {
     } else {
       final r = widget.riddle!;
       final buffer = StringBuffer();
-      buffer.writeln('💡 Devinette du Mali • ${r.regionName}');
-      buffer.writeln(r.formulaIntro);
+      final formula = (r.formulaIntro.trim().isNotEmpty &&
+              !r.formulaIntro.contains('  !'))
+          ? r.formulaIntro
+          : "« Kôkô ! » — « N'sira ! »";
+      buffer.writeln(formula);
       buffer.writeln('« ${r.riddleText} »');
       if (_showAnswer) {
         buffer.writeln('\n✅ Réponse : ${r.correctAnswer}');

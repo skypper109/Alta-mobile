@@ -264,7 +264,11 @@ class CultureShareCard extends StatelessWidget {
               ),
             ),
             child: Text(
-              item.formulaIntro.toUpperCase(),
+              (item.formulaIntro.trim().isNotEmpty &&
+                          !item.formulaIntro.contains('  !')
+                      ? item.formulaIntro
+                      : "« Kôkô ! » — « N'sira ! »")
+                  .toUpperCase(),
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w800,

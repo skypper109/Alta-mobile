@@ -53,6 +53,9 @@ class VivienneTtsService {
   static const String vivienneLanguage = 'fr-FR';
 
   final AudioPlayer _audioPlayer = AudioPlayer();
+  final FlutterTts _fallbackTts = FlutterTts();
+  bool _fallbackInitialized = false;
+  bool _isUsingFallback = false;
 
   VivienneTtsStatus _status = VivienneTtsStatus.idle;
   String? _currentText;
@@ -70,12 +73,33 @@ class VivienneTtsService {
   Function(String)? _onErrorCallback;
 
   VivienneTtsStatus get status => _status;
-  bool get isSpeaking => _status == VivienneTtsStatus.speaking || _status == VivienneTtsStatus.synthesizing;
+  bool get isSpeaking =>
+      _status == VivienneTtsStatus.speaking ||
+      _status == VivienneTtsStatus.synthesizing;
   String? get currentText => _currentText;
 
   Future<void> _initAudioPlayer() async {
     try {
       await _audioPlayer.setReleaseMode(ReleaseMode.stop);
+
+      // Configuration AudioContext pour garantir la restitution sur haut-parleur
+      await _audioPlayer.setAudioContext(
+        AudioContext(
+          android: const AudioContextAndroid(
+            isSpeakerphoneOn: false,
+            stayAwake: false,
+            contentType: AndroidContentType.speech,
+            usageType: AndroidUsageType.assistanceNavigationGuidance,
+            audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+          ),
+          iOS: AudioContextIOS(
+            category: AVAudioSessionCategory.playback,
+            options: const {
+              AVAudioSessionOptions.duckOthers,
+            },
+          ),
+        ),
+      );
 
       _audioPlayer.onPlayerStateChanged.listen((state) {
         if (state == PlayerState.playing) {
@@ -93,8 +117,68 @@ class VivienneTtsService {
       _audioPlayer.onPlayerComplete.listen((_) {
         _handleChunkCompleted();
       });
+
+      // Pré-initialisation asynchrone du moteur de repli local
+      unawaited(_initFallbackTts());
     } catch (e) {
       debugPrint('[VivienneTts] Erreur init AudioPlayer: $e');
+    }
+  }
+
+  /// Initialise le moteur système FlutterTts en cas d'indisponibilité réseau
+  Future<void> _initFallbackTts() async {
+    if (_fallbackInitialized) return;
+    try {
+      await _fallbackTts.setLanguage(vivienneLanguage);
+      await _fallbackTts.setSpeechRate(vivienneSpeechRate);
+      await _fallbackTts.setPitch(viviennePitch);
+      await _fallbackTts.setVolume(vivienneVolume);
+
+      // Meilleure voix féminine française disponible
+      try {
+        final voices = await _fallbackTts.getVoices;
+        if (voices is List) {
+          for (final v in voices) {
+            if (v is Map) {
+              final locale = (v['locale'] ?? '').toString().toLowerCase();
+              final name = (v['name'] ?? '').toString().toLowerCase();
+              if (locale.startsWith('fr') &&
+                  (name.contains('female') ||
+                      name.contains('fr-fr') ||
+                      name.contains('femme') ||
+                      name.contains('vivienne'))) {
+                await _fallbackTts.setVoice({
+                  'name': v['name'].toString(),
+                  'locale': v['locale'].toString(),
+                });
+                break;
+              }
+            }
+          }
+        }
+      } catch (_) {}
+
+      _fallbackTts.setStartHandler(() {
+        _status = VivienneTtsStatus.speaking;
+        _onStartCallback?.call();
+      });
+
+      _fallbackTts.setCompletionHandler(() {
+        if (_isUsingFallback) {
+          _handleChunkCompleted();
+        }
+      });
+
+      _fallbackTts.setErrorHandler((msg) {
+        debugPrint('[VivienneTts] Signal d\'erreur FlutterTts fallback: $msg');
+        if (_isUsingFallback) {
+          _handleChunkCompleted();
+        }
+      });
+
+      _fallbackInitialized = true;
+    } catch (e) {
+      debugPrint('[VivienneTts] Erreur init FlutterTts fallback: $e');
     }
   }
 
@@ -257,7 +341,7 @@ class VivienneTtsService {
         '&Sec-MS-GEC=$secMsGec'
         '&Sec-MS-GEC-Version=$secMsGecVersion';
 
-    final client = HttpClient();
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 3);
     client.userAgent =
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0';
 
@@ -274,8 +358,9 @@ class VivienneTtsService {
     req.headers.set('Accept-Language', 'en-US,en;q=0.9');
     req.headers.set('Cookie', 'muid=${_generateMuid()};');
 
-    final resp = await req.close();
+    final resp = await req.close().timeout(const Duration(seconds: 3));
     if (resp.statusCode != 101) {
+      client.close(force: true);
       throw Exception('WebSocket upgrade rejeté : status ${resp.statusCode}');
     }
 
@@ -323,7 +408,12 @@ class VivienneTtsService {
       (message) {
         if (message is String) {
           if (message.contains('Path:turn.end')) {
-            ws.close();
+            try {
+              ws.close();
+            } catch (_) {}
+            try {
+              client.close(force: true);
+            } catch (_) {}
             if (!completer.isCompleted) completer.complete(audioBuffer.toBytes());
           }
         } else if (message is List<int>) {
@@ -340,14 +430,34 @@ class VivienneTtsService {
         }
       },
       onError: (e) {
+        try {
+          ws.close();
+        } catch (_) {}
+        try {
+          client.close(force: true);
+        } catch (_) {}
         if (!completer.isCompleted) completer.completeError(e);
       },
       onDone: () {
+        try {
+          client.close(force: true);
+        } catch (_) {}
         if (!completer.isCompleted) completer.complete(audioBuffer.toBytes());
       },
     );
 
-    return completer.future;
+    return completer.future.timeout(
+      const Duration(seconds: 4),
+      onTimeout: () {
+        try {
+          ws.close();
+        } catch (_) {}
+        try {
+          client.close(force: true);
+        } catch (_) {}
+        throw TimeoutException('Délai dépassé pour la synthèse WebSocket Vivienne');
+      },
+    );
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -355,10 +465,24 @@ class VivienneTtsService {
   // ─────────────────────────────────────────────────────────────────────────────
 
   static String? _workingBackendUrl;
+  static DateTime? _lastBackendCheckTime;
+  static bool _hasCheckedBackend = false;
 
   /// Résolution immédiate de l'URL active du serveur en moins de 15ms
   static Future<String?> _resolveWorkingBackendUrl() async {
     if (_workingBackendUrl != null) return _workingBackendUrl;
+
+    // Si on a déjà vérifié récemment et qu'aucun serveur local n'est actif,
+    // on ne bloque pas les lectures suivantes pendant 45 secondes
+    if (_hasCheckedBackend && _lastBackendCheckTime != null) {
+      if (DateTime.now().difference(_lastBackendCheckTime!) <
+          const Duration(seconds: 45)) {
+        return null;
+      }
+    }
+
+    _lastBackendCheckTime = DateTime.now();
+    _hasCheckedBackend = true;
 
     // Priorité aux adresses locales ultra-rapides pour éviter tout timeout réseau
     final priorityCandidates = [
@@ -373,12 +497,14 @@ class VivienneTtsService {
       if (!uniqueUrls.contains(u)) uniqueUrls.add(u);
     }
 
-    final client = HttpClient()..connectionTimeout = const Duration(milliseconds: 600);
+    final client = HttpClient()
+      ..connectionTimeout = const Duration(milliseconds: 200);
 
     for (final base in uniqueUrls) {
       try {
         final req = await client.getUrl(Uri.parse('$base/health'));
-        final resp = await req.close().timeout(const Duration(milliseconds: 700));
+        final resp =
+            await req.close().timeout(const Duration(milliseconds: 250));
         if (resp.statusCode == 200) {
           _workingBackendUrl = base;
           client.close();
@@ -579,12 +705,25 @@ class VivienneTtsService {
   Future<void> _playQueue() async {
     if (_playbackQueue.isEmpty || _isDisposed) {
       _isPlayingQueue = false;
+      _isUsingFallback = false;
       _status = VivienneTtsStatus.stopped;
-      _onCompletionCallback?.call();
+      final cb = _onCompletionCallback;
+      _onCompletionCallback = null;
+      cb?.call();
       return;
     }
 
     _isPlayingQueue = true;
+    if (_currentQueueIndex >= _playbackQueue.length) {
+      _isPlayingQueue = false;
+      _isUsingFallback = false;
+      _status = VivienneTtsStatus.stopped;
+      final cb = _onCompletionCallback;
+      _onCompletionCallback = null;
+      cb?.call();
+      return;
+    }
+
     final currentPhrase = _playbackQueue[_currentQueueIndex];
 
     try {
@@ -593,6 +732,7 @@ class VivienneTtsService {
 
       if (_isDisposed || !_isPlayingQueue) return;
 
+      _isUsingFallback = false;
       _status = VivienneTtsStatus.speaking;
       _onStartCallback?.call();
       await _audioPlayer.play(DeviceFileSource(file.path, mimeType: 'audio/mpeg'));
@@ -603,16 +743,18 @@ class VivienneTtsService {
         getOrSynthesizeAudioFile(_playbackQueue[nextIndex]).catchError((_) => file);
       }
     } catch (e) {
-      debugPrint('[VivienneTts] Erreur sur la phrase $_currentQueueIndex : $e. Nouvelle tentative avec Vivienne...');
-      await Future.delayed(const Duration(milliseconds: 800));
+      debugPrint(
+          '[VivienneTts] Synthèse neurale non disponible ($e). Repli immédiat sur FlutterTTS...');
       if (!_isPlayingQueue || _isDisposed) return;
+
       try {
-        final file = await getOrSynthesizeAudioFile(currentPhrase);
-        if (_isDisposed || !_isPlayingQueue) return;
+        await _initFallbackTts();
+        _isUsingFallback = true;
         _status = VivienneTtsStatus.speaking;
-        await _audioPlayer.play(DeviceFileSource(file.path, mimeType: 'audio/mpeg'));
+        _onStartCallback?.call();
+        await _fallbackTts.speak(currentPhrase);
       } catch (err) {
-        // Avancer sur la phrase suivante sans jamais basculer sur une autre voix
+        debugPrint('[VivienneTts] Erreur ultime FlutterTts fallback: $err');
         _onErrorCallback?.call(err.toString());
         _handleChunkCompleted();
       }
@@ -630,6 +772,7 @@ class VivienneTtsService {
     } else {
       _isAdvancingQueue = false;
       _isPlayingQueue = false;
+      _isUsingFallback = false;
       _status = VivienneTtsStatus.stopped;
       final cb = _onCompletionCallback;
       _onCompletionCallback = null;
@@ -690,6 +833,7 @@ class VivienneTtsService {
   Future<void> stop() async {
     _isPlayingQueue = false;
     _isAdvancingQueue = false;
+    _isUsingFallback = false;
     _playbackQueue.clear();
     _status = VivienneTtsStatus.stopped;
     _onCompletionCallback = null;
@@ -697,12 +841,20 @@ class VivienneTtsService {
     try {
       await _audioPlayer.stop();
     } catch (_) {}
+
+    try {
+      await _fallbackTts.stop();
+    } catch (_) {}
   }
 
   /// Mettre en pause
   Future<void> pause() async {
     try {
-      await _audioPlayer.pause();
+      if (_isUsingFallback) {
+        await _fallbackTts.pause();
+      } else {
+        await _audioPlayer.pause();
+      }
       _status = VivienneTtsStatus.paused;
     } catch (_) {}
   }
@@ -710,7 +862,13 @@ class VivienneTtsService {
   /// Reprendre
   Future<void> resume() async {
     try {
-      await _audioPlayer.resume();
+      if (_isUsingFallback) {
+        if (_currentQueueIndex < _playbackQueue.length) {
+          await _fallbackTts.speak(_playbackQueue[_currentQueueIndex]);
+        }
+      } else {
+        await _audioPlayer.resume();
+      }
       _status = VivienneTtsStatus.speaking;
     } catch (_) {}
   }
@@ -728,6 +886,9 @@ class VivienneTtsService {
   void dispose() {
     _isDisposed = true;
     _audioPlayer.dispose();
+    try {
+      _fallbackTts.stop();
+    } catch (_) {}
   }
 }
 

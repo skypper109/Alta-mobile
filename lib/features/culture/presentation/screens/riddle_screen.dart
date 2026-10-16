@@ -64,18 +64,34 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
 
   TraditionalRiddle get _currentRiddle => _riddles[_currentIndex];
 
+  void _stopTts() {
+    try {
+      VivienneTtsService.instance.stop();
+      _flutterTts.stop();
+    } catch (_) {}
+    if (mounted) setState(() => _isSpeaking = false);
+  }
+
   Future<void> _toggleTts() async {
     HapticFeedback.lightImpact();
     if (_isSpeaking) {
-      await VivienneTtsService.instance.stop();
-      if (mounted) setState(() => _isSpeaking = false);
+      _stopTts();
     } else {
       if (mounted) setState(() => _isSpeaking = true);
-      final text =
-          '${_currentRiddle.formulaIntro}. ${_currentRiddle.riddleText}';
+      final formula = (_currentRiddle.formulaIntro.trim().isNotEmpty &&
+              !_currentRiddle.formulaIntro.contains('  !'))
+          ? _currentRiddle.formulaIntro
+          : "« Kôkô ! » — « N'sira ! »";
+      final text = '$formula. ${_currentRiddle.riddleText}';
       await VivienneTtsService.instance.speak(
         text,
+        onStart: () {
+          if (mounted) setState(() => _isSpeaking = true);
+        },
         onComplete: () {
+          if (mounted) setState(() => _isSpeaking = false);
+        },
+        onError: (_) {
           if (mounted) setState(() => _isSpeaking = false);
         },
       );
@@ -84,6 +100,7 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
 
   void _revealNextHint() {
     HapticFeedback.selectionClick();
+    _stopTts();
     if (_revealedHintsCount < _currentRiddle.hints.length) {
       setState(() {
         _revealedHintsCount++;
@@ -102,7 +119,7 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
   void _validateAnswer() {
     if (_selectedOption == null || _isAnswered) return;
     HapticFeedback.mediumImpact();
-    _flutterTts.stop();
+    _stopTts();
     final correct = _selectedOption == _currentRiddle.correctAnswer;
     setState(() {
       _isAnswered = true;
@@ -142,12 +159,11 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
 
   void _giveUpAndReveal() {
     HapticFeedback.mediumImpact();
-    _flutterTts.stop();
+    _stopTts();
     setState(() {
       _isAnswered = true;
       _isCorrect = false;
       _selectedOption = _currentRiddle.correctAnswer;
-      _isSpeaking = false;
       _revealedHintsCount = _currentRiddle.hints.length;
       _answeredResults[_currentIndex] = false;
     });
@@ -155,7 +171,7 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
 
   void _nextRiddle() {
     HapticFeedback.mediumImpact();
-    _flutterTts.stop();
+    _stopTts();
 
     if (_currentIndex >= _riddles.length - 1) {
       HapticFeedback.heavyImpact();
@@ -194,13 +210,12 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
       _selectedOption = null;
       _isAnswered = false;
       _isCorrect = false;
-      _isSpeaking = false;
     });
   }
 
   void _restartSession() {
     HapticFeedback.mediumImpact();
-    _flutterTts.stop();
+    _stopTts();
     setState(() {
       _currentIndex = 0;
       _score = 0;
@@ -211,24 +226,18 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
       _selectedOption = null;
       _isAnswered = false;
       _isCorrect = false;
-      _isSpeaking = false;
     });
   }
 
   @override
   void deactivate() {
-    try {
-      VivienneTtsService.instance.stop();
-    } catch (_) {}
+    _stopTts();
     super.deactivate();
   }
 
   @override
   void dispose() {
-    try {
-      VivienneTtsService.instance.stop();
-      _flutterTts.stop();
-    } catch (_) {}
+    _stopTts();
     super.dispose();
   }
 
@@ -265,6 +274,7 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
                   GestureDetector(
                     onTap: () {
                       HapticFeedback.lightImpact();
+                      _stopTts();
                       if (context.canPop()) {
                         context.pop();
                       } else {
@@ -428,27 +438,42 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Formule rituelle des anciens
+                          // Formule rituelle des anciens (« Kôkô ! » — « N'sira ! »)
                           Center(
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 6),
+                                  horizontal: 14, vertical: 7),
                               decoration: BoxDecoration(
                                 color: CultureTheme.accentOrange
                                     .withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: CultureTheme.accentOrange
-                                      .withValues(alpha: 0.3),
+                                      .withValues(alpha: 0.35),
                                 ),
                               ),
-                              child: Text(
-                                riddle.formulaIntro,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: CultureTheme.accentOrange,
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.record_voice_over_rounded,
+                                    size: 14,
+                                    color: CultureTheme.accentOrange,
+                                  ),
+                                  const SizedBox(width: 7),
+                                  Text(
+                                    riddle.formulaIntro.trim().isNotEmpty &&
+                                            !riddle.formulaIntro.contains('  !')
+                                        ? riddle.formulaIntro
+                                        : "« Kôkô ! » — « N'sira ! »",
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: CultureTheme.accentOrange,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
