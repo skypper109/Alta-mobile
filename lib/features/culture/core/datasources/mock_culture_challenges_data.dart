@@ -740,6 +740,19 @@ abstract final class MockCultureChallengesData {
     );
   }
 
+  /// Récupère un pack de quiz adapté à la région spécifiée (ou le premier par défaut)
+  static CultureQuizPack getQuizPackForRegion(String? regionId) {
+    if (regionId == null || regionId.isEmpty || regionId == 'all') {
+      return quizPacks.first;
+    }
+    return quizPacks.firstWhere(
+      (p) =>
+          p.regionId == regionId ||
+          p.questions.any((q) => q.regionId == regionId),
+      orElse: () => quizPacks.first,
+    );
+  }
+
   /// Récupère une devinette par son ID
   static TraditionalRiddle getRiddleById(String id) {
     return riddles.firstWhere(

@@ -232,7 +232,10 @@ class CultureDefisView extends ConsumerWidget {
                 subtitleColor: subtitleColor,
                 onTap: () {
                   HapticFeedback.mediumImpact();
-                  context.push('/culture/defis/quiz');
+                  final pack = activeRegion != null
+                      ? MockCultureChallengesData.getQuizPackForRegion(activeRegion.id)
+                      : MockCultureChallengesData.quizPacks.first;
+                  context.push('/culture/quiz/${pack.id}');
                 },
               ),
 
@@ -251,7 +254,12 @@ class CultureDefisView extends ConsumerWidget {
                 subtitleColor: subtitleColor,
                 onTap: () {
                   HapticFeedback.mediumImpact();
-                  context.push('/culture/defis/quiz');
+                  final pack = activeRegion != null
+                      ? MockCultureChallengesData.getQuizPackForRegion(activeRegion.id)
+                      : (MockCultureChallengesData.quizPacks.length > 1
+                          ? MockCultureChallengesData.quizPacks[1]
+                          : MockCultureChallengesData.quizPacks.first);
+                  context.push('/culture/quiz/${pack.id}');
                 },
               ),
 
@@ -467,7 +475,7 @@ class CultureDefisView extends ConsumerWidget {
               ),
               onPressed: () {
                 HapticFeedback.mediumImpact();
-                context.push('/culture/defis/devinettes');
+                context.push('/culture/defis/devinettes?id=${daily.id}');
               },
               icon: const Icon(Icons.play_circle_fill_rounded,
                   color: Colors.white, size: 18),
@@ -498,7 +506,7 @@ class CultureDefisView extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
-        context.push('/culture/defis/devinettes');
+        context.push('/culture/defis/devinettes?id=riddle_elements');
       },
       child: Container(
         padding: const EdgeInsets.all(14),
@@ -694,7 +702,7 @@ class CultureDefisView extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
-        context.push('/culture/defis/devinettes');
+        context.push('/culture/defis/devinettes?id=${riddle.id}');
       },
       child: Container(
         padding: const EdgeInsets.all(14),

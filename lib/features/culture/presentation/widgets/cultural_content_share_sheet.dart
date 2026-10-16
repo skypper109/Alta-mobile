@@ -88,6 +88,75 @@ class CulturalContentShareSheet extends StatefulWidget {
     );
   }
 
+  /// Méthode d'ouverture pratique pour partager un défi culturel ou une question de quiz
+  static Future<void> showForChallenge({
+    required BuildContext context,
+    required String question,
+    required String packTitle,
+    required int questionIndex,
+    required int totalQuestions,
+    required int xp,
+    required String regionName,
+    required String category,
+    required String imageUrl,
+    List<String> options = const [],
+    int? selectedOptionIndex,
+    int? correctOptionIndex,
+    String? explanation,
+  }) {
+    HapticFeedback.mediumImpact();
+    final isAnswered = selectedOptionIndex != null;
+    final isCorrect = isAnswered &&
+        correctOptionIndex != null &&
+        selectedOptionIndex == correctOptionIndex;
+
+    String desc;
+    if (isAnswered &&
+        correctOptionIndex != null &&
+        correctOptionIndex >= 0 &&
+        correctOptionIndex < options.length) {
+      final correctText = options[correctOptionIndex];
+      final expText = (explanation != null && explanation.trim().isNotEmpty)
+          ? '\n\n$explanation'
+          : '';
+      desc = '💡 Réponse : $correctText$expText';
+    } else if (options.isNotEmpty) {
+      final optionsBuffer = StringBuffer();
+      for (int i = 0; i < options.length; i++) {
+        final letter = String.fromCharCode(65 + i);
+        optionsBuffer.writeln('$letter. ${options[i]}');
+      }
+      desc =
+          'Saurez-vous relever ce défi culturel malien ?\n\n$optionsBuffer';
+    } else {
+      desc = 'Rejoins l\'aventure AlterniA et relève ce défi culturel malien !';
+    }
+
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => CulturalContentShareSheet(
+        title: question,
+        subtitle: '« $packTitle » • Défi ${questionIndex + 1}/$totalQuestions',
+        categoryTag: 'DÉFI DU SAVOIR • ${category.toUpperCase()}',
+        regionName: regionName.isNotEmpty ? regionName : 'Tout le Mali',
+        imageUrl: imageUrl,
+        description: desc,
+        era: 'Défi ${questionIndex + 1}/$totalQuestions • +$xp XP',
+        keyFacts: [
+          'Défi : $packTitle',
+          if (isAnswered)
+            (isCorrect ? 'Score : Réussi 🎯 (+$xp XP)' : 'Statut : Relevé ⚔️')
+          else
+            'Gain : +$xp XP',
+          'Question ${questionIndex + 1}/$totalQuestions',
+          'Région : ${regionName.isNotEmpty ? regionName : 'Tout le Mali'}',
+        ],
+      ),
+    );
+  }
+
   /// Méthode d'ouverture universelle
   static Future<void> show({
     required BuildContext context,
@@ -132,6 +201,35 @@ class _CulturalContentShareSheetState extends State<CulturalContentShareSheet> {
   /// Légende invitant à la découverte pour WhatsApp et réseaux
   String _buildShareCaption() {
     final buffer = StringBuffer();
+    final isChallenge = widget.categoryTag.contains('DÉFI') ||
+        widget.categoryTag.contains('SAVOIR') ||
+        widget.categoryTag.contains('QUIZ');
+
+    if (isChallenge) {
+      buffer.writeln('⚔️ DÉFI DU SAVOIR MALIEN 🇲🇱');
+      buffer.writeln('« ${widget.title} »');
+      if (widget.subtitle.isNotEmpty) {
+        buffer.writeln('${widget.subtitle}\n');
+      }
+      buffer.writeln('📍 Région : ${widget.regionName}');
+      if (widget.era != null && widget.era!.isNotEmpty) {
+        buffer.writeln('⏳ Épreuve : ${widget.era}');
+      }
+      final cleanDesc = widget.description
+          .replaceAll(RegExp(r'\s+'), ' ')
+          .trim();
+      if (cleanDesc.isNotEmpty) {
+        final excerpt = cleanDesc.length > 250
+            ? '${cleanDesc.substring(0, 247)}...'
+            : cleanDesc;
+        buffer.writeln('\n$excerpt');
+      }
+      buffer.writeln('\n🎯 Peux-tu relever ce défi culturel malien ?');
+      buffer.writeln('📲 Télécharge l\'application AlterniA : ${widget.appLink}');
+      buffer.writeln('#CultureMali #AlternIA #DefiMali #Mali');
+      return buffer.toString();
+    }
+
     buffer.writeln('🏛️ DÉCOUVERTE DU PATRIMOINE DU MALI 🇲🇱');
     buffer.writeln('« ${widget.title.toUpperCase()} »');
     if (widget.subtitle.isNotEmpty) {
@@ -484,9 +582,9 @@ class _CulturalContentShareSheetState extends State<CulturalContentShareSheet> {
             ),
           ),
 
-          // ── 2. VISUEL PHOTOGRAPHIQUE DU MONUMENT / LIEU ───────────────────
+          // ── 2. VISUEL PHOTOGRAPHIQUE DU MONUMENT / LIEU / DÉFI ───────────
           SizedBox(
-            height: 185,
+            height: widget.title.length > 50 ? 215 : 185,
             width: double.infinity,
             child: Stack(
               fit: StackFit.expand,
@@ -508,7 +606,7 @@ class _CulturalContentShareSheetState extends State<CulturalContentShareSheet> {
                     color: const Color(0xFF1E293B),
                     child: const Center(
                       child: Icon(Icons.museum_rounded,
-                          size: 48, color: Colors.white38),
+                            size: 48, color: Colors.white38),
                     ),
                   ),
 
@@ -616,15 +714,17 @@ class _CulturalContentShareSheetState extends State<CulturalContentShareSheet> {
                       Text(
                         widget.title,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 18,
+                          fontSize: widget.title.length > 70
+                              ? 13.5
+                              : (widget.title.length > 40 ? 15.0 : 18.0),
                           fontWeight: FontWeight.w900,
                           color: Colors.white,
-                          height: 1.15,
+                          height: 1.18,
                           shadows: const [
                             Shadow(color: Colors.black, blurRadius: 6),
                           ],
                         ),
-                        maxLines: 2,
+                        maxLines: widget.title.length > 50 ? 3 : 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -654,8 +754,8 @@ class _CulturalContentShareSheetState extends State<CulturalContentShareSheet> {
                 ],
 
                 Text(
-                  widget.description.length > 210
-                      ? '${widget.description.substring(0, 207)}...'
+                  widget.description.length > 320
+                      ? '${widget.description.substring(0, 317)}...'
                       : widget.description,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
@@ -669,7 +769,7 @@ class _CulturalContentShareSheetState extends State<CulturalContentShareSheet> {
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
-                    children: widget.keyFacts.take(2).map((fact) {
+                    children: widget.keyFacts.take(3).map((fact) {
                       return Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 7, vertical: 3.5),

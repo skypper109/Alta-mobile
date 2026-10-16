@@ -51,6 +51,55 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
 
   void _shareCurrentChallenge() {
     CulturalHaptics.audioToggle();
+
+    // 1. Si le joueur est en plein défi (en train de répondre à une question précise)
+    if (_hasStarted && !_isCompleted && _questions.isNotEmpty) {
+      final q = _currentQuestion;
+      CulturalContentShareSheet.showForChallenge(
+        context: context,
+        question: q.question,
+        packTitle: _pack.title,
+        questionIndex: _currentIndex,
+        totalQuestions: _questions.length,
+        xp: q.xp,
+        regionName: q.regionName.isNotEmpty ? q.regionName : _pack.regionName,
+        category: q.category,
+        imageUrl: _pack.photoUrl,
+        options: q.options,
+        selectedOptionIndex: _selectedAnswerIndex,
+        correctOptionIndex: q.correctIndex,
+        explanation: q.explanation,
+      );
+      return;
+    }
+
+    // 2. Si le quiz est terminé (partage du Sceau d'honneur et des points obtenus)
+    if (_isCompleted) {
+      final percentage = _questions.isNotEmpty
+          ? ((_score / _questions.length) * 100).round()
+          : 0;
+      CulturalContentShareSheet.show(
+        context: context,
+        title: _pack.title,
+        subtitle:
+            '${_pack.stampBadgeTitle} • $_score/${_questions.length} bonnes réponses',
+        categoryTag: 'DÉFI DU SAVOIR MALIEN 🇲🇱',
+        regionName: _pack.regionName,
+        imageUrl: _pack.photoUrl,
+        description:
+            'J\'ai relevé le défi « ${_pack.title} » sur AlterniA et obtenu le ${_pack.stampBadgeTitle} avec un score de $_score/${_questions.length} ($percentage% de maîtrise) ! (+$_totalXpEarned XP de sagesse)',
+        era: 'Score : $percentage% de maîtrise',
+        keyFacts: [
+          'Sceau : ${_pack.stampBadgeTitle}',
+          'Score : $_score/${_questions.length} ($percentage%)',
+          'XP gagnés : +$_totalXpEarned XP',
+          'Région : ${_pack.regionName}',
+        ],
+      );
+      return;
+    }
+
+    // 3. Fiche de présentation du pack (avant démarrage)
     CulturalContentShareSheet.show(
       context: context,
       title: _pack.title,
@@ -65,8 +114,6 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
         'Gain : +${_pack.xpReward} XP',
         'Sceau : ${_pack.stampBadgeTitle}',
         'Région : ${_pack.regionName}',
-        if (_hasStarted && !_isCompleted)
-          'Progression : Question ${_currentIndex + 1}/${_questions.length}',
       ],
     );
   }
