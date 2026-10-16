@@ -14,6 +14,7 @@ import '../widgets/connected_contents_section.dart';
 import '../widgets/culture_audio_listen_badge.dart';
 import '../../../../core/services/vivienne_tts_service.dart';
 import '../widgets/culture_detail_sticky_header.dart';
+import '../widgets/cultural_content_share_sheet.dart';
 import '../widgets/passport_stamp_toast.dart';
 
 /// Fiche de consultation immersive d'une Ville ou Village du Mali
@@ -470,11 +471,28 @@ class _PlaceDetailScreenState extends ConsumerState<PlaceDetailScreen> {
           ),
         ],
       ),
-      // ── EN-TÊTE SUPÉRIEUR PERSISTANT (RETOUR & FAVORI) ────────────────
+      // ── EN-TÊTE SUPÉRIEUR PERSISTANT (RETOUR, PARTAGE & FAVORI) ─────
       CultureDetailStickyHeader(
         title: item.name,
         isScrolled: _isScrolled,
         accentColor: CultureTheme.cyanTurquoise,
+        onShare: () {
+          CulturalContentShareSheet.show(
+            context: context,
+            title: item.name,
+            subtitle: item.subtitle,
+            categoryTag: 'VILLE & TERROIR DU MALI',
+            regionName: item.regionName,
+            imageUrl: item.photoUrl,
+            description: item.resume,
+            era: item.fondation,
+            keyFacts: [
+              'Fondation : ${item.fondation}',
+              'Région : ${item.regionName}',
+              'Patrimoine : ${item.tag}',
+            ],
+          );
+        },
       ),
     ],
   ),

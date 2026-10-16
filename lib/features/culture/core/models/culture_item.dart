@@ -42,6 +42,17 @@ class CultureItem {
     return regionId == selectedRegionId;
   }
 
+  String get detailRoute {
+    if (subCategory == 'monuments') return '/culture/monument/$id';
+    if (subCategory == 'personnages') return '/culture/personnage/$id';
+    if (subCategory == 'villes') return '/culture/ville/$id';
+    if (subCategory == 'contes_interactifs') return '/culture/contes/$id';
+    if (category == 'personnages') return '/culture/personnage/$id';
+    if (category == 'monuments') return '/culture/monument/$id';
+    if (category == 'villes') return '/culture/ville/$id';
+    return '/culture/personnage/$id';
+  }
+
   static IconData iconFromName(String? name, {String? subCategory}) {
     if (name != null) {
       switch (name) {

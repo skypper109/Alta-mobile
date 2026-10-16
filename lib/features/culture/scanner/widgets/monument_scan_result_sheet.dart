@@ -4,10 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../core/datasources/culture_repository.dart';
 import '../../core/theme/culture_theme.dart';
+import '../../presentation/widgets/cultural_content_share_sheet.dart';
 import '../models/monument_scan_models.dart';
 import 'monument_3d_viewer_modal.dart';
 
@@ -74,14 +74,18 @@ class _MonumentScanResultSheetState extends ConsumerState<MonumentScanResultShee
   void _shareMonument() {
     HapticFeedback.selectionClick();
     final target = widget.result.target;
-    // ignore: deprecated_member_use
-    Share.share(
-      '🏛️ Découverte CultureLens — AlterniA :\n'
-      '${target.name} (${target.regionName})\n\n'
-      '« ${target.subtitle} »\n\n'
-      '📍 Localisation : ${target.locationDetails}\n'
-      '📜 Histoire : ${target.historicalStory}\n\n'
-      'Explorez le patrimoine malien avec AlterniA !',
+    CulturalContentShareSheet.show(
+      context: context,
+      title: target.name,
+      subtitle: target.subtitle,
+      categoryTag: target.tag.isNotEmpty ? target.tag : 'PATRIMOINE DU MALI',
+      regionName: target.regionName,
+      imageUrl: target.photoUrl,
+      description: target.historicalStory,
+      keyFacts: target.detectionFeatures
+          .map((f) => '${f.label}: ${f.category}')
+          .take(3)
+          .toList(),
     );
   }
 

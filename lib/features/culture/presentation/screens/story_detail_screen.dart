@@ -11,6 +11,7 @@ import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/authentic_photo_hero.dart';
 import '../widgets/connected_contents_section.dart';
 import '../widgets/culture_detail_sticky_header.dart';
+import '../widgets/cultural_content_share_sheet.dart';
 import '../widgets/story_audio_player_sheet.dart';
 
 /// Fiche détaillée d'un Conte Malien (Écouter, Lire, Commencer l'expérience)
@@ -439,11 +440,28 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
           ),
         ],
       ),
-      // ── EN-TÊTE SUPÉRIEUR PERSISTANT (RETOUR & FAVORI) ────────────────
+      // ── EN-TÊTE SUPÉRIEUR PERSISTANT (RETOUR, PARTAGE & FAVORI) ─────
       CultureDetailStickyHeader(
         title: item.title,
         isScrolled: _isScrolled,
         accentColor: CultureTheme.accentOrange,
+        onShare: () {
+          CulturalContentShareSheet.show(
+            context: context,
+            title: item.title,
+            subtitle: item.subtitle,
+            categoryTag: 'CONTE & PAROLE DU MALI',
+            regionName: item.regionName,
+            imageUrl: item.photoUrl,
+            description: item.summary,
+            era: item.origin,
+            keyFacts: [
+              'Origine : ${item.origin}',
+              'Genre : ${item.tag}',
+              'Région : ${item.regionName}',
+            ],
+          );
+        },
       ),
     ],
   ),

@@ -17,6 +17,7 @@ import '../../../../core/services/vivienne_tts_service.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/character_motion_hero.dart';
 import '../widgets/connected_contents_section.dart';
+import '../widgets/cultural_content_share_sheet.dart';
 import '../widgets/documentary_scene_player.dart';
 import '../widgets/historical_sacred_parchment_card.dart';
 import '../widgets/passport_stamp_toast.dart';
@@ -548,7 +549,32 @@ class _HistoricalFigureDetailScreenState
                               ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
+                    // Bouton Partager
+                    _buildTopActionButton(
+                      icon: Icons.share_rounded,
+                      isDark: isDark,
+                      borderCol: borderCol,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        CulturalContentShareSheet.show(
+                          context: context,
+                          title: item.name,
+                          subtitle: item.titleHonorifique,
+                          categoryTag: 'GRAND PERSONNAGE HISTORIQUE',
+                          regionName: item.regionName,
+                          imageUrl: item.photoUrl,
+                          description: item.resume,
+                          era: item.period,
+                          keyFacts: [
+                            'Titre : ${item.titleHonorifique}',
+                            'Règne : ${item.period}',
+                            'Région : ${item.regionName}',
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
                     // Bouton Favori unique
                     _buildTopActionButton(
                       icon: _isBookmarked

@@ -18,6 +18,7 @@ class CultureDetailStickyHeader extends StatefulWidget {
   final String title;
   final bool isScrolled;
   final VoidCallback? onBack;
+  final VoidCallback? onShare;
   final Color accentColor;
   final bool showBookmark;
   final bool initialBookmarked;
@@ -28,6 +29,7 @@ class CultureDetailStickyHeader extends StatefulWidget {
     required this.title,
     required this.isScrolled,
     this.onBack,
+    this.onShare,
     this.accentColor = CultureTheme.accentOrange,
     this.showBookmark = true,
     this.initialBookmarked = false,
@@ -155,6 +157,20 @@ class _CultureDetailStickyHeaderState extends State<CultureDetailStickyHeader> {
             ),
             const SizedBox(width: 12),
 
+            // Bouton Partager persistant
+            if (widget.onShare != null) ...[
+              _buildActionButton(
+                icon: Icons.share_rounded,
+                iconColor: widget.isScrolled && !isDark
+                    ? const Color(0xFF0F172A)
+                    : Colors.white,
+                isDark: isDark,
+                borderCol: borderCol,
+                onTap: widget.onShare!,
+              ),
+              const SizedBox(width: 8),
+            ],
+
             // Bouton Favori persistant
             if (widget.showBookmark)
               _buildActionButton(
@@ -170,7 +186,7 @@ class _CultureDetailStickyHeaderState extends State<CultureDetailStickyHeader> {
                 borderCol: borderCol,
                 onTap: _toggleBookmark,
               )
-            else
+            else if (widget.onShare == null)
               const SizedBox(width: 42),
           ],
         ),

@@ -17,6 +17,7 @@ import '../../../core/theme/culture_theme.dart';
 import '../../../presentation/widgets/ask_cultural_guide_button.dart';
 import '../../../presentation/widgets/authentic_photo_hero.dart';
 import '../../../presentation/widgets/culture_detail_sticky_header.dart';
+import '../../../presentation/widgets/cultural_content_share_sheet.dart';
 import '../../../presentation/widgets/passport_stamp_toast.dart';
 import '../../data/models/mali_region.dart';
 
@@ -494,11 +495,31 @@ class _RegionDetailScreenState extends ConsumerState<RegionDetailScreen> {
                 ),
               ],
             ),
-            // ── EN-TÊTE SUPÉRIEUR PERSISTANT (RETOUR & FAVORI) ────────────────
+            // ── EN-TÊTE SUPÉRIEUR PERSISTANT (RETOUR, PARTAGE & FAVORI) ─────
             CultureDetailStickyHeader(
               title: region.nom,
               isScrolled: _isScrolled,
               accentColor: CultureTheme.primaryBlue,
+              onShare: () {
+                CulturalContentShareSheet.show(
+                  context: context,
+                  title: 'Région de ${region.nom}',
+                  subtitle: region.surnom,
+                  categoryTag: 'RÉGION & TERROIR DU MALI',
+                  regionName: region.nom,
+                  imageUrl: region.imageAsset,
+                  description: region.descriptionComplete.isNotEmpty
+                      ? region.descriptionComplete
+                      : region.descriptionCourte,
+                  era: 'Chef-lieu : ${region.chefLieu}',
+                  keyFacts: [
+                    'Superficie : ${region.superficie}',
+                    'Population : ${region.population}',
+                    if (region.pointsForts.isNotEmpty)
+                      'Points forts : ${region.pointsForts.take(2).join(", ")}',
+                  ],
+                );
+              },
             ),
           ],
         ),

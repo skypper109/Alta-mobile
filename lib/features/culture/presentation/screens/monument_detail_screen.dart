@@ -18,6 +18,7 @@ import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/connected_contents_section.dart';
 import '../widgets/culture_audio_listen_badge.dart';
 import '../widgets/culture_detail_sticky_header.dart';
+import '../widgets/cultural_content_share_sheet.dart';
 import '../widgets/monument_guided_tour_view.dart';
 import '../widgets/monument_living_hero.dart';
 import '../widgets/passport_stamp_toast.dart';
@@ -296,11 +297,17 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
               ],
             ),
 
-            // ── 5. EN-TÊTE SUPÉRIEUR PERSISTANT (RETOUR & FAVORI) ──────────────
+            // ── 5. EN-TÊTE SUPÉRIEUR PERSISTANT (RETOUR, PARTAGE & FAVORI) ────
             CultureDetailStickyHeader(
               title: item.name,
               isScrolled: _isScrolled,
               accentColor: CultureTheme.accentOrange,
+              onShare: () {
+                CulturalContentShareSheet.showForMonument(
+                  context: context,
+                  monument: item,
+                );
+              },
             ),
           ],
         ),
@@ -457,6 +464,41 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                     const SizedBox(width: 4),
                     Text(
                       'Carte',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: CultureTheme.accentOrange,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () {
+                CulturalHaptics.cardPress();
+                CulturalContentShareSheet.showForMonument(
+                  context: context,
+                  monument: item,
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.22 : 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.share_rounded, size: 13, color: CultureTheme.accentOrange),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Partager',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
