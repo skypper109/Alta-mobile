@@ -2,7 +2,6 @@ import 'package:alternia/presentation/common/widgets/alternia_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import '../../../../core/services/vivienne_tts_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -31,23 +30,7 @@ class CultureJeuxContesView extends ConsumerStatefulWidget {
 
 class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
   int _selectedFilterIndex = 0; // 0: Contes, 1: Devinettes, 2: Défis, 3: Proverbes
-  final FlutterTts _flutterTts = FlutterTts();
   String? _currentlySpeakingProverbId;
-
-  @override
-  void initState() {
-    super.initState();
-    _initTts();
-  }
-
-  Future<void> _initTts() async {
-    try {
-      await VivienneTtsService.applyVivienneProfile(_flutterTts);
-      _flutterTts.setCompletionHandler(() {
-        if (mounted) setState(() => _currentlySpeakingProverbId = null);
-      });
-    } catch (_) {}
-  }
 
   @override
   void deactivate() {
@@ -61,7 +44,6 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
   void dispose() {
     try {
       VivienneTtsService.instance.stop();
-      _flutterTts.stop();
     } catch (_) {}
     super.dispose();
   }

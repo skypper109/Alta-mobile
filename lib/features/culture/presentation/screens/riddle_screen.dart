@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import '../../../../core/services/vivienne_tts_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -39,7 +38,6 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
   int _totalXpEarned = 0;
   final Map<int, bool> _answeredResults = {};
 
-  final FlutterTts _flutterTts = FlutterTts();
   bool _isSpeaking = false;
 
   @override
@@ -50,16 +48,6 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
       final index = _riddles.indexWhere((r) => r.id == widget.riddleId);
       if (index != -1) _currentIndex = index;
     }
-    _initTts();
-  }
-
-  Future<void> _initTts() async {
-    try {
-      await VivienneTtsService.applyVivienneProfile(_flutterTts);
-      _flutterTts.setCompletionHandler(() {
-        if (mounted) setState(() => _isSpeaking = false);
-      });
-    } catch (_) {}
   }
 
   TraditionalRiddle get _currentRiddle => _riddles[_currentIndex];
@@ -67,7 +55,6 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
   void _stopTts() {
     try {
       VivienneTtsService.instance.stop();
-      _flutterTts.stop();
     } catch (_) {}
     if (mounted) setState(() => _isSpeaking = false);
   }

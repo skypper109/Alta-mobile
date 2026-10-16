@@ -681,21 +681,38 @@ class VivienneTtsService {
   // 4. LECTURE FLUIDE MULTI-PHRASES SANS LATENCE
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /// Découpe un texte long en phrases naturelles
+  /// Découpe un texte long en blocs naturels cohérents sans jamais couper les devinettes ou quiz courts
   List<String> _splitIntoSentences(String text) {
     final clean = cleanForSpeech(text);
     if (clean.isEmpty) return [];
 
+    // Pour tous les textes jusqu'à 800 caractères (devinettes, quiz, explications, sagesses),
+    // on conserve l'INTÉGRALITÉ du texte en un seul bloc fluide et ininterrompu.
+    // Cela garantit que toute la devinette / question est lue sans jamais s'arrêter à la 1ère phrase.
+    if (clean.length <= 800) {
+      return [clean];
+    }
+
+    // Pour les très longs textes, découpage par blocs d'au moins 350 caractères
     final rawSentences = clean.split(RegExp(r'(?<=[.!?])\s+'));
     final result = <String>[];
+    var currentChunk = StringBuffer();
 
     for (final s in rawSentences) {
       final trimmed = s.trim();
-      if (trimmed.length > 5) {
-        result.add(trimmed);
-      } else if (result.isNotEmpty && trimmed.isNotEmpty) {
-        result[result.length - 1] = '${result.last} $trimmed';
+      if (trimmed.isEmpty) continue;
+
+      if (currentChunk.length + trimmed.length > 500 && currentChunk.isNotEmpty) {
+        result.add(currentChunk.toString().trim());
+        currentChunk = StringBuffer();
       }
+
+      if (currentChunk.isNotEmpty) currentChunk.write(' ');
+      currentChunk.write(trimmed);
+    }
+
+    if (currentChunk.isNotEmpty) {
+      result.add(currentChunk.toString().trim());
     }
 
     return result.isEmpty ? [clean] : result;
@@ -725,6 +742,20 @@ class VivienneTtsService {
     }
 
     final currentPhrase = _playbackQueue[_currentQueueIndex];
+
+    // Si le moteur est déjà en mode repli système, continuer directement sans délai réseau
+    if (_isUsingFallback) {
+      try {
+        _status = VivienneTtsStatus.speaking;
+        _onStartCallback?.call();
+        await _fallbackTts.speak(currentPhrase);
+      } catch (err) {
+        debugPrint('[VivienneTts] Erreur FlutterTts fallback: $err');
+        _onErrorCallback?.call(err.toString());
+        _handleChunkCompleted();
+      }
+      return;
+    }
 
     try {
       _status = VivienneTtsStatus.synthesizing;
