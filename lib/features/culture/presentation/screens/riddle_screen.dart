@@ -15,7 +15,7 @@ import '../widgets/culture_share_sheet.dart';
 import '../widgets/passport_stamp_toast.dart';
 import 'culture_main_screen.dart';
 
-/// Écran d'Expérience de Devinettes Traditionnelles («   ! »)
+/// Écran d'Expérience de Devinettes Traditionnelles (« Kôkô ! » — « N'sira ! »)
 class RiddleScreen extends ConsumerStatefulWidget {
   final String? riddleId;
 

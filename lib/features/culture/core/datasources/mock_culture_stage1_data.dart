@@ -376,13 +376,13 @@ abstract final class MockCultureStage1Data {
   // ── 6. DÉFIS & DEVINETTES (DÉFIS) ──────────────────────────────────────────
   static const List<CultureItem> defis = [
     CultureItem(
-      id: 'defi_nda_baobab',
-      title: '«   ! » — Les Énigmes du Baobab',
+      id: 'defi_koko_baobab',
+      title: '« Kôkô ! » — « N\'sira ! » • Les Énigmes du Baobab',
       subtitle: 'Devinettes traditionnelles Bambara',
       category: 'defis',
       subCategory: 'devinettes',
       description:
-          'Répondez par «    sira » et élucidez les énigmes poétiques posées par nos aïeux.',
+          'Répondez par « N\'sira ! » et élucidez les énigmes poétiques posées par nos aïeux sous l\'arbre à palabres.',
       regionId: null,
       regionName: 'Tout le Mali',
       tag: 'Jeu de Devinettes',

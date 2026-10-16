@@ -106,7 +106,8 @@ abstract final class MockCulturalGuideKnowledge {
           ),
           GuideSuggestion(
             id: 'defi_nda_origin',
-            questionText: 'Pourquoi dit-on «   ! » avant une devinette ?',
+            questionText:
+                'Pourquoi dit-on « Kôkô ! » — « N\'sira ! » avant une devinette ?',
             icon: Icons.chat_bubble_outline_rounded,
           ),
           GuideSuggestion(
@@ -231,7 +232,7 @@ abstract final class MockCulturalGuideKnowledge {
 
       case CulturalContentType.defi:
         welcomeText =
-            '«   ! » Les devinettes et énigmes traditionnelles sont l\'école de la vivacité d\'esprit au Mali. '
+            '« Kôkô ! » — « N\'sira ! » Les devinettes et énigmes traditionnelles sont l\'école de la vivacité d\'esprit au Mali. '
             'Que voulez-vous savoir sur les symboles et maximes de ce défi ?';
         break;
 
@@ -312,11 +313,11 @@ abstract final class MockCulturalGuideKnowledge {
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           text: 'Votre Passeport Culturel est richement initié ! '
               'Pour aller plus loin, je vous suggère d\'explorer les Monts Mandingues de Koulikoro, '
-              'ou de relever les devinettes traditionnelles «   ! » pour affûter votre esprit.',
+              'ou de relever les devinettes traditionnelles « Kôkô ! » — « N\'sira ! » pour affûter votre esprit.',
           isUser: false,
           timestamp: DateTime.now(),
           action: const GuideConnectedAction(
-            label: 'Relever un Défi  ',
+            label: 'Relever un Défi Kôkô !',
             targetRoute: '/culture/defis/devinettes',
           ),
         );
@@ -415,12 +416,17 @@ abstract final class MockCulturalGuideKnowledge {
 
     // ── DÉFIS ───────────────────────────────────────────────────────────────
     if (context.contentType == CulturalContentType.defi) {
-      if (q.contains(" ") || q.contains('pourquoi') || q.contains('formule')) {
+      if (q.contains("kôkô") ||
+          q.contains("koko") ||
+          q.contains("n'sira") ||
+          q.contains("nsira") ||
+          q.contains('pourquoi') ||
+          q.contains('formule')) {
         return GuideMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           text:
-              'La formule rituelle «   ! » (qui signifie littéralement « J\'ai posé mon énigme ») appelle la réponse de l\'assemblée : «    sira ! » (« Que ta parole trouve son chemin ! »). '
-              'C\'est le signal d\'ouverture de la joute intellectuelle entre les jeunes et les aînés.',
+              'La formule rituelle « Kôkô ! » (qui symbolise le conteur frappant avec humilité à la porte de la sagesse) appelle la réponse unanime de l\'assemblée : « N\'sira ! » (« Que la voie te soit ouverte, entre ! »). '
+              'C\'est le signal sacré d\'ouverture des devinettes et contes des veillées en pays mandingue et sahélien.',
           isUser: false,
           timestamp: DateTime.now(),
         );
