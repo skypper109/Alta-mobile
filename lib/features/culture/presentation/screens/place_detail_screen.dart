@@ -250,7 +250,7 @@ class _PlaceDetailScreenState extends ConsumerState<PlaceDetailScreen> {
                               ),
                             ),
                             Text(
-                              'Récit et origines racontés par le Griot',
+                              'Récit et origines racontés par Grand-mère Mah',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10.5,
                                 color: subtitleColor,

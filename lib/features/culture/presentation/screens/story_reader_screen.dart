@@ -285,7 +285,7 @@ class _StoryReaderScreenState extends ConsumerState<StoryReaderScreen> {
                       children: [
                         Text(
                           isFullStoryPlaying
-                              ? 'Le Griot raconte le conte...'
+                              ? 'Grand-mère Mah raconte le conte...'
                               : 'Écouter la veillée complète',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,

@@ -334,7 +334,7 @@ class _MonumentScanResultSheetState extends ConsumerState<MonumentScanResultShee
                                     Flexible(
                                       child: Text(
                                         widget.isAudioPlaying
-                                            ? 'Narration du Griot en cours...'
+                                            ? 'Narration de Grand-mère Mah en cours...'
                                             : 'Écouter l\'histoire orale',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -353,7 +353,7 @@ class _MonumentScanResultSheetState extends ConsumerState<MonumentScanResultShee
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
-                                        'GRIOT',
+                                        'GRAND-MÈRE MAH',
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 8.5,
                                           fontWeight: FontWeight.w800,

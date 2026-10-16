@@ -10,7 +10,7 @@ class CultureAlternIAService {
 
   List<String> get candidateUrls => AltaApiConfig.candidateBaseUrls;
 
-  /// Face ID Simli officiel du Vieux Sage (Griot Ancestral)
+  /// Face ID Simli officiel de Grand-mère Mah (Griotte Ancestrale)
   static const String simliSageFaceId = 'c295e3a2-ed11-48d5-a1bd-ff42ac7eac73';
   static const String simliTeacherFaceId = 'bb1212ec-2cc5-4ca0-ad32-4a4427600345';
 
@@ -19,7 +19,7 @@ class CultureAlternIAService {
   /// Voix académique / sage par défaut (Griot Henri / Vivienne)
   final String defaultVoice = 'henri';
 
-  /// Chemin de l'image photoréaliste locale du Vieux Sage (visage officiel Simli)
+  /// Chemin de l'image photoréaliste locale de Grand-mère Mah (visage officiel Simli)
   static const String defaultSageImagePath = 'assets/images/culture/griot_sage.jpg';
 
   // ── Cache de connectivité pour réactivité immédiate sans freeze ────────────
@@ -75,7 +75,7 @@ class CultureAlternIAService {
     return url != null;
   }
 
-  /// Demande au backend de générer une vidéo LivePortrait/Simli pour le Vieux Sage
+  /// Demande au backend de générer une vidéo LivePortrait/Simli pour Grand-mère Mah
   /// Retourne null immédiatement si le backend n'est pas lancé, sans bloquer le téléphone.
   Future<String?> generateSageVideo({
     required String text,

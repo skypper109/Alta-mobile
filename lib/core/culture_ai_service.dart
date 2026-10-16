@@ -1,5 +1,5 @@
 // ─── AlterniA — Culture AI Service ────────────────────────────────────────────
-// Service IA dédié à l'espace Culture du Mali et au Vieux Sage / Griot.
+// Service IA dédié à l'espace Culture du Mali et à Grand-mère Mah.
 // Endpoint prioritaire : /api/v1/culture/ask (Guide Culturel RAG)
 // Endpoint de repli : /api/chat avec routage culturel dédié
 // Fallback local : Moteur de sagesse ancestrale autonome hors-ligne
@@ -301,7 +301,7 @@ Fournis une réponse enrichissante, structurée et empreinte de fierté républi
     }
   }
 
-  /// Construit un System Prompt ultra-adapté pour le CHAT AVEC LE VIEUX SAGE DU MALI
+  /// Construit un System Prompt ultra-adapté pour le CHAT AVEC GRAND-MÈRE MAH DU MALI
   static String buildChatSystemPrompt(CultureUseCase useCase, [String? additionalContext]) {
     final baseHeader = '''Tu es « Grand-mère Mah, mémoire vivante et griotte de la tradition ancestrale du Mali ».
 Tu accueilles chaleureusement l'enfant ou le visiteur sous le grand baobab sacré lors de la veillée au coin du feu crépitant.
@@ -490,7 +490,7 @@ class CultureAiService {
     );
   }
 
-  // ── CHAT DU VIEUX SAGE DU MALI ADAPTATIF ──────────────────────────────────
+  // ── CHAT DE GRAND-MÈRE MAH DU MALI ADAPTATIF ──────────────────────────────────
 
   Future<String> culturalChat({
     required String userMessage,
@@ -577,7 +577,7 @@ class CultureAiService {
       } catch (_) {}
     }
 
-    // 4. FALLBACK LOCAL AUTONOME : Le Vieux Sage répond TOUJOURS avec authenticité
+    // 4. FALLBACK LOCAL AUTONOME : Grand-mère Mah répond TOUJOURS avec authenticité
     return generateLocalSageResponse(cleanMsg, additionalContext);
   }
 

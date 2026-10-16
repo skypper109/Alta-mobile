@@ -70,7 +70,7 @@ class AskCulturalGuideButton extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        'LE VIEUX SAGE',
+                        'GRAND-MÈRE MAH',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 9.5,
                           fontWeight: FontWeight.w800,

@@ -227,7 +227,7 @@ Pour un satellite en orbite autour de la Terre, la seule force est l'attraction 
       subject: 'Histoire-Géo',
       classLevel: 'Toutes Classes',
       durationMinutes: 8,
-      narrator: 'Le Vieux Sage Griot (AlternIA)',
+      narrator: 'Grand-mère Mah (AlternIA)',
       icon: Icons.auto_stories_rounded,
       accentColor: Color(0xFFD97706),
       summary:

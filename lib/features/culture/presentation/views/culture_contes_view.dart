@@ -360,7 +360,7 @@ class CultureContesView extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            '« Quand la nuit enveloppe la savane, les enfants s\'assoient au pied du vieux baobab et le Griot ouvre la boîte à mémoires du Manden. »',
+            '« Quand la nuit enveloppe la savane, les enfants s\'assoient au pied du vieux baobab et Grand-mère Mah ouvre la boîte à mémoires du Manden. »',
             style: GoogleFonts.merriweather(
               fontSize: 12.5,
               height: 1.5,

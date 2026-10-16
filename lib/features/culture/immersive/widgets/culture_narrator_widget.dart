@@ -47,7 +47,7 @@ class CultureNarratorWidget extends ConsumerStatefulWidget {
     super.key,
     this.imagePath = 'assets/images/culture/robot_sage.jpg',
     this.size = 110.0,
-    this.name = 'Griot-Bot',
+    this.name = 'Grand-mère Mah',
     this.subtitle = 'Mémoire vivante du Mali',
     this.showBadge = true,
     this.primaryColor = CultureTheme.accentOrange,
@@ -282,8 +282,8 @@ class _CultureNarratorWidgetState extends ConsumerState<CultureNarratorWidget>
                   const SizedBox(width: 6),
                   Text(
                     isSpeaking
-                        ? 'Parole du Griot...'
-                        : (widget.name ?? 'Le Griot'),
+                        ? 'Parole de Grand-mère Mah...'
+                        : (widget.name ?? 'Grand-mère Mah'),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,

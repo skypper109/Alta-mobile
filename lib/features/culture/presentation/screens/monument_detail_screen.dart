@@ -572,7 +572,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Écouter l\'Histoire Orale du Griot',
+                      'Écouter l\'Histoire Orale de Grand-mère Mah',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         fontWeight: FontWeight.w800,

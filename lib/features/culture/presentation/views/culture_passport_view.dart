@@ -955,7 +955,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'LE VIEUX SAGE IA',
+                  'GRAND-MÈRE MAH IA',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
@@ -965,7 +965,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Interrogez le guide sur votre parcours et vos prochaines étapes.',
+                  'Interrogez Grand-mère Mah sur votre parcours et vos prochaines étapes.',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

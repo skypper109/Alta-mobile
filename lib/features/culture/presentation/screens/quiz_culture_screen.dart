@@ -811,7 +811,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'Narration vocale du Griot disponible pour chaque question.',
+                          'Narration vocale de Grand-mère Mah disponible pour chaque question.',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w600,

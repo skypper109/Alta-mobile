@@ -440,8 +440,8 @@ class _CulturalMysteryVaultWidgetState
                                 const SizedBox(width: 5),
                                 Text(
                                   isSpeaking
-                                      ? 'Griot en voix'
-                                      : 'Écouter le sage',
+                                      ? 'Grand-mère Mah en voix'
+                                      : 'Écouter Grand-mère Mah',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,

@@ -324,7 +324,7 @@ class _InteractiveStoryPlayerScreenState
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            'Parole du Griot en cours…',
+                            'Parole de Grand-mère Mah en cours…',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w600,
@@ -661,7 +661,7 @@ class _InteractiveStoryPlayerScreenState
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'SAGESSE DU GRIOT • LA MORALE',
+                    'SAGESSE DE GRAND-MÈRE MAH • LA MORALE',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
@@ -754,7 +754,7 @@ class _InteractiveStoryPlayerScreenState
 
         const SizedBox(height: 18),
 
-        // Échanger avec le Vieux Sage sur ce conte
+        // Échanger avec Grand-mère Mah sur ce conte
         AskCulturalGuideButton(
           contextData: CulturalGuideContext(
             contentType: CulturalContentType.conte,
@@ -1406,7 +1406,7 @@ class _TheatricalDialogueBeats extends StatelessWidget {
           avatarPath = castConfig.actorRight.avatarPath;
         } else {
           speakerColor = CultureTheme.primaryBlue;
-          speakerName = 'LE GRIOT • VOIX DE LA VEILLÉE';
+          speakerName = 'GRAND-MÈRE MAH • VOIX DE LA VEILLÉE';
           speakerIcon = Icons.record_voice_over_rounded;
           avatarPath = 'assets/images/culture/griot_sage.jpg';
         }

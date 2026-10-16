@@ -36,7 +36,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
       0; // 0: Avatar Live, 1: Histoire, 2: Inventions, 3: Sagesse
   AvatarState _avatarState = AvatarState.speaking;
   String _liveSpeechText =
-      'Bonjour ! Je suis le Vieux Sage du Mali. Pose-moi n\'importe quelle question sur l\'Histoire, les Rois et les Inventions de notre terre !';
+      'Bonjour ! Je suis Grand-mère Mah du Mali. Pose-moi n\'importe quelle question sur l\'Histoire, les Rois et les Inventions de notre terre !';
   String? _currentVideoUrl;
 
   final CultureAlternIAService _cultureService = CultureAlternIAService();
@@ -276,7 +276,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
     setState(() {
       _subTabIndex = 0; // Basculer sur l'onglet Avatar Live
       _avatarState = AvatarState.thinking;
-      _liveSpeechText = 'Le Vieux Sage prépare sa réponse vidéo et vocale...';
+      _liveSpeechText = 'Grand-mère Mah prépare sa réponse vidéo et vocale...';
     });
 
     _loadSageResponse(speech, subject: title);
@@ -305,7 +305,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
 
       setState(() {
         _avatarState = AvatarState.thinking;
-        _liveSpeechText = 'Le Vieux Sage prépare sa réponse vidéo et vocale...';
+        _liveSpeechText = 'Grand-mère Mah prépare sa réponse vidéo et vocale...';
       });
 
       _loadSageResponse(replyText, subject: 'Histoire du Mali');
@@ -318,7 +318,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
 
     setState(() {
       _avatarState = AvatarState.thinking;
-      _liveSpeechText = 'Le Vieux Sage prépare sa réponse vidéo et vocale...';
+      _liveSpeechText = 'Grand-mère Mah prépare sa réponse vidéo et vocale...';
     });
 
     try {
@@ -655,7 +655,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
                     const SizedBox(width: 8),
                     Text(
                       _avatarState == AvatarState.speaking
-                          ? 'LE VIEUX SAGE PARLE…'
+                          ? 'GRAND-MÈRE MAH PARLE…'
                           : (_avatarState == AvatarState.listening
                               ? 'ÉCOUTE ACTIVE…'
                               : 'PRÉPARATION VIDÉO & SAGESSE…'),
@@ -688,7 +688,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
 
         const SizedBox(height: 14),
 
-        // ── THÈMES RAPIDES POUR INTERROGER LE VIEUX SAGE ───────────────────
+        // ── THÈMES RAPIDES POUR INTERROGER GRAND-MÈRE MAH ───────────────────
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -727,7 +727,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
 
         const SizedBox(height: 14),
 
-        // ── BARRE DE PAROLE ET MICROPHONE 1-CLIC (VIEUX SAGE) ──────────────
+        // ── BARRE DE PAROLE ET MICROPHONE 1-CLIC (GRAND-MÈRE MAH) ──────────────
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
@@ -759,7 +759,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
                         child: Text(
                           _liveSpokenWords.isNotEmpty
                               ? '« $_liveSpokenWords »'
-                              : 'Écoute en direct... Parlez au Vieux Sage, touchez pour envoyer',
+                              : 'Écoute en direct... Parlez à Grand-mère Mah, touchez pour envoyer',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -802,7 +802,7 @@ class _CulturePageState extends ConsumerState<CulturePage> {
                         decoration: InputDecoration(
                           hintText: _isListening
                               ? 'Transcription en direct...'
-                              : 'Pose une question au Vieux Sage...',
+                              : 'Pose une question à Grand-mère Mah...',
                           hintStyle: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             color: isDark

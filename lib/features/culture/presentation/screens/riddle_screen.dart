@@ -14,7 +14,7 @@ import '../widgets/culture_share_sheet.dart';
 import '../widgets/passport_stamp_toast.dart';
 import 'culture_main_screen.dart';
 
-/// Écran d'Expérience de Devinettes Traditionnelles (« Kôkô ! » — « N'sira ! »)
+/// Écran d'Expérience de Devinettes Traditionnelles 
 class RiddleScreen extends ConsumerStatefulWidget {
   final String? riddleId;
 
@@ -342,7 +342,7 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              _isSpeaking ? 'Le Griot parle...' : 'Écouter',
+                              _isSpeaking ? 'Grand-mère Mah parle...' : 'Écouter',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,

@@ -517,7 +517,7 @@ class _CultureSearchPageState extends ConsumerState<CultureSearchPage>
                   Row(
                     children: [
                       Text(
-                        'Discuter avec le Vieux Sage IA',
+                        'Discuter avec Grand-mère Mah',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,

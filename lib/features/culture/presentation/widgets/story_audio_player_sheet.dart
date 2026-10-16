@@ -469,7 +469,7 @@ class _StoryAudioPlayerSheetState extends ConsumerState<StoryAudioPlayerSheet>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Rythme du Griot :',
+                'Rythme de Grand-mère Mah :',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
