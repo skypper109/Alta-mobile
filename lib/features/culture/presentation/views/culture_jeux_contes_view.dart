@@ -351,38 +351,44 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
   }) {
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 13, color: color),
-              const SizedBox(width: 5),
-              Text(
-                title,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                  color: color,
-                ),
-              ),
-              if (count != null) ...[
+        Flexible(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 13, color: color),
                 const SizedBox(width: 5),
-                Text(
-                  '($count)',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: color,
+                Flexible(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                      color: color,
+                    ),
                   ),
                 ),
+                if (count != null) ...[
+                  const SizedBox(width: 5),
+                  Text(
+                    '($count)',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: color,
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
         const SizedBox(width: 10),
@@ -620,14 +626,14 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
             ),
           ),
 
-          // Pied de carte avec statistiques et action
+          // Pied de carte avec statistiques et action 100% RESPONSIVE SANS OVERFLOW
           Padding(
-            padding: const EdgeInsets.all(15),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               children: [
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                      const EdgeInsets.symmetric(horizontal: 7.5, vertical: 3.5),
                   decoration: BoxDecoration(
                     color: CultureTheme.accentOrange.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(6),
@@ -635,44 +641,54 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                   child: Text(
                     '+${featuredPack.xpReward} XP',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
+                      fontSize: 10.5,
                       fontWeight: FontWeight.w800,
                       color: CultureTheme.accentOrange,
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Text(
-                  '${featuredPack.questionsCount} questions • ~${featuredPack.timeMinutes} min',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w600,
-                    color: subtitleColor,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '${featuredPack.questionsCount} ques. • ~${featuredPack.timeMinutes} min',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: subtitleColor,
+                    ),
                   ),
                 ),
-                const Spacer(),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: CultureTheme.primaryBlue,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Relever le défi',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    context.push('/culture/quiz/${featuredPack.id}');
+                  },
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6.5),
+                    decoration: BoxDecoration(
+                      color: CultureTheme.primaryBlue,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Relever le défi',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.arrow_forward_rounded,
-                          size: 14, color: Colors.white),
-                    ],
+                        const SizedBox(width: 3),
+                        const Icon(Icons.arrow_forward_rounded,
+                            size: 13, color: Colors.white),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -683,7 +699,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     );
   }
 
-  // ── 4. GRILLE DE QUIZ DU SAVOIR (INTERACTIF) ───────────────────────────────
+  // ── 4. GRILLE DE QUIZ DU SAVOIR (INTERACTIF & RESPONSIVE) ───────────────────
   Widget _buildQuizGrid({
     required BuildContext context,
     required bool isDark,
@@ -700,26 +716,23 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
 
         return Container(
           margin: const EdgeInsets.only(bottom: 14),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: borderCol, width: 1.2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+          child: CulturalInteractiveCard(
+            padding: const EdgeInsets.all(14),
+            showSudaneseCorners: false,
+            activeAccentColor: color,
+            backgroundColor: cardBg,
+            borderColor: borderCol,
+            borderRadius: 18,
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              context.push('/culture/quiz/${pack.id}');
+            },
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: 46,
+                  height: 46,
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(14),
@@ -732,11 +745,11 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                     child: Icon(
                       pack.icon,
                       color: color,
-                      size: 24,
+                      size: 22,
                     ),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -782,6 +795,8 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                           fontWeight: FontWeight.w800,
                           color: titleColor,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -790,9 +805,14 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                           fontSize: 11,
                           color: subtitleColor,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 5),
-                      Row(
+                      const SizedBox(height: 6),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 6,
+                        runSpacing: 4,
                         children: [
                           Text(
                             '${pack.questionsCount} questions',
@@ -802,7 +822,6 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                               color: color,
                             ),
                           ),
-                          const SizedBox(width: 8),
                           Text(
                             '• ~${pack.timeMinutes} min',
                             style: GoogleFonts.plusJakartaSans(
@@ -811,7 +830,6 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                               color: subtitleColor,
                             ),
                           ),
-                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 1.5),
@@ -823,7 +841,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                             child: Text(
                               '+${pack.xpReward} XP',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10,
+                                fontSize: 9.5,
                                 fontWeight: FontWeight.w800,
                                 color: CultureTheme.accentOrange,
                               ),
@@ -834,10 +852,19 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.play_circle_fill_rounded,
-                  size: 28,
-                  color: color,
+                const SizedBox(width: 8),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.play_arrow_rounded,
+                    size: 22,
+                    color: color,
+                  ),
                 ),
               ],
             ),

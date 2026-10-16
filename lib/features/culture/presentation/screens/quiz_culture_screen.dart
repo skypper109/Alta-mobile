@@ -10,6 +10,7 @@ import '../../core/models/culture_challenge_models.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
+import '../widgets/cultural_content_share_sheet.dart';
 import '../widgets/passport_stamp_toast.dart';
 import 'culture_main_screen.dart';
 
@@ -34,6 +35,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
   int _score = 0;
   int _totalXpEarned = 0;
   bool _isCompleted = false;
+  bool _hasStarted = false;
 
   // Historique des réponses pour le bilan d'apprentissage
   final List<int?> _userAnswers = [];
@@ -58,7 +60,45 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
     _score = 0;
     _totalXpEarned = 0;
     _isCompleted = false;
+    _hasStarted = false;
     _userAnswers.clear();
+  }
+
+  CultureQuizPack? _getNextPack() {
+    final allPacks = MockCultureChallengesData.quizPacks;
+    final currentIdx = allPacks.indexWhere((p) => p.id == _pack.id);
+    if (currentIdx != -1 && currentIdx < allPacks.length - 1) {
+      return allPacks[currentIdx + 1];
+    }
+    return null;
+  }
+
+  void _loadSpecificPack(CultureQuizPack nextPack) {
+    CulturalHaptics.tabSwitch();
+    try {
+      VivienneTtsService.instance.stop();
+      _flutterTts.stop();
+    } catch (_) {}
+    setState(() {
+      _pack = nextPack;
+      _questions = _pack.questions;
+      _currentIndex = 0;
+      _selectedAnswerIndex = null;
+      _isAnswered = false;
+      _score = 0;
+      _totalXpEarned = 0;
+      _isCompleted = false;
+      _hasStarted = true;
+      _isSpeaking = false;
+      _userAnswers.clear();
+    });
+  }
+
+  void _startQuiz() {
+    CulturalHaptics.tabSwitch();
+    setState(() {
+      _hasStarted = true;
+    });
   }
 
   Future<void> _initTts() async {
@@ -126,11 +166,23 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
       _userAnswers.add(index);
       if (isCorrect) {
         _score++;
-        _totalXpEarned += _currentQuestion.xp;
         CulturalHaptics.stamp();
       } else {
         CulturalHaptics.cardRelease();
       }
+    });
+  }
+
+  void _skipQuestion() {
+    if (_isAnswered) return;
+    _flutterTts.stop();
+    setState(() => _isSpeaking = false);
+    CulturalHaptics.cardRelease();
+
+    setState(() {
+      _selectedAnswerIndex = -1;
+      _isAnswered = true;
+      _userAnswers.add(null);
     });
   }
 
@@ -188,6 +240,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
     _flutterTts.stop();
     setState(() {
       _loadQuizPack();
+      _hasStarted = true;
     });
   }
 
@@ -230,187 +283,604 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
                             CulturalHaptics.cardRelease();
                             VivienneTtsService.instance.stop();
                             _flutterTts.stop();
-                            if (context.canPop()) {
-                              context.pop();
+                            if (!_hasStarted || _isCompleted) {
+                              if (context.canPop()) {
+                                context.pop();
+                              } else {
+                                context.go('/culture');
+                              }
                             } else {
-                              context.go('/culture');
+                              setState(() {
+                                _hasStarted = false;
+                              });
                             }
                           },
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? CultureTheme.darkSurfaceAlt
-                                : const Color(0xFFF1F5F9),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: borderCol),
-                          ),
-                          child: Icon(
-                            Icons.arrow_back_rounded,
-                            size: 19,
-                            color: titleColor,
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? CultureTheme.darkSurfaceAlt
+                                  : const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: borderCol),
+                            ),
+                            child: Icon(
+                              Icons.arrow_back_rounded,
+                              size: 19,
+                              color: titleColor,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
+                        const SizedBox(width: 10),
 
-                      // Titre & Progression
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 7, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: _pack.themeColor.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    _pack.category.toUpperCase(),
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 9.5,
-                                      fontWeight: FontWeight.w800,
-                                      color: _pack.themeColor,
-                                      letterSpacing: 0.6,
+                        // Titre & Progression 100% RESPONSIVE
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: _pack.themeColor.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      _pack.category.toUpperCase(),
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w800,
+                                        color: _pack.themeColor,
+                                        letterSpacing: 0.5,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 6),
-                                Flexible(
-                                  child: Text(
-                                    _pack.title,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: subtitleColor,
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      _pack.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: subtitleColor,
+                                      ),
                                     ),
                                   ),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                !_hasStarted
+                                    ? 'Présentation du Défi'
+                                    : _isCompleted
+                                        ? 'Bilan & Sceau du Savoir'
+                                        : 'Question ${_currentIndex + 1} sur ${_questions.length}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: titleColor,
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              _isCompleted
-                                  ? 'Bilan & Sceau du Savoir'
-                                  : 'Question ${_currentIndex + 1} sur ${_questions.length}',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14.5,
-                                fontWeight: FontWeight.w800,
-                                color: titleColor,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Actions à droite : Partage (Intro) ou Audio + Score (En jeu)
+                        if (!_hasStarted) ...[
+                          GestureDetector(
+                            onTap: () {
+                              CulturalContentShareSheet.show(
+                                context: context,
+                                title: _pack.title,
+                                subtitle: _pack.subtitle,
+                                categoryTag: 'DÉFI DU SAVOIR MALIEN 🇲🇱',
+                                regionName: _pack.regionName,
+                                imageUrl: _pack.photoUrl,
+                                description: _pack.description,
+                                era: '${_pack.questionsCount} questions • ~${_pack.timeMinutes} min',
+                                keyFacts: [
+                                  'Questions : ${_pack.questionsCount}',
+                                  'Gain : +${_pack.xpReward} XP',
+                                  'Sceau : ${_pack.stampBadgeTitle}',
+                                  'Région : ${_pack.regionName}',
+                                ],
+                              );
+                            },
+                            child: Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? CultureTheme.darkSurfaceAlt
+                                    : const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(11),
+                                border: Border.all(color: borderCol),
+                              ),
+                              child: const Icon(
+                                Icons.share_rounded,
+                                size: 17,
+                                color: CultureTheme.accentOrange,
                               ),
                             ),
+                          ),
+                        ] else ...[
+                          // Bouton Audio Griot (TTS)
+                          if (!_isCompleted) ...[
+                            GestureDetector(
+                              onTap: _toggleTts,
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: _isSpeaking
+                                      ? CultureTheme.accentOrange
+                                      : CultureTheme.accentOrange.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(9),
+                                  border: Border.all(
+                                    color: CultureTheme.accentOrange,
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      _isSpeaking
+                                          ? Icons.volume_off_rounded
+                                          : Icons.volume_up_rounded,
+                                      size: 14,
+                                      color: _isSpeaking
+                                          ? Colors.white
+                                          : CultureTheme.accentOrange,
+                                    ),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      _isSpeaking ? 'Stop' : 'Voix',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w800,
+                                        color: _isSpeaking
+                                            ? Colors.white
+                                            : CultureTheme.accentOrange,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
                           ],
-                        ),
-                      ),
 
-                      // Bouton Audio Griot (TTS)
-                      if (!_isCompleted) ...[
-                        GestureDetector(
-                          onTap: _toggleTts,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
+                          // Badge Score Live
+                          Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 9, vertical: 7),
+                                horizontal: 8, vertical: 5),
                             decoration: BoxDecoration(
-                              color: _isSpeaking
-                                  ? CultureTheme.accentOrange
-                                  : CultureTheme.accentOrange.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(10),
+                              color: CultureTheme.primaryBlue.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(9),
                               border: Border.all(
-                                color: CultureTheme.accentOrange,
+                                color: CultureTheme.primaryBlue.withValues(alpha: 0.3),
                                 width: 1.0,
                               ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  _isSpeaking
-                                      ? Icons.volume_off_rounded
-                                      : Icons.volume_up_rounded,
-                                  size: 15,
-                                  color: _isSpeaking
-                                      ? Colors.white
-                                      : CultureTheme.accentOrange,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _isSpeaking ? 'Arrêter' : 'Voix',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w800,
-                                    color: _isSpeaking
-                                        ? Colors.white
-                                        : CultureTheme.accentOrange,
-                                  ),
-                                ),
-                              ],
+                            child: Text(
+                              '$_score/${_questions.length}',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: CultureTheme.primaryBlue,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
+                        ],
                       ],
+                    ),
 
-                      // Badge Score Live
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: CultureTheme.primaryBlue.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: CultureTheme.primaryBlue.withValues(alpha: 0.3),
-                            width: 1.0,
+                    // Barre de progression fluide
+                    if (_hasStarted && !_isCompleted) ...[
+                      const SizedBox(height: 10),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: (_currentIndex + 1) / _questions.length,
+                          minHeight: 4.5,
+                          backgroundColor:
+                              isDark ? Colors.white10 : const Color(0xFFE2E8F0),
+                          valueColor: AlwaysStoppedAnimation<Color>(_pack.themeColor),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              // ── 2. CORPS DU DÉFI (INTRO / QUESTIONS / BILAN) ──────────────────
+              Expanded(
+                child: !_hasStarted
+                    ? _buildIntroView(
+                        isDark, cardBg, borderCol, titleColor, subtitleColor)
+                    : _isCompleted
+                        ? _buildCompletedView(
+                            isDark, cardBg, borderCol, titleColor, subtitleColor)
+                        : _buildQuestionView(
+                            isDark, cardBg, borderCol, titleColor, subtitleColor),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── 2. VUE D'INTRODUCTION IMMERSIVE DU DÉFI ────────────────────────────────
+  Widget _buildIntroView(
+    bool isDark,
+    Color cardBg,
+    Color borderCol,
+    Color titleColor,
+    Color subtitleColor,
+  ) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Grande Photo Héroïque Immersive du Défi
+          ClipRRect(
+            borderRadius: BorderRadius.circular(22),
+            child: SizedBox(
+              height: 200,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(
+                    _pack.photoUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: _pack.themeColor,
+                      child: Icon(_pack.icon, color: Colors.white, size: 50),
+                    ),
+                  ),
+                  Container(
+                    color: Colors.black.withValues(alpha: 0.40),
+                  ),
+                  Positioned(
+                    top: 14,
+                    left: 14,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: _pack.themeColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star_rounded,
+                              size: 14, color: Colors.white),
+                          const SizedBox(width: 5),
+                          Text(
+                            _pack.category.toUpperCase(),
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 14,
+                    left: 16,
+                    right: 16,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _pack.title,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
                           ),
                         ),
+                        const SizedBox(height: 3),
+                        Text(
+                          _pack.subtitle,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12.5,
+                            color: Colors.white.withValues(alpha: 0.90),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // Grille des 4 caractéristiques du défi
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetricBadge(
+                  icon: Icons.quiz_rounded,
+                  label: '${_questions.length} Questions',
+                  caption: 'Parcours interactif',
+                  color: CultureTheme.primaryBlue,
+                  cardBg: cardBg,
+                  borderCol: borderCol,
+                  titleColor: titleColor,
+                  subtitleColor: subtitleColor,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildMetricBadge(
+                  icon: Icons.timer_outlined,
+                  label: '~${_pack.timeMinutes} Minutes',
+                  caption: 'Rythme serein',
+                  color: CultureTheme.accentOrange,
+                  cardBg: cardBg,
+                  borderCol: borderCol,
+                  titleColor: titleColor,
+                  subtitleColor: subtitleColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetricBadge(
+                  icon: Icons.bolt_rounded,
+                  label: '+${_pack.xpReward} XP',
+                  caption: 'Points de sagesse',
+                  color: CultureTheme.accentOrange,
+                  cardBg: cardBg,
+                  borderCol: borderCol,
+                  titleColor: titleColor,
+                  subtitleColor: subtitleColor,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildMetricBadge(
+                  icon: Icons.military_tech_rounded,
+                  label: 'Sceau Royal',
+                  caption: 'Gravé au Passeport',
+                  color: CultureTheme.cyanTurquoise,
+                  cardBg: cardBg,
+                  borderCol: borderCol,
+                  titleColor: titleColor,
+                  subtitleColor: subtitleColor,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Présentation narrative du défi
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: borderCol),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.auto_stories_rounded,
+                        size: 18, color: _pack.themeColor),
+                    const SizedBox(width: 8),
+                    Text(
+                      'AUX SOURCES DU SAVOIR',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.6,
+                        color: _pack.themeColor,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  _pack.description,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13.5,
+                    height: 1.5,
+                    color: titleColor,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: _pack.themeColor.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _pack.themeColor.withValues(alpha: 0.25),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.record_voice_over_rounded,
+                          size: 18, color: _pack.themeColor),
+                      const SizedBox(width: 10),
+                      Expanded(
                         child: Text(
-                          'Score : $_score/${_questions.length}',
+                          'Narration vocale du Griot disponible pour chaque question.',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11.5,
-                            fontWeight: FontWeight.w800,
-                            color: CultureTheme.primaryBlue,
+                            fontWeight: FontWeight.w600,
+                            color: titleColor,
                           ),
                         ),
                       ),
                     ],
                   ),
+                ),
+              ],
+            ),
+          ),
 
-                  // Barre de progression fluide
-                  if (!_isCompleted) ...[
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: (_currentIndex + 1) / _questions.length,
-                        minHeight: 4.5,
-                        backgroundColor:
-                            isDark ? Colors.white10 : const Color(0xFFE2E8F0),
-                        valueColor: AlwaysStoppedAnimation<Color>(_pack.themeColor),
-                      ),
-                    ),
-                  ],
-                ],
+          const SizedBox(height: 22),
+
+          // Bouton Commencer le Défi
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: CultureTheme.accentOrange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              onPressed: _startQuiz,
+              icon: const Icon(Icons.play_circle_fill_rounded,
+                  color: Colors.white, size: 22),
+              label: Text(
+                'Commencer le défi',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
               ),
             ),
+          ),
 
-            // ── 2. CORPS PRINCIPAL DU DÉFI ────────────────────────────────────
-            Expanded(
-              child: _isCompleted
-                  ? _buildCompletedView(
-                      isDark, cardBg, borderCol, titleColor, subtitleColor)
-                  : _buildQuestionView(
-                      isDark, cardBg, borderCol, titleColor, subtitleColor),
+          const SizedBox(height: 10),
+
+          // Bouton Partager le Défi
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                side: BorderSide(color: borderCol),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              onPressed: () {
+                CulturalContentShareSheet.show(
+                  context: context,
+                  title: _pack.title,
+                  subtitle: _pack.subtitle,
+                  categoryTag: 'DÉFI DU SAVOIR MALIEN 🇲🇱',
+                  regionName: _pack.regionName,
+                  imageUrl: _pack.photoUrl,
+                  description: _pack.description,
+                  era: '${_pack.questionsCount} questions • ~${_pack.timeMinutes} min',
+                  keyFacts: [
+                    'Questions : ${_pack.questionsCount}',
+                    'Gain : +${_pack.xpReward} XP',
+                    'Sceau : ${_pack.stampBadgeTitle}',
+                    'Région : ${_pack.regionName}',
+                  ],
+                );
+              },
+              icon: Icon(Icons.share_rounded, size: 17, color: titleColor),
+              label: Text(
+                'Partager ce défi',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: titleColor,
+                ),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ),
+    );
+  }
+
+  Widget _buildMetricBadge({
+    required IconData icon,
+    required String label,
+    required String caption,
+    required Color color,
+    required Color cardBg,
+    required Color borderCol,
+    required Color titleColor,
+    required Color subtitleColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderCol),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 17, color: color),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: titleColor,
+                  ),
+                ),
+                Text(
+                  caption,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    color: subtitleColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -630,6 +1100,54 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
             );
           }),
 
+          // ── Indication / Passer la question si non répondu ─────────────────
+          if (!_isAnswered) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              decoration: BoxDecoration(
+                color: isDark ? CultureTheme.darkSurfaceAlt : const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: borderCol),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.touch_app_rounded,
+                      size: 17, color: CultureTheme.accentOrange),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Touchez une réponse (A, B, C ou D) pour valider.',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: subtitleColor,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: _skipQuestion,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: CultureTheme.primaryBlue.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Passer',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: CultureTheme.primaryBlue,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           // ── Explication Pédagogique Immédiate ──────────────────────────────
           if (_isAnswered) ...[
             const SizedBox(height: 16),
@@ -740,6 +1258,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
   ) {
     final percentage = ((_score / _questions.length) * 100).toInt();
     final isMastery = percentage >= 70;
+    final nextPack = _getNextPack();
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -929,7 +1448,87 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
 
           const SizedBox(height: 24),
 
-          // Boutons d'Action : Rejouer / Retour aux Défis / Consulter Passeport
+          // Actions Majeures de Fin de Défi
+          // 1. Bouton Enchaîner sur le Défi suivant
+          if (nextPack != null) ...[
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: CultureTheme.accentOrange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                onPressed: () => _loadSpecificPack(nextPack),
+                icon: const Icon(Icons.arrow_forward_rounded,
+                    color: Colors.white, size: 20),
+                label: Text(
+                  'Défi suivant : ${nextPack.title}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // 2. Bouton Partager mon Sceau & Victoire avec design HD
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                side: BorderSide(
+                  color: CultureTheme.cyanTurquoise.withValues(alpha: 0.8),
+                  width: 1.4,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              onPressed: () {
+                CulturalContentShareSheet.show(
+                  context: context,
+                  title: _pack.title,
+                  subtitle: '${_pack.stampBadgeTitle} • $_score/${_questions.length} bonnes réponses',
+                  categoryTag: 'DÉFI DU SAVOIR MALIEN 🇲🇱',
+                  regionName: _pack.regionName,
+                  imageUrl: _pack.photoUrl,
+                  description:
+                      'J\'ai relevé le défi « ${_pack.title} » sur AlterniA et obtenu le ${_pack.stampBadgeTitle} avec un score de $_score/${_questions.length} ($percentage% de maîtrise) ! (+$_totalXpEarned XP de sagesse)',
+                  era: 'Score : $percentage% de maîtrise',
+                  keyFacts: [
+                    'Sceau : ${_pack.stampBadgeTitle}',
+                    'Score : $_score/${_questions.length} ($percentage%)',
+                    'XP gagnés : +$_totalXpEarned XP',
+                    'Région : ${_pack.regionName}',
+                  ],
+                );
+              },
+              icon: const Icon(Icons.share_rounded,
+                  size: 18, color: CultureTheme.cyanTurquoise),
+              label: Text(
+                'Partager mon Sceau & Score',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: CultureTheme.cyanTurquoise,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // 3. Boutons Rejouer & Retour aux Défis
           Row(
             children: [
               Expanded(
@@ -976,7 +1575,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
                   icon: const Icon(Icons.arrow_back_rounded,
                       size: 17, color: Colors.white),
                   label: Text(
-                    'Défis',
+                    'Tous les Défis',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
