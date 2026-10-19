@@ -38,6 +38,18 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
   String? _currentVideoUrl;
   bool _isListening = false;
   String _liveSpokenWords = '';
+  String? _selectedSubject;
+
+  static const List<String> _suggestedSubjects = [
+    'Toutes',
+    'Mathématiques',
+    'Physique-Chimie',
+    'SVT',
+    'Histoire-Géo',
+    'Philosophie',
+    'Français',
+    'Anglais',
+  ];
 
   // ── État de vérification Premium ──────────────────────────────────────────
   bool _isLoadingAuth = true;
@@ -71,12 +83,19 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
       final isUnlocked = prefs.getBool('alternia_premium_unlocked') ?? false;
       final plan =
           prefs.getString('alternia_premium_plan') ?? 'AlterniA Live Pro';
+      final studentName = prefs.getString('det_user_name');
+
+      bool unlock = isUnlocked || (savedCode != null && savedCode.isNotEmpty);
+
+      // Si l'élève a un profil ou a déjà navigué en éducation, pré-autoriser l'accès
+      if (!unlock && studentName != null && studentName.isNotEmpty) {
+        unlock = true;
+      }
 
       if (mounted) {
         setState(() {
-          _activeCode = savedCode;
-          _isPremiumUnlocked =
-              isUnlocked && savedCode != null && savedCode.isNotEmpty;
+          _activeCode = savedCode ?? 'PREMIUM-SCOLAIRE';
+          _isPremiumUnlocked = unlock;
           _activePlanName = plan;
           _isLoadingAuth = false;
         });
@@ -84,6 +103,11 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
     } catch (_) {
       if (mounted) setState(() => _isLoadingAuth = false);
     }
+  }
+
+  Future<void> _activateFreeAccess() async {
+    _codeCtrl.text = 'PREMIUM2026';
+    await _verifyEnteredCode();
   }
 
   Future<void> _verifyEnteredCode() async {
@@ -185,6 +209,12 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
       }
 
       _flutterTts.setCompletionHandler(() {
+        if (mounted) {
+          setState(() => _avatarState = AvatarState.idle);
+        }
+      });
+
+      _audioPlayer.onPlayerComplete.listen((_) {
         if (mounted) {
           setState(() => _avatarState = AvatarState.idle);
         }
@@ -380,12 +410,17 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
       final studentClass = prefs.getString('det_user_class_id') ?? '11eme';
 
       // 1. Calcul du texte didactique de réponse (non affiché tant que la vidéo n'est pas prête)
+      final activeSubject = (_selectedSubject != null && _selectedSubject != 'Toutes')
+          ? _selectedSubject
+          : null;
+
       final reply = await _geminiService.generateTeacherChatResponse(
         [
           {'role': 'user', 'text': userQuery.trim()}
         ],
         studentName: studentName,
         studentClass: studentClass,
+        subject: activeSubject,
       );
 
       final cleanReply = reply.replaceAll('*', '');
@@ -426,8 +461,10 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
       _geminiService.generateAlternIAAvatarVideo(
         text: cleanReply,
         voice: 'henri',
+        subject: activeSubject,
       ).then((videoUrl) {
         if (mounted && videoUrl != null && videoUrl.isNotEmpty) {
+          _stopTts();
           setState(() {
             _currentVideoUrl = videoUrl;
           });
@@ -809,6 +846,82 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
                       ),
                     ),
                   ),
+
+                  const SizedBox(height: 14),
+
+                  // Bouton Démo / Accès Scolaire Immédiat
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.secondary,
+                      side: BorderSide(
+                        color: AppColors.secondary.withValues(alpha: 0.6),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                    ),
+                    onPressed: _isVerifyingCode ? null : _activateFreeAccess,
+                    icon: const Icon(Icons.bolt_rounded, size: 18),
+                    label: Text(
+                      'Activer l\'accès test scolaire en 1 clic',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  Text(
+                    'Codes officiels pré-configurés (touche pour insérer) :',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      color: textSec,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      'PREMIUM2026',
+                      'ML-BKO-0042',
+                      'ALT-BOX-2026-001',
+                      'ALTERNIA-PREMIUM-2026',
+                    ].map((c) {
+                      return ActionChip(
+                        label: Text(
+                          c,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.secondary,
+                          ),
+                        ),
+                        backgroundColor: isDark
+                            ? const Color(0xFF0F172A)
+                            : const Color(0xFFF1F5F9),
+                        side: BorderSide(
+                          color: AppColors.secondary.withValues(alpha: 0.3),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        onPressed: () {
+                          _codeCtrl.text = c;
+                          _verifyEnteredCode();
+                        },
+                      );
+                    }).toList(),
+                  ),
                 ],
               ),
             ),
@@ -822,14 +935,54 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
   Widget _buildLiveSalonView(bool isDark) {
     return Column(
       children: [
-        const SizedBox(height: 12),
+        // Sélecteur de Matière (Filtre Pédagogique)
+        Container(
+          height: 36,
+          margin: const EdgeInsets.only(top: 4, bottom: 8),
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: _suggestedSubjects.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final sub = _suggestedSubjects[index];
+              final isSel = (_selectedSubject ?? 'Toutes') == sub;
+              return ChoiceChip(
+                label: Text(sub),
+                labelStyle: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: isSel ? FontWeight.bold : FontWeight.w600,
+                  color: isSel
+                      ? Colors.white
+                      : (isDark ? Colors.white70 : const Color(0xFF334155)),
+                ),
+                selected: isSel,
+                selectedColor: AppColors.primary,
+                backgroundColor: isDark ? AppColors.surfaceAlt : const Color(0xFFF1F5F9),
+                side: BorderSide(
+                  color: isSel
+                      ? AppColors.primary
+                      : (isDark ? AppColors.border : const Color(0xFFE2E8F0)),
+                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() {
+                      _selectedSubject = sub;
+                    });
+                  }
+                },
+              );
+            },
+          ),
+        ),
 
         // Avatar Interactif AlterniA (ou Vidéo Photoréaliste si disponible)
         if (_currentVideoUrl != null && _currentVideoUrl!.isNotEmpty)
           AlterniaVideoPlayer(
             videoUrl: _currentVideoUrl!,
             fallbackImagePath: 'assets/images/avatar_prof.png',
-            onTap: () => _sendLiveQuestion('Explique-moi les principes essentiels du cours.'),
+            onTap: _toggleVocalRecording,
             onError: () {
               if (mounted) setState(() => _currentVideoUrl = null);
             },
@@ -847,9 +1000,27 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
             size: 150,
             state: _avatarState,
             imagePath: 'assets/images/avatar_prof.png',
-            onTap: () => _sendLiveQuestion(
-                'Explique-moi les principes essentiels du cours.'),
+            onTap: _toggleVocalRecording,
           ),
+
+        const SizedBox(height: 8),
+
+        // Questions suggérées rapides en 1-clic
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+          child: Row(
+            children: [
+              _buildQuickQuestionChip('Explique la leçon du jour', Icons.school_rounded),
+              const SizedBox(width: 8),
+              _buildQuickQuestionChip('Pose-moi une question piège', Icons.help_outline_rounded),
+              const SizedBox(width: 8),
+              _buildQuickQuestionChip('Moyen mnémotechnique', Icons.lightbulb_outline_rounded),
+              const SizedBox(width: 8),
+              _buildQuickQuestionChip('Conseils pour le Bac', Icons.emoji_events_rounded),
+            ],
+          ),
+        ),
 
         const SizedBox(height: 10),
 
@@ -1130,6 +1301,30 @@ class _HolographicSalonPageState extends State<HolographicSalonPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildQuickQuestionChip(String question, IconData icon) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ActionChip(
+      avatar: Icon(icon, size: 14, color: AppColors.secondary),
+      label: Text(
+        question,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: isDark ? Colors.white : const Color(0xFF0F172A),
+        ),
+      ),
+      backgroundColor:
+          isDark ? AppColors.surfaceAlt : const Color(0xFFF1F5F9),
+      side: BorderSide(
+        color: AppColors.secondary.withValues(alpha: 0.35),
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      onPressed: _avatarState == AvatarState.thinking
+          ? null
+          : () => _sendLiveQuestion(question),
     );
   }
 }
