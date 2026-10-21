@@ -198,6 +198,7 @@ class _HistoricalFigureDetailScreenState
     final borderCol =
         isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
     final topPadding = MediaQuery.paddingOf(context).top;
+    final hPad = CultureResponsive.horizontalPadding(context);
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
@@ -229,9 +230,13 @@ class _HistoricalFigureDetailScreenState
 
                 // ── 2. CORPS ÉDITORIAL & ÉPOPÉE INTERACTIVE ───────────────────
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
+                  padding: EdgeInsets.fromLTRB(hPad, 20, hPad, 40),
+                  sliver: SliverToBoxAdapter(
+                    child: CultureResponsive.constrainedCentered(
+                      maxWidth: CultureResponsive.kMaxDetailWidth,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                       // Contexte régional transversal si actif
                       if (activeRegion != null) ...[
                         Row(
@@ -424,19 +429,23 @@ class _HistoricalFigureDetailScreenState
                         items: item.connectedItems,
                         title: 'Patrimoine & Figures Liés',
                       ),
-                    ]),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
+          ],
+        ),
 
-            // ── HEADER UNIQUE FIGÉ EN HAUT (AUCUNE DUPLICATION) ───────────────
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
+        // ── HEADER UNIQUE FIGÉ EN HAUT (AUCUNE DUPLICATION) ───────────────
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: CultureResponsive.constrainedCentered(
+            maxWidth: CultureResponsive.kMaxDetailWidth,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
                 padding: EdgeInsets.only(
                   top: topPadding > 0 ? topPadding + 6 : 14,
                   bottom: 10,
@@ -593,6 +602,7 @@ class _HistoricalFigureDetailScreenState
                 ),
               ),
             ),
+          ),
           ],
         ),
       ),

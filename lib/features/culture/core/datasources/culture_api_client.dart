@@ -324,4 +324,74 @@ class CultureApiClient {
     }
     return [];
   }
+
+  /// Soumet une contribution citoyenne au patrimoine culturel (couvre les 6 univers)
+  Future<Map<String, dynamic>?> submitContribution(Map<String, dynamic> payload) async {
+    try {
+      final res = await _dio.post(
+        '$_activeBaseUrl/api/v1/culture/contributions',
+        data: payload,
+      );
+      if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
+        return res.data as Map<String, dynamic>;
+      }
+    } catch (e) {
+      _logger.e('Erreur lors de la soumission de la contribution: $e');
+    }
+    return null;
+  }
+
+  /// Récupère la liste des contributions
+  Future<List<Map<String, dynamic>>> fetchContributions({
+    String? statut,
+    String? typeContenu,
+    String? auteurId,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (statut != null) queryParams['statut'] = statut;
+      if (typeContenu != null) queryParams['type_contenu'] = typeContenu;
+      if (auteurId != null) queryParams['auteur_id'] = auteurId;
+
+      final res = await _dio.get(
+        '$_activeBaseUrl/api/v1/culture/contributions',
+        queryParameters: queryParams,
+      );
+      if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
+        final items = (res.data as Map<String, dynamic>)['items'];
+        if (items is List) {
+          return items.whereType<Map<String, dynamic>>().toList();
+        }
+      }
+    } catch (_) {
+      _logger.d('CultureApiClient.fetchContributions -> utilisation locale');
+    }
+    return [];
+  }
+
+  /// Modère une contribution (APPROUVE / REJETE)
+  Future<Map<String, dynamic>?> moderateContribution(
+    String contributionId,
+    String decision, {
+    String? motif,
+    String? adminId,
+  }) async {
+    try {
+      final res = await _dio.post(
+        '$_activeBaseUrl/api/v1/culture/contributions/$contributionId/decision',
+        data: {
+          'decision': decision,
+          'motif': motif,
+          'admin_id': adminId,
+        },
+      );
+      if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
+        return res.data as Map<String, dynamic>;
+      }
+    } catch (e) {
+      _logger.e('Erreur lors de la modération de la contribution: $e');
+    }
+    return null;
+  }
 }
+

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+export 'culture_responsive.dart';
+
 /// Palette culturelle officielle AlterniA & Mali
 /// STRICTEMENT SANS DÉGRADÉS selon les règles d'architecture UX/UI
 abstract final class CultureTheme {

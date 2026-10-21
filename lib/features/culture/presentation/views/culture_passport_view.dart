@@ -88,16 +88,28 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
           .toList();
     }
 
+    final hPad = CultureResponsive.horizontalPadding(context);
+    final isTablet = CultureResponsive.isTablet(context);
+
     return CulturalAtmosphereCanvas(
       enableParticles: true,
       enableBogolanMotifs: true,
       motifOpacity: 0.11,
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      child: RefreshIndicator(
+        color: CultureTheme.accentOrange,
+        onRefresh: () async {
+          await ref.read(culturePassportProvider.notifier).syncWithBackend();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          padding: EdgeInsets.fromLTRB(hPad, 10, hPad, 36),
+          child: CultureResponsive.constrainedCentered(
+            maxWidth: CultureResponsive.kMaxContentWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
             // ── OPTIONNEL : BOUTON RETOUR QUAND OUVERT EN STANDALONE ──────────
             if (widget.showBackButton) ...[
               Row(
@@ -219,7 +231,8 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                   _buildFilterPills(isDark, surfaceAlt, borderCol),
                   const SizedBox(height: 16),
                   _buildDiscoveriesGrid(context, displayedEntries, isDark,
-                      surfaceAlt, subtitleColor),
+                      surfaceAlt, subtitleColor,
+                      isTablet: isTablet),
                 ],
               ),
             ),
@@ -254,8 +267,10 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
           ],
         ),
       ),
-    );
-  }
+    ),
+    ),
+  );
+}
 
   // ── TITRE DE SECTION AVEC LIGNE SÉPARATRICE ─────────────────────────────────
   Widget _buildSectionTitle(String title, IconData icon, Color borderCol) {
@@ -801,71 +816,74 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
 
   // ── 4. PILULES DE FILTRE DE LA COLLECTION ──────────────────────────────────
   Widget _buildFilterPills(bool isDark, Color surfaceAlt, Color borderCol) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        children: List.generate(_filters.length, (index) {
-          final isSelected = _selectedFilterIndex == index;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () {
-                CulturalHaptics.tabSwitch();
-                setState(() {
-                  _selectedFilterIndex = index;
-                });
-              },
-              child: AnimatedScale(
-                scale: isSelected ? 1.04 : 1.0,
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeOutBack,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? CultureTheme.accentOrange
-                        : (isDark
-                            ? CultureTheme.darkSurface
-                            : Colors.white),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected ? CultureTheme.accentOrange : borderCol,
+    return Center(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(_filters.length, (index) {
+            final isSelected = _selectedFilterIndex == index;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: GestureDetector(
+                onTap: () {
+                  CulturalHaptics.tabSwitch();
+                  setState(() {
+                    _selectedFilterIndex = index;
+                  });
+                },
+                child: AnimatedScale(
+                  scale: isSelected ? 1.04 : 1.0,
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOutBack,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? CultureTheme.accentOrange
+                          : (isDark
+                              ? CultureTheme.darkSurface
+                              : Colors.white),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected ? CultureTheme.accentOrange : borderCol,
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        index < _filterIcons.length
-                            ? _filterIcons[index]
-                            : Icons.category_rounded,
-                        size: 13,
-                        color: isSelected ? Colors.white : CultureTheme.accentOrange,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        _filters[index],
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          fontWeight:
-                              isSelected ? FontWeight.w700 : FontWeight.w600,
-                          color: isSelected
-                              ? Colors.white
-                              : (isDark
-                                  ? const Color(0xFF94A3B8)
-                                  : const Color(0xFF64748B)),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          index < _filterIcons.length
+                              ? _filterIcons[index]
+                              : Icons.category_rounded,
+                          size: 13,
+                          color: isSelected ? Colors.white : CultureTheme.accentOrange,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 5),
+                        Text(
+                          _filters[index],
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w600,
+                            color: isSelected
+                                ? Colors.white
+                                : (isDark
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF64748B)),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }
@@ -876,8 +894,9 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     List<PassportEntry> entries,
     bool isDark,
     Color surfaceAlt,
-    Color subtitleColor,
-  ) {
+    Color subtitleColor, {
+    bool isTablet = false,
+  }) {
     if (entries.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(30),
@@ -901,6 +920,27 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
             ),
           ],
         ),
+      );
+    }
+
+    if (isTablet) {
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: entries.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 14,
+          mainAxisSpacing: 12,
+          childAspectRatio: 3.3,
+        ),
+        itemBuilder: (context, index) {
+          return AnimatedCulturalReveal(
+            key: ValueKey('passport_entry_${_selectedFilterIndex}_${entries[index].id}'),
+            delay: Duration(milliseconds: 40 * (index % 8)),
+            child: PassportItemCard(entry: entries[index]),
+          );
+        },
       );
     }
 

@@ -1135,6 +1135,16 @@ class ProfileScreen extends ConsumerWidget {
 
           // ── SECTION SERVICES & MONÉTISATION ────────────────────────────
           _ProfileNavTile(
+            title: 'Carnet de Suivi & Compétences',
+            subtitle: 'Parcours d\'apprentissage, radars de maîtrise & historique',
+            icon: Icons.insights_rounded,
+            color: const Color(0xFF40BBCC),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              context.push('/progress');
+            },
+          ),
+          _ProfileNavTile(
             title: 'Portefeuille & Retraits Mobile Money',
             subtitle: 'Gérer vos pièces, historique et retraits en FCFA',
             icon: Icons.account_balance_wallet_rounded,

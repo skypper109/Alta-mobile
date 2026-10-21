@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../datasources/culture_repository.dart';
+import '../models/culture_challenge_models.dart';
 import '../models/culture_detail_models.dart';
 import '../models/culture_item.dart';
+import '../models/culture_proverb_models.dart';
+import '../models/culture_story_models.dart';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // PROVIDERS DE DONNÉES CULTURELLES ALIMENTÉS PAR LA BASE DE DONNÉES CENTRALE
@@ -61,3 +64,57 @@ final placeDetailProvider = FutureProvider.family<PlaceDetail?, String>((ref, id
   final repo = ref.watch(cultureRepositoryProvider);
   return repo.getPlaceDetail(id);
 });
+
+/// Filtres de requêtes pour les contributions culturelles
+class ContributionFilter {
+  final String? statut;
+  final String? typeContenu;
+  final String? auteurId;
+
+  const ContributionFilter({this.statut, this.typeContenu, this.auteurId});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ContributionFilter &&
+          runtimeType == other.runtimeType &&
+          statut == other.statut &&
+          typeContenu == other.typeContenu &&
+          auteurId == other.auteurId;
+
+  @override
+  int get hashCode => Object.hash(statut, typeContenu, auteurId);
+}
+
+/// Provider asynchrone des contributions citoyennes au patrimoine
+final culturalContributionsProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, ContributionFilter>((ref, filter) async {
+  final repo = ref.watch(cultureRepositoryProvider);
+  return repo.getContributions(
+    statut: filter.statut,
+    typeContenu: filter.typeContenu,
+    auteurId: filter.auteurId,
+  );
+});
+
+/// Provider asynchrone des Contes interactifs complets (connecté au backend)
+final dynamicInteractiveStoriesProvider =
+    FutureProvider.family<List<InteractiveStory>, String?>((ref, regionId) async {
+  final repo = ref.watch(cultureRepositoryProvider);
+  return repo.getInteractiveStories(regionId: regionId);
+});
+
+/// Provider asynchrone des Proverbes et Sagesses (connecté au backend)
+final dynamicProverbsProvider =
+    FutureProvider.family<List<CultureProverb>, String?>((ref, regionId) async {
+  final repo = ref.watch(cultureRepositoryProvider);
+  return repo.getProverbs(regionId: regionId);
+});
+
+/// Provider asynchrone des Devinettes du Mali (connecté au backend)
+final dynamicRiddlesProvider =
+    FutureProvider.family<List<CultureRiddle>, String?>((ref, regionId) async {
+  final repo = ref.watch(cultureRepositoryProvider);
+  return repo.getRiddles(regionId: regionId);
+});
+

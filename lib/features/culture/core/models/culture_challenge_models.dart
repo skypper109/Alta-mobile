@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 /// Devinette traditionnelle malienne (« Kôkô ! » — « N'sira ! »)
+typedef CultureRiddle = TraditionalRiddle;
+
 class TraditionalRiddle {
   final String id;
   final String formulaIntro; // Ex: "« Kôkô ! » — « N'sira ! »"

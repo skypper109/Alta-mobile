@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/vivienne_tts_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_challenges_data.dart';
 import '../../core/datasources/mock_culture_proverbs_data.dart';
@@ -107,17 +108,23 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     final borderCol =
         isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
-    // Données filtrées par région
-    final filteredStories = MockCultureStoriesData.getFiltered(
-      regionId: activeRegion?.id,
-    );
-    final filteredRiddles = MockCultureChallengesData.getFilteredRiddles(
-      regionId: activeRegion?.id,
-    );
-    final filteredProverbs = MockCultureProverbsData.getFiltered(
-      regionId: activeRegion?.id,
-    );
-    final featuredProverb = MockCultureProverbsData.featuredProverb;
+    // Données réelles issues du backend (avec repli local certifié)
+    final storiesAsync = ref.watch(dynamicInteractiveStoriesProvider(activeRegion?.id));
+    final proverbsAsync = ref.watch(dynamicProverbsProvider(activeRegion?.id));
+    final riddlesAsync = ref.watch(dynamicRiddlesProvider(activeRegion?.id));
+
+    final filteredStories = storiesAsync.valueOrNull ??
+        MockCultureStoriesData.getFiltered(regionId: activeRegion?.id);
+    final filteredRiddles = riddlesAsync.valueOrNull ??
+        MockCultureChallengesData.getFilteredRiddles(regionId: activeRegion?.id);
+    final filteredProverbs = proverbsAsync.valueOrNull ??
+        MockCultureProverbsData.getFiltered(regionId: activeRegion?.id);
+    final featuredProverb = filteredProverbs.isNotEmpty
+        ? filteredProverbs.first
+        : MockCultureProverbsData.featuredProverb;
+
+    final hPad = CultureResponsive.horizontalPadding(context);
+    final isTablet = CultureResponsive.isTablet(context);
 
     return CulturalAtmosphereCanvas(
       enableParticles: true,
@@ -125,16 +132,20 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
       motifOpacity: 0.11,
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 36),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── 1. SÉLECTEUR D'UNIVERS INTERACTIF ──────────────────────────────
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                children: List.generate(_filters.length, (index) {
+        padding: EdgeInsets.fromLTRB(hPad, 14, hPad, 36),
+        child: CultureResponsive.constrainedCentered(
+          maxWidth: CultureResponsive.kMaxContentWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── 1. SÉLECTEUR D'UNIVERS INTERACTIF ──────────────────────────────
+              Center(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(_filters.length, (index) {
                   final isSelected = _selectedFilterIndex == index;
                   final activeCol = _getFilterColor(index);
 
@@ -191,6 +202,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                 }),
               ),
             ),
+          ),
 
             const SizedBox(height: 18),
 
@@ -215,21 +227,49 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
               ),
               const SizedBox(height: 14),
 
-              ...filteredStories.map((story) {
-                final index = filteredStories.indexOf(story);
-                return AnimatedCulturalReveal(
-                  delay: Duration(milliseconds: 60 * index),
-                  child: _buildStoryRowItem(
-                    story: story,
-                    context: context,
-                    isDark: isDark,
-                    cardBg: cardBg,
-                    borderCol: borderCol,
-                    titleColor: titleColor,
-                    subtitleColor: subtitleColor,
+              if (isTablet)
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: filteredStories.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 14,
+                    childAspectRatio: 2.85,
                   ),
-                );
-              }),
+                  itemBuilder: (ctx, index) {
+                    final story = filteredStories[index];
+                    return AnimatedCulturalReveal(
+                      delay: Duration(milliseconds: 60 * index),
+                      child: _buildStoryRowItem(
+                        story: story,
+                        context: context,
+                        isDark: isDark,
+                        cardBg: cardBg,
+                        borderCol: borderCol,
+                        titleColor: titleColor,
+                        subtitleColor: subtitleColor,
+                      ),
+                    );
+                  },
+                )
+              else
+                ...filteredStories.map((story) {
+                  final index = filteredStories.indexOf(story);
+                  return AnimatedCulturalReveal(
+                    delay: Duration(milliseconds: 60 * index),
+                    child: _buildStoryRowItem(
+                      story: story,
+                      context: context,
+                      isDark: isDark,
+                      cardBg: cardBg,
+                      borderCol: borderCol,
+                      titleColor: titleColor,
+                      subtitleColor: subtitleColor,
+                    ),
+                  );
+                }),
               const SizedBox(height: 20),
             ],
 
@@ -305,6 +345,82 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
               const SizedBox(height: 20),
             ],
 
+            const SizedBox(height: 10),
+
+            // Bannière de contribution participative Contes & Sagesses
+            GestureDetector(
+              onTap: () {
+                final catId = _selectedFilterIndex == 0
+                    ? 'conte'
+                    : (_selectedFilterIndex == 1
+                        ? 'devinette'
+                        : (_selectedFilterIndex == 3 ? 'proverbe' : 'conte'));
+                context.push('/culture/contribuer?cat=$catId');
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.35),
+                    width: 1.2,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.add_circle_outline_rounded,
+                        color: Color(0xFF10B981),
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _selectedFilterIndex == 0
+                                ? 'Connaissez-vous un conte traditionnel ?'
+                                : (_selectedFilterIndex == 1
+                                    ? 'Avez-vous une énigme ou devinette ?'
+                                    : 'Partagez un proverbe ou une maxime'),
+                            style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: titleColor,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Enrichissez l\'arbre à palabres (+50 XP, +25 Pièces)',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: subtitleColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: Color(0xFF10B981),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
             // Footer Logo Culture avec "iA" en jaune !
             const Center(
               child: Opacity(
@@ -320,8 +436,9 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   // ── EN-TÊTE DE SECTION AVEC COMPTEUR ────────────────────────────────────────
   Widget _buildSectionHeader({
@@ -691,166 +808,185 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     required Color subtitleColor,
   }) {
     final packs = MockCultureChallengesData.quizPacks;
+    final isTablet = CultureResponsive.isTablet(context);
 
-    return Column(
-      children: packs.map((pack) {
-        final color = pack.themeColor;
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 14),
-          child: CulturalInteractiveCard(
-            padding: const EdgeInsets.all(14),
-            showSudaneseCorners: false,
-            activeAccentColor: color,
-            backgroundColor: cardBg,
-            borderColor: borderCol,
-            borderRadius: 18,
-            onTap: () {
-              HapticFeedback.mediumImpact();
-              context.push('/culture/quiz/${pack.id}');
-            },
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: color.withValues(alpha: 0.3),
-                      width: 1.0,
-                    ),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      pack.icon,
-                      color: color,
-                      size: 22,
-                    ),
-                  ),
+    Widget buildPackCard(CultureQuizPack pack) {
+      final color = pack.themeColor;
+      return CulturalInteractiveCard(
+        padding: const EdgeInsets.all(14),
+        showSudaneseCorners: false,
+        activeAccentColor: color,
+        backgroundColor: cardBg,
+        borderColor: borderCol,
+        borderRadius: 18,
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push('/culture/quiz/${pack.id}');
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.3),
+                  width: 1.0,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+              child: Center(
+                child: Icon(
+                  pack.icon,
+                  color: color,
+                  size: 22,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 1.5),
-                            decoration: BoxDecoration(
-                              color: color.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Text(
-                              pack.category.toUpperCase(),
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w800,
-                                color: color,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              pack.regionName,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: subtitleColor,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        pack.title,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w800,
-                          color: titleColor,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(5),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        pack.subtitle,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          color: subtitleColor,
+                        child: Text(
+                          pack.category.toUpperCase(),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: color,
+                          ),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 6),
-                      Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 6,
-                        runSpacing: 4,
-                        children: [
-                          Text(
-                            '${pack.questionsCount} questions',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w600,
-                              color: color,
-                            ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          pack.regionName,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: subtitleColor,
                           ),
-                          Text(
-                            '• ~${pack.timeMinutes} min',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w500,
-                              color: subtitleColor,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 1.5),
-                            decoration: BoxDecoration(
-                              color: CultureTheme.accentOrange
-                                  .withValues(alpha: 0.14),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Text(
-                              '+${pack.xpReward} XP',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w800,
-                                color: CultureTheme.accentOrange,
-                              ),
-                            ),
-                          ),
-                        ],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
+                  const SizedBox(height: 4),
+                  Text(
+                    pack.title,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      color: titleColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  child: Icon(
-                    Icons.play_arrow_rounded,
-                    size: 22,
-                    color: color,
+                  const SizedBox(height: 2),
+                  Text(
+                    pack.subtitle,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      color: subtitleColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      Text(
+                        '${pack.questionsCount} questions',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                          color: color,
+                        ),
+                      ),
+                      Text(
+                        '• ~${pack.timeMinutes} min',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w500,
+                          color: subtitleColor,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: CultureTheme.accentOrange
+                              .withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Text(
+                          '+${pack.xpReward} XP',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            color: CultureTheme.accentOrange,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
+            const SizedBox(width: 8),
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.play_arrow_rounded,
+                size: 22,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (isTablet) {
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: packs.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 14,
+          mainAxisSpacing: 14,
+          childAspectRatio: 2.85,
+        ),
+        itemBuilder: (ctx, index) => buildPackCard(packs[index]),
+      );
+    }
+
+    return Column(
+      children: packs.map((pack) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 14),
+          child: buildPackCard(pack),
         );
       }).toList(),
     );
@@ -866,6 +1002,164 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     required Color titleColor,
     required Color subtitleColor,
   }) {
+    final isTablet = CultureResponsive.isTablet(context);
+
+    Widget buildRiddleCard(TraditionalRiddle riddle, int index) {
+      return CulturalInteractiveCard(
+        padding: const EdgeInsets.all(16),
+        showSudaneseCorners: true,
+        activeAccentColor: CultureTheme.accentOrange,
+        backgroundColor: cardBg,
+        borderRadius: 18,
+        onTap: () {
+          context.push('/culture/devinette/${riddle.id}', extra: riddle);
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 3.5),
+                  decoration: BoxDecoration(
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: CultureTheme.accentOrange
+                          .withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Text(
+                    'FORMULE TRADITIONNELLE',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w800,
+                      color: CultureTheme.accentOrange,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 7, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: CultureTheme.cyanTurquoise
+                        .withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '+${riddle.xpReward} XP',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: CultureTheme.cyanTurquoise,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              '« ${riddle.riddleText} »',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                height: 1.35,
+                color: titleColor,
+              ),
+            ),
+            const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    riddle.regionName,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: subtitleColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Row(
+                  children: [
+                    // Bouton Partager interactif
+                    TextButton.icon(
+                      onPressed: () {
+                        CultureShareSheet.show(
+                          context: context,
+                          riddle: riddle,
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.share_rounded,
+                        size: 13,
+                        color: CultureTheme.accentOrange,
+                      ),
+                      label: Text(
+                        'Partager',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: CultureTheme.accentOrange,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Trouver la réponse',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: CultureTheme.accentOrange,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 13,
+                      color: CultureTheme.accentOrange,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (isTablet) {
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: riddles.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 14,
+          mainAxisSpacing: 14,
+          childAspectRatio: 2.3,
+        ),
+        itemBuilder: (ctx, index) {
+          return AnimatedCulturalReveal(
+            delay: Duration(milliseconds: 60 * index),
+            child: buildRiddleCard(riddles[index], index),
+          );
+        },
+      );
+    }
+
     return Column(
       children: riddles.map((riddle) {
         final index = riddles.indexOf(riddle);
@@ -873,136 +1167,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
           delay: Duration(milliseconds: 60 * index),
           child: Container(
             margin: const EdgeInsets.only(bottom: 12),
-            child: CulturalInteractiveCard(
-              padding: const EdgeInsets.all(16),
-              showSudaneseCorners: true,
-              activeAccentColor: CultureTheme.accentOrange,
-              backgroundColor: cardBg,
-              borderRadius: 18,
-              onTap: () {
-                context.push('/culture/devinette/${riddle.id}', extra: riddle);
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3.5),
-                        decoration: BoxDecoration(
-                          color:
-                              CultureTheme.accentOrange.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: CultureTheme.accentOrange
-                                .withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Text(
-                          'FORMULE TRADITIONNELLE',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w800,
-                            color: CultureTheme.accentOrange,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: CultureTheme.cyanTurquoise
-                              .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          '+${riddle.xpReward} XP',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: CultureTheme.cyanTurquoise,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    '« ${riddle.riddleText} »',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      height: 1.35,
-                      color: titleColor,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        riddle.regionName,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: subtitleColor,
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          // Bouton Partager interactif
-                          TextButton.icon(
-                            onPressed: () {
-                              CultureShareSheet.show(
-                                context: context,
-                                riddle: riddle,
-                              );
-                            },
-                            icon: const Icon(
-                              Icons.share_rounded,
-                              size: 13,
-                              color: CultureTheme.accentOrange,
-                            ),
-                            label: Text(
-                              'Partager',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: CultureTheme.accentOrange,
-                              ),
-                            ),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Trouver la réponse',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: CultureTheme.accentOrange,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.arrow_forward_rounded,
-                            size: 13,
-                            color: CultureTheme.accentOrange,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            child: buildRiddleCard(riddle, index),
           ),
         );
       }).toList(),
@@ -1048,21 +1213,49 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
         ),
         const SizedBox(height: 14),
 
-        ...proverbs.map((proverb) {
-          final index = proverbs.indexOf(proverb);
-          return AnimatedCulturalReveal(
-            delay: Duration(milliseconds: 50 * index),
-            child: _buildProverbRowItem(
-              proverb: proverb,
-              context: context,
-              isDark: isDark,
-              cardBg: cardBg,
-              borderCol: borderCol,
-              titleColor: titleColor,
-              subtitleColor: subtitleColor,
+        if (CultureResponsive.isTablet(context))
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: proverbs.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 14,
+              mainAxisSpacing: 14,
+              childAspectRatio: 2.85,
             ),
-          );
-        }),
+            itemBuilder: (ctx, index) {
+              final proverb = proverbs[index];
+              return AnimatedCulturalReveal(
+                delay: Duration(milliseconds: 50 * index),
+                child: _buildProverbRowItem(
+                  proverb: proverb,
+                  context: context,
+                  isDark: isDark,
+                  cardBg: cardBg,
+                  borderCol: borderCol,
+                  titleColor: titleColor,
+                  subtitleColor: subtitleColor,
+                ),
+              );
+            },
+          )
+        else
+          ...proverbs.map((proverb) {
+            final index = proverbs.indexOf(proverb);
+            return AnimatedCulturalReveal(
+              delay: Duration(milliseconds: 50 * index),
+              child: _buildProverbRowItem(
+                proverb: proverb,
+                context: context,
+                isDark: isDark,
+                cardBg: cardBg,
+                borderCol: borderCol,
+                titleColor: titleColor,
+                subtitleColor: subtitleColor,
+              ),
+            );
+          }),
       ],
     );
   }

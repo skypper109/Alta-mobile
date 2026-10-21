@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/datasources/mock_culture_challenges_data.dart';
@@ -30,9 +31,9 @@ class CultureDefisView extends ConsumerWidget {
     final borderCol =
         isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
-    final filteredRiddles = MockCultureChallengesData.getFilteredRiddles(
-      regionId: activeRegion?.id,
-    );
+    final riddlesAsync = ref.watch(dynamicRiddlesProvider(activeRegion?.id));
+    final filteredRiddles = riddlesAsync.valueOrNull ??
+        MockCultureChallengesData.getFilteredRiddles(regionId: activeRegion?.id);
 
     final passport = ref.watch(culturePassportProvider);
 

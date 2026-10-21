@@ -68,9 +68,14 @@ class CultureNavigationTabs extends StatelessWidget {
     final unselectedHPad = isSmall ? 6.5 : (isCompact ? 8.0 : 9.5);
     final maxLabelWidth = isSmall ? 85.0 : (isCompact ? 100.0 : 125.0);
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(outerHPad, 0, outerHPad, outerBPad),
-      child: Row(
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: ConstrainedBox(
+        constraints:
+            const BoxConstraints(maxWidth: CultureResponsive.kMaxNavTabsWidth),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(outerHPad, 0, outerHPad, outerBPad),
+          child: Row(
         children: [
           // ── Bouton retour éducation Solide Opaque ─────────────────────────
           _BackToEducationButton(
@@ -182,7 +187,9 @@ class CultureNavigationTabs extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 }
 

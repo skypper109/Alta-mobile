@@ -92,16 +92,21 @@ class CultureHomeView extends ConsumerWidget {
         .take(4)
         .toList();
 
+    final hPad = CultureResponsive.horizontalPadding(context);
+    final isTablet = CultureResponsive.isTablet(context);
+
     return CulturalAtmosphereCanvas(
       enableParticles: true,
       enableBogolanMotifs: true,
       motifOpacity: 0.12,
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        padding: EdgeInsets.fromLTRB(hPad, 10, hPad, 30),
+        child: CultureResponsive.constrainedCentered(
+          maxWidth: CultureResponsive.kMaxContentWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // ── 0. LE RITUEL QUOTIDIEN : LA PÉPITE DU JOUR & LE DÉFI ÉCLAIR (60s) ──
             const AnimatedCulturalReveal(
               delay: Duration(milliseconds: 60),
@@ -158,123 +163,48 @@ class CultureHomeView extends ConsumerWidget {
 
             const SizedBox(height: 20),
 
-            // ── NOUVEAUTÉ : SCANNER IA DE MONUMENTS & LIEUX ──────────────────
-            AnimatedCulturalReveal(
-              delay: const Duration(milliseconds: 220),
-              child: GestureDetector(
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  context.push('/culture/scanner');
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: isDark ? CultureTheme.darkSurface : Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: CultureTheme.accentOrange.withValues(alpha: 0.5),
-                      width: 1.4,
+            // ── NOUVEAUTÉ : SCANNER IA & TRANSMISSION CITOYENNE ───────────────
+            if (isTablet)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _buildScannerCard(
+                      context: context,
+                      isDark: isDark,
+                      titleColor: titleColor,
+                      subtitleColor: subtitleColor,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color:
-                            CultureTheme.accentOrange.withValues(alpha: 0.08),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: CultureTheme.accentOrange,
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: CultureTheme.accentOrange
-                                  .withValues(alpha: 0.35),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.document_scanner_rounded,
-                            size: 28,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: CultureTheme.accentOrange
-                                        .withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    'DÉCOUVERTE & HISTOIRE',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 9.5,
-                                      fontWeight: FontWeight.w800,
-                                      color: CultureTheme.accentOrange,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Scanner un Monument ou Lieu',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w800,
-                                color: titleColor,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Pointez votre caméra pour révéler son histoire',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11.5,
-                                color: subtitleColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color:
-                              CultureTheme.accentOrange.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.arrow_forward_rounded,
-                          size: 16,
-                          color: CultureTheme.accentOrange,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: _buildTransmettreCard(
+                      context: context,
+                      isDark: isDark,
+                      cardBg: cardBg,
+                      titleColor: titleColor,
+                      subtitleColor: subtitleColor,
+                    ),
                   ),
-                ),
+                ],
+              )
+            else ...[
+              _buildScannerCard(
+                context: context,
+                isDark: isDark,
+                titleColor: titleColor,
+                subtitleColor: subtitleColor,
               ),
-            ),
+              const SizedBox(height: 12),
+              _buildTransmettreCard(
+                context: context,
+                isDark: isDark,
+                cardBg: cardBg,
+                titleColor: titleColor,
+                subtitleColor: subtitleColor,
+              ),
+            ],
+
 
             const SizedBox(height: 24),
 
@@ -443,6 +373,33 @@ class CultureHomeView extends ConsumerWidget {
                   ),
                 ),
               )
+            else if (isTablet)
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: recommendations.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 3.2,
+                ),
+                itemBuilder: (ctx, index) {
+                  final item = recommendations[index];
+                  return AnimatedCulturalReveal(
+                    delay: Duration(milliseconds: 200 + (index * 60)),
+                    child: _buildRecommendationTile(
+                      context,
+                      item: item,
+                      isDark: isDark,
+                      cardBg: cardBg,
+                      borderCol: borderCol,
+                      titleColor: titleColor,
+                      subtitleColor: subtitleColor,
+                    ),
+                  );
+                },
+              )
             else
               ListView.separated(
                 shrinkWrap: true,
@@ -480,6 +437,253 @@ class CultureHomeView extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+  Widget _buildScannerCard({
+    required BuildContext context,
+    required bool isDark,
+    required Color titleColor,
+    required Color subtitleColor,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        context.push('/culture/scanner');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? CultureTheme.darkSurface : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: CultureTheme.accentOrange.withValues(alpha: 0.5),
+            width: 1.4,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: CultureTheme.accentOrange.withValues(alpha: 0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: CultureTheme.accentOrange,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: CultureTheme.accentOrange.withValues(alpha: 0.35),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.document_scanner_rounded,
+                  size: 28,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: CultureTheme.accentOrange
+                              .withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'DÉCOUVERTE & HISTOIRE',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            color: CultureTheme.accentOrange,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Scanner un Monument ou Lieu',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: titleColor,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Pointez votre caméra pour révéler son histoire',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11.5,
+                      color: subtitleColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: CultureTheme.accentOrange.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_forward_rounded,
+                size: 16,
+                color: CultureTheme.accentOrange,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTransmettreCard({
+    required BuildContext context,
+    required bool isDark,
+    required Color cardBg,
+    required Color titleColor,
+    required Color subtitleColor,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        context.push('/culture/contribuer');
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: const Color(0xFF10B981).withValues(alpha: 0.35),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF10B981).withValues(alpha: 0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: const Color(0xFF10B981),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.35),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.edit_note_rounded,
+                  size: 28,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981)
+                              .withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'TRANSMISSION CITOYENNE',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF10B981),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '+50 XP',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.bold,
+                          color: CultureTheme.accentOrange,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Transmettre un Savoir Ancestral',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: titleColor,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Proverbe, conte, monument, héros, terroir ou nom (Jamu)',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: subtitleColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.add_rounded,
+                size: 16,
+                color: Color(0xFF10B981),
+              ),
+            ),
           ],
         ),
       ),

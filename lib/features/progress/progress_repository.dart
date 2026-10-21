@@ -230,13 +230,17 @@ class _ProgressPageState extends ConsumerState<ProgressPage>
                     ),
                   ),
                 ),
-                data: (state) => TabBarView(
-                  controller: _tabCtrl,
-                  children: [
-                    _RadarTab(radars: state.radars),
-                    _HistoryTab(history: state.history),
-                    _StatsTab(history: state.history),
-                  ],
+                data: (state) => RefreshIndicator(
+                  color: AltaColors.primary,
+                  onRefresh: () => ref.read(progressNotifierProvider.notifier).refresh(),
+                  child: TabBarView(
+                    controller: _tabCtrl,
+                    children: [
+                      _RadarTab(radars: state.radars),
+                      _HistoryTab(history: state.history),
+                      _StatsTab(history: state.history),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -264,11 +268,20 @@ class _ProgressHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Text('Carnet de Suivi', style: DetTextStyles.headingMd),
-              Spacer(),
-              AlterniaLogo(size: 28, showText: true),
+              if (Navigator.of(context).canPop()) ...[
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                  onPressed: () => Navigator.of(context).pop(),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+                const SizedBox(width: 12),
+              ],
+              const Text('Carnet de Suivi', style: DetTextStyles.headingMd),
+              const Spacer(),
+              const AlterniaLogo(size: 28, showText: true),
             ],
           ),
           const SizedBox(height: 12),

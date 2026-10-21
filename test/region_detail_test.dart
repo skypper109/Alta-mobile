@@ -1,9 +1,13 @@
 import 'package:alternia/features/culture/core/controllers/culture_passport_controller.dart';
 import 'package:alternia/features/culture/core/models/culture_passport_models.dart';
 import 'package:alternia/features/culture/exploration/data/datasources/mock_mali_regions.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('Culture Module - Region & Passport Tests', () {
     test('MockMaliRegions supplies rich data for all 11 regions of Mali', () {
       for (final region in MockMaliRegions.regions) {
@@ -16,7 +20,11 @@ void main() {
     });
 
     test('CulturePassportNotifier records discovery correctly', () {
-      final notifier = CulturePassportNotifier();
+      SharedPreferences.setMockInitialValues({});
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(culturePassportProvider.notifier);
       final initialCount = notifier.state.entries.length;
 
       expect(initialCount, greaterThan(0));

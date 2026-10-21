@@ -220,6 +220,8 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
     final borderCol = isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
     final surfaceAlt = isDark ? CultureTheme.darkSurfaceAlt : CultureTheme.lightSurfaceAlt;
 
+    final hPad = CultureResponsive.horizontalPadding(context);
+
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         VivienneTtsService.instance.stop();
@@ -243,18 +245,21 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
 
                 // ── 2. EN-TÊTE D'IDENTITÉ & LECTEUR AUDIO GRIOT ────────────────
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                  padding: EdgeInsets.fromLTRB(hPad, 18, hPad, 0),
                   sliver: SliverToBoxAdapter(
-                    child: _buildMonumentHeader(
-                      context,
-                      item,
-                      activeRegion?.nom,
-                      isDark,
-                      titleColor,
-                      subtitleColor,
-                      cardBg,
-                      borderCol,
-                      surfaceAlt,
+                    child: CultureResponsive.constrainedCentered(
+                      maxWidth: CultureResponsive.kMaxDetailWidth,
+                      child: _buildMonumentHeader(
+                        context,
+                        item,
+                        activeRegion?.nom,
+                        isDark,
+                        titleColor,
+                        subtitleColor,
+                        cardBg,
+                        borderCol,
+                        surfaceAlt,
+                      ),
                     ),
                   ),
                 ),
@@ -272,23 +277,26 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
 
                 // ── 4. CONTENU DYNAMIQUE DE L'ONGLET SÉLECTIONNÉ ──────────────
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
+                  padding: EdgeInsets.fromLTRB(hPad, 16, hPad, 36),
                   sliver: SliverToBoxAdapter(
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 280),
-                      switchInCurve: Curves.easeOutCubic,
-                      switchOutCurve: Curves.easeInCubic,
-                      child: KeyedSubtree(
-                        key: ValueKey(_currentTab),
-                        child: _buildActiveTabContent(
-                          context,
-                          item,
-                          isDark,
-                          titleColor,
-                          subtitleColor,
-                          cardBg,
-                          borderCol,
-                          surfaceAlt,
+                    child: CultureResponsive.constrainedCentered(
+                      maxWidth: CultureResponsive.kMaxDetailWidth,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 280),
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeInCubic,
+                        child: KeyedSubtree(
+                          key: ValueKey(_currentTab),
+                          child: _buildActiveTabContent(
+                            context,
+                            item,
+                            isDark,
+                            titleColor,
+                            subtitleColor,
+                            cardBg,
+                            borderCol,
+                            surfaceAlt,
+                          ),
                         ),
                       ),
                     ),

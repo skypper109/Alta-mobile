@@ -30,6 +30,7 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
   final VoidCallback? onSearchTap;
   final VoidCallback? onSageTap;
   final VoidCallback? onScannerTap;
+  final VoidCallback? onContribuerTap;
 
   const AlterniaTopHeaderBar({
     super.key,
@@ -40,6 +41,7 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
     this.onSearchTap,
     this.onSageTap,
     this.onScannerTap,
+    this.onContribuerTap,
   });
 
   const AlterniaTopHeaderBar.education({
@@ -50,7 +52,8 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
         onGuideAiTap = null,
         onSearchTap = null,
         onSageTap = null,
-        onScannerTap = null;
+        onScannerTap = null,
+        onContribuerTap = null;
 
   const AlterniaTopHeaderBar.culture({
     super.key,
@@ -60,6 +63,7 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
     this.onSearchTap,
     this.onSageTap,
     this.onScannerTap,
+    this.onContribuerTap,
   }) : variant = AlterniaHeaderVariant.culture;
 
   @override
@@ -283,9 +287,46 @@ class AlterniaTopHeaderBar extends ConsumerWidget {
             ),
           ),
         ),
+
+        const SizedBox(width: 8),
+
+        // 4. Bouton Contribuer au Patrimoine (Tout contenu : Proverbes, Contes, Monuments, Héros, Lieux, Jamu)
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onContribuerTap ??
+                () {
+                  HapticFeedback.lightImpact();
+                  context.push('/culture/contribuer');
+                },
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: const Color(0xFF10B981).withValues(
+                  alpha: isDark ? 0.22 : 0.14,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0xFF10B981).withValues(alpha: 0.5),
+                  width: 1.2,
+                ),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.edit_note_rounded,
+                  size: 20,
+                  color: Color(0xFF10B981),
+                ),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
+
 
   // ── ACTIONS POUR LA SECTION ÉDUCATION ───────────────────────────────────────
   Widget _buildEducationActions(BuildContext context, WidgetRef ref, bool isDark) {

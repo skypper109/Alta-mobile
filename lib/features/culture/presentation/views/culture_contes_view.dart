@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/datasources/mock_culture_stories_data.dart';
 import '../../core/models/culture_story_models.dart';
@@ -32,9 +33,9 @@ class CultureContesView extends ConsumerWidget {
     final borderCol =
         isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
 
-    final filteredStories = MockCultureStoriesData.getFiltered(
-      regionId: activeRegion?.id,
-    );
+    final storiesAsync = ref.watch(dynamicInteractiveStoriesProvider(activeRegion?.id));
+    final filteredStories = storiesAsync.valueOrNull ??
+        MockCultureStoriesData.getFiltered(regionId: activeRegion?.id);
 
     // Contes en cours de progression (Continuer)
     final inProgressStories = filteredStories

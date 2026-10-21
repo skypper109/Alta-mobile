@@ -28,6 +28,7 @@ import '../../features/culture/presentation/screens/quiz_culture_screen.dart';
 import '../../features/culture/presentation/screens/riddle_screen.dart';
 import '../../features/culture/presentation/screens/soundiata_motion_design_reel_screen.dart';
 import '../../features/culture/presentation/views/culture_passport_view.dart';
+import '../../features/culture/presentation/screens/culture_contribution_screen.dart';
 import '../../features/culture/presentation/screens/story_detail_screen.dart';
 import '../../features/culture/presentation/screens/story_reader_screen.dart';
 import '../../features/discussions/holographic_salon_page.dart';
@@ -52,6 +53,7 @@ import '../../features/wallet/wallet_screen.dart';
 import '../../features/referral/referral_screen.dart';
 import '../../features/subscription/subscription_screen.dart';
 import '../../features/national_challenge/national_challenge_screen.dart';
+import '../../features/progress/progress_repository.dart';
 
 part 'app_router.g.dart';
 
@@ -207,6 +209,14 @@ GoRouter appRouter(Ref ref) {
       ),
 
       // ── Modals & Standalone Routes ───────────────────────────────────────
+      GoRoute(
+        path: '/culture/contribuer',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final cat = state.uri.queryParameters['cat'] ?? (state.extra as String?);
+          return CultureContributionScreen(initialCategory: cat);
+        },
+      ),
       GoRoute(
         path: '/culture/search',
         parentNavigatorKey: _rootNavigatorKey,
@@ -576,6 +586,11 @@ GoRouter appRouter(Ref ref) {
         path: '/national-challenge',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const NationalChallengeScreen(),
+      ),
+      GoRoute(
+        path: '/progress',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ProgressPage(),
       ),
       GoRoute(
         path: '/splash',

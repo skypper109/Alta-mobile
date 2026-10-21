@@ -73,19 +73,26 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
         .where((i) => i.matchesRegion(regionId))
         .toList();
 
+    final hPad = CultureResponsive.horizontalPadding(context);
+
     return CulturalAtmosphereCanvas(
       enableParticles: true,
       enableBogolanMotifs: true,
       motifOpacity: 0.11,
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── 1. BARRE DE SÉLECTION DE CATÉGORIE RESPONSIVE (FIGÉE) ───────────
-            Row(
-              children: List.generate(_categories.length, (index) {
+        padding: EdgeInsets.fromLTRB(hPad, 10, hPad, 36),
+        child: CultureResponsive.constrainedCentered(
+          maxWidth: CultureResponsive.kMaxContentWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── 1. BARRE DE SÉLECTION DE CATÉGORIE RESPONSIVE (FIGÉE) ───────────
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 580),
+                  child: Row(
+                    children: List.generate(_categories.length, (index) {
                 final isSelected = _selectedFilterIndex == index;
                 final activeCol = _getCategoryColor(index);
 
@@ -152,6 +159,8 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                 );
               }),
             ),
+          ),
+        ),
 
             const SizedBox(height: 18),
 
@@ -232,6 +241,81 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                 subtitleColor: subtitleColor,
               ),
             ],
+
+            const SizedBox(height: 24),
+
+            // Bannière de contribution participative
+            GestureDetector(
+              onTap: () {
+                final catId = _selectedFilterIndex == 0
+                    ? 'personnage'
+                    : (_selectedFilterIndex == 1 ? 'monument' : 'lieu');
+                context.push('/culture/contribuer?cat=$catId');
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.35),
+                    width: 1.2,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.add_circle_outline_rounded,
+                        color: Color(0xFF10B981),
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _selectedFilterIndex == 0
+                                ? 'Une figure historique manque ?'
+                                : (_selectedFilterIndex == 1
+                                    ? 'Connaissez-vous un monument local ?'
+                                    : 'Votre village a une histoire sacrée ?'),
+                            style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: titleColor,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Soumettez sa mémoire au Conseil (+50 XP, +25 Pièces)',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: subtitleColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: Color(0xFF10B981),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
             // Footer Logo Culture avec "iA" en jaune !
             const Center(
               child: Opacity(
@@ -247,7 +331,8 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   // ── 1. CARTE VEDETTE D'EN-TÊTE DE CATÉGORIE ────────────────────────────────
@@ -603,14 +688,17 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
 
     final narration = ref.watch(narrationCoordinatorProvider);
 
+    final columns = CultureResponsive.catalogGridColumns(context);
+    final aspectRatio = CultureResponsive.catalogGridAspectRatio(context);
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.66,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columns,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+        childAspectRatio: aspectRatio,
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {

@@ -10,9 +10,15 @@ import '../../scanner/data/monument_scan_knowledge.dart';
 import '../../scanner/models/monument_scan_models.dart';
 import '../models/culture_detail_models.dart';
 import '../models/culture_item.dart';
+import '../models/culture_story_models.dart';
+import '../models/culture_proverb_models.dart';
+import '../models/culture_challenge_models.dart';
 import 'culture_api_client.dart';
 import 'culture_database_seed.dart';
 import 'mock_culture_details_data.dart';
+import 'mock_culture_stories_data.dart';
+import 'mock_culture_proverbs_data.dart';
+import 'mock_culture_challenges_data.dart';
 
 /// Provider Riverpod global pour CultureApiClient
 final cultureApiClientProvider = Provider<CultureApiClient>((ref) {
@@ -777,4 +783,142 @@ class CultureRepository {
     }
     return res;
   }
+
+  /// Soumet une nouvelle contribution culturelle (tous types de contenu)
+  Future<Map<String, dynamic>?> submitContribution(Map<String, dynamic> payload) async {
+    return _apiClient.submitContribution(payload);
+  }
+
+  /// Récupère les contributions pour la modération ou l'historique utilisateur
+  Future<List<Map<String, dynamic>>> getContributions({
+    String? statut,
+    String? typeContenu,
+    String? auteurId,
+  }) async {
+    return _apiClient.fetchContributions(
+      statut: statut,
+      typeContenu: typeContenu,
+      auteurId: auteurId,
+    );
+  }
+
+  /// Récupère la liste des contes interactifs (priorité backend API, repli hors ligne)
+  Future<List<InteractiveStory>> getInteractiveStories({String? regionId}) async {
+    try {
+      final remote = await _apiClient.fetchStories();
+      if (remote.isNotEmpty) {
+        final list = <InteractiveStory>[];
+        for (final item in remote) {
+          final id = item['id'] as String? ?? '';
+          final matchingMock = MockCultureStoriesData.stories.firstWhere(
+            (s) => s.id == id,
+            orElse: () => MockCultureStoriesData.stories.first,
+          );
+          list.add(InteractiveStory(
+            id: id,
+            title: item['title'] as String? ?? matchingMock.title,
+            subtitle: item['subtitle'] as String? ?? matchingMock.subtitle,
+            origin: item['origin'] as String? ?? matchingMock.origin,
+            regionId: item['regionId'] as String? ?? matchingMock.regionId,
+            regionName: item['regionName'] as String? ?? matchingMock.regionName,
+            tag: item['tag'] as String? ?? matchingMock.tag,
+            photoUrl: item['photoUrl'] as String? ?? matchingMock.photoUrl,
+            photoCredits: matchingMock.photoCredits,
+            summary: item['resume'] as String? ?? matchingMock.summary,
+            narrator: item['narrator'] as String? ?? matchingMock.narrator,
+            audioDuration: item['audioDuration'] as String? ?? matchingMock.audioDuration,
+            readingDuration: item['readingDuration'] as String? ?? matchingMock.readingDuration,
+            moral: item['moral'] as String? ?? matchingMock.moral,
+            connectedItems: matchingMock.connectedItems,
+            scenes: matchingMock.scenes,
+          ));
+        }
+        if (list.isNotEmpty) {
+          if (regionId == null || regionId.isEmpty || regionId == 'all') return list;
+          return list.where((s) => s.regionId == null || s.regionId == regionId).toList();
+        }
+      }
+    } catch (_) {}
+    return MockCultureStoriesData.getFiltered(regionId: regionId);
+  }
+
+  /// Récupère la liste des proverbes (priorité backend API, repli hors ligne)
+  Future<List<CultureProverb>> getProverbs({String? regionId}) async {
+    try {
+      final remote = await _apiClient.fetchProverbs();
+      if (remote.isNotEmpty) {
+        final list = <CultureProverb>[];
+        for (final item in remote) {
+          final id = item['id'] as String? ?? '';
+          final matchingMock = MockCultureProverbsData.proverbs.firstWhere(
+            (p) => p.id == id,
+            orElse: () => MockCultureProverbsData.proverbs.first,
+          );
+          list.add(CultureProverb(
+            id: id,
+            text: item['text'] as String? ?? matchingMock.text,
+            originalText: item['originalText'] as String? ?? matchingMock.originalText,
+            meaning: item['meaning'] as String? ?? matchingMock.meaning,
+            theme: item['theme'] as String? ?? matchingMock.theme,
+            regionId: item['regionId'] as String? ?? matchingMock.regionId,
+            regionName: item['regionName'] as String? ?? matchingMock.regionName,
+            origin: matchingMock.origin,
+            moral: matchingMock.moral,
+            stageImagePath: matchingMock.stageImagePath,
+            speakerName: matchingMock.speakerName,
+            speakerRole: matchingMock.speakerRole,
+            speakerAvatar: matchingMock.speakerAvatar,
+          ));
+        }
+        if (list.isNotEmpty) {
+          if (regionId == null || regionId.isEmpty || regionId == 'all') return list;
+          return list.where((p) => p.regionId == null || p.regionId == regionId).toList();
+        }
+      }
+    } catch (_) {}
+    return MockCultureProverbsData.getFiltered(regionId: regionId);
+  }
+
+  /// Récupère la liste des devinettes traditionnelles (priorité backend API, repli hors ligne)
+  Future<List<CultureRiddle>> getRiddles({String? regionId}) async {
+    try {
+      final res = await _apiClient.fetchProverbs();
+      if (res.isNotEmpty) {
+        final riddlesFromApi = <CultureRiddle>[];
+        for (final item in res) {
+          final theme = (item['theme'] as String? ?? '').toLowerCase();
+          final origin = (item['origin'] as String? ?? item['origine'] as String? ?? '').toLowerCase();
+          final text = item['text'] as String? ?? item['texte'] as String? ?? '';
+          if (theme.contains('devinette') || origin.contains('devinette') || text.contains('Kôkô')) {
+            final matchingMock = MockCultureChallengesData.riddles.firstWhere(
+              (r) => r.id == item['id'],
+              orElse: () => MockCultureChallengesData.riddles.first,
+            );
+            final meaning = item['meaning'] as String? ?? item['signification'] as String? ?? matchingMock.culturalExplanation;
+            final moral = item['moral'] as String? ?? item['morale'] as String? ?? matchingMock.correctAnswer;
+            riddlesFromApi.add(TraditionalRiddle(
+              id: item['id'] as String? ?? matchingMock.id,
+              riddleText: text.isNotEmpty ? text : matchingMock.riddleText,
+              hints: matchingMock.hints,
+              options: matchingMock.options,
+              correctAnswer: moral.isNotEmpty ? moral : matchingMock.correctAnswer,
+              culturalExplanation: meaning.isNotEmpty ? meaning : matchingMock.culturalExplanation,
+              proverb: item['originalText'] as String? ?? matchingMock.proverb,
+              regionId: item['regionId'] as String? ?? item['region_id'] as String?,
+              regionName: item['regionName'] as String? ?? item['region_nom'] as String? ?? matchingMock.regionName,
+              category: item['theme'] as String? ?? matchingMock.category,
+              difficulty: matchingMock.difficulty,
+              xpReward: (item['xpReward'] as num?)?.toInt() ?? matchingMock.xpReward,
+            ));
+          }
+        }
+        if (riddlesFromApi.isNotEmpty) {
+          if (regionId == null || regionId.isEmpty || regionId == 'all') return riddlesFromApi;
+          return riddlesFromApi.where((r) => r.regionId == null || r.regionId == regionId).toList();
+        }
+      }
+    } catch (_) {}
+    return MockCultureChallengesData.getFilteredRiddles(regionId: regionId);
+  }
 }
+

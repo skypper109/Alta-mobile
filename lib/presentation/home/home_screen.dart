@@ -399,6 +399,11 @@ class HomeScreen extends ConsumerWidget {
           // ── 5. VOS MATIÈRES (PROGRAMME MALIEN) ──────────────────────────
           DetSectionHeader(
             title: 'Programmes (${userState.classShortLabel})',
+            actionLabel: 'Carnet de suivi >',
+            onAction: () {
+              HapticFeedback.lightImpact();
+              context.push('/progress');
+            },
           ),
           const SizedBox(height: 14),
 

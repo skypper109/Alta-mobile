@@ -111,6 +111,49 @@ class PassportEntry {
       xpEarned: xpEarned ?? this.xpEarned,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'type': type.name,
+      'title': title,
+      'subtitle': subtitle,
+      'regionId': regionId,
+      'regionName': regionName,
+      'photoUrl': photoUrl,
+      'tag': tag,
+      'discoveredAt': discoveredAt.toIso8601String(),
+      'culturalQuote': culturalQuote,
+      'isMilestone': isMilestone,
+      'milestoneLabel': milestoneLabel,
+      'targetRoute': targetRoute,
+      'xpEarned': xpEarned,
+    };
+  }
+
+  factory PassportEntry.fromJson(Map<String, dynamic> json) {
+    return PassportEntry(
+      id: json['id'] as String? ?? '',
+      type: PassportItemType.values.firstWhere(
+        (t) => t.name == (json['type'] as String?),
+        orElse: () => PassportItemType.monument,
+      ),
+      title: json['title'] as String? ?? '',
+      subtitle: json['subtitle'] as String? ?? '',
+      regionId: json['regionId'] as String?,
+      regionName: json['regionName'] as String? ?? 'Tout le Mali',
+      photoUrl: json['photoUrl'] as String? ?? '',
+      tag: json['tag'] as String? ?? '',
+      discoveredAt: json['discoveredAt'] != null
+          ? DateTime.tryParse(json['discoveredAt'] as String) ?? DateTime.now()
+          : DateTime.now(),
+      culturalQuote: json['culturalQuote'] as String?,
+      isMilestone: json['isMilestone'] as bool? ?? false,
+      milestoneLabel: json['milestoneLabel'] as String?,
+      targetRoute: json['targetRoute'] as String? ?? '',
+      xpEarned: (json['xpEarned'] as num?)?.toInt() ?? 50,
+    );
+  }
 }
 
 /// Sceau culturel honorifique / Distinction de voyageur (sans points XP)

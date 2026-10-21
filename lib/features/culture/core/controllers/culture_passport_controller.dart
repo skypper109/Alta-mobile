@@ -1,26 +1,196 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../profile/gamification_notifier.dart';
+import '../../../profile/user_prefs_notifier.dart';
+import '../datasources/culture_api_client.dart';
 import '../models/culture_passport_models.dart';
 import '../theme/culture_theme.dart';
 
-/// Notifier du Passeport Culturel gérant la mémoire de l'odyssée
+/// Notifier du Passeport Culturel & Parcours gérant la mémoire de l'odyssée
+/// Entièrement connecté : profil utilisateur dynamique, persistance locale SharedPreferences,
+/// synchronisation bi-directionnelle avec l'API backend CultureLens et calcul d'XP réel.
 class CulturePassportNotifier extends StateNotifier<PassportState> {
-  CulturePassportNotifier()
-      : super(
-          PassportState(
-            travelerName: 'Explorateur Alternia',
-            passportNumber: 'ML-ALT-2026-08',
-            issuedAt: DateTime.now().subtract(const Duration(days: 14)),
-            entries: _initialDiscoveries,
-            exploredRegionIds: const [
-              'koulikoro',
-              'tombouctou',
-              'sikasso',
-              'mopti'
-            ],
-            featuredDiscoveryOfTheDay: _defaultFeaturedDiscovery,
-          ),
+  final Ref _ref;
+  final CultureApiClient _apiClient;
+
+  static const String _prefEntriesKey = 'culture_passport_entries_v2';
+  static const String _prefIssuedAtKey = 'culture_passport_issued_at_v2';
+
+  CulturePassportNotifier(this._ref, {CultureApiClient? apiClient})
+      : _apiClient = apiClient ?? CultureApiClient(),
+        super(_createInitialState(_ref)) {
+    _initAndSync();
+    _listenToUserChanges();
+  }
+
+  String get _currentTravelerName {
+    final prefs = _ref.read(userPrefsProvider);
+    return prefs.name.trim().isNotEmpty ? prefs.name.trim() : 'Explorateur Alternia';
+  }
+
+  String get _currentPassportNumber {
+    final prefs = _ref.read(userPrefsProvider);
+    return _generatePassportNumber(prefs);
+  }
+
+  static String _generatePassportNumber(UserProfileState prefs) {
+    final raw = prefs.name.isNotEmpty ? prefs.name : prefs.studentClassId;
+    if (raw.trim().isEmpty) return 'ML-ALT-2026-08';
+    final hash = raw.codeUnits.fold<int>(0, (acc, c) => (acc * 31 + c) & 0xFFFFFF);
+    final numStr = hash.toString().padLeft(6, '0');
+    return 'ML-ALT-2026-${numStr.substring(numStr.length - 6)}';
+  }
+
+  static List<String> _computeExploredRegions(List<PassportEntry> entries) {
+    final regions = <String>{};
+    for (final e in entries) {
+      if (e.regionId != null && e.regionId!.trim().isNotEmpty) {
+        regions.add(e.regionId!.trim());
+      }
+    }
+    if (regions.isEmpty) {
+      return ['koulikoro', 'tombouctou', 'sikasso', 'mopti'];
+    }
+    return regions.toList();
+  }
+
+  static PassportState _createInitialState(Ref ref) {
+    final prefs = ref.read(userPrefsProvider);
+    final travelerName = prefs.name.trim().isNotEmpty ? prefs.name.trim() : 'Explorateur Alternia';
+    final passportNum = _generatePassportNumber(prefs);
+
+    return PassportState(
+      travelerName: travelerName,
+      passportNumber: passportNum,
+      issuedAt: DateTime.now().subtract(const Duration(days: 14)),
+      entries: _initialDiscoveries,
+      exploredRegionIds: _computeExploredRegions(_initialDiscoveries),
+      featuredDiscoveryOfTheDay: _defaultFeaturedDiscovery,
+    );
+  }
+
+  void _listenToUserChanges() {
+    _ref.listen<UserProfileState>(userPrefsProvider, (prev, next) {
+      final newName = next.name.trim().isNotEmpty ? next.name.trim() : 'Explorateur Alternia';
+      final newPassportNum = _generatePassportNumber(next);
+      if (state.travelerName != newName || state.passportNumber != newPassportNum) {
+        state = PassportState(
+          travelerName: newName,
+          passportNumber: newPassportNum,
+          issuedAt: state.issuedAt,
+          entries: state.entries,
+          exploredRegionIds: state.exploredRegionIds,
+          featuredDiscoveryOfTheDay: state.featuredDiscoveryOfTheDay,
         );
+      }
+    });
+  }
+
+  Future<void> _initAndSync() async {
+    await _loadFromLocal();
+    await syncWithBackend();
+  }
+
+  Future<void> _loadFromLocal() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedJson = prefs.getString(_prefEntriesKey);
+      if (savedJson != null && savedJson.isNotEmpty) {
+        final decoded = jsonDecode(savedJson) as List<dynamic>;
+        final loaded = decoded
+            .whereType<Map<String, dynamic>>()
+            .map((item) => PassportEntry.fromJson(item))
+            .toList();
+
+        if (loaded.isNotEmpty) {
+          final issuedAtStr = prefs.getString(_prefIssuedAtKey);
+          final issuedAt = issuedAtStr != null
+              ? DateTime.tryParse(issuedAtStr) ?? state.issuedAt
+              : state.issuedAt;
+
+          state = PassportState(
+            travelerName: _currentTravelerName,
+            passportNumber: _currentPassportNumber,
+            issuedAt: issuedAt,
+            entries: loaded,
+            exploredRegionIds: _computeExploredRegions(loaded),
+            featuredDiscoveryOfTheDay: loaded.firstWhere(
+              (e) =>
+                  e.type == PassportItemType.personnage ||
+                  e.type == PassportItemType.monument,
+              orElse: () => _defaultFeaturedDiscovery,
+            ),
+          );
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _saveToLocal(List<PassportEntry> entries) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final serialized = entries.map((e) => e.toJson()).toList();
+      await prefs.setString(_prefEntriesKey, jsonEncode(serialized));
+      await prefs.setString(_prefIssuedAtKey, state.issuedAt.toIso8601String());
+    } catch (_) {}
+  }
+
+  /// Synchronise les découvertes enregistrées sur le backend (alta_db)
+  Future<void> syncWithBackend() async {
+    try {
+      final userPrefs = _ref.read(userPrefsProvider);
+      final studentId = userPrefs.name.isNotEmpty ? userPrefs.name : null;
+
+      final remoteDiscoveries = await _apiClient.fetchDiscoveries(studentId: studentId);
+      if (remoteDiscoveries.isNotEmpty) {
+        final currentEntries = List<PassportEntry>.from(state.entries);
+        bool hasChanges = false;
+
+        for (final item in remoteDiscoveries) {
+          final monumentId = item['monumentId'] as String? ?? item['id'] as String? ?? '';
+          if (monumentId.isEmpty) continue;
+
+          final alreadyExists = currentEntries.any((e) => e.id == monumentId);
+          if (!alreadyExists) {
+            final entry = PassportEntry(
+              id: monumentId,
+              type: PassportItemType.monument,
+              title: item['monumentName'] as String? ?? 'Monument Historique',
+              subtitle: 'Découvert et authentifié via CultureLens',
+              regionId: (item['ville'] as String?)?.toLowerCase(),
+              regionName: item['ville'] as String? ?? 'Mali',
+              photoUrl: item['photoUrl'] as String? ??
+                  'assets/images/culture/monuments/mosquee_djingareyber.jpg',
+              tag: 'Authentifié IA',
+              discoveredAt: item['discoveredAt'] != null
+                  ? DateTime.tryParse(item['discoveredAt'] as String) ?? DateTime.now()
+                  : DateTime.now(),
+              targetRoute: '/culture/monument/$monumentId',
+              xpEarned: 50,
+            );
+            currentEntries.add(entry);
+            hasChanges = true;
+          }
+        }
+
+        if (hasChanges) {
+          state = PassportState(
+            travelerName: _currentTravelerName,
+            passportNumber: _currentPassportNumber,
+            issuedAt: state.issuedAt,
+            entries: currentEntries,
+            exploredRegionIds: _computeExploredRegions(currentEntries),
+            featuredDiscoveryOfTheDay: state.featuredDiscoveryOfTheDay,
+          );
+          await _saveToLocal(currentEntries);
+        }
+      }
+    } catch (_) {}
+  }
 
   static final PassportEntry _defaultFeaturedDiscovery = PassportEntry(
     id: 'perso_soundiata',
@@ -179,12 +349,12 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
     PassportEntry(
       id: 'riddle_vent',
       type: PassportItemType.defi,
-      title: 'Devinette   : Le Vent (Fonyo)',
+      title: 'Devinette : Le Vent (Fonyo)',
       subtitle: 'Je voyage sans jambes et parle sans bouche...',
       regionId: null,
       regionName: 'Tout le Mali',
       photoUrl: 'assets/images/culture/villes/bandiagara_falaise.jpg',
-      tag: 'Devinette  ',
+      tag: 'Devinette',
       discoveredAt: DateTime.now().subtract(const Duration(days: 3)),
       culturalQuote:
           '« Le vent ne brise jamais l\'herbe qui sait se courber avec humilité. »',
@@ -195,7 +365,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
     ),
   ];
 
-  /// Enregistre une découverte de manière idempotente dans le Passeport
+  /// Enregistre une découverte de manière idempotente dans le Passeport,
+  /// la persiste localement et la soumet au serveur central
   bool recordDiscovery({
     required String id,
     required PassportItemType type,
@@ -214,11 +385,9 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
     final existingIndex =
         state.entries.indexWhere((e) => e.type == type && e.id == id);
     if (existingIndex != -1) {
-      // Déjà découvert
       return false;
     }
 
-    // Détection automatique de milestone si premier élément du genre
     final bool firstOfType = !state.entries.any((e) => e.type == type);
     final String? resolvedMilestone = milestoneLabel ??
         (firstOfType
@@ -242,16 +411,14 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
       xpEarned: xpEarned,
     );
 
-    final updatedRegions = List<String>.from(state.exploredRegionIds);
-    if (regionId != null && !updatedRegions.contains(regionId)) {
-      updatedRegions.add(regionId);
-    }
+    final updatedEntries = [newEntry, ...state.entries];
+    final updatedRegions = _computeExploredRegions(updatedEntries);
 
     state = PassportState(
-      travelerName: state.travelerName,
-      passportNumber: state.passportNumber,
+      travelerName: _currentTravelerName,
+      passportNumber: _currentPassportNumber,
       issuedAt: state.issuedAt,
-      entries: [newEntry, ...state.entries],
+      entries: updatedEntries,
       exploredRegionIds: updatedRegions,
       featuredDiscoveryOfTheDay: (newEntry.targetRoute.isNotEmpty &&
               !newEntry.targetRoute.contains('passport') &&
@@ -259,6 +426,25 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
           ? newEntry
           : (state.featuredDiscoveryOfTheDay ?? _defaultFeaturedDiscovery),
     );
+
+    // 1. Sauvegarde locale persistante
+    unawaited(_saveToLocal(updatedEntries));
+
+    // 2. Synchronisation backend CultureLens
+    if (type == PassportItemType.monument || type == PassportItemType.ville) {
+      final userPrefs = _ref.read(userPrefsProvider);
+      unawaited(_apiClient.recordDiscovery(
+        monumentId: id,
+        studentId: userPrefs.name.isNotEmpty ? userPrefs.name : null,
+        confidence: 0.98,
+        notes: 'Inscrit au Passeport Culturel ($title)',
+      ));
+    }
+
+    // 3. Attribution d'XP dans la gamification globale
+    try {
+      _ref.read(gamificationProvider.notifier).addXp(xpEarned);
+    } catch (_) {}
 
     return true;
   }
@@ -315,7 +501,7 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
       ),
       CulturalDistinction(
         id: 'sage_enigmes',
-        title: 'Initié aux Devinettes  ',
+        title: 'Initié aux Devinettes',
         subtitle: 'Maître des énigmes de la sagesse populaire',
         description:
             'A résolu avec sagacité les énigmes ancestrales du Djoliba.',
@@ -345,8 +531,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
   }
 }
 
-/// Provider Riverpod global du Passeport Culturel
+/// Provider Riverpod global du Passeport Culturel (dynamique)
 final culturePassportProvider =
     StateNotifierProvider<CulturePassportNotifier, PassportState>((ref) {
-  return CulturePassportNotifier();
+  return CulturePassportNotifier(ref);
 });
