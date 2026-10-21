@@ -42,11 +42,14 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
   // Narration vocale du Griot (TTS unifié Vivienne avec repli système)
   bool _isSpeaking = false;
 
-  void _stopTts() {
+  void _stopTts({bool updateState = true}) {
     try {
       VivienneTtsService.instance.stop();
     } catch (_) {}
-    if (mounted) setState(() => _isSpeaking = false);
+    _isSpeaking = false;
+    if (updateState && mounted) {
+      setState(() {});
+    }
   }
 
   void _shareCurrentChallenge() {
@@ -174,13 +177,13 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
 
   @override
   void deactivate() {
-    _stopTts();
+    _stopTts(updateState: false);
     super.deactivate();
   }
 
   @override
   void dispose() {
-    _stopTts();
+    _stopTts(updateState: false);
     super.dispose();
   }
 

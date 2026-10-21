@@ -52,11 +52,14 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
 
   TraditionalRiddle get _currentRiddle => _riddles[_currentIndex];
 
-  void _stopTts() {
+  void _stopTts({bool updateState = true}) {
     try {
       VivienneTtsService.instance.stop();
     } catch (_) {}
-    if (mounted) setState(() => _isSpeaking = false);
+    _isSpeaking = false;
+    if (updateState && mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _toggleTts() async {
@@ -214,13 +217,13 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
 
   @override
   void deactivate() {
-    _stopTts();
+    _stopTts(updateState: false);
     super.deactivate();
   }
 
   @override
   void dispose() {
-    _stopTts();
+    _stopTts(updateState: false);
     super.dispose();
   }
 

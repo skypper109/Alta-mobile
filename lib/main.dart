@@ -13,8 +13,8 @@ import 'core/constants/app_colors.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ── Polices Google Fonts hors-ligne (zéro crash / zéro requête réseau) ─────
-  GoogleFonts.config.allowRuntimeFetching = false;
+  // ── Polices Google Fonts hors-ligne (assets prioritaires, fallback sans crash) ──
+  GoogleFonts.config.allowRuntimeFetching = true;
 
   // ── Orientation portrait ────────────────────────────────────────────────
   await SystemChrome.setPreferredOrientations([

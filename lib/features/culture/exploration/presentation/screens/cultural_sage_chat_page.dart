@@ -168,7 +168,7 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
 
   @override
   void deactivate() {
-    _stopTts();
+    _stopTts(updateState: false);
     VivienneTtsService.instance.stop();
     super.deactivate();
   }
@@ -177,7 +177,7 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
   void dispose() {
     _scrollCtrl.dispose();
     _promptCtrl.dispose();
-    _stopTts();
+    _stopTts(updateState: false);
     if (_isListening) {
       _speechToText.stop();
     }
@@ -272,18 +272,17 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
     }
   }
 
-  Future<void> _stopTts() async {
+  Future<void> _stopTts({bool updateState = true}) async {
     try {
       await VivienneTtsService.instance.stop();
       await _tts.stop();
     } catch (_) {}
-    if (mounted) {
-      setState(() {
-        _currentlySpeakingMessageId = null;
-        if (_sageState == _SageState.speaking) {
-          _sageState = _SageState.idle;
-        }
-      });
+    _currentlySpeakingMessageId = null;
+    if (_sageState == _SageState.speaking) {
+      _sageState = _SageState.idle;
+    }
+    if (updateState && mounted) {
+      setState(() {});
     }
   }
 

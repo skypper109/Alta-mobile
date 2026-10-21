@@ -108,10 +108,11 @@ class _NationalChallengeScreenState
                       style: GoogleFonts.plusJakartaSans(color: textSec)),
             )
           : _isPlaying
-              ? _buildQuizView(defi, textPri, textSec, cardBg, borderCol, isDark)
+              ? _buildQuizView(
+                  defi, textPri, textSec, cardBg, borderCol, isDark)
               : state.dernierResultat != null
-                  ? _buildResultView(
-                      state.dernierResultat!, textPri, textSec, cardBg, borderCol)
+                  ? _buildResultView(state.dernierResultat!, textPri, textSec,
+                      cardBg, borderCol, isDark)
                   : _buildLobbyView(
                       defi, textPri, textSec, cardBg, borderCol, isDark),
     );
@@ -201,6 +202,94 @@ class _NationalChallengeScreenState
 
         const SizedBox(height: 18),
 
+        // Carte Adversaire SoloLearn (Matchmaking instantané sans attente)
+        if (defi.adversaire != null) ...[
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: const Color(0xFFF1851F).withValues(alpha: 0.35),
+                width: 1.5,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1851F).withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.bolt_rounded,
+                        color: Color(0xFFF1851F), size: 26),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'DUEL SOLOLEARN INSTANTANÉ',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.7,
+                              color: const Color(0xFFF1851F),
+                            ),
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.success.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'En ligne 24h/24',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.success,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        defi.adversaire!['nom']?.toString() ?? 'Lycéen du Mali',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w700,
+                          color: textPri,
+                        ),
+                      ),
+                      Text(
+                        '${defi.adversaire!['etablissement'] ?? ''} • ${defi.adversaire!['ville'] ?? 'Mali'}',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          color: textSec,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+        ],
+
         // Récompenses en Pièces
         Container(
           padding: const EdgeInsets.all(18),
@@ -212,35 +301,72 @@ class _NationalChallengeScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'BARÈME & RÈGLE DE RÉCOMPENSE',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.8,
+                      color: textSec,
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1851F).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Pièces = Victoire',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFFF1851F),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
               Text(
-                'BARÈME DE PIÈCES & RÉCOMPENSES',
+                'Les pièces ne sont remportées qu\'en cas de victoire face au rival. En cas de défaite, tu gagnes uniquement des points XP.',
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.8,
+                  fontSize: 11.5,
                   color: textSec,
+                  height: 1.35,
                 ),
               ),
               const SizedBox(height: 12),
               _RewardRow(
-                rank: '1er National',
+                rank: '1er National (Victoire)',
                 coins: '+${defi.recompensePremier} Pièces',
                 color: const Color(0xFFF1851F),
                 icon: Icons.emoji_events_rounded,
               ),
               const SizedBox(height: 8),
               _RewardRow(
-                rank: 'Top 10 National',
+                rank: 'Top 10 National (Victoire)',
                 coins: '+${defi.recompenseTop10} Pièces',
                 color: AppColors.primary,
                 icon: Icons.stars_rounded,
               ),
               const SizedBox(height: 8),
               _RewardRow(
-                rank: 'Participation validée',
-                coins: '+${defi.recompenseParticipation} Pièces',
+                rank: 'Victoire validée',
+                coins: '+${defi.recompenseParticipation * 2} Pièces',
                 color: AppColors.success,
                 icon: Icons.check_circle_rounded,
+              ),
+              const SizedBox(height: 8),
+              _RewardRow(
+                rank: 'Défaite (Consolidation)',
+                coins: '0 Pièce (+100 XP)',
+                color: Colors.grey,
+                icon: Icons.military_tech_rounded,
               ),
             ],
           ),
@@ -254,7 +380,7 @@ class _NationalChallengeScreenState
             onPressed: _startChallenge,
             icon: const Icon(Icons.play_arrow_rounded, size: 22),
             label: Text(
-              'Commencer l\'Épreuve Chronométrée',
+              'Lancer le Défi Instantané (Sans Attente)',
               style: GoogleFonts.plusJakartaSans(
                 fontWeight: FontWeight.bold,
                 fontSize: 14.5,
@@ -492,7 +618,11 @@ class _NationalChallengeScreenState
     Color textSec,
     Color cardBg,
     Color borderCol,
+    bool isDark,
   ) {
+    final estGagne = res.estVictoire;
+    final advNom = res.adversaire?['nom']?.toString();
+
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       children: [
@@ -501,25 +631,45 @@ class _NationalChallengeScreenState
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: borderCol),
+            border: Border.all(
+              color: estGagne
+                  ? const Color(0xFFF1851F).withValues(alpha: 0.4)
+                  : borderCol,
+              width: estGagne ? 1.6 : 1.0,
+            ),
           ),
           child: Column(
             children: [
-              const Icon(Icons.workspace_premium_rounded,
-                  size: 50, color: Color(0xFFF1851F)),
-              const SizedBox(height: 10),
+              Icon(
+                estGagne
+                    ? Icons.emoji_events_rounded
+                    : Icons.military_tech_rounded,
+                size: 54,
+                color: estGagne ? const Color(0xFFF1851F) : Colors.grey,
+              ),
+              const SizedBox(height: 12),
               Text(
-                'Épreuve Terminée !',
+                estGagne
+                    ? 'Victoire Décrochée !'
+                    : 'Défi Terminé — Pas de Victoire',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: textPri,
+                  color: estGagne ? const Color(0xFFF1851F) : textPri,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 5),
               Text(
-                'Score officiel validé par le serveur AlterniA',
-                style: GoogleFonts.plusJakartaSans(fontSize: 12, color: textSec),
+                advNom != null
+                    ? (estGagne
+                        ? 'Tu as battu $advNom dans ce duel SoloLearn !'
+                        : '$advNom a été plus rapide. Entraîne-toi pour le battre !')
+                    : (estGagne
+                        ? 'Félicitations, tu remportes ce défi national !'
+                        : 'Seule la victoire rapporte des pièces. Tu gagnes des XP d\'effort.'),
+                textAlign: TextAlign.center,
+                style:
+                    GoogleFonts.plusJakartaSans(fontSize: 12.5, color: textSec),
               ),
               const SizedBox(height: 18),
               Text(
@@ -527,7 +677,7 @@ class _NationalChallengeScreenState
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 38,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.primary,
+                  color: estGagne ? AppColors.primary : textPri,
                 ),
               ),
               Text(
@@ -535,50 +685,122 @@ class _NationalChallengeScreenState
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: res.pourcentage >= 50
-                      ? AppColors.success
-                      : AppColors.error,
+                  color: estGagne ? AppColors.success : AppColors.error,
                 ),
               ),
               const SizedBox(height: 18),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1851F).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.monetization_on_rounded,
-                        color: Color(0xFFF1851F), size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      '+${res.piecesGagnees} Pièces créditées',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14,
-                        color: const Color(0xFFF1851F),
-                      ),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 10,
+                runSpacing: 8,
+                children: [
+                  // Badge Pièces
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: estGagne
+                          ? const Color(0xFFF1851F).withValues(alpha: 0.14)
+                          : Colors.grey.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
-                ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.monetization_on_rounded,
+                          color:
+                              estGagne ? const Color(0xFFF1851F) : Colors.grey,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          estGagne
+                              ? '+${res.piecesGagnees} Pièces gagnées'
+                              : '0 Pièce (Victoire requise)',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
+                            color: estGagne ? const Color(0xFFF1851F) : textSec,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Badge XP
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.bolt_rounded,
+                          color: AppColors.primary,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '+${res.xpGagnes} XP acquis',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
         const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () => context.push('/education/duel/leaderboard'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        // Bouton pour rejouer immédiatement à tout moment et grimper ses scores
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              ref
+                  .read(nationalChallengeProvider.notifier)
+                  .reinitialiserPourNouveauDefi();
+              _startChallenge();
+            },
+            icon: const Icon(Icons.refresh_rounded, size: 20),
+            label: Text(
+              'Rejouer Immédiatement & Grimper Mon Score',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14)),
+            ),
           ),
-          child: const Text('Voir le Classement National des Lycées'),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => context.push('/education/duel/leaderboard'),
+            icon: const Icon(Icons.leaderboard_rounded, size: 18),
+            label: const Text('Voir le Classement National des Lycées'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14)),
+            ),
+          ),
         ),
       ],
     );
