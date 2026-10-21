@@ -1547,7 +1547,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${_selectedDurationSeconds} sec / question ⏱️',
+                    '$_selectedDurationSeconds sec / question ⏱️',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10.5,
                       fontWeight: FontWeight.w700,
