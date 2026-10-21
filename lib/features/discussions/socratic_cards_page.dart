@@ -780,32 +780,42 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
             padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
             child: Row(
               children: [
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xFF10B981),
+                Expanded(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFF10B981),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          'TUTEUR IA',
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w800,
+                            color: isDark ? AltaColors.secondary : AltaColors.primary,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  'TUTEUR PÉDAGOGIQUE IA',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w800,
-                    color: isDark ? AltaColors.secondary : AltaColors.primary,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                const Spacer(),
                 GestureDetector(
                   onTap: () {
                     HapticFeedback.mediumImpact();
                     context.push('/holo-salon');
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       gradient: AltaColors.cyanGradient,
                       borderRadius: BorderRadius.circular(14),
@@ -827,7 +837,7 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Avatar Live',
+                          'Avatar',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -842,7 +852,7 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
                 GestureDetector(
                   onTap: _showHistoryModal,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: isDark ? DetColors.surfaceAlt : Colors.white,
                       borderRadius: BorderRadius.circular(14),

@@ -38,6 +38,7 @@ class NationalChallengeItem {
   final int recompenseTop10;
   final int recompenseParticipation;
   final List<ChallengeQuestionItem> questions;
+  final Map<String, dynamic>? adversaire;
 
   const NationalChallengeItem({
     required this.id,
@@ -51,6 +52,7 @@ class NationalChallengeItem {
     required this.recompenseTop10,
     required this.recompenseParticipation,
     required this.questions,
+    this.adversaire,
   });
 
   factory NationalChallengeItem.fromJson(Map<String, dynamic> json) {
@@ -68,6 +70,7 @@ class NationalChallengeItem {
       questions: (json['questions'] as List? ?? [])
           .map((e) => ChallengeQuestionItem.fromJson(e as Map<String, dynamic>))
           .toList(),
+      adversaire: json['adversaire'] as Map<String, dynamic>?,
     );
   }
 }
@@ -79,6 +82,10 @@ class ChallengeResultItem {
   final int piecesGagnees;
   final int xpGagnes;
   final int tempsSecondes;
+  final bool estVictoire;
+  final bool nouveauRecord;
+  final Map<String, dynamic>? adversaire;
+  final String? message;
   final List<dynamic> corrections;
 
   const ChallengeResultItem({
@@ -88,6 +95,10 @@ class ChallengeResultItem {
     required this.piecesGagnees,
     required this.xpGagnes,
     required this.tempsSecondes,
+    this.estVictoire = false,
+    this.nouveauRecord = false,
+    this.adversaire,
+    this.message,
     required this.corrections,
   });
 
@@ -99,6 +110,10 @@ class ChallengeResultItem {
       piecesGagnees: (json['pieces_gagnees'] as num?)?.toInt() ?? 0,
       xpGagnes: (json['xp_gagnes'] as num?)?.toInt() ?? 0,
       tempsSecondes: (json['temps_secondes'] as num?)?.toInt() ?? 0,
+      estVictoire: json['est_victoire'] as bool? ?? ((json['pieces_gagnees'] as num?)?.toInt() ?? 0) > 0,
+      nouveauRecord: json['nouveau_record'] as bool? ?? false,
+      adversaire: json['adversaire'] as Map<String, dynamic>?,
+      message: json['message'] as String?,
       corrections: json['corrections'] as List? ?? [],
     );
   }
@@ -194,8 +209,16 @@ class NationalChallengeNotifier extends StateNotifier<NationalChallengeState> {
     required String defiId,
     required Map<String, int> reponses,
     required int tempsSec,
+    String? adversaireNom,
+    int? adversaireScore,
+    int? adversaireTempsSec,
   }) async {
     state = state.copyWith(isSubmitting: true, error: null);
+    final adv = state.defiCourant?.adversaire;
+    final finalAdvNom = adversaireNom ?? adv?['nom'] as String?;
+    final finalAdvScore = adversaireScore ?? (adv?['score_simule'] as num?)?.toInt();
+    final finalAdvTemps = adversaireTempsSec ?? (adv?['temps_simule_sec'] as num?)?.toInt();
+
     for (final base in AltaApiConfig.candidateBaseUrls) {
       try {
         final res = await _dio.post(
@@ -207,6 +230,9 @@ class NationalChallengeNotifier extends StateNotifier<NationalChallengeState> {
             'apprenant_classe': _studentClass,
             'reponses': reponses,
             'temps_ecoule_sec': tempsSec,
+            if (finalAdvNom != null) 'adversaire_nom': finalAdvNom,
+            if (finalAdvScore != null) 'adversaire_score': finalAdvScore,
+            if (finalAdvTemps != null) 'adversaire_temps_sec': finalAdvTemps,
           },
         );
         if (res.statusCode == 200 && res.data is Map) {
@@ -216,7 +242,7 @@ class NationalChallengeNotifier extends StateNotifier<NationalChallengeState> {
             isSubmitting: false,
           );
 
-          // Rafraîchir les pièces et l'XP
+          // Rafraîchir les pièces et l'XP (seules les victoires ont des pièces créditées)
           _ref.read(walletProvider.notifier).refreshAll();
           _ref.read(gamificationProvider.notifier).addXp(resItem.xpGagnes);
           return resItem;
@@ -230,6 +256,10 @@ class NationalChallengeNotifier extends StateNotifier<NationalChallengeState> {
     }
     state = state.copyWith(isSubmitting: false);
     return null;
+  }
+
+  void reinitialiserPourNouveauDefi() {
+    state = state.copyWith(dernierResultat: null);
   }
 }
 

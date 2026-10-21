@@ -112,13 +112,15 @@ class DuelService {
     )).toList();
   }
 
-  /// Crée un salon de duel 1v1 avec Code de Validation (PIN)
+  /// Crée un salon de duel 1v1 avec Code de Validation (PIN) et chronomètre configurable
   Future<Map<String, dynamic>?> createRoom({
     required String creatorName,
     required String classLevel,
     required String subject,
     int count = 5,
     String period = 'trimestre_1',
+    int durationSeconds = 15,
+    String? studentId,
   }) async {
     final activeUrl = await getActiveBaseUrlFast();
     if (activeUrl == null) return null;
@@ -132,6 +134,8 @@ class DuelService {
           'subject': subject,
           'count': count,
           'period': period,
+          'duration_seconds': durationSeconds,
+          'student_id': studentId,
         },
         options: Options(
           connectTimeout: const Duration(seconds: 15),
@@ -148,10 +152,12 @@ class DuelService {
     return null;
   }
 
-  /// Rejoint un salon de duel avec le Code de Validation
+  /// Rejoint un salon de duel avec le Code de Validation et vérifie la classe
   Future<Map<String, dynamic>?> joinRoom({
     required String roomCode,
     required String playerName,
+    String? classLevel,
+    String? playerId,
   }) async {
     final activeUrl = await getActiveBaseUrlFast();
     if (activeUrl == null) return null;
@@ -162,6 +168,8 @@ class DuelService {
         data: {
           'room_code': roomCode.trim().toUpperCase(),
           'player_name': playerName,
+          'class_level': classLevel,
+          'player_id': playerId,
         },
         options: Options(
           connectTimeout: const Duration(seconds: 6),
@@ -228,12 +236,15 @@ class DuelService {
     return null;
   }
 
-  /// Met à jour le score du joueur dans la salle
+  /// Met à jour le score du joueur dans la salle avec distinction de rôle
   Future<void> updateScore({
     required String roomCode,
     required String playerName,
     required int score,
     required int questionIndex,
+    bool? isHost,
+    String? playerId,
+    bool isFinished = false,
   }) async {
     final activeUrl = await getActiveBaseUrlFast();
     if (activeUrl == null) return;
@@ -246,6 +257,9 @@ class DuelService {
           'player_name': playerName,
           'score': score,
           'question_index': questionIndex,
+          'is_host': isHost,
+          'player_id': playerId,
+          'is_finished': isFinished,
         },
         options: Options(connectTimeout: const Duration(seconds: 2)),
       );

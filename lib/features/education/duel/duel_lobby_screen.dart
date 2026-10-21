@@ -29,6 +29,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
   String _selectedSubject = 'Mathématiques';
   DuelMode _selectedMode = DuelMode.vsAi;
   int _selectedQuestionCount = 5;
+  int _selectedDurationSeconds = 15;
   String _selectedPeriod = 'trimestre_1';
   bool _isOnline = false;
   bool _isCheckingConnection = true;
@@ -53,7 +54,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
   // CRÉATION D'UNE SALLE AVEC CODE DE VALIDATION (PIN)
   // ───────────────────────────────────────────────────────────────────────────
   Future<void> _handleCreateRoomWithCode(
-      String playerName, String classId, int questionCount) async {
+      String playerName, String classId, int questionCount, int durationSeconds) async {
     if (!_isOnline) {
       _showOfflineNotice();
       return;
@@ -90,6 +91,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
       subject: _selectedSubject,
       count: questionCount,
       period: _selectedPeriod,
+      durationSeconds: durationSeconds,
     );
 
     if (!mounted) return;
@@ -111,7 +113,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
         .map((q) => DuelQuestion.fromJson(q as Map<String, dynamic>))
         .toList();
 
-    _showRoomWaitingSheet(roomCode, playerName, classId, questions);
+    _showRoomWaitingSheet(roomCode, playerName, classId, questions, durationSeconds);
   }
 
   void _showRoomWaitingSheet(
@@ -119,6 +121,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
     String playerName,
     String classId,
     List<DuelQuestion> questions,
+    int durationSeconds,
   ) {
     Timer? pollTimer;
     String? guestName;
@@ -171,6 +174,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                       playerName: playerName,
                       opponentName: guestName ?? 'Ami Connecté',
                       roomCode: roomCode,
+                      isHost: true,
+                      durationSeconds: durationSeconds,
                       initialQuestions:
                           questions.isNotEmpty ? questions : null,
                       questionCount: questions.length,
@@ -614,6 +619,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
               final res = await duelServiceProvider.joinRoom(
                 roomCode: code,
                 playerName: playerName,
+                classLevel: classId,
               );
 
               if (!mounted) return;
@@ -636,6 +642,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                           'Code de validation invalide ou salon inexistant.',
                     ),
                     backgroundColor: Colors.redAccent,
+                    duration: const Duration(seconds: 4),
                   ),
                 );
               }
@@ -699,6 +706,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                 if (status['status'] == 'IN_PROGRESS') {
                   hasStarted = true;
                   guestPollTimer?.cancel();
+                  final durationSec = (status['duration_seconds'] as num?)?.toInt() ?? 15;
                   if (sheetCtx.mounted) Navigator.pop(sheetCtx);
                   if (mounted) {
                     HapticFeedback.heavyImpact();
@@ -712,6 +720,8 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                           playerName: playerName,
                           opponentName: status['creator_name'] ?? creatorName,
                           roomCode: roomCode,
+                          isHost: false,
+                          durationSeconds: durationSec,
                           initialQuestions:
                               questions.isNotEmpty ? questions : null,
                           period: period,
@@ -1041,6 +1051,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
             initialQuestions: questions.isNotEmpty ? questions : null,
             questionCount: questionCount,
             period: _selectedPeriod,
+            durationSeconds: (res['room']?['duration_seconds'] as num?)?.toInt() ?? _selectedDurationSeconds,
           ),
         ),
       );
@@ -1071,6 +1082,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
             roomCode: 'ML-${1000 + DateTime.now().millisecond}',
             initialQuestions: localQuestions.isNotEmpty ? localQuestions : null,
             questionCount: questionCount,
+            durationSeconds: _selectedDurationSeconds,
           ),
         ),
       );
@@ -1514,12 +1526,103 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
 
             const SizedBox(height: 22),
 
-            // ── 3. PÉRIODE DU PROGRAMME SCOLAIRE (RAG ADAPTATIF) ───────────
+            // ── 3. CHRONOMÈTRE PAR QUESTION (DURÉE SÉLECTIONNABLE) ─────────
             Row(
               children: [
                 Expanded(
                   child: Text(
-                    '3. Période Scolaire du Programme',
+                    '3. Chronomètre par Question',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: textPri,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AltaColors.primary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${_selectedDurationSeconds} sec / question ⏱️',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: AltaColors.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            Row(
+              children: [
+                Expanded(
+                  child: _DurationOption(
+                    seconds: 10,
+                    label: 'Éclair',
+                    emoji: '⚡',
+                    isSelected: _selectedDurationSeconds == 10,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _selectedDurationSeconds = 10);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _DurationOption(
+                    seconds: 15,
+                    label: 'Standard',
+                    emoji: '⏱️',
+                    isSelected: _selectedDurationSeconds == 15,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _selectedDurationSeconds = 15);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _DurationOption(
+                    seconds: 20,
+                    label: 'Réflexion',
+                    emoji: '🧠',
+                    isSelected: _selectedDurationSeconds == 20,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _selectedDurationSeconds = 20);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _DurationOption(
+                    seconds: 30,
+                    label: 'Serein',
+                    emoji: '🛡️',
+                    isSelected: _selectedDurationSeconds == 30,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _selectedDurationSeconds = 30);
+                    },
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 22),
+
+            // ── 4. PÉRIODE DU PROGRAMME SCOLAIRE (RAG ADAPTATIF) ───────────
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '4. Période Scolaire du Programme',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -1590,9 +1693,9 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
 
             const SizedBox(height: 22),
 
-            // ── 4. SÉLECTION DE LA MATIÈRE DU PROGRAMME ─────────────────────
+            // ── 5. SÉLECTION DE LA MATIÈRE DU PROGRAMME ─────────────────────
             Text(
-              '4. Matière au Programme (${userState.classShortLabel})',
+              '5. Matière au Programme (${userState.classShortLabel})',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -1638,7 +1741,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
 
             const SizedBox(height: 28),
 
-            // ── 5. BOUTON ACTION LANCER LE DUEL ─────────────────────────────
+            // ── 6. BOUTON ACTION LANCER LE DUEL ─────────────────────────────
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -1655,12 +1758,20 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
 
                   if (_selectedMode == DuelMode.createRoomWithCode) {
                     _handleCreateRoomWithCode(
-                        firstName, userState.studentClassId, _selectedQuestionCount);
+                      firstName,
+                      userState.studentClassId,
+                      _selectedQuestionCount,
+                      _selectedDurationSeconds,
+                    );
                   } else if (_selectedMode == DuelMode.joinRoomWithCode) {
                     _handleJoinRoomDialog(firstName, userState.studentClassId);
                   } else if (_selectedMode == DuelMode.matchmakingMali) {
-                    _handleMatchmakeMali(firstName, userState.studentClassId,
-                        userState.classShortLabel, _selectedQuestionCount);
+                    _handleMatchmakeMali(
+                      firstName,
+                      userState.studentClassId,
+                      userState.classShortLabel,
+                      _selectedQuestionCount,
+                    );
                   } else {
                     Navigator.push(
                       context,
@@ -1675,6 +1786,7 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                               : 'Camarade',
                           questionCount: _selectedQuestionCount,
                           period: _selectedPeriod,
+                          durationSeconds: _selectedDurationSeconds,
                         ),
                       ),
                     );
@@ -1682,12 +1794,12 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
                 },
                 child: Text(
                   _selectedMode == DuelMode.createRoomWithCode
-                      ? 'Générer le code PIN ($_selectedQuestionCount Q)'
+                      ? 'Générer le code PIN ($_selectedQuestionCount Q • ${_selectedDurationSeconds}s)'
                       : (_selectedMode == DuelMode.joinRoomWithCode
                           ? 'Entrer le code de validation'
                           : (_selectedMode == DuelMode.matchmakingMali
-                              ? 'Rechercher un élève au Mali ($_selectedQuestionCount Q)'
-                              : 'Démarrer le duel chrono ($_selectedQuestionCount Q)')),
+                              ? 'Rechercher un élève au Mali ($_selectedQuestionCount Q • ${_selectedDurationSeconds}s)'
+                              : 'Démarrer le duel chrono ($_selectedQuestionCount Q • ${_selectedDurationSeconds}s)')),
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -1697,6 +1809,76 @@ class _DuelLobbyScreenState extends ConsumerState<DuelLobbyScreen> {
               ),
             ),
             const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DurationOption extends StatelessWidget {
+  const _DurationOption({
+    required this.seconds,
+    required this.label,
+    required this.emoji,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final int seconds;
+  final String label;
+  final String emoji;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AltaColors.surfaceDark : AltaColors.surfaceLight;
+    final borderCol = isDark ? AltaColors.borderDark : AltaColors.borderLight;
+    final textPri = isDark ? Colors.white : const Color(0xFF0F172A);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark ? AltaColors.surfaceAltDark : AltaColors.surfaceAltLight)
+              : cardBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? AltaColors.primary : borderCol,
+            width: isSelected ? 2.0 : 1.0,
+          ),
+        ),
+        child: Column(
+          children: [
+            Text(
+              emoji,
+              style: const TextStyle(fontSize: 15),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              '${seconds}s',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: isSelected ? AltaColors.primary : textPri,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 9.5,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected
+                    ? AltaColors.primary
+                    : (isDark ? Colors.white70 : const Color(0xFF475569)),
+              ),
+            ),
           ],
         ),
       ),
