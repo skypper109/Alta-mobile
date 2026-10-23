@@ -11,6 +11,7 @@ import '../../features/device/device_notifier.dart';
 import '../../features/device/device_page.dart';
 import '../../features/profile/gamification_notifier.dart';
 import '../../features/profile/user_prefs_notifier.dart';
+import '../../features/culture/core/controllers/culture_passport_controller.dart';
 import '../../shared/widgets.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -606,6 +607,8 @@ class ProfileScreen extends ConsumerWidget {
             onPressed: () async {
               Navigator.pop(ctx);
               await ref.read(userPrefsProvider.notifier).resetOnboarding();
+              await ref.read(gamificationProvider.notifier).resetStats();
+              await ref.read(culturePassportProvider.notifier).resetPassport();
               if (context.mounted) {
                 context.go('/onboarding');
               }

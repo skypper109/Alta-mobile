@@ -25,7 +25,7 @@ class GamificationState {
 
   int get xpInt {
     final cleaned = xp.replaceAll(RegExp(r'[^0-9]'), '');
-    return int.tryParse(cleaned) ?? 3450;
+    return int.tryParse(cleaned) ?? 0;
   }
 
   int get streakInt {
@@ -35,7 +35,7 @@ class GamificationState {
 
   int get coinsInt {
     final cleaned = coins.replaceAll(RegExp(r'[^0-9]'), '');
-    return int.tryParse(cleaned) ?? 240;
+    return int.tryParse(cleaned) ?? 0;
   }
 
   double getProgressForSubject(String subject) {
@@ -51,7 +51,7 @@ class GamificationState {
         return entry.value;
       }
     }
-    return 0.50; // Progression par défaut réaliste
+    return 0.0; // Progression par défaut à zéro au premier lancement
   }
 
   GamificationState copyWith({
@@ -76,23 +76,11 @@ class GamificationState {
 class GamificationNotifier extends StateNotifier<GamificationState> {
   GamificationNotifier(this._ref)
       : super(const GamificationState(
-          streak: '12j',
-          xp: '3 450',
-          coins: '240',
-          seances: '28',
-          subjectsProgress: {
-            'Sociologie Générale': 0.68,
-            'Droit & Institutions': 0.74,
-            'Science Politique': 0.52,
-            'Histoire-Géographie': 0.80,
-            'Économie': 0.62,
-            'Philosophie': 0.45,
-            'Mathématiques': 0.78,
-            'Physique-Chimie': 0.65,
-            'Biologie': 0.70,
-            'Français': 0.85,
-            'Anglais': 0.60,
-          },
+          streak: '0j',
+          xp: '0',
+          coins: '0',
+          seances: '0',
+          subjectsProgress: {},
         )) {
     _loadFromLocalCache();
     fetchStatsFromBackend();
@@ -100,7 +88,7 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
 
   final Ref _ref;
 
-  static const _prefsKey = 'alternia_gamification_stats_cache';
+  static const _prefsKey = 'alternia_gamification_stats_v3';
 
   static String _formatNumber(int number) {
     return number.toString().replaceAllMapped(
@@ -158,7 +146,7 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
         (data['streak'] != null ? '${data['streak']}j' : state.streak);
 
     final xp = data['xp_label'] as String? ??
-        (data['xp'] != null ? _formatNumber(int.tryParse(data['xp'].toString()) ?? 3450) : state.xp);
+        (data['xp'] != null ? _formatNumber(int.tryParse(data['xp'].toString()) ?? 0) : state.xp);
 
     final coins = data['coins_label'] as String? ??
         (data['coins'] != null ? data['coins'].toString() : state.coins);
@@ -317,12 +305,19 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
     await _saveLocalCache();
   }
 
-  /// Définit manuellement la valeur du streak
-  Future<void> setStreak(int streakCount) async {
-    state = state.copyWith(
-      streak: '${streakCount}j',
+  /// Réinitialise l'ensemble des métriques de jeu à zéro (utilisé lors de la réinitialisation du profil)
+  Future<void> resetStats() async {
+    state = const GamificationState(
+      streak: '0j',
+      xp: '0',
+      coins: '0',
+      seances: '0',
+      subjectsProgress: {},
     );
-    await _saveLocalCache();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_prefsKey);
+    } catch (_) {}
   }
 }
 

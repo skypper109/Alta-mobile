@@ -156,11 +156,11 @@ class ChallengeUserProfile {
   final int dailyStreak;
 
   const ChallengeUserProfile({
-    this.level = 2,
-    this.rankTitle = 'Initié du Manden',
-    this.totalXp = 380,
-    this.riddlesSolved = 7,
-    this.quizzesCompleted = 4,
-    this.dailyStreak = 3,
+    this.level = 1,
+    this.rankTitle = 'Apprenti du Sahel',
+    this.totalXp = 0,
+    this.riddlesSolved = 0,
+    this.quizzesCompleted = 0,
+    this.dailyStreak = 0,
   });
 }

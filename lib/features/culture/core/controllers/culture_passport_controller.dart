@@ -17,8 +17,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
   final Ref _ref;
   final CultureApiClient _apiClient;
 
-  static const String _prefEntriesKey = 'culture_passport_entries_v2';
-  static const String _prefIssuedAtKey = 'culture_passport_issued_at_v2';
+  static const String _prefEntriesKey = 'culture_passport_entries_v3';
+  static const String _prefIssuedAtKey = 'culture_passport_issued_at_v3';
 
   CulturePassportNotifier(this._ref, {CultureApiClient? apiClient})
       : _apiClient = apiClient ?? CultureApiClient(),
@@ -52,9 +52,6 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
         regions.add(e.regionId!.trim());
       }
     }
-    if (regions.isEmpty) {
-      return ['koulikoro', 'tombouctou', 'sikasso', 'mopti'];
-    }
     return regions.toList();
   }
 
@@ -66,9 +63,9 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
     return PassportState(
       travelerName: travelerName,
       passportNumber: passportNum,
-      issuedAt: DateTime.now().subtract(const Duration(days: 14)),
-      entries: _initialDiscoveries,
-      exploredRegionIds: _computeExploredRegions(_initialDiscoveries),
+      issuedAt: DateTime.now(),
+      entries: const [],
+      exploredRegionIds: const [],
       featuredDiscoveryOfTheDay: _defaultFeaturedDiscovery,
     );
   }
@@ -210,161 +207,6 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
     xpEarned: 50,
   );
 
-  static final List<PassportEntry> _initialDiscoveries = [
-    // 1. Figures
-    PassportEntry(
-      id: 'perso_soundiata',
-      type: PassportItemType.personnage,
-      title: 'Soundiata Keïta',
-      subtitle: 'Le Lion du Manden & Proclamateur de la Charte de 1236',
-      regionId: 'koulikoro',
-      regionName: 'Koulikoro',
-      photoUrl: 'assets/images/culture/personnages/soundiata.jpg',
-      tag: 'Mansa Bâtisseur',
-      discoveredAt: DateTime.now().subtract(const Duration(days: 12)),
-      culturalQuote:
-          '« Toute vie humaine est une vie. Un tort causé à une vie exige réparation. »',
-      isMilestone: true,
-      milestoneLabel: 'Première figure historique découverte',
-      targetRoute: '/culture/personnage/perso_soundiata',
-      xpEarned: 50,
-    ),
-    PassportEntry(
-      id: 'perso_mansa_moussa',
-      type: PassportItemType.personnage,
-      title: 'Mansa Moussa',
-      subtitle: 'L\'Empereur d\'Or & Mécène du Savoir Universel',
-      regionId: 'tombouctou',
-      regionName: 'Tombouctou',
-      photoUrl: 'assets/images/culture/personnages/mansa_moussa.jpg',
-      tag: 'Âge d\'Or',
-      discoveredAt: DateTime.now().subtract(const Duration(days: 9)),
-      culturalQuote:
-          '« Il fit rayonner les universités du Mali jusqu\'aux confins du monde méditerranéen. »',
-      targetRoute: '/culture/personnage/perso_mansa_moussa',
-      xpEarned: 50,
-    ),
-    PassportEntry(
-      id: 'perso_babemba',
-      type: PassportItemType.personnage,
-      title: 'Babemba Traoré',
-      subtitle: 'Roi du Kénédougou & Héros du Tata',
-      regionId: 'sikasso',
-      regionName: 'Sikasso',
-      photoUrl: 'assets/images/culture/personnages/babemba_traore.jpg',
-      tag: 'Résistance',
-      discoveredAt: DateTime.now().subtract(const Duration(days: 6)),
-      culturalQuote: '« Sayi té Maloya Sa (Plutôt la mort que la honte). »',
-      targetRoute: '/culture/personnage/perso_babemba',
-      xpEarned: 50,
-    ),
-
-    // 2. Monuments
-    PassportEntry(
-      id: 'monument_djingareyber',
-      type: PassportItemType.monument,
-      title: 'Mosquée Djingareyber',
-      subtitle: 'Sanctuaire d\'argile et de savoir de Tombouctou',
-      regionId: 'tombouctou',
-      regionName: 'Tombouctou',
-      photoUrl: 'assets/images/culture/monuments/mosquee_djingareyber.jpg',
-      tag: 'Joyau UNESCO',
-      discoveredAt: DateTime.now().subtract(const Duration(days: 10)),
-      culturalQuote:
-          '« Un lieu où la prière et la science se rencontrent depuis sept siècles. »',
-      isMilestone: true,
-      milestoneLabel: 'Premier monument historique exploré',
-      targetRoute: '/culture/monument/monument_djingareyber',
-      xpEarned: 40,
-    ),
-    PassportEntry(
-      id: 'monument_mosquee_djenne',
-      type: PassportItemType.monument,
-      title: 'Grande Mosquée de Djenné',
-      subtitle: 'Plus grand édifice en terre crue (banco) au monde',
-      regionId: 'mopti',
-      regionName: 'Mopti',
-      photoUrl:
-          'assets/images/culture/monuments/monument_mosquee_djenne/dje_1.webp',
-      tag: 'Architecture Banco',
-      discoveredAt: DateTime.now().subtract(const Duration(days: 4)),
-      culturalQuote:
-          '« Chaque année, la fête du Crépissage rassemble toute la communauté du Djoliba. »',
-      targetRoute: '/culture/monument/monument_mosquee_djenne',
-      xpEarned: 40,
-    ),
-
-    // 3. Villes
-    PassportEntry(
-      id: 'ville_djenne',
-      type: PassportItemType.ville,
-      title: 'Djenné',
-      subtitle: 'La Cité Millénaire du Banco & de la Fraternité',
-      regionId: 'mopti',
-      regionName: 'Mopti',
-      photoUrl: 'assets/images/culture/villes/djenne_ville.jpg',
-      tag: 'Cité d\'Art',
-      discoveredAt: DateTime.now().subtract(const Duration(days: 8)),
-      culturalQuote:
-          '« Berceau des bâtisseurs maçons Barey et du carrefour fluvial du Bani. »',
-      targetRoute: '/culture/ville/ville_djenne',
-      xpEarned: 30,
-    ),
-    PassportEntry(
-      id: 'ville_sikasso',
-      type: PassportItemType.ville,
-      title: 'Sikasso',
-      subtitle: 'La Cité du Kénédougou & Verger du Mali',
-      regionId: 'sikasso',
-      regionName: 'Sikasso',
-      photoUrl: 'assets/images/culture/villes/sikasso_ville.jpg',
-      tag: 'Capitale du Sud',
-      discoveredAt: DateTime.now().subtract(const Duration(days: 5)),
-      culturalQuote:
-          '« Terre fertile, remparts de mémoire et carrefour des rythmes Balafon. »',
-      targetRoute: '/culture/ville/ville_sikasso',
-      xpEarned: 30,
-    ),
-
-    // 4. Contes
-    PassportEntry(
-      id: 'conte_lievre_hyene',
-      type: PassportItemType.conte,
-      title: 'Zoumana le Lièvre et Namori l\'Hyène',
-      subtitle: 'La ruse de l\'esprit face à la cupidité de la force',
-      regionId: null,
-      regionName: 'Tout le Mali',
-      photoUrl: 'assets/images/culture/villes/djenne_ville.jpg',
-      tag: 'Fable Mandingue',
-      discoveredAt: DateTime.now().subtract(const Duration(days: 7)),
-      culturalQuote:
-          '« La sagesse et la mesure triomphent toujours de la force aveugle. »',
-      isMilestone: true,
-      milestoneLabel: 'Premier conte et sagesse achevés',
-      targetRoute: '/culture/conte/conte_lievre_hyene',
-      xpEarned: 60,
-    ),
-
-    // 5. Défis
-    PassportEntry(
-      id: 'riddle_vent',
-      type: PassportItemType.defi,
-      title: 'Devinette : Le Vent (Fonyo)',
-      subtitle: 'Je voyage sans jambes et parle sans bouche...',
-      regionId: null,
-      regionName: 'Tout le Mali',
-      photoUrl: 'assets/images/culture/villes/bandiagara_falaise.jpg',
-      tag: 'Devinette',
-      discoveredAt: DateTime.now().subtract(const Duration(days: 3)),
-      culturalQuote:
-          '« Le vent ne brise jamais l\'herbe qui sait se courber avec humilité. »',
-      isMilestone: true,
-      milestoneLabel: 'Première énigme traditionnelle résolue',
-      targetRoute: '/culture/defis/devinettes',
-      xpEarned: 120,
-    ),
-  ];
-
   /// Enregistre une découverte de manière idempotente dans le Passeport,
   /// la persiste localement et la soumet au serveur central
   bool recordDiscovery({
@@ -447,6 +289,18 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
     } catch (_) {}
 
     return true;
+  }
+
+  /// Réinitialise le passeport culturel à zéro (efface les tampons locaux)
+  Future<void> resetPassport() async {
+    state = _createInitialState(_ref);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_prefEntriesKey);
+      await prefs.remove(_prefIssuedAtKey);
+      await prefs.remove('culture_passport_entries_v2');
+      await prefs.remove('culture_passport_issued_at_v2');
+    } catch (_) {}
   }
 
   /// Liste des distinctions culturelles calculées dynamiquement
