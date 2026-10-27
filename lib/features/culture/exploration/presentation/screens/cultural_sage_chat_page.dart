@@ -674,7 +674,8 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
   @override
   Widget build(BuildContext context) {
     final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
-    final campfireHeight = isKeyboardOpen ? 140.0 : 275.0;
+    final isTablet = CultureResponsive.isTablet(context);
+    final campfireHeight = isKeyboardOpen ? 140.0 : (isTablet ? 320.0 : 275.0);
 
     return Theme(
       data: AppTheme.darkTheme,
@@ -794,58 +795,61 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
       },
     ];
 
-    return Container(
-      height: 34,
-      margin: const EdgeInsets.only(bottom: 6),
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        itemCount: allTopics.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 7),
-        itemBuilder: (context, i) {
-          final t = allTopics[i];
-          final isCatalog = t['prompt'] == 'catalog';
+    return CultureResponsive.constrainedCentered(
+      maxWidth: CultureResponsive.kMaxDetailWidth,
+      child: Container(
+        height: 34,
+        margin: const EdgeInsets.only(bottom: 6),
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          itemCount: allTopics.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 7),
+          itemBuilder: (context, i) {
+            final t = allTopics[i];
+            final isCatalog = t['prompt'] == 'catalog';
 
-          return GestureDetector(
-            onTap: () {
-              if (isCatalog) {
-                _showNamesCatalogModal();
-              } else {
-                _sendMessage(t['prompt']!);
-              }
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
-              decoration: BoxDecoration(
-                color: isCatalog ? const Color(0x33D97706) : AppColors.surfaceAlt,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isCatalog ? AppColors.accentLight : AppColors.border,
-                  width: 1.0,
+            return GestureDetector(
+              onTap: () {
+                if (isCatalog) {
+                  _showNamesCatalogModal();
+                } else {
+                  _sendMessage(t['prompt']!);
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isCatalog ? const Color(0x33D97706) : AppColors.surfaceAlt,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isCatalog ? AppColors.accentLight : AppColors.border,
+                    width: 1.0,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isCatalog) ...[
+                      const Icon(Icons.menu_book_rounded,
+                          size: 13, color: AppColors.accentLight),
+                      const SizedBox(width: 5),
+                    ],
+                    Text(
+                      t['label']!,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: isCatalog ? AppColors.accentLight : AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isCatalog) ...[
-                    const Icon(Icons.menu_book_rounded,
-                        size: 13, color: AppColors.accentLight),
-                    const SizedBox(width: 5),
-                  ],
-                  Text(
-                    t['label']!,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w700,
-                      color: isCatalog ? AppColors.accentLight : AppColors.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -853,16 +857,19 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
   // ── 5. LISTE DES MESSAGES ──────────────────────────────────────────────────
 
   Widget _buildTranscript() {
-    return ListView.builder(
-      controller: _scrollCtrl,
-      padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
-      itemCount: _messages.length + (_isLoading ? 1 : 0),
-      itemBuilder: (context, i) {
-        if (_isLoading && i == _messages.length) {
-          return _buildThinkingCard();
-        }
-        return _buildMessageCard(_messages[i]);
-      },
+    return CultureResponsive.constrainedCentered(
+      maxWidth: CultureResponsive.kMaxDetailWidth,
+      child: ListView.builder(
+        controller: _scrollCtrl,
+        padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
+        itemCount: _messages.length + (_isLoading ? 1 : 0),
+        itemBuilder: (context, i) {
+          if (_isLoading && i == _messages.length) {
+            return _buildThinkingCard();
+          }
+          return _buildMessageCard(_messages[i]);
+        },
+      ),
     );
   }
 
@@ -1467,16 +1474,20 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
 
   Widget _buildInputBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 6, 12, 8),
       decoration: const BoxDecoration(
         color: Color(0xFF140F0C),
         border: Border(
           top: BorderSide(color: Color(0x29D97706), width: 1.0),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      child: SafeArea(
+        top: false,
+        child: CultureResponsive.constrainedCentered(
+          maxWidth: CultureResponsive.kMaxDetailWidth,
+          padding: const EdgeInsets.fromLTRB(12, 6, 12, 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
           // Bannière d'écoute vocale en direct si le micro est actif
           if (_isListening)
             Container(
@@ -1685,7 +1696,9 @@ class _CulturalSageChatPageState extends State<CulturalSageChatPage>
               ),
             ],
           ),
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }

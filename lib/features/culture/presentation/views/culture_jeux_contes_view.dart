@@ -236,7 +236,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                     crossAxisCount: 2,
                     crossAxisSpacing: 14,
                     mainAxisSpacing: 14,
-                    childAspectRatio: 2.85,
+                    mainAxisExtent: 110,
                   ),
                   itemBuilder: (ctx, index) {
                     final story = filteredStories[index];
@@ -976,7 +976,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
           crossAxisCount: 2,
           crossAxisSpacing: 14,
           mainAxisSpacing: 14,
-          childAspectRatio: 2.85,
+          mainAxisExtent: 125,
         ),
         itemBuilder: (ctx, index) => buildPackCard(packs[index]),
       );
@@ -1061,16 +1061,32 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
               ],
             ),
             const SizedBox(height: 10),
-            Text(
-              '« ${riddle.riddleText} »',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                height: 1.35,
-                color: titleColor,
+            if (isTablet)
+              Expanded(
+                child: Text(
+                  '« ${riddle.riddleText} »',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    height: 1.35,
+                    color: titleColor,
+                  ),
+                  maxLines: 5,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              )
+            else ...[
+              Text(
+                '« ${riddle.riddleText} »',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  height: 1.35,
+                  color: titleColor,
+                ),
               ),
-            ),
-            const Spacer(),
+              const SizedBox(height: 12),
+            ],
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -1149,7 +1165,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
           crossAxisCount: 2,
           crossAxisSpacing: 14,
           mainAxisSpacing: 14,
-          childAspectRatio: 2.3,
+          mainAxisExtent: 215,
         ),
         itemBuilder: (ctx, index) {
           return AnimatedCulturalReveal(
@@ -1222,7 +1238,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
               crossAxisCount: 2,
               crossAxisSpacing: 14,
               mainAxisSpacing: 14,
-              childAspectRatio: 2.85,
+              mainAxisExtent: 255,
             ),
             itemBuilder: (ctx, index) {
               final proverb = proverbs[index];
@@ -1236,6 +1252,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                   borderCol: borderCol,
                   titleColor: titleColor,
                   subtitleColor: subtitleColor,
+                  isGridItem: true,
                 ),
               );
             },
@@ -1573,11 +1590,12 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
     required Color borderCol,
     required Color titleColor,
     required Color subtitleColor,
+    bool isGridItem = false,
   }) {
     final isSpeaking = _currentlySpeakingProverbId == proverb.id;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: isGridItem ? 0 : 12),
       child: CulturalInteractiveCard(
         padding: const EdgeInsets.all(16),
         showSudaneseCorners: true,
@@ -1679,45 +1697,87 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
             ),
             const SizedBox(height: 10),
 
-            // Citation en langue originale (Bambara...)
-            if (proverb.originalText != null &&
-                proverb.originalText!.isNotEmpty) ...[
-              Text(
-                '« ${proverb.originalText} »',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12.5,
-                  fontStyle: FontStyle.italic,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFFD97706),
+            if (isGridItem) ...[
+              if (proverb.originalText != null &&
+                  proverb.originalText!.isNotEmpty) ...[
+                Text(
+                  '« ${proverb.originalText} »',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFD97706),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 3),
+              ],
+              Text(
+                '« ${proverb.text} »',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w800,
+                  height: 1.3,
+                  color: titleColor,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
+              Expanded(
+                child: Text(
+                  proverb.meaning,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    height: 1.35,
+                    color: subtitleColor,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ] else ...[
+              // Citation en langue originale (Bambara...)
+              if (proverb.originalText != null &&
+                  proverb.originalText!.isNotEmpty) ...[
+                Text(
+                  '« ${proverb.originalText} »',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12.5,
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFD97706),
+                  ),
+                ),
+                const SizedBox(height: 4),
+              ],
+
+              // Proverbe en français
+              Text(
+                '« ${proverb.text} »',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  height: 1.35,
+                  color: titleColor,
+                ),
+              ),
+              const SizedBox(height: 6),
+
+              // Signification & Enseignement
+              Text(
+                proverb.meaning,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11.5,
+                  height: 1.4,
+                  color: subtitleColor,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 12),
             ],
-
-            // Proverbe en français
-            Text(
-              '« ${proverb.text} »',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                height: 1.35,
-                color: titleColor,
-              ),
-            ),
-            const SizedBox(height: 6),
-
-            // Signification & Enseignement
-            Text(
-              proverb.meaning,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 11.5,
-                height: 1.4,
-                color: subtitleColor,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 12),
 
             // Pied de carte : Orateur & Boutons d'Action
             Row(

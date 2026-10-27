@@ -190,6 +190,7 @@ class NationalChallengeNotifier extends StateNotifier<NationalChallengeState> {
           queryParameters: queryParams,
         );
         if (res.statusCode == 200 && res.data is List) {
+          AltaApiConfig.setActiveBaseUrl(base);
           final list = (res.data as List)
               .map((e) => NationalChallengeItem.fromJson(e as Map<String, dynamic>))
               .toList();
@@ -236,6 +237,7 @@ class NationalChallengeNotifier extends StateNotifier<NationalChallengeState> {
           },
         );
         if (res.statusCode == 200 && res.data is Map) {
+          AltaApiConfig.setActiveBaseUrl(base);
           final resItem = ChallengeResultItem.fromJson(res.data as Map<String, dynamic>);
           state = state.copyWith(
             dernierResultat: resItem,

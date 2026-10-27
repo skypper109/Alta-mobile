@@ -76,17 +76,29 @@ class DeviceRepository implements IDeviceRepository {
   }
 
   List<String> _buildCandidateList() {
-    return [
-      '172.20.10.14',
+    final activeBase = AltaApiConfig.activeBaseUrl;
+    final Set<String> candidates = {};
+
+    if (activeBase != null && activeBase.isNotEmpty) {
+      try {
+        final uri = Uri.parse(activeBase);
+        if (uri.host.isNotEmpty) candidates.add(uri.host);
+      } catch (_) {}
+    }
+
+    candidates.addAll([
       '127.0.0.1',
       'localhost',
       '10.0.2.2',
       '192.168.4.1',
       '192.168.1.1',
       '192.168.1.100',
+      '172.20.10.14',
       '10.42.0.1',
       '172.16.0.1',
-    ];
+    ]);
+
+    return candidates.toList();
   }
 
   Future<DeviceEntity?> _probeDevice(String ip) async {
@@ -104,6 +116,8 @@ class DeviceRepository implements IDeviceRepository {
         );
 
         if (response.statusCode == 200 && response.data is Map) {
+          AltaApiConfig.setActiveBaseUrl(
+              ip.startsWith('http') ? ip : 'http://$ip:$port');
           return _parseDeviceInfo(
               ip, port, response.data as Map<String, dynamic>);
         }
@@ -135,6 +149,7 @@ class DeviceRepository implements IDeviceRepository {
     try {
       final wsTarget = 'ws://${device.ipAddress}:${device.port}/ws/session';
       await _wsManager.connect(wsTarget);
+      AltaApiConfig.setActiveBaseUrl('http://${device.ipAddress}:${device.port}');
       _logger.i('[Device] Connexion WS à $wsTarget');
       return right(device.copyWith(isConnected: true));
     } catch (e) {

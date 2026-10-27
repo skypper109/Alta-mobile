@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/constants.dart';
 import '../../core/malian_school_system.dart';
+import '../../features/profile/gamification_notifier.dart';
 import '../../features/profile/user_prefs_notifier.dart';
 import '../common/widgets/alternia_logo.dart';
 
@@ -333,6 +334,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           classId: classToSave,
           school: _selectedSchool,
         );
+    await ref.read(gamificationProvider.notifier).resetStats();
 
     if (mounted) {
       if (_wantsClassSelection && classToSave.isNotEmpty) {

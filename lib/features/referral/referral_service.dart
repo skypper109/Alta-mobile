@@ -114,6 +114,7 @@ class ReferralNotifier extends StateNotifier<ReferralState> {
           },
         );
         if (res.statusCode == 200 && res.data is Map) {
+          AltaApiConfig.setActiveBaseUrl(base);
           final d = res.data as Map<String, dynamic>;
           final hist = (d['historique_filleuls'] as List? ?? [])
               .map((e) => ReferralHistoryItem.fromJson(e as Map<String, dynamic>))
@@ -150,6 +151,7 @@ class ReferralNotifier extends StateNotifier<ReferralState> {
           },
         );
         if (res.statusCode == 200) {
+          AltaApiConfig.setActiveBaseUrl(base);
           await fetchSummary();
           return true;
         }

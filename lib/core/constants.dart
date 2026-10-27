@@ -10,20 +10,55 @@ import 'package:flutter/material.dart';
 abstract final class AltaApiConfig {
   /// URL permanente officielle du serveur AlternIA (Domaine LWS / Cloudflare)
   static const String serverBaseUrl = 'https://api.alterniamali.com';
-  static const String defaultLanUrl = 'http://172.20.10.14:8000';
+  static const String defaultLanUrl = 'http://127.0.0.1:8000';
   static const String cloudTunnelUrl = 'https://api.alterniamali.com';
 
-  /// URLs candidates testées automatiquement par l'application :
-  /// Priorité aux adresses locales et Wi-Fi LAN directes du boîtier/serveur, puis au cloud.
-  static const List<String> candidateBaseUrls = [
-    'http://172.20.10.14:8000',
+  static String? _cachedActiveBaseUrl;
+  static DateTime? _cacheTimestamp;
+
+  static const List<String> _baseCandidateList = [
     'http://127.0.0.1:8000',
     'http://localhost:8000',
     'http://10.0.2.2:8000',
+    'https://api.alterniamali.com',
     'http://192.168.4.1:8000',
     'http://192.168.1.100:8000',
-    'https://api.alterniamali.com',
+    'http://172.20.10.14:8000',
   ];
+
+  /// URLs candidates ordonnées intelligemment :
+  /// Si un serveur actif a été détecté récemment (< 2 min), il est placé systématiquement en index 0
+  /// pour garantir 0ms d'attente à toutes les requêtes subséquentes.
+  static List<String> get candidateBaseUrls {
+    final active = _cachedActiveBaseUrl;
+    if (active != null &&
+        _cacheTimestamp != null &&
+        DateTime.now().difference(_cacheTimestamp!).inMinutes < 2) {
+      return [
+        active,
+        ..._baseCandidateList.where((u) => u != active),
+      ];
+    }
+    return _baseCandidateList;
+  }
+
+  /// URL active mémorisée en cache
+  static String? get activeBaseUrl => _cachedActiveBaseUrl;
+
+  /// Enregistre une URL active confirmée pour synchroniser l'ensemble des services de l'application
+  static void setActiveBaseUrl(String url) {
+    final clean = url.trim();
+    if (clean.isNotEmpty) {
+      _cachedActiveBaseUrl = clean;
+      _cacheTimestamp = DateTime.now();
+    }
+  }
+
+  /// Réinitialise le cache en cas d'erreur réseau avérée
+  static void invalidateActiveBaseUrl() {
+    _cachedActiveBaseUrl = null;
+    _cacheTimestamp = null;
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════

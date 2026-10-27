@@ -7,8 +7,8 @@ import 'core/theme/app_theme.dart';
 import 'presentation/common/providers/theme_provider.dart';
 import 'presentation/router/app_router.dart';
 
-class DetAiApp extends ConsumerWidget {
-  const DetAiApp({super.key});
+class AlterniaApp extends ConsumerWidget {
+  const AlterniaApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,3 +33,6 @@ class DetAiApp extends ConsumerWidget {
     );
   }
 }
+
+/// Alias de rétrocompatibilité
+typedef DetAiApp = AlterniaApp;

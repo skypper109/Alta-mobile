@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/malian_school_system.dart';
+import '../../features/profile/gamification_notifier.dart';
 import '../../features/profile/user_prefs_notifier.dart';
 import '../common/widgets/alternia_logo.dart';
 import '../common/widgets/universe_splash_transition.dart';
@@ -115,6 +116,7 @@ class _EducationSetupScreenState extends ConsumerState<EducationSetupScreen> {
           name: name,
           classId: _selectedClassId,
         );
+    await ref.read(gamificationProvider.notifier).resetStats();
 
     if (mounted) {
       // Transition cinématique avec le rassemblement du logo officiel

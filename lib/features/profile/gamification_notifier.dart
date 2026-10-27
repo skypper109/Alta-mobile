@@ -76,7 +76,7 @@ class GamificationState {
 class GamificationNotifier extends StateNotifier<GamificationState> {
   GamificationNotifier(this._ref)
       : super(const GamificationState(
-          streak: '0j',
+          streak: '1j',
           xp: '0',
           coins: '0',
           seances: '0',
@@ -308,7 +308,7 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
   /// Réinitialise l'ensemble des métriques de jeu à zéro (utilisé lors de la réinitialisation du profil)
   Future<void> resetStats() async {
     state = const GamificationState(
-      streak: '0j',
+      streak: '1j',
       xp: '0',
       coins: '0',
       seances: '0',

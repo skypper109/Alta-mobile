@@ -119,6 +119,8 @@ class UserPrefsNotifier extends StateNotifier<UserProfileState> {
       await prefs.setString(_keyClassId, classId.trim());
       await prefs.setString(_keySchool, school.trim());
       await prefs.setBool(_keyOnboarding, true);
+      // Réinitialise le cache de gamification pour que le nouvel inscrit parte d'une base saine (1j, 0 XP)
+      await prefs.remove('alternia_gamification_stats_v3');
 
       state = UserProfileState(
         name: name.trim(),

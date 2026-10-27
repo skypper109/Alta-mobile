@@ -183,6 +183,7 @@ class WalletNotifier extends StateNotifier<WalletState> {
           queryParameters: {'student_id': _studentId},
         );
         if (res.statusCode == 200 && res.data is Map) {
+          AltaApiConfig.setActiveBaseUrl(base);
           final d = res.data as Map<String, dynamic>;
           state = state.copyWith(
             soldePieces: (d['solde_pieces'] as num?)?.toInt() ?? state.soldePieces,
@@ -208,6 +209,7 @@ class WalletNotifier extends StateNotifier<WalletState> {
           queryParameters: {'student_id': _studentId, 'limit': 30},
         );
         if (res.statusCode == 200 && res.data is List) {
+          AltaApiConfig.setActiveBaseUrl(base);
           final list = (res.data as List)
               .map((e) => WalletTransactionItem.fromJson(e as Map<String, dynamic>))
               .toList();
@@ -226,6 +228,7 @@ class WalletNotifier extends StateNotifier<WalletState> {
           queryParameters: {'apprenant_id': _studentId},
         );
         if (res.statusCode == 200 && res.data is List) {
+          AltaApiConfig.setActiveBaseUrl(base);
           final list = (res.data as List)
               .map((e) => WithdrawalRequestItem.fromJson(e as Map<String, dynamic>))
               .toList();
@@ -255,6 +258,7 @@ class WalletNotifier extends StateNotifier<WalletState> {
           },
         );
         if (res.statusCode == 200) {
+          AltaApiConfig.setActiveBaseUrl(base);
           await refreshAll();
           return true;
         }

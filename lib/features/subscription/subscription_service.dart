@@ -114,6 +114,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
           queryParameters: {'student_id': _studentId},
         );
         if (res.statusCode == 200 && res.data is Map) {
+          AltaApiConfig.setActiveBaseUrl(base);
           final d = res.data as Map<String, dynamic>;
           state = state.copyWith(
             estPremium: d['est_premium'] as bool? ?? false,
@@ -134,6 +135,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
       try {
         final res = await _dio.get('$base/api/abonnements/offres');
         if (res.statusCode == 200 && res.data is List) {
+          AltaApiConfig.setActiveBaseUrl(base);
           final list = (res.data as List)
               .map((e) => SubscriptionOfferItem.fromJson(e as Map<String, dynamic>))
               .toList();
@@ -156,6 +158,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
           },
         );
         if (res.statusCode == 200) {
+          AltaApiConfig.setActiveBaseUrl(base);
           await refresh();
           return true;
         }
