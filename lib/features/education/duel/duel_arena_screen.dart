@@ -673,8 +673,11 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
     final isDraw = _playerScore == _opponentScore;
     final playerWon = _playerScore > _opponentScore;
 
-    final xpGained = playerWon ? 250 : (isDraw ? 120 : 75);
-    final coinsGained = playerWon ? 50 : 0; // 0 pièce si on ne gagne pas, uniquement des XP !
+    // Récompense conditionnée à la réussite réelle du défi (victoire ou égalité avec score > 0)
+    final xpGained = (playerWon && _playerScore > 0)
+        ? 120
+        : (isDraw && _playerScore > 0 ? 50 : 0);
+    final coinsGained = (playerWon && _playerScore > 0) ? 25 : 0;
 
     ref.read(gamificationProvider.notifier).addDuelReward(
           xpGained: xpGained,

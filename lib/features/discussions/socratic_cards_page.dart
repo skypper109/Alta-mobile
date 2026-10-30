@@ -773,8 +773,11 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Column(
-        children: [
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 880),
+          child: Column(
+            children: [
           // ── Sous-titre Discussions & Boutons Actions ───────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
@@ -1391,8 +1394,10 @@ class _SocraticCardsPageState extends ConsumerState<SocraticCardsPage>
             ),
           ],
         ),
-    );
-  }
+      ),
+    ),
+  );
+}
 
   Widget _buildSubjectChip({
     required String label,

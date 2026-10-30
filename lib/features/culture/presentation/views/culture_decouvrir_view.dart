@@ -8,7 +8,6 @@ import '../../core/controllers/culture_filter_controller.dart';
 import '../../core/models/culture_item.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../immersive/immersive.dart';
-import '../widgets/culture_audio_listen_badge.dart';
 
 /// Vue 2 : Découverte — Hub Central d'Exploration Culturelle du Mali
 /// Grandes Figures, Monuments Historiques, Villes & Terroirs
@@ -74,6 +73,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
         .toList();
 
     final hPad = CultureResponsive.horizontalPadding(context);
+    final isTablet = CultureResponsive.isTablet(context);
 
     return CulturalAtmosphereCanvas(
       enableParticles: true,
@@ -81,7 +81,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
       motifOpacity: 0.11,
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(hPad, 10, hPad, 36),
+        padding: EdgeInsets.fromLTRB(hPad, 10, hPad, isTablet ? 70 : 100),
         child: CultureResponsive.constrainedCentered(
           maxWidth: CultureResponsive.kMaxContentWidth,
           child: Column(
@@ -90,7 +90,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
               // ── 1. BARRE DE SÉLECTION DE CATÉGORIE RESPONSIVE (FIGÉE) ───────────
               Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 580),
+                  constraints: BoxConstraints(maxWidth: isTablet ? 660 : 580),
                   child: Row(
                     children: List.generate(_categories.length, (index) {
                 final isSelected = _selectedFilterIndex == index;
@@ -111,8 +111,9 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                       },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 220),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 9),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: isTablet ? 10 : 6,
+                            vertical: isTablet ? 12 : 9),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? activeCol
@@ -130,17 +131,17 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                           children: [
                             Icon(
                               _categoryIcons[index],
-                              size: 14,
+                              size: isTablet ? 18 : 14,
                               color: isSelected ? Colors.white : activeCol,
                             ),
-                            const SizedBox(width: 5),
+                            SizedBox(width: isTablet ? 7 : 5),
                             Flexible(
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Text(
                                   _categories[index],
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12,
+                                    fontSize: isTablet ? 14.5 : 12,
                                     fontWeight: isSelected
                                         ? FontWeight.w800
                                         : FontWeight.w600,
@@ -289,7 +290,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                                     : 'Votre village a une histoire sacrée ?'),
                             style: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                              fontSize: isTablet ? 17 : 14,
                               color: titleColor,
                             ),
                           ),
@@ -297,17 +298,17 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                           Text(
                             'Soumettez sa mémoire au Conseil (+50 XP, +25 Pièces)',
                             style: GoogleFonts.inter(
-                              fontSize: 12,
+                              fontSize: isTablet ? 14 : 12,
                               color: subtitleColor,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(
+                    Icon(
                       Icons.arrow_forward_ios_rounded,
-                      size: 14,
-                      color: Color(0xFF10B981),
+                      size: isTablet ? 17 : 14,
+                      color: const Color(0xFF10B981),
                     ),
                   ],
                 ),
@@ -386,6 +387,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
     }
 
     final isSoundiata = categoryIndex == 0;
+    final isTablet = CultureResponsive.isTablet(context);
 
     return CulturalInteractiveCard(
       padding: EdgeInsets.zero,
@@ -402,7 +404,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
         children: [
           // ── BANNIÈRE VISUELLE 2D HERO AVEC BADGES MOTION ───────────────────
           SizedBox(
-            height: isSoundiata ? 175 : 145,
+            height: isSoundiata ? (isTablet ? 250 : 175) : (isTablet ? 220 : 145),
             width: double.infinity,
             child: Stack(
               fit: StackFit.expand,
@@ -434,11 +436,12 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                 ),
                 // Badge Haut-Gauche
                 Positioned(
-                  top: 12,
-                  left: 12,
+                  top: isTablet ? 14 : 12,
+                  left: isTablet ? 14 : 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4.5),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 14 : 10,
+                        vertical: isTablet ? 7 : 4.5),
                     decoration: BoxDecoration(
                       color: isSoundiata ? const Color(0xFFF59E0B) : categoryColor,
                       borderRadius: BorderRadius.circular(8),
@@ -455,13 +458,14 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (isSoundiata) ...[
-                          const Icon(Icons.shield_rounded, size: 12, color: Colors.black),
-                          const SizedBox(width: 4),
+                          Icon(Icons.shield_rounded,
+                              size: isTablet ? 15 : 12, color: Colors.black),
+                          SizedBox(width: isTablet ? 6 : 4),
                         ],
                         Text(
                           heroTag,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 9.5,
+                            fontSize: isTablet ? 12 : 9.5,
                             fontWeight: FontWeight.w900,
                             color: isSoundiata ? Colors.black : Colors.white,
                             letterSpacing: 0.8,
@@ -474,11 +478,12 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                 // Badge Période Haut-Droit
                 if (isSoundiata)
                   Positioned(
-                    top: 12,
-                    right: 12,
+                    top: isTablet ? 14 : 12,
+                    right: isTablet ? 14 : 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 12 : 8,
+                          vertical: isTablet ? 6 : 4),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.65),
                         borderRadius: BorderRadius.circular(8),
@@ -489,7 +494,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                       child: Text(
                         '1190 – 1255',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 9.5,
+                          fontSize: isTablet ? 12 : 9.5,
                           fontWeight: FontWeight.w800,
                           color: const Color(0xFFF59E0B),
                         ),
@@ -501,7 +506,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
           ),
           // ── CONTENU ÉDITORIAL & CTA ─────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(isTablet ? 22 : 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -511,7 +516,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                       child: Text(
                         heroTitle,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 17,
+                          fontSize: isTablet ? 24 : 17,
                           fontWeight: FontWeight.w900,
                           color: titleColor,
                           letterSpacing: -0.4,
@@ -520,8 +525,9 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                     ),
                     if (isSoundiata)
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: isTablet ? 10 : 8,
+                            vertical: isTablet ? 5 : 3),
                         decoration: BoxDecoration(
                           color: CultureTheme.orPatrimoine.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
@@ -529,7 +535,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                         child: Text(
                           'ÉPOPÉE',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 9,
+                            fontSize: isTablet ? 11.5 : 9,
                             fontWeight: FontWeight.w800,
                             color: CultureTheme.orPatrimoine,
                             letterSpacing: 0.5,
@@ -542,30 +548,31 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                 Text(
                   heroSubtitle,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
+                    fontSize: isTablet ? 16 : 12,
                     fontWeight: FontWeight.w700,
                     color: categoryColor,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: isTablet ? 10 : 8),
                 Text(
                   heroDescription,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11.5,
+                    fontSize: isTablet ? 14.5 : 11.5,
                     color: subtitleColor,
                     height: 1.45,
                     fontWeight: FontWeight.w400,
                   ),
-                  maxLines: 2,
+                  maxLines: isTablet ? 3 : 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: isTablet ? 16 : 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 16 : 12,
+                          vertical: isTablet ? 9 : 6),
                       decoration: BoxDecoration(
                         color: categoryColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10),
@@ -579,15 +586,15 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                           Text(
                             isSoundiata ? 'Explorer l\'Épopée Sacrée' : 'Explorer la fiche',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11.5,
+                              fontSize: isTablet ? 14 : 11.5,
                               fontWeight: FontWeight.w800,
                               color: categoryColor,
                             ),
                           ),
-                          const SizedBox(width: 5),
+                          SizedBox(width: isTablet ? 7 : 5),
                           Icon(
                             Icons.arrow_forward_rounded,
-                            size: 13,
+                            size: isTablet ? 16 : 13,
                             color: categoryColor,
                           ),
                         ],
@@ -611,23 +618,28 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
     required Color borderCol,
     int? count,
   }) {
+    final isTablet = CultureResponsive.isTablet(context);
+
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: EdgeInsets.symmetric(
+            horizontal: isTablet ? 12 : 8,
+            vertical: isTablet ? 6 : 4,
+          ),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(isTablet ? 8 : 6),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 13, color: color),
-              const SizedBox(width: 5),
+              Icon(icon, size: isTablet ? 16 : 13, color: color),
+              SizedBox(width: isTablet ? 7 : 5),
               Text(
                 title,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
+                  fontSize: isTablet ? 13.5 : 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.8,
                   color: color,
@@ -638,7 +650,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                 Text(
                   '($count)',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
+                    fontSize: isTablet ? 13.5 : 11,
                     fontWeight: FontWeight.w800,
                     color: color,
                   ),
@@ -690,6 +702,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
 
     final columns = CultureResponsive.catalogGridColumns(context);
     final aspectRatio = CultureResponsive.catalogGridAspectRatio(context);
+    final isTablet = CultureResponsive.isTablet(context);
 
     return GridView.builder(
       shrinkWrap: true,
@@ -705,8 +718,6 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
         final item = items[index];
         final isPlayingItem =
             narration.isSpeaking && narration.activeContentId == item.id;
-        final speechText =
-            '${item.title}. ${item.subtitle}. Région de ${item.regionName}. ${item.description}';
 
         final itemHeroTag = 'decouvrir_grid_${categoryRoute}_${item.id}';
 
@@ -738,6 +749,9 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                           child: Image.asset(
                             item.imageUrl!,
                             fit: BoxFit.cover,
+                            alignment: categoryRoute == 'personnage'
+                                ? Alignment.topCenter
+                                : Alignment.center,
                             errorBuilder: (_, __, ___) => Container(
                               color: categoryColor.withValues(alpha: 0.12),
                               child: Icon(item.icon,
@@ -757,11 +771,12 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                       // Badge Héros / 2D en haut à gauche
                       if (categoryRoute == 'personnage')
                         Positioned(
-                          top: 7,
-                          left: 7,
+                          top: isTablet ? 8 : 6,
+                          left: isTablet ? 8 : 6,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2.5),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: isTablet ? 7 : 6,
+                                vertical: isTablet ? 3.5 : 2.5),
                             decoration: BoxDecoration(
                               color: item.id.contains('soundiata')
                                   ? const Color(0xFFF59E0B)
@@ -772,16 +787,16 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 if (item.id.contains('soundiata')) ...[
-                                  const Icon(Icons.auto_awesome_rounded,
-                                      size: 9, color: Colors.black),
-                                  const SizedBox(width: 3),
+                                  Icon(Icons.auto_awesome_rounded,
+                                      size: isTablet ? 10 : 9, color: Colors.black),
+                                  SizedBox(width: isTablet ? 4 : 3),
                                 ],
                                 Text(
                                   item.id.contains('soundiata')
                                       ? 'ÉPOPÉE'
                                       : item.tag.toUpperCase(),
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 8.5,
+                                    fontSize: isTablet ? 9.5 : 8.5,
                                     fontWeight: FontWeight.w800,
                                     color: item.id.contains('soundiata')
                                         ? Colors.black
@@ -795,11 +810,12 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                         ),
                       // Badge région en haut à droite
                       Positioned(
-                        top: 7,
-                        right: 7,
+                        top: isTablet ? 8 : 6,
+                        right: isTablet ? 8 : 6,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2.5),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: isTablet ? 7 : 6,
+                              vertical: isTablet ? 3.5 : 2.5),
                           decoration: BoxDecoration(
                             color: Colors.black.withValues(alpha: 0.65),
                             borderRadius: BorderRadius.circular(6),
@@ -807,34 +823,25 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                           child: Text(
                             item.regionName,
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 9,
+                              fontSize: isTablet ? 10 : 9,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                             ),
                           ),
                         ),
                       ),
-                      // Badge Écouter en bas à gauche de la photo
-                      Positioned(
-                        bottom: 6,
-                        left: 6,
-                        child: CultureAudioListenBadge(
-                          contentId: item.id,
-                          speechText: speechText,
-                          label: 'Écouter',
-                          compact: true,
-                          activeColor: categoryColor,
-                        ),
-                      ),
                     ],
                   ),
                 ),
 
-                // Textes descriptifs
+                // Textes descriptifs (hauteur compacte et proportionnée)
                 Expanded(
                   flex: 4,
                   child: Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 10 : 8,
+                      vertical: isTablet ? 7 : 6,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -845,11 +852,11 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                             Text(
                               item.title,
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
+                                fontSize: isTablet ? 13.0 : 12.0,
                                 fontWeight: FontWeight.w800,
                                 color:
                                     isPlayingItem ? categoryColor : titleColor,
-                                height: 1.2,
+                                height: 1.15,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -858,9 +865,10 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                             Text(
                               item.subtitle,
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10.5,
+                                fontSize: isTablet ? 10.0 : 9.0,
                                 fontWeight: FontWeight.w600,
                                 color: categoryColor,
+                                height: 1.2,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -873,8 +881,8 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                               child: Text(
                                 item.info,
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: isTablet ? 10.0 : 8.5,
+                                  fontWeight: FontWeight.w600,
                                   color: subtitleColor,
                                 ),
                                 maxLines: 1,
@@ -884,7 +892,7 @@ class _CultureDecouvrirViewState extends ConsumerState<CultureDecouvrirView> {
                             const SizedBox(width: 4),
                             Icon(
                               Icons.arrow_forward_rounded,
-                              size: 13,
+                              size: isTablet ? 14 : 11,
                               color: categoryColor,
                             ),
                           ],

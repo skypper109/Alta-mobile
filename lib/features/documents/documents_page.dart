@@ -282,11 +282,19 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
         isDark ? AltaColors.textSecondaryDark : AltaColors.textSecondaryLight;
     final userPrefs = ref.watch(userPrefsProvider);
 
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
+    final isLargeTablet = screenWidth >= 900;
+    final hPad = isLargeTablet ? 40.0 : (isTablet ? 28.0 : 20.0);
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 125),
-        children: [
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 880),
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(hPad, 8, hPad, 125),
+            children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             // children: [
@@ -1181,7 +1189,9 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage>
           ),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 }
 

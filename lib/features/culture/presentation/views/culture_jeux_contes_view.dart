@@ -132,7 +132,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
       motifOpacity: 0.11,
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(hPad, 14, hPad, 36),
+        padding: EdgeInsets.fromLTRB(hPad, 14, hPad, isTablet ? 70 : 100),
         child: CultureResponsive.constrainedCentered(
           maxWidth: CultureResponsive.kMaxContentWidth,
           child: Column(
@@ -1238,7 +1238,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
               crossAxisCount: 2,
               crossAxisSpacing: 14,
               mainAxisSpacing: 14,
-              mainAxisExtent: 255,
+              mainAxisExtent: 265,
             ),
             itemBuilder: (ctx, index) {
               final proverb = proverbs[index];
@@ -1614,43 +1614,61 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
             // Ligne En-tête : Thème, Région, XP et bouton Partager
             Row(
               children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: CultureTheme.accentOrange.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: CultureTheme.accentOrange.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Text(
-                    proverb.theme.toUpperCase(),
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      color: CultureTheme.accentOrange,
-                    ),
+                Expanded(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: CultureTheme.accentOrange
+                                .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: CultureTheme.accentOrange
+                                  .withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Text(
+                            proverb.theme.toUpperCase(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: CultureTheme.accentOrange,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2.5),
+                          decoration: BoxDecoration(
+                            color: CultureTheme.cyanTurquoise
+                                .withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            proverb.regionName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: CultureTheme.cyanTurquoise,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 6),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
-                  decoration: BoxDecoration(
-                    color: CultureTheme.cyanTurquoise.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    proverb.regionName,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                      color: CultureTheme.cyanTurquoise,
-                    ),
-                  ),
-                ),
-                const Spacer(),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
@@ -1667,7 +1685,7 @@ class _CultureJeuxContesViewState extends ConsumerState<CultureJeuxContesView> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
                 // Bouton Partage direct
                 GestureDetector(
                   onTap: () {

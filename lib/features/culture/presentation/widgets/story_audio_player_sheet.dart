@@ -307,34 +307,40 @@ class _StoryAudioPlayerSheetState extends ConsumerState<StoryAudioPlayerSheet>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: CultureTheme.accentOrange,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              'SCÈNE ${_currentSceneIndex + 1}/${scenes.length}',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: CultureTheme.accentOrange,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'SCÈNE ${_currentSceneIndex + 1}/${scenes.length}',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            currentScene.title,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w800,
-                              color: titleColor,
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                currentScene.title,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: titleColor,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       // Égaliseur audio en direct
                       if (isPlaying)
@@ -464,9 +470,12 @@ class _StoryAudioPlayerSheetState extends ConsumerState<StoryAudioPlayerSheet>
 
           const SizedBox(height: 14),
 
-          // Sélecteur de rythme de parole du Griot
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          // Sélecteur de rythme de parole du Griot (entièrement réactif)
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 6,
+            runSpacing: 6,
             children: [
               Text(
                 'Rythme de Grand-mère Mah :',
@@ -476,11 +485,8 @@ class _StoryAudioPlayerSheetState extends ConsumerState<StoryAudioPlayerSheet>
                   color: subtitleColor,
                 ),
               ),
-              const SizedBox(width: 8),
               _buildSpeedChip(label: '0.75x (Posé)', rate: 0.40, currentRate: narration.speechRate),
-              const SizedBox(width: 6),
               _buildSpeedChip(label: '1.0x (Normal)', rate: 0.48, currentRate: narration.speechRate),
-              const SizedBox(width: 6),
               _buildSpeedChip(label: '1.25x (Vif)', rate: 0.58, currentRate: narration.speechRate),
             ],
           ),

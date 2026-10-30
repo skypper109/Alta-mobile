@@ -34,11 +34,19 @@ class HomeScreen extends ConsumerWidget {
         isDark ? AppColors.textSecondary : const Color(0xFF475569);
     final borderCol = isDark ? AppColors.border : const Color(0xFFE2E8F0);
 
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
+    final isLargeTablet = screenWidth >= 900;
+    final hPad = isLargeTablet ? 40.0 : (isTablet ? 28.0 : 20.0);
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 125),
-        children: [
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 880),
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(hPad, 8, hPad, 125),
+            children: [
           // ── 1. GREETING BANNER ──────────────────────────────────────────
           Row(
             children: [
@@ -46,7 +54,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Text(
                   'Bonjour $firstName',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 24,
+                    fontSize: isTablet ? 30 : 24,
                     fontWeight: FontWeight.bold,
                     color: textColor,
                     letterSpacing: -0.4,
@@ -57,8 +65,10 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(width: 10),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isTablet ? 14 : 10,
+                  vertical: isTablet ? 6 : 4,
+                ),
                 decoration: BoxDecoration(
                   color:
                       AppColors.primary.withValues(alpha: isDark ? 0.2 : 0.1),
@@ -72,7 +82,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Text(
                   userState.classShortLabel,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
+                    fontSize: isTablet ? 14 : 12,
                     fontWeight: FontWeight.bold,
                     color: isDark ? AppColors.secondary : AppColors.primary,
                   ),
@@ -81,7 +91,7 @@ class HomeScreen extends ConsumerWidget {
             ],
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: isTablet ? 20 : 16),
 
           // ── 2. QUICK STATS PILL ROW (RÉEL ET CONNECTÉ AU BACKEND) ──────
           Row(
@@ -94,7 +104,7 @@ class HomeScreen extends ConsumerWidget {
                   color: AppColors.accent,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: isTablet ? 12 : 8),
               Expanded(
                 child: _TeenStatBadge(
                   label: 'XP',
@@ -103,7 +113,7 @@ class HomeScreen extends ConsumerWidget {
                   color: AppColors.secondary,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: isTablet ? 12 : 8),
               Expanded(
                 child: _TeenStatBadge(
                   label: 'Pièces',
@@ -119,7 +129,7 @@ class HomeScreen extends ConsumerWidget {
             ],
           ),
 
-          const SizedBox(height: 18),
+          SizedBox(height: isTablet ? 22 : 18),
 
           // ── 3. HERO BANNER BOÎTIER ALTERNIA (SOLIDE, SANS DÉGRADÉ) ──────
           GestureDetector(
@@ -128,10 +138,10 @@ class HomeScreen extends ConsumerWidget {
               showDeviceModalSheet(context);
             },
             child: Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(isTablet ? 22 : 16),
               decoration: BoxDecoration(
                 gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(isTablet ? 26 : 22),
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.primary.withValues(alpha: 0.35),
@@ -143,20 +153,20 @@ class HomeScreen extends ConsumerWidget {
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(isTablet ? 16 : 12),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(isTablet ? 16 : 14),
                     ),
                     child: Icon(
                       isConnected
                           ? Icons.router_rounded
                           : Icons.wifi_tethering_rounded,
-                      size: 26,
+                      size: isTablet ? 32 : 26,
                       color: isConnected ? AppColors.secondary : Colors.white,
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  SizedBox(width: isTablet ? 18 : 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,7 +176,7 @@ class HomeScreen extends ConsumerWidget {
                               ? 'Boîtier AlterniA Connecté'
                               : 'Boîtier AlterniA',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16,
+                            fontSize: isTablet ? 19 : 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -177,7 +187,7 @@ class HomeScreen extends ConsumerWidget {
                               ? 'Wi-Fi local • $deviceName'
                               : 'Appairer ou utiliser le Cloud IA',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
+                            fontSize: isTablet ? 14 : 12,
                             color: Colors.white.withValues(alpha: 0.8),
                           ),
                           maxLines: 1,
@@ -187,8 +197,10 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 12 : 9,
+                      vertical: isTablet ? 6 : 4,
+                    ),
                     decoration: BoxDecoration(
                       color: isConnected
                           ? AppColors.success.withValues(alpha: 0.15)
@@ -205,7 +217,7 @@ class HomeScreen extends ConsumerWidget {
                     child: Text(
                       isConnected ? 'EN LIGNE' : 'HORS-LIGNE',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 9.5,
+                        fontSize: isTablet ? 11 : 9.5,
                         fontWeight: FontWeight.bold,
                         color: isConnected ? AppColors.success : textMuted,
                       ),
@@ -560,11 +572,11 @@ class HomeScreen extends ConsumerWidget {
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.2,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: isLargeTablet ? 4 : (isTablet ? 3 : 2),
+                  crossAxisSpacing: isTablet ? 16 : 12,
+                  mainAxisSpacing: isTablet ? 16 : 12,
+                  mainAxisExtent: isLargeTablet ? 160.0 : (isTablet ? 154.0 : 138.0),
                 ),
                 itemCount: subjects.length,
                 itemBuilder: (context, i) {
@@ -579,6 +591,7 @@ class HomeScreen extends ConsumerWidget {
                       ref.read(activeSubjectProvider.notifier).state = subject;
                       context.go('/discussions');
                     },
+                    padding: EdgeInsets.all(isTablet ? 18 : 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -587,16 +600,18 @@ class HomeScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(10),
+                              padding: EdgeInsets.all(isTablet ? 12 : 10),
                               decoration: BoxDecoration(
                                 color: color.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(isTablet ? 14 : 12),
                               ),
-                              child: Icon(icon, size: 22, color: color),
+                              child: Icon(icon, size: isTablet ? 26 : 22, color: color),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 3),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isTablet ? 9 : 7,
+                                vertical: isTablet ? 4 : 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: color.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(8),
@@ -604,7 +619,7 @@ class HomeScreen extends ConsumerWidget {
                               child: Text(
                                 '${(progress * 100).toInt()}%',
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 10,
+                                  fontSize: isTablet ? 12 : 10,
                                   fontWeight: FontWeight.bold,
                                   color: color,
                                 ),
@@ -618,19 +633,19 @@ class HomeScreen extends ConsumerWidget {
                             Text(
                               subject,
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14,
+                                fontSize: isTablet ? 16 : 14,
                                 fontWeight: FontWeight.bold,
                                 color: textColor,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 6),
+                            SizedBox(height: isTablet ? 8 : 6),
                             ClipRRect(
                               borderRadius: BorderRadius.circular(3),
                               child: LinearProgressIndicator(
                                 value: progress,
-                                minHeight: 5,
+                                minHeight: isTablet ? 6 : 5,
                                 backgroundColor: isDark
                                     ? AppColors.surfaceAlt
                                     : const Color(0xFFE2E8F0),
@@ -741,7 +756,9 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 }
 
@@ -766,21 +783,26 @@ class _TeenStatBadge extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? AppColors.textPrimary : const Color(0xFF0F172A);
     final labelColor = isDark ? AppColors.textMuted : const Color(0xFF475569);
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
 
     return CustomCard(
       onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: EdgeInsets.symmetric(
+        horizontal: isTablet ? 14 : 10,
+        vertical: isTablet ? 12 : 10,
+      ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(6),
+            padding: EdgeInsets.all(isTablet ? 9 : 6),
             decoration: BoxDecoration(
               color: color.withValues(alpha: isDark ? 0.18 : 0.12),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(isTablet ? 12 : 10),
             ),
-            child: Icon(icon, size: 18, color: color),
+            child: Icon(icon, size: isTablet ? 22 : 18, color: color),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: isTablet ? 10 : 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -788,7 +810,7 @@ class _TeenStatBadge extends StatelessWidget {
                 Text(
                   label,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10,
+                    fontSize: isTablet ? 11.5 : 10,
                     fontWeight: FontWeight.w600,
                     color: labelColor,
                   ),
@@ -796,7 +818,7 @@ class _TeenStatBadge extends StatelessWidget {
                 Text(
                   value,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13.5,
+                    fontSize: isTablet ? 16.0 : 13.5,
                     fontWeight: FontWeight.bold,
                     color: textColor,
                   ),
@@ -831,25 +853,28 @@ class _TeenSuggestionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
 
     return CustomCard(
       onTap: onTap,
+      padding: EdgeInsets.all(isTablet ? 18 : 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(isTablet ? 11 : 8),
             decoration: BoxDecoration(
               color: color.withValues(alpha: isDark ? 0.18 : 0.12),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(isTablet ? 14 : 10),
             ),
-            child: Icon(icon, size: 20, color: color),
+            child: Icon(icon, size: isTablet ? 24 : 20, color: color),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: isTablet ? 14 : 10),
           Text(
             title,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
+              fontSize: isTablet ? 16 : 14,
               fontWeight: FontWeight.bold,
               color: isDark ? AppColors.textPrimary : const Color(0xFF0F172A),
             ),
@@ -860,7 +885,7 @@ class _TeenSuggestionCard extends StatelessWidget {
           Text(
             subtitle,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
+              fontSize: isTablet ? 13 : 11,
               fontWeight: FontWeight.w500,
               color: isDark ? AppColors.textMuted : const Color(0xFF475569),
             ),

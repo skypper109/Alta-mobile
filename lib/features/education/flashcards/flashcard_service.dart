@@ -276,11 +276,13 @@ class FlashcardServiceNotifier extends StateNotifier<FlashcardDeckState> {
     state = state.copyWith(cards: updatedList);
     await _saveDeck(updatedList);
 
-    // 1. Récompense immédiate de l'élève en XP (+15 XP)
-    _ref.read(gamificationProvider.notifier).addFlashcardReward(
-          xpGained: 15,
-          subject: card.subject,
-        );
+    // 1. Récompense d'XP uniquement si la carte est réellement maîtrisée (rating >= 2)
+    if (rating >= 2) {
+      _ref.read(gamificationProvider.notifier).addFlashcardReward(
+            xpGained: 10,
+            subject: card.subject,
+          );
+    }
 
     // 2. Enregistrement dans la file d'attente Store & Forward
     _ref.read(syncQueueProvider.notifier).enqueue(

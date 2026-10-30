@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/datasources/mock_culture_stories_data.dart';
 import '../../core/models/culture_passport_models.dart';
 import '../../core/models/culture_story_models.dart';
@@ -11,8 +10,8 @@ import '../../core/theme/culture_theme.dart';
 import '../../../../core/services/vivienne_tts_service.dart';
 import '../../immersive/controllers/narration_coordinator.dart';
 import '../widgets/connected_contents_section.dart';
+import '../widgets/content_mastery_quiz_card.dart';
 import '../widgets/culture_audio_listen_badge.dart';
-import '../widgets/passport_stamp_toast.dart';
 import '../widgets/story_audio_player_sheet.dart';
 
 /// Écran de lecture continue du conte avec écoute orale simultanée (Voix du Griot)
@@ -33,30 +32,6 @@ class _StoryReaderScreenState extends ConsumerState<StoryReaderScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final story =
-          widget.story ?? MockCultureStoriesData.getStoryById(widget.id);
-      final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
-            id: story.id,
-            type: PassportItemType.conte,
-            title: story.title,
-            subtitle: story.subtitle,
-            regionId: story.regionId,
-            regionName: story.regionName,
-            photoUrl: story.photoUrl,
-            tag: story.tag,
-            culturalQuote: story.moral,
-            targetRoute: '/culture/conte/${story.id}',
-          );
-      if (added && mounted) {
-        PassportStampToast.show(
-          context,
-          title: story.title,
-          type: PassportItemType.conte,
-        );
-      }
-    });
   }
 
   @override
@@ -609,7 +584,16 @@ class _StoryReaderScreenState extends ConsumerState<StoryReaderScreen> {
 
                     const SizedBox(height: 28),
 
-                    // ── 5. CONTENUS ASSOCIÉS ─────────────────────────────────
+                    // ── 5. DÉFI DE MAÎTRISE LIÉ AU CONTE ──────────────────────
+                    ContentMasteryQuizCard(
+                      contentId: story.id,
+                      contentType: PassportItemType.conte,
+                      contentTitle: story.title,
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // ── 6. CONTENUS ASSOCIÉS ─────────────────────────────────
                     ConnectedContentsSection(items: story.connectedItems),
                   ],
                 ),

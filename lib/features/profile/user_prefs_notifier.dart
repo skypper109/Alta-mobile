@@ -91,6 +91,7 @@ class UserPrefsNotifier extends StateNotifier<UserProfileState> {
   Future<void> _loadFromPrefs() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
       final name = prefs.getString(_keyName) ?? '';
       final classId = prefs.getString(_keyClassId) ?? '';
       final school = prefs.getString(_keySchool) ?? '';
@@ -104,8 +105,23 @@ class UserPrefsNotifier extends StateNotifier<UserProfileState> {
         isLoading: false,
       );
     } catch (_) {
-      state = state.copyWith(isLoading: false);
+      if (mounted) {
+        state = state.copyWith(isLoading: false);
+      }
     }
+  }
+
+  /// Marque uniquement les 3 écrans d'introduction comme vus au premier lancement,
+  /// sans créer de profil fictif (le nom et la classe seront demandés à l'entrée dans Éducation).
+  Future<void> completeOnboarding() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_keyOnboarding, true);
+      state = state.copyWith(
+        hasCompletedOnboarding: true,
+        isLoading: false,
+      );
+    } catch (_) {}
   }
 
   Future<void> saveRegistration({
@@ -160,7 +176,17 @@ class UserPrefsNotifier extends StateNotifier<UserProfileState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_keyOnboarding, false);
-      state = state.copyWith(hasCompletedOnboarding: false);
+      await prefs.remove(_keyName);
+      await prefs.remove(_keyClassId);
+      await prefs.remove(_keySchool);
+      await prefs.remove('alternia_gamification_stats_v3');
+      state = const UserProfileState(
+        name: '',
+        studentClassId: '',
+        school: '',
+        hasCompletedOnboarding: false,
+        isLoading: false,
+      );
     } catch (_) {}
   }
 }

@@ -60,6 +60,7 @@ class PassportEntry {
   final String? milestoneLabel;
   final String targetRoute;
   final int xpEarned;
+  final int coinsEarned;
 
   const PassportEntry({
     required this.id,
@@ -76,6 +77,7 @@ class PassportEntry {
     this.milestoneLabel,
     required this.targetRoute,
     this.xpEarned = 50,
+    this.coinsEarned = 15,
   });
 
   PassportEntry copyWith({
@@ -93,6 +95,7 @@ class PassportEntry {
     String? milestoneLabel,
     String? targetRoute,
     int? xpEarned,
+    int? coinsEarned,
   }) {
     return PassportEntry(
       id: id ?? this.id,
@@ -109,6 +112,7 @@ class PassportEntry {
       milestoneLabel: milestoneLabel ?? this.milestoneLabel,
       targetRoute: targetRoute ?? this.targetRoute,
       xpEarned: xpEarned ?? this.xpEarned,
+      coinsEarned: coinsEarned ?? this.coinsEarned,
     );
   }
 
@@ -128,6 +132,7 @@ class PassportEntry {
       'milestoneLabel': milestoneLabel,
       'targetRoute': targetRoute,
       'xpEarned': xpEarned,
+      'coinsEarned': coinsEarned,
     };
   }
 
@@ -152,6 +157,7 @@ class PassportEntry {
       milestoneLabel: json['milestoneLabel'] as String?,
       targetRoute: json['targetRoute'] as String? ?? '',
       xpEarned: (json['xpEarned'] as num?)?.toInt() ?? 50,
+      coinsEarned: (json['coinsEarned'] as num?)?.toInt() ?? 15,
     );
   }
 }
@@ -189,6 +195,8 @@ class PassportState {
   final List<PassportEntry> entries;
   final List<String> exploredRegionIds;
   final PassportEntry? featuredDiscoveryOfTheDay;
+  final int bonusCultureXp;
+  final int bonusCultureCoins;
 
   const PassportState({
     required this.travelerName,
@@ -197,6 +205,8 @@ class PassportState {
     required this.entries,
     required this.exploredRegionIds,
     this.featuredDiscoveryOfTheDay,
+    this.bonusCultureXp = 0,
+    this.bonusCultureCoins = 0,
   });
 
   // Filtres par type
@@ -220,8 +230,9 @@ class PassportState {
 
   int get totalDiscoveries => entries.length;
 
-  // Calculs d'XP de Sagesse
-  int get totalXp => entries.fold<int>(0, (sum, e) => sum + e.xpEarned);
+  // Calculs d'XP et Pièces de Sagesse (strictement réservés à l'espace Culture)
+  int get totalXp => entries.fold<int>(bonusCultureXp, (sum, e) => sum + e.xpEarned);
+  int get totalCoins => entries.fold<int>(bonusCultureCoins, (sum, e) => sum + e.coinsEarned);
   int get defisXp => defis.fold<int>(0, (sum, e) => sum + e.xpEarned);
   int get contesXp => contes.fold<int>(0, (sum, e) => sum + e.xpEarned);
   int get monumentsXp => monuments.fold<int>(0, (sum, e) => sum + e.xpEarned);

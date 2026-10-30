@@ -547,53 +547,26 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
     final borderCol =
         isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder;
     final screenWidth = MediaQuery.sizeOf(context).width;
-    final theaterHeight = (screenWidth * 0.68).clamp(240.0, 290.0);
+    final isTablet = screenWidth >= 600;
+    final theaterHeight = isTablet ? 340.0 : (screenWidth * 0.68).clamp(240.0, 290.0);
     final isDual = scene.opponentCharImage != null || scene.isConfrontation;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── EN-TÊTE DE SECTION DOCUMENTAIRE ───────────────────────────────────
+        // ── EN-TÊTE DE SECTION DOCUMENTAIRE (Bouton Écouter déplacé en haut) ─
         Row(
           children: [
-            Expanded(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.movie_filter_rounded,
-                      size: 14,
-                      color: Color(0xFFF59E0B),
-                    ),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        'RÉCIT DOCUMENTAIRE ANIMÉ',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                          color: const Color(0xFFF59E0B),
-                          letterSpacing: 0.8,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            // Bouton Écouter à la place de l'ancien badge statique
+            CultureAudioListenBadge(
+              contentId: '${widget.figure.id}_scene_$_currentSceneIndex',
+              speechText:
+                  '${scene.actTitle}. ${scene.periodLocation}. ${scene.narrative}',
+              label: 'Écouter le récit',
+              compact: false,
+              activeColor: const Color(0xFFF59E0B),
             ),
-            const SizedBox(width: 8),
+            const Spacer(),
             // Bouton Rejouer l'animation de scène
             GestureDetector(
               onTap: () {
@@ -602,12 +575,12 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
               },
               child: Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   color: isDark
                       ? CultureTheme.darkSurfaceAlt
                       : const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: borderCol),
                 ),
                 child: Row(
@@ -771,10 +744,10 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.black.withValues(alpha: 0.55),
+                          Colors.black.withValues(alpha: 0.40),
                           Colors.transparent,
+                          Colors.black.withValues(alpha: 0.55),
                           Colors.black.withValues(alpha: 0.85),
-                          Colors.black.withValues(alpha: 0.98),
                         ],
                         stops: const [0.0, 0.35, 0.75, 1.0],
                       ),
@@ -840,8 +813,8 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
 
                   // 4. PERSONNAGE PRINCIPAL : PLAN 2.5D GLISSE DEPUIS LA GAUCHE !
                   Positioned(
-                    left: scene.isConfrontation ? 8 : 14,
-                    bottom: 10,
+                    left: scene.isConfrontation ? (isTablet ? 16 : 8) : (isTablet ? 22 : 14),
+                    bottom: isTablet ? 14 : 10,
                     child: SlideTransition(
                       position: _primarySlideAnimation,
                       child: FadeTransition(
@@ -869,8 +842,8 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                   // 5. PERSONNAGE OPPOSANT OU ALLIÉ : GLISSE DEPUIS LA DROITE !
                   if (scene.opponentCharImage != null)
                     Positioned(
-                      right: 8,
-                      bottom: 10,
+                      right: isTablet ? 16 : 8,
+                      bottom: isTablet ? 14 : 10,
                       child: SlideTransition(
                         position: _opponentSlideAnimation,
                         child: FadeTransition(
@@ -888,6 +861,68 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                               pulseProgress: _clashPulseController.value,
                             ),
                           ),
+                        ),
+                      ),
+                    )
+                  else if (!isDual)
+                    // PAROLE SACRÉE EN VEDETTE DANS LE THÉÂTRE (ÉVITE LE VIDE SUR TABLETTE)
+                    Positioned(
+                      right: isTablet ? 20 : 12,
+                      bottom: isTablet ? 14 : 10,
+                      child: Container(
+                        constraints: BoxConstraints(
+                          maxWidth: (screenWidth * (isTablet ? 0.44 : 0.38)).clamp(140.0, 320.0),
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 12 : 8,
+                          vertical: isTablet ? 8 : 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.75),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: (scene.primaryColor ?? const Color(0xFFF59E0B))
+                                .withValues(alpha: 0.45),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.format_quote_rounded,
+                                  size: isTablet ? 13 : 11,
+                                  color: scene.primaryColor ?? const Color(0xFFF59E0B),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'PAROLE DU HÉROS',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: isTablet ? 9.5 : 8,
+                                    fontWeight: FontWeight.w900,
+                                    color: scene.primaryColor ?? const Color(0xFFF59E0B),
+                                    letterSpacing: 0.6,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              scene.keyQuote,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: isTablet ? 11.0 : 9.5,
+                                fontStyle: FontStyle.italic,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white.withValues(alpha: 0.92),
+                                height: 1.35,
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -1047,30 +1082,15 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
 
                 const SizedBox(height: 14),
 
-                // ── ACTIONS : NARRATION VOCALE & NAVIGATION SCÈNE SUIVANTE ────
+                // ── ACTIONS : NAVIGATION DE SCÈNE AÉRÉE ET COMPACTE ──────────
                 Row(
                   children: [
-                    // Badge d'écoute orale de la scène
-                    Flexible(
-                      child: CultureAudioListenBadge(
-                        contentId: '${widget.figure.id}_scene_$_currentSceneIndex',
-                        speechText:
-                            '${scene.actTitle}. ${scene.periodLocation}. ${scene.narrative}',
-                        label: 'Écouter',
-                        compact: true,
-                        activeColor: const Color(0xFFF59E0B),
-                      ),
-                    ),
-
-                    const SizedBox(width: 8),
-
                     // Bouton Scène Précédente
                     if (_currentSceneIndex > 0) ...[
                       GestureDetector(
                         onTap: () => _goToScene(_currentSceneIndex - 1),
                         child: Container(
-                          width: 36,
-                          height: 36,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8.5),
                           decoration: BoxDecoration(
                             color: isDark
                                 ? CultureTheme.darkSurfaceAlt
@@ -1078,15 +1098,30 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: borderCol),
                           ),
-                          child: Icon(
-                            Icons.chevron_left_rounded,
-                            size: 22,
-                            color: titleColor,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.chevron_left_rounded,
+                                size: 18,
+                                color: titleColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Précédent',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: titleColor,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
                     ],
+
+                    const Spacer(),
 
                     // Bouton Scène Suivante
                     if (_currentSceneIndex < _scenes.length - 1)
@@ -1177,8 +1212,13 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
     required bool isDual,
     required double pulseProgress,
   }) {
-    final double cardWidth = isLarge ? 88.0 : (isDual ? 72.0 : 80.0);
-    final double cardHeight = isLarge ? 104.0 : (isDual ? 86.0 : 96.0);
+    final isTablet = MediaQuery.sizeOf(context).width >= 600;
+    final double cardWidth = isTablet
+        ? (isLarge ? 124.0 : (isDual ? 96.0 : 108.0))
+        : (isLarge ? 88.0 : (isDual ? 72.0 : 80.0));
+    final double cardHeight = isTablet
+        ? (isLarge ? 148.0 : (isDual ? 116.0 : 128.0))
+        : (isLarge ? 104.0 : (isDual ? 86.0 : 96.0));
     final tiltAngle = isFacingRight ? 0.08 : -0.08;
     final floatY =
         math.sin(pulseProgress * 2 * math.pi + (isFacingRight ? 0.0 : math.pi)) *
@@ -1280,6 +1320,8 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
       ),
     );
 
+    final labelMaxWidth = isTablet ? 220.0 : 115.0;
+
     return Transform(
       transform: Matrix4.identity()
         ..setEntry(3, 2, 0.002) // Perspective 3D
@@ -1301,7 +1343,8 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                   role,
                   accentColor,
                   isFacingRight ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-                  maxWidth: cardWidth + 20,
+                  maxWidth: cardWidth + 24,
+                  isTablet: isTablet,
                 ),
               ],
             )
@@ -1315,7 +1358,8 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                     role,
                     accentColor,
                     CrossAxisAlignment.end,
-                    maxWidth: 110,
+                    maxWidth: labelMaxWidth,
+                    isTablet: isTablet,
                   ),
                   const SizedBox(width: 8),
                 ],
@@ -1327,7 +1371,8 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
                     role,
                     accentColor,
                     CrossAxisAlignment.start,
-                    maxWidth: 110,
+                    maxWidth: labelMaxWidth,
+                    isTablet: isTablet,
                   ),
                 ],
               ],
@@ -1341,10 +1386,14 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
     Color accentColor,
     CrossAxisAlignment align, {
     double? maxWidth,
+    bool isTablet = false,
   }) {
     return Container(
       constraints: maxWidth != null ? BoxConstraints(maxWidth: maxWidth) : null,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      padding: EdgeInsets.symmetric(
+        horizontal: isTablet ? 10 : 8,
+        vertical: isTablet ? 6 : 5,
+      ),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(10),
@@ -1366,7 +1415,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
           Text(
             name,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 11.0,
+              fontSize: isTablet ? 13.0 : 11.0,
               fontWeight: FontWeight.w900,
               color: Colors.white,
               letterSpacing: -0.2,
@@ -1378,7 +1427,7 @@ class _DocumentaryScenePlayerState extends State<DocumentaryScenePlayer>
           Text(
             role,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 8.5,
+              fontSize: isTablet ? 10.0 : 8.5,
               fontWeight: FontWeight.w700,
               color: accentColor,
             ),

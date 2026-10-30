@@ -205,10 +205,13 @@ class _ProgressPageState extends ConsumerState<ProgressPage>
     return Scaffold(
       backgroundColor: AltaColors.backgroundDark,
       body: SafeArea(
-        child: Column(
-          children: [
-            // ── Header ─────────────────────────────────────────────────────
-            _ProgressHeader(tabCtrl: _tabCtrl),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 880),
+            child: Column(
+              children: [
+                // ── Header ─────────────────────────────────────────────────────
+                _ProgressHeader(tabCtrl: _tabCtrl),
 
             // ── Contenu ────────────────────────────────────────────────────
             Expanded(
@@ -247,7 +250,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage>
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }
 

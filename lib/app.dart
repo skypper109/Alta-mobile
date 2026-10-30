@@ -23,9 +23,19 @@ class AlterniaApp extends ConsumerWidget {
       themeMode: themeMode,
       routerConfig: router,
       builder: (context, child) {
+        final mediaQuery = MediaQuery.of(context);
+        final screenWidth = mediaQuery.size.width;
+        final isLargeTablet = screenWidth >= 900;
+        final isTablet = screenWidth >= 600;
+
+        // Échelle typographique adaptative :
+        // Sur tablette, agrandit et zoome vigoureusement (+20% à +25%)
+        // l'ensemble des textes et interfaces pour une lisibilité impeccable.
+        final double scaleFactor = isLargeTablet ? 1.25 : (isTablet ? 1.20 : 1.0);
+
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.noScaling,
+          data: mediaQuery.copyWith(
+            textScaler: TextScaler.linear(scaleFactor),
           ),
           child: child!,
         );

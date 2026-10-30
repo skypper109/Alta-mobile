@@ -101,7 +101,7 @@ class CultureHomeView extends ConsumerWidget {
       motifOpacity: 0.12,
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(hPad, 10, hPad, 30),
+        padding: EdgeInsets.fromLTRB(hPad, 10, hPad, isTablet ? 70 : 100),
         child: CultureResponsive.constrainedCentered(
           maxWidth: CultureResponsive.kMaxContentWidth,
           child: Column(
@@ -163,47 +163,13 @@ class CultureHomeView extends ConsumerWidget {
 
             const SizedBox(height: 20),
 
-            // ── NOUVEAUTÉ : SCANNER IA & TRANSMISSION CITOYENNE ───────────────
-            if (isTablet)
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: _buildScannerCard(
-                      context: context,
-                      isDark: isDark,
-                      titleColor: titleColor,
-                      subtitleColor: subtitleColor,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: _buildTransmettreCard(
-                      context: context,
-                      isDark: isDark,
-                      cardBg: cardBg,
-                      titleColor: titleColor,
-                      subtitleColor: subtitleColor,
-                    ),
-                  ),
-                ],
-              )
-            else ...[
-              _buildScannerCard(
-                context: context,
-                isDark: isDark,
-                titleColor: titleColor,
-                subtitleColor: subtitleColor,
-              ),
-              const SizedBox(height: 12),
-              _buildTransmettreCard(
-                context: context,
-                isDark: isDark,
-                cardBg: cardBg,
-                titleColor: titleColor,
-                subtitleColor: subtitleColor,
-              ),
-            ],
+            // ── NOUVEAUTÉ : SCANNER IA DU PATRIMOINE ─────────────────────────
+            _buildScannerCard(
+              context: context,
+              isDark: isDark,
+              titleColor: titleColor,
+              subtitleColor: subtitleColor,
+            ),
 
 
             const SizedBox(height: 24),
@@ -280,7 +246,7 @@ class CultureHomeView extends ConsumerWidget {
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 140,
+                      height: CultureResponsive.isTablet(context) ? 152 : 148,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
@@ -562,134 +528,6 @@ class CultureHomeView extends ConsumerWidget {
     );
   }
 
-  Widget _buildTransmettreCard({
-    required BuildContext context,
-    required bool isDark,
-    required Color cardBg,
-    required Color titleColor,
-    required Color subtitleColor,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        context.push('/culture/contribuer');
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: const Color(0xFF10B981).withValues(alpha: 0.35),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF10B981).withValues(alpha: 0.08),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: const Color(0xFF10B981),
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF10B981).withValues(alpha: 0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.edit_note_rounded,
-                  size: 28,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF10B981)
-                              .withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'TRANSMISSION CITOYENNE',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF10B981),
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '+50 XP',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.bold,
-                          color: CultureTheme.accentOrange,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Transmettre un Savoir Ancestral',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: titleColor,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Proverbe, conte, monument, héros, terroir ou nom (Jamu)',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: subtitleColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF10B981).withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.add_rounded,
-                size: 16,
-                color: Color(0xFF10B981),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildRecentActivityCard({
     required BuildContext context,
     required PassportEntry entry,
@@ -757,7 +595,7 @@ class CultureHomeView extends ConsumerWidget {
         children: [
           // Photo avec overlay
           SizedBox(
-            height: 68,
+            height: 64,
             width: double.infinity,
             child: Stack(
               fit: StackFit.expand,
@@ -824,7 +662,7 @@ class CultureHomeView extends ConsumerWidget {
           // Contenu texte
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+              padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

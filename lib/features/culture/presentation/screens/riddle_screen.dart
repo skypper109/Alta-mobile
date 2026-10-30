@@ -118,29 +118,7 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
       }
     });
 
-    if (correct) {
-      final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
-            id: _currentRiddle.id,
-            type: PassportItemType.defi,
-            title: 'Devinette : ${_currentRiddle.correctAnswer}',
-            subtitle: _currentRiddle.category,
-            regionId: _currentRiddle.regionId,
-            regionName: _currentRiddle.regionName,
-            photoUrl: _currentRiddle.photoUrl ??
-                'assets/images/culture/villes/bandiagara_falaise.jpg',
-            tag: 'Devinette',
-            culturalQuote: _currentRiddle.proverb,
-            targetRoute: '/culture/defis/devinettes?id=${_currentRiddle.id}',
-            xpEarned: _currentRiddle.xpReward,
-          );
-      if (added && mounted) {
-        PassportStampToast.show(
-          context,
-          title: 'Devinette : ${_currentRiddle.correctAnswer}',
-          type: PassportItemType.defi,
-        );
-      }
-    }
+    // Les XP et Pièces ne sont attribués qu'à la fin de la session complète si le score >= 60%
   }
 
   void _giveUpAndReveal() {
@@ -165,27 +143,31 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
         _isCompleted = true;
       });
 
-      // Enregistrement final du sceau de la veillée dans le Passeport
-      final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
-            id: 'riddles_session_complete',
-            type: PassportItemType.defi,
-            title: 'Veillée des Devinettes',
-            subtitle: 'Sceau des Sagesses • Score : $_score/${_riddles.length}',
-            regionName: 'Tout le Mali',
-            photoUrl: 'assets/images/culture/villes/bandiagara_falaise.jpg',
-            tag: 'Défi Devinettes',
-            culturalQuote:
-                '« La parole est une énigme que seul le cœur attentif peut délier. »',
-            targetRoute: '/culture/defis/devinettes',
-            xpEarned: _totalXpEarned > 0 ? _totalXpEarned : 50,
-          );
+      // Enregistrement final du sceau de la veillée uniquement si maîtrise >= 60%
+      final ratio = _riddles.isNotEmpty ? (_score / _riddles.length) : 0.0;
+      if (ratio >= 0.60 && _totalXpEarned > 0) {
+        final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
+              id: 'riddles_session_complete',
+              type: PassportItemType.defi,
+              title: 'Veillée des Devinettes',
+              subtitle: 'Sceau des Sagesses • Score : $_score/${_riddles.length}',
+              regionName: 'Tout le Mali',
+              photoUrl: 'assets/images/culture/villes/bandiagara_falaise.jpg',
+              tag: 'Défi Devinettes',
+              culturalQuote:
+                  '« La parole est une énigme que seul le cœur attentif peut délier. »',
+              targetRoute: '/culture/defis/devinettes',
+              xpEarned: _totalXpEarned,
+              coinsEarned: 15,
+            );
 
-      if (added && mounted) {
-        PassportStampToast.show(
-          context,
-          title: 'Sceau des Devinettes',
-          type: PassportItemType.defi,
-        );
+        if (added && mounted) {
+          PassportStampToast.show(
+            context,
+            title: 'Sceau des Devinettes',
+            type: PassportItemType.defi,
+          );
+        }
       }
       return;
     }
@@ -310,26 +292,36 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
                     ),
                   ),
                   if (!_isCompleted) ...[
-                    // Bouton Voix de l'Ancien (TTS) animé
+                    // Bouton Voix de l'Ancien (TTS) animé et visible
                     GestureDetector(
                       onTap: _toggleTts,
                       child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
+                        duration: const Duration(milliseconds: 220),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 7),
+                            horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
                           color: _isSpeaking
                               ? CultureTheme.accentOrange
                               : CultureTheme.accentOrange
-                                  .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
+                                  .withValues(alpha: isDark ? 0.20 : 0.12),
+                          borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: _isSpeaking
-                                ? CultureTheme.cyanTurquoise
+                                ? CultureTheme.accentOrange
                                 : CultureTheme.accentOrange
-                                    .withValues(alpha: 0.25),
-                            width: _isSpeaking ? 1.5 : 1.0,
+                                    .withValues(alpha: isDark ? 0.60 : 0.45),
+                            width: 1.4,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: (_isSpeaking
+                                      ? CultureTheme.accentOrange
+                                      : Colors.black)
+                                  .withValues(alpha: _isSpeaking ? 0.35 : (isDark ? 0.25 : 0.06)),
+                              blurRadius: _isSpeaking ? 8 : 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -337,21 +329,22 @@ class _RiddleScreenState extends ConsumerState<RiddleScreen> {
                             Icon(
                               _isSpeaking
                                   ? Icons.volume_up_rounded
-                                  : Icons.volume_mute_rounded,
+                                  : Icons.headphones_rounded,
                               size: 16,
                               color: _isSpeaking
                                   ? Colors.white
                                   : CultureTheme.accentOrange,
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 6),
                             Text(
-                              _isSpeaking ? 'Grand-mère Mah parle...' : 'Écouter',
+                              _isSpeaking ? 'En écoute...' : 'Écouter',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.2,
                                 color: _isSpeaking
                                     ? Colors.white
-                                    : CultureTheme.accentOrange,
+                                    : (isDark ? Colors.white : const Color(0xFF0F172A)),
                               ),
                             ),
                           ],

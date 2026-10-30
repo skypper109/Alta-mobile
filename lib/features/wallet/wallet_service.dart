@@ -107,10 +107,10 @@ class WalletState {
   final String? error;
 
   const WalletState({
-    this.soldePieces = 240,
-    this.soldePiecesLabel = '240',
-    this.valeurFcfa = 480,
-    this.valeurFcfaLabel = '480 FCFA',
+    this.soldePieces = 0,
+    this.soldePiecesLabel = '0',
+    this.valeurFcfa = 0,
+    this.valeurFcfaLabel = '0 FCFA',
     this.piecesReservees = 0,
     this.piecesRetireesTotal = 0,
     this.tauxConversion = 2,

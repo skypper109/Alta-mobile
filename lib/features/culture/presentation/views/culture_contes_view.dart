@@ -334,23 +334,31 @@ class CultureContesView extends ConsumerWidget {
                 },
                 child: Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: CultureTheme.accentOrange,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: CultureTheme.accentOrange.withValues(alpha: 0.35),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.headphones_rounded,
-                          size: 12, color: Colors.white),
-                      const SizedBox(width: 5),
+                          size: 15, color: Colors.white),
+                      const SizedBox(width: 6),
                       Text(
                         'Écouter le conte',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 10.5,
+                          fontSize: 12,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
+                          letterSpacing: 0.2,
                         ),
                       ),
                     ],
@@ -490,13 +498,41 @@ class CultureContesView extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 10),
-            IconButton(
-              onPressed: () {
+            GestureDetector(
+              onTap: () {
                 HapticFeedback.lightImpact();
                 StoryAudioPlayerSheet.show(context, story);
               },
-              icon: const Icon(Icons.headphones_rounded,
-                  color: CultureTheme.accentOrange),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.20 : 0.12),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.60 : 0.45),
+                    width: 1.4,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.headphones_rounded,
+                      size: 16,
+                      color: CultureTheme.accentOrange,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Écouter',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -843,24 +879,29 @@ class CultureContesView extends ConsumerWidget {
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3.5),
+                              horizontal: 10, vertical: 5.5),
                           decoration: BoxDecoration(
                             color: CultureTheme.accentOrange
-                                .withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(6),
+                                .withValues(alpha: isDark ? 0.20 : 0.12),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: CultureTheme.accentOrange
+                                  .withValues(alpha: isDark ? 0.55 : 0.40),
+                              width: 1.2,
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(Icons.headphones_rounded,
-                                  size: 12, color: CultureTheme.accentOrange),
-                              const SizedBox(width: 4),
+                                  size: 14, color: CultureTheme.accentOrange),
+                              const SizedBox(width: 5),
                               Text(
                                 story.audioDuration,
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: CultureTheme.accentOrange,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                                 ),
                               ),
                             ],

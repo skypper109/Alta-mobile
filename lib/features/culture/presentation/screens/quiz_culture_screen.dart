@@ -265,33 +265,60 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
       });
       CulturalHaptics.celebration();
 
-      final calculatedXp = (_questions.isNotEmpty
-              ? ((_pack.xpReward * _score) ~/ _questions.length)
-              : _pack.xpReward)
-          .clamp(40, 500);
+      final ratio = _questions.isNotEmpty ? (_score / _questions.length) : 0.0;
+      final isMastery = ratio >= 0.60;
 
-      // Enregistrement officiel dans le Passeport Culturel (Trésors Gravés)
-      final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
-            id: _pack.id,
-            type: PassportItemType.defi,
-            title: _pack.title,
-            subtitle: '${_pack.stampBadgeTitle} • Score: $_score/${_questions.length}',
-            regionId: _pack.regionId,
-            regionName: _pack.regionName,
-            photoUrl: _pack.photoUrl,
-            tag: 'Défi du Savoir',
-            culturalQuote:
-                '« L\'ignorant marche dans l\'obscurité, mais celui qui apprend allume une lampe pour son peuple. »',
-            targetRoute: '/culture/quiz/${_pack.id}',
-            xpEarned: calculatedXp,
+      if (isMastery) {
+        final calculatedXp = (_questions.isNotEmpty
+                ? ((_pack.xpReward * _score) ~/ _questions.length)
+                : _pack.xpReward)
+            .clamp(30, 500);
+        final calculatedCoins = (_questions.isNotEmpty
+                ? ((_pack.coinsReward * _score) ~/ _questions.length)
+                : _pack.coinsReward)
+            .clamp(10, 100);
+
+        PassportItemType resolvedType = PassportItemType.defi;
+        if (_pack.linkedContentType == 'personnage') {
+          resolvedType = PassportItemType.personnage;
+        } else if (_pack.linkedContentType == 'monument') {
+          resolvedType = PassportItemType.monument;
+        } else if (_pack.linkedContentType == 'ville') {
+          resolvedType = PassportItemType.ville;
+        } else if (_pack.linkedContentType == 'conte') {
+          resolvedType = PassportItemType.conte;
+        }
+
+        final targetId = _pack.linkedContentId ?? _pack.id;
+        final targetTitle = _pack.linkedContentTitle ?? _pack.title;
+        final targetSubtitle = _pack.linkedContentSubtitle ??
+            '${_pack.stampBadgeTitle} • Score: $_score/${_questions.length}';
+        final targetRoute = _pack.linkedTargetRoute ?? '/culture/quiz/${_pack.id}';
+
+        // Enregistrement officiel dans le Passeport Culturel uniquement si maîtrise >= 60%
+        final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
+              id: targetId,
+              type: resolvedType,
+              title: targetTitle,
+              subtitle: targetSubtitle,
+              regionId: _pack.regionId,
+              regionName: _pack.regionName,
+              photoUrl: _pack.photoUrl,
+              tag: _pack.linkedContentType != null ? 'Contenu Maîtrisé' : 'Défi du Savoir',
+              culturalQuote: _pack.linkedContentQuote ??
+                  '« L\'ignorant marche dans l\'obscurité, mais celui qui apprend allume une lampe pour son peuple. »',
+              targetRoute: targetRoute,
+              xpEarned: calculatedXp,
+              coinsEarned: calculatedCoins,
+            );
+
+        if (added && mounted) {
+          PassportStampToast.show(
+            context,
+            title: _pack.stampBadgeTitle,
+            type: resolvedType,
           );
-
-      if (added && mounted) {
-        PassportStampToast.show(
-          context,
-          title: _pack.stampBadgeTitle,
-          type: PassportItemType.defi,
-        );
+        }
       }
     }
   }
@@ -1295,7 +1322,11 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
     Color subtitleColor,
   ) {
     final percentage = ((_score / _questions.length) * 100).toInt();
-    final isMastery = percentage >= 70;
+    final isMastery = percentage >= 60;
+    final earnedCoins = isMastery
+        ? ((_pack.coinsReward * _score) ~/ _questions.length).clamp(10, 100)
+        : 0;
+    final earnedXp = isMastery ? _totalXpEarned : 0;
     final nextPack = _getNextPack();
 
     return SingleChildScrollView(
@@ -1307,16 +1338,18 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
           Center(
             child: CulturalRoyalStampAnimation(
               size: 88,
-              icon: Icons.auto_awesome_rounded,
-              label: _pack.stampBadgeTitle,
-              color: _pack.themeColor,
+              icon: isMastery ? Icons.auto_awesome_rounded : Icons.menu_book_rounded,
+              label: isMastery ? _pack.stampBadgeTitle : 'Minimum 60% requis',
+              color: isMastery ? _pack.themeColor : const Color(0xFF64748B),
             ),
           ),
 
           const SizedBox(height: 18),
 
           Text(
-            isMastery ? 'Sceau du Savoir Obtenu !' : 'Bel Apprentissage !',
+            isMastery
+                ? 'Sceau du Savoir Obtenu !'
+                : 'Maîtrise à renforcer ($percentage%)',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 22,
               fontWeight: FontWeight.w900,
@@ -1326,7 +1359,9 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            '$_score bonnes réponses sur ${_questions.length} ($percentage% de maîtrise)',
+            isMastery
+                ? '$_score bonnes réponses sur ${_questions.length} ($percentage% de maîtrise)'
+                : '$_score/${_questions.length} — Obtenez au moins 60% après avoir terminé le contenu pour débloquer vos XP et Pièces Culturelles.',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13.5,
               fontWeight: FontWeight.w600,
@@ -1337,7 +1372,7 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
 
           const SizedBox(height: 22),
 
-          // Carte Récompenses & XP
+          // Carte Récompenses & XP + Pièces Culturelles
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -1351,12 +1386,13 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
                   width: 46,
                   height: 46,
                   decoration: BoxDecoration(
-                    color: CultureTheme.accentOrange.withValues(alpha: 0.15),
+                    color: (isMastery ? CultureTheme.accentOrange : const Color(0xFF64748B))
+                        .withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
-                    Icons.bolt_rounded,
-                    color: CultureTheme.accentOrange,
+                  child: Icon(
+                    isMastery ? Icons.bolt_rounded : Icons.lock_outline_rounded,
+                    color: isMastery ? CultureTheme.accentOrange : const Color(0xFF64748B),
                     size: 26,
                   ),
                 ),
@@ -1365,23 +1401,23 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CulturalRollingXpCounter(
-                        targetXp: _totalXpEarned,
+                      Text(
+                        isMastery
+                            ? '+$earnedXp XP • +$earnedCoins Pièces Culturelles'
+                            : '0 XP • 0 Pièce (Score < 60%)',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14.5,
                           fontWeight: FontWeight.w800,
-                          color: CultureTheme.accentOrange,
-                        ),
-                        suffix: 'XP de Sagesse Gagnés',
-                        suffixStyle: GoogleFonts.plusJakartaSans(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w700,
-                          color: CultureTheme.accentOrange,
+                          color: isMastery
+                              ? CultureTheme.accentOrange
+                              : subtitleColor,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Gravé dans le Passeport Culturel',
+                        isMastery
+                            ? 'Gravé dans votre Passeport Culturel'
+                            : 'Relisez le contenu et réessayez le défi pour débloquer la récompense',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11.5,
                           color: subtitleColor,
@@ -1390,9 +1426,9 @@ class _QuizCultureScreenState extends ConsumerState<QuizCultureScreen> {
                     ],
                   ),
                 ),
-                const Icon(
-                  Icons.check_circle_rounded,
-                  color: CultureTheme.cyanTurquoise,
+                Icon(
+                  isMastery ? Icons.check_circle_rounded : Icons.refresh_rounded,
+                  color: isMastery ? CultureTheme.cyanTurquoise : subtitleColor,
                   size: 22,
                 ),
               ],

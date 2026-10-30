@@ -10,10 +10,10 @@ abstract final class CultureResponsive {
   static const double kDesktopMin = 1100.0;
 
   // ── Contraintes de largeur maximale pour confort de lecture & esthétique ───
-  static const double kMaxContentWidth = 1140.0;
-  static const double kMaxFormWidth = 780.0;
+  static const double kMaxContentWidth = 880.0;
+  static const double kMaxFormWidth = 720.0;
   static const double kMaxNavTabsWidth = 640.0;
-  static const double kMaxDetailWidth = 920.0;
+  static const double kMaxDetailWidth = 840.0;
   static const double kMaxDialogWidth = 560.0;
 
   /// Indique si l'appareil est une tablette (largeur >= 600px)
@@ -43,18 +43,20 @@ abstract final class CultureResponsive {
   /// Nombre de colonnes de grille pour les catalogues d'exploration (Monuments, Personnages, Villes)
   static int catalogGridColumns(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    if (width >= kDesktopMin) return 4;
+    if (width >= kDesktopMin) return 5;
     if (width >= kTabletLarge) return 4;
+    if (width >= 680) return 4;
     if (width >= kTabletMin) return 3;
     return 2;
   }
 
-  /// Aspect ratio optimal pour les cartes de découverte
+  /// Aspect ratio optimal pour les cartes de découverte (hauteur compacte et harmonieuse)
   static double catalogGridAspectRatio(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    if (width >= kDesktopMin) return 0.72;
-    if (width >= kTabletMin) return 0.70;
-    return 0.66;
+    if (width >= kDesktopMin) return 0.78;
+    if (width >= 680) return 0.76;
+    if (width >= kTabletMin) return 0.76;
+    return 0.78;
   }
 
   /// Nombre de colonnes pour les sous-sections de listes (Contes, Devinettes, Proverbes, Quiz)

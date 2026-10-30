@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
-import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_detail_models.dart';
 import '../../core/models/culture_passport_models.dart';
@@ -11,11 +10,11 @@ import '../../core/theme/culture_theme.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/authentic_photo_hero.dart';
 import '../widgets/connected_contents_section.dart';
+import '../widgets/content_mastery_quiz_card.dart';
 import '../widgets/culture_audio_listen_badge.dart';
 import '../../../../core/services/vivienne_tts_service.dart';
 import '../widgets/culture_detail_sticky_header.dart';
 import '../widgets/cultural_content_share_sheet.dart';
-import '../widgets/passport_stamp_toast.dart';
 
 /// Fiche de consultation immersive d'une Ville ou Village du Mali
 class PlaceDetailScreen extends ConsumerStatefulWidget {
@@ -93,28 +92,7 @@ class _PlaceDetailScreenState extends ConsumerState<PlaceDetailScreen> {
 
     final activeRegion = ref.watch(activeCultureRegionProvider).activeRegion;
 
-    // Enregistrement automatique au Passeport Culturel
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
-            id: item.id,
-            type: PassportItemType.ville,
-            title: item.name,
-            subtitle: item.subtitle,
-            regionId: item.regionId,
-            regionName: item.regionName,
-            photoUrl: item.photoUrl,
-            tag: item.tag,
-            culturalQuote: '« Cité d\'histoire, carrefour de civilisations. »',
-            targetRoute: '/culture/ville/${item.id}',
-          );
-      if (added && context.mounted) {
-        PassportStampToast.show(
-          context,
-          title: item.name,
-          type: PassportItemType.ville,
-        );
-      }
-    });
+    // Pas d'enregistrement automatique : validation requise via le Défi Quiz lié au lieu
 
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569);
@@ -267,7 +245,7 @@ class _PlaceDetailScreenState extends ConsumerState<PlaceDetailScreen> {
                             'Identité culturelle : ${item.identiteCulturelle}. '
                             '${item.chapters.map((c) => '${c.title} : ${c.content}').join(' ')}',
                         label: 'Écouter',
-                        compact: true,
+                        compact: false,
                         activeColor: CultureTheme.cyanTurquoise,
                       ),
                     ],
@@ -348,61 +326,70 @@ class _PlaceDetailScreenState extends ConsumerState<PlaceDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: item.keyFacts.map((fact) {
-                    return Container(
-                      width: (MediaQuery.of(context).size.width - 50) / 2,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: cardBg,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: borderCol),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(fact.icon, size: 14, color: CultureTheme.cyanTurquoise),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  fact.label.toUpperCase(),
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 9.5,
-                                    fontWeight: FontWeight.w800,
-                                    color: subtitleColor,
-                                    letterSpacing: 0.3,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    const spacing = 10.0;
+                    final cardWidth = (constraints.maxWidth - spacing) / 2;
+
+                    return Wrap(
+                      spacing: spacing,
+                      runSpacing: spacing,
+                      children: item.keyFacts.map((fact) {
+                        return SizedBox(
+                          width: cardWidth,
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: cardBg,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: borderCol),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            fact.value,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: titleColor,
-                              height: 1.3,
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(fact.icon, size: 14, color: CultureTheme.cyanTurquoise),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        fact.label.toUpperCase(),
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 9.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: subtitleColor,
+                                          letterSpacing: 0.3,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  fact.value,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: titleColor,
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        );
+                      }).toList(),
                     );
-                  }).toList(),
+                  },
                 ),
 
                 const SizedBox(height: 24),
@@ -460,6 +447,15 @@ class _PlaceDetailScreenState extends ConsumerState<PlaceDetailScreen> {
                 }),
 
                 const SizedBox(height: 12),
+
+                // ── DÉFI DE MAÎTRISE LIÉ À LA CITÉ / TERROIR ──────────────────
+                ContentMasteryQuizCard(
+                  contentId: item.id,
+                  contentType: PassportItemType.ville,
+                  contentTitle: item.name,
+                ),
+
+                const SizedBox(height: 24),
 
                 // ── CONTENUS ASSOCIÉS & MAILLAGE CULTUREL ─────────────────────
                 ConnectedContentsSection(

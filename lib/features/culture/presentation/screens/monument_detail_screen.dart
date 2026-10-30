@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
-import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/datasources/mock_culture_details_data.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_detail_models.dart';
@@ -16,12 +15,12 @@ import '../../scanner/data/monument_scan_knowledge.dart';
 import '../../core/datasources/monument_bespoke_content_data.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/connected_contents_section.dart';
+import '../widgets/content_mastery_quiz_card.dart';
 import '../widgets/culture_audio_listen_badge.dart';
 import '../widgets/culture_detail_sticky_header.dart';
 import '../widgets/cultural_content_share_sheet.dart';
 import '../widgets/monument_guided_tour_view.dart';
 import '../widgets/monument_living_hero.dart';
-import '../widgets/passport_stamp_toast.dart';
 import '../../../../core/services/vivienne_tts_service.dart';
 
 /// Onglets d'exploration thématique d'un monument adaptés dynamiquement à chaque édifice
@@ -191,28 +190,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
 
     final activeRegion = ref.watch(activeCultureRegionProvider).activeRegion;
 
-    // Enregistrement automatique au Passeport Culturel
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
-            id: item.id,
-            type: PassportItemType.monument,
-            title: item.name,
-            subtitle: item.subtitle,
-            regionId: item.regionId,
-            regionName: item.regionName,
-            photoUrl: item.photoUrl,
-            tag: item.tag,
-            culturalQuote: '« Bâti en terre de banco, sanctuaire de mémoire. »',
-            targetRoute: '/culture/monument/${item.id}',
-          );
-      if (added && context.mounted) {
-        PassportStampToast.show(
-          context,
-          title: item.name,
-          type: PassportItemType.monument,
-        );
-      }
-    });
+    // Pas d'enregistrement automatique à l'ouverture : l'apprenant doit terminer et valider le Défi Quiz lié
 
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569);
@@ -432,7 +410,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
 
         const SizedBox(height: 10),
 
-        // Localisation géographique avec bouton d'accès direct à la carte
+        // Localisation géographique avec accès carte
         Row(
           children: [
             const Icon(Icons.pin_drop_rounded, size: 15, color: CultureTheme.accentOrange),
@@ -445,9 +423,32 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                   fontWeight: FontWeight.w600,
                   color: subtitleColor,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: 8),
+          ],
+        ),
+
+        const SizedBox(height: 10),
+
+        // ── ACTIONS RAPIDES : ÉCOUTER LE RÉCIT (MAINTENU SANS LA GROSSE CARTE), CARTE & PARTAGER ──
+        Row(
+          children: [
+            // Bouton Écouter le récit oral maintenu
+            CultureAudioListenBadge(
+              contentId: 'detail_monument_${item.id}',
+              speechText:
+                  '${item.name}. ${item.subtitle}. Époque : ${item.era}. '
+                  'Localisation : ${item.locationDetails}. ${item.presentation}. '
+                  'Pourquoi ce monument est important : ${item.whyItMatters}. '
+                  '${item.architectureAndMaterials}. '
+                  '${item.chapters.map((c) => '${c.title} : ${c.content}').join(' ')}',
+              label: 'Écouter le récit',
+              compact: false,
+              activeColor: CultureTheme.accentOrange,
+            ),
+            const Spacer(),
             GestureDetector(
               onTap: () {
                 CulturalHaptics.cardPress();
@@ -457,7 +458,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                 );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                 decoration: BoxDecoration(
                   color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.22 : 0.1),
                   borderRadius: BorderRadius.circular(10),
@@ -492,7 +493,7 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
                 );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                 decoration: BoxDecoration(
                   color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.22 : 0.1),
                   borderRadius: BorderRadius.circular(10),
@@ -518,101 +519,6 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
               ),
             ),
           ],
-        ),
-
-        const SizedBox(height: 16),
-
-        // ── LECTEUR AUDIO DU GRIOT VIVANT ───────────────────────────────────
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isDark
-                  ? [
-                      const Color(0xFF1E293B),
-                      const Color(0xFF0F172A),
-                    ]
-                  : [
-                      const Color(0xFFFFFBEB),
-                      const Color(0xFFFEF3C7),
-                    ],
-            ),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.4 : 0.35),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: CultureTheme.accentOrange.withValues(alpha: isDark ? 0.18 : 0.08),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [CultureTheme.accentOrange, CultureTheme.accentLight],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: CultureTheme.accentOrange.withValues(alpha: 0.35),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.graphic_eq_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Écouter l\'Histoire Orale de Grand-mère Mah',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: titleColor,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Récit conté du sanctuaire millénaire • 2 min',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: subtitleColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              CultureAudioListenBadge(
-                contentId: 'detail_monument_${item.id}',
-                speechText:
-                    '${item.name}. ${item.subtitle}. Époque : ${item.era}. '
-                    'Localisation : ${item.locationDetails}. ${item.presentation}. '
-                    'Pourquoi ce monument est important : ${item.whyItMatters}. '
-                    '${item.architectureAndMaterials}. '
-                    '${item.chapters.map((c) => '${c.title} : ${c.content}').join(' ')}',
-                label: 'Écouter',
-                compact: true,
-                activeColor: CultureTheme.accentOrange,
-              ),
-            ],
-          ),
         ),
 
         const SizedBox(height: 16),
@@ -828,6 +734,15 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
         ),
 
         const SizedBox(height: 28),
+
+        // ── DÉFI DE MAÎTRISE LIÉ AU MONUMENT ────────────────────────────────
+        ContentMasteryQuizCard(
+          contentId: item.id,
+          contentType: PassportItemType.monument,
+          contentTitle: item.name,
+        ),
+
+        const SizedBox(height: 24),
 
         // ── MAILLAGE TRANSVERSAL ────────────────────────────────────────────
         ConnectedContentsSection(
@@ -1315,61 +1230,70 @@ class _MonumentDetailScreenState extends ConsumerState<MonumentDetailScreen> {
 
     final facts = item.keyFacts.isNotEmpty ? item.keyFacts : defaultFacts;
 
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: facts.map((fact) {
-        return Container(
-          width: (MediaQuery.of(context).size.width - 50) / 2,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderCol),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(fact.icon, size: 15, color: CultureTheme.accentOrange),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      fact.label.toUpperCase(),
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w800,
-                        color: subtitleColor,
-                        letterSpacing: 0.4,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 12.0;
+        final cardWidth = (constraints.maxWidth - spacing) / 2;
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: facts.map((fact) {
+            return SizedBox(
+              width: cardWidth,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderCol),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                fact.value,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w800,
-                  color: titleColor,
-                  height: 1.3,
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(fact.icon, size: 15, color: CultureTheme.accentOrange),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            fact.label.toUpperCase(),
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              color: subtitleColor,
+                              letterSpacing: 0.4,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      fact.value,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                        color: titleColor,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            );
+          }).toList(),
         );
-      }).toList(),
+      },
     );
   }
 

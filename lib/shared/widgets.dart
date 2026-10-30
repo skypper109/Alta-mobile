@@ -105,139 +105,154 @@ class DetShellScaffold extends ConsumerWidget {
           : Builder(
               builder: (context) {
                 final screenWidth = MediaQuery.sizeOf(context).width;
+                final isTablet = screenWidth >= 600;
+                final isLargeTablet = screenWidth >= 900;
                 final isSmall = screenWidth < 360;
                 final isCompact = screenWidth < 390;
 
-                final outerHPad = isSmall ? 10.0 : (isCompact ? 12.0 : 16.0);
-                final outerBPad = isSmall ? 18.0 : 22.0;
-                final buttonHPad = isSmall ? 10.0 : 12.0;
-                final gap = isSmall ? 6.0 : 8.0;
+                final navBarHeight = isTablet ? 74.0 : 64.0;
+                final outerHPad = isLargeTablet ? 32.0 : (isTablet ? 24.0 : (isSmall ? 10.0 : (isCompact ? 12.0 : 16.0)));
+                final outerBPad = isTablet ? 24.0 : (isSmall ? 18.0 : 22.0);
+                final buttonHPad = isTablet ? 16.0 : (isSmall ? 10.0 : 12.0);
+                final gap = isTablet ? 12.0 : (isSmall ? 6.0 : 8.0);
 
-                final iconSize = isSmall ? 19.5 : 21.0;
-                final fontSize = isSmall ? 11.0 : (isCompact ? 11.5 : 12.0);
-                final selectedHPad = isSmall ? 9.0 : (isCompact ? 11.0 : 13.0);
-                final unselectedHPad = isSmall ? 6.5 : (isCompact ? 8.0 : 9.5);
-                final maxLabelWidth = isSmall ? 85.0 : (isCompact ? 100.0 : 125.0);
+                final iconSize = isTablet ? 24.0 : (isSmall ? 19.5 : 21.0);
+                final fontSize = isTablet ? 13.0 : (isSmall ? 11.0 : (isCompact ? 11.5 : 12.0));
+                final selectedHPad = isTablet ? 14.0 : (isSmall ? 9.0 : (isCompact ? 11.0 : 13.0));
+                final unselectedHPad = isTablet ? 10.0 : (isSmall ? 6.5 : (isCompact ? 8.0 : 9.5));
+                final maxLabelWidth = isTablet ? 140.0 : (isSmall ? 85.0 : (isCompact ? 100.0 : 125.0));
+                final maxMenuWidth = isLargeTablet ? 600.0 : (isTablet ? 560.0 : double.infinity);
 
-                return Padding(
-                  padding: EdgeInsets.fromLTRB(outerHPad, 0, outerHPad, outerBPad),
-                  child: Row(
-                    children: [
-                      // ── Barre de navigation Éducation Solide Opaque ───────────
-                      Expanded(
-                        child: Container(
-                          height: 64,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: navBg,
-                            borderRadius: BorderRadius.circular(32),
-                            border: Border.all(color: borderColor, width: 1.2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: (isDark ? Colors.black : AppColors.primary)
-                                    .withValues(alpha: isDark ? 0.45 : 0.12),
-                                blurRadius: 22,
-                                spreadRadius: 2,
-                                offset: const Offset(0, 5),
+                return SafeArea(
+                  top: false,
+                  child: SizedBox(
+                    height: navBarHeight + outerBPad,
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: maxMenuWidth),
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(outerHPad, 0, outerHPad, outerBPad),
+                          child: Row(
+                            children: [
+                              // ── Barre de navigation Éducation Solide Opaque ───────────
+                              Expanded(
+                                child: Container(
+                                  height: navBarHeight,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isTablet ? 8 : 6,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: navBg,
+                                    borderRadius: BorderRadius.circular(isTablet ? 36 : 30),
+                                    border: Border.all(color: borderColor, width: 1.2),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: (isDark ? Colors.black : AppColors.primary)
+                                            .withValues(alpha: isDark ? 0.45 : 0.12),
+                                        blurRadius: 22,
+                                        spreadRadius: 2,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: List.generate(items.length, (index) {
+                                      final item = items[index];
+                                      final isSelected =
+                                          navigationShell.currentIndex == item.branchIndex;
+
+                                      return GestureDetector(
+                                        onTap: () {
+                                          if (navigationShell.currentIndex !=
+                                              item.branchIndex) {
+                                            _onTabSelected(context, ref, item.branchIndex);
+                                          }
+                                        },
+                                        behavior: HitTestBehavior.opaque,
+                                        child: AnimatedContainer(
+                                          duration: const Duration(milliseconds: 250),
+                                          curve: Curves.easeInOut,
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: isSelected ? selectedHPad : unselectedHPad,
+                                            vertical: isTablet ? 10 : 8,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            gradient: isSelected
+                                                ? AppColors.primaryGradient
+                                                : null,
+                                            color: isSelected ? null : Colors.transparent,
+                                            borderRadius: BorderRadius.circular(isTablet ? 28 : 24),
+                                            boxShadow: isSelected
+                                                ? [
+                                                    BoxShadow(
+                                                      color: AppColors.primary.withValues(
+                                                          alpha: isDark ? 0.4 : 0.25),
+                                                      blurRadius: 10,
+                                                      offset: const Offset(0, 3),
+                                                    ),
+                                                  ]
+                                                : null,
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                isSelected ? item.selectedIcon : item.icon,
+                                                size: iconSize,
+                                                color: isSelected
+                                                    ? AppColors.secondary
+                                                    : (isDark
+                                                        ? AppColors.textMuted
+                                                        : const Color(0xFF64748B)),
+                                              ),
+                                              if (isSelected) ...[
+                                                const SizedBox(width: 5),
+                                                ConstrainedBox(
+                                                  constraints: BoxConstraints(
+                                                    maxWidth: maxLabelWidth,
+                                                  ),
+                                                  child: FittedBox(
+                                                    fit: BoxFit.scaleDown,
+                                                    alignment: Alignment.centerLeft,
+                                                    child: Text(
+                                                      item.label,
+                                                      maxLines: 1,
+                                                      softWrap: false,
+                                                      style: GoogleFonts.plusJakartaSans(
+                                                        fontSize: fontSize,
+                                                        fontWeight: FontWeight.w700,
+                                                        color: Colors.white,
+                                                        letterSpacing: -0.2,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(width: gap),
+
+                              // ── Bouton aller à la Culture Solide avec Splash (placé à droite) ──
+                              _GoToCultureButton(
+                                isDark: isDark,
+                                horizontalPadding: buttonHPad,
+                                onTap: () => _onTabSelected(context, ref, 3),
                               ),
                             ],
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: List.generate(items.length, (index) {
-                              final item = items[index];
-                              final isSelected =
-                                  navigationShell.currentIndex == item.branchIndex;
-
-                              return GestureDetector(
-                                onTap: () {
-                                  if (navigationShell.currentIndex !=
-                                      item.branchIndex) {
-                                    _onTabSelected(context, ref, item.branchIndex);
-                                  }
-                                },
-                                behavior: HitTestBehavior.opaque,
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 250),
-                                  curve: Curves.easeInOut,
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: isSelected ? selectedHPad : unselectedHPad,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    gradient: isSelected
-                                        ? AppColors.primaryGradient
-                                        : null,
-                                    color: isSelected ? null : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(24),
-                                    boxShadow: isSelected
-                                        ? [
-                                            BoxShadow(
-                                              color: AppColors.primary.withValues(
-                                                  alpha: isDark ? 0.4 : 0.25),
-                                              blurRadius: 10,
-                                              offset: const Offset(0, 3),
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        isSelected ? item.selectedIcon : item.icon,
-                                        size: iconSize,
-                                        color: isSelected
-                                            ? AppColors.secondary
-                                            : (isDark
-                                                ? AppColors.textMuted
-                                                : const Color(0xFF64748B)),
-                                      ),
-                                      if (isSelected) ...[
-                                        const SizedBox(width: 5),
-                                        ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxWidth: maxLabelWidth,
-                                          ),
-                                          child: FittedBox(
-                                            fit: BoxFit.scaleDown,
-                                            alignment: Alignment.centerLeft,
-                                            child: Text(
-                                              item.label,
-                                              maxLines: 1,
-                                              softWrap: false,
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: fontSize,
-                                                fontWeight: FontWeight.w700,
-                                                color: Colors.white,
-                                                letterSpacing: -0.2,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
                         ),
                       ),
-
-                      SizedBox(width: gap),
-
-                      // ── Bouton aller à la Culture Solide avec Splash (placé à droite) ──
-                      _GoToCultureButton(
-                        isDark: isDark,
-                        horizontalPadding: buttonHPad,
-                        onTap: () => _onTabSelected(context, ref, 3),
-                      ),
-                    ],
+                    ),
                   ),
                 );
               },
@@ -259,6 +274,14 @@ class _GoToCultureButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
+    final btnHeight = isTablet ? 74.0 : 64.0;
+    final iconSize = isTablet ? 24.0 : 21.0;
+    final fontSize = isTablet ? 11.0 : 9.5;
+    final hPad = isTablet ? 16.0 : horizontalPadding;
+
     final bgColor = isDark ? const Color(0xFF121B2D) : Colors.white;
     final borderColor =
         isDark ? const Color(0xFF23314D) : const Color(0xFFE2E8F0);
@@ -273,11 +296,11 @@ class _GoToCultureButton extends StatelessWidget {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        height: 64,
-        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+        height: btnHeight,
+        padding: EdgeInsets.symmetric(horizontal: hPad),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(isTablet ? 36 : 30),
           border: Border.all(color: borderColor, width: 1.2),
           boxShadow: [
             BoxShadow(
@@ -293,17 +316,16 @@ class _GoToCultureButton extends StatelessWidget {
           children: [
             Icon(
               Icons.public_rounded,
-              size: 22,
-              color: isDark ? const Color(0xFF64748B) : const Color(0xFF64748B),
+              size: iconSize,
+              color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
             ),
             const SizedBox(height: 3),
             Text(
               'Culture',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 9.5,
+                fontSize: fontSize,
                 fontWeight: FontWeight.w600,
-                color:
-                    isDark ? const Color(0xFF64748B) : const Color(0xFF64748B),
+                color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
               ),
             ),
           ],
@@ -548,6 +570,9 @@ class AlterniaAvatarTopBarButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
+
     final bgColor = isDark ? AppColors.surfaceAlt : Colors.white;
     final borderColor = isDark
         ? AppColors.secondary.withValues(alpha: 0.4)
@@ -561,13 +586,13 @@ class AlterniaAvatarTopBarButton extends StatelessWidget {
       },
       child: Container(
         padding: EdgeInsets.symmetric(
-          horizontal: showLabel ? 10 : 7,
-          vertical: showLabel ? 6 : 7,
+          horizontal: showLabel ? (isTablet ? 14 : 10) : (isTablet ? 9 : 7),
+          vertical: showLabel ? (isTablet ? 8 : 6) : (isTablet ? 9 : 7),
         ),
         decoration: BoxDecoration(
           color: bgColor,
           shape: showLabel ? BoxShape.rectangle : BoxShape.circle,
-          borderRadius: showLabel ? BorderRadius.circular(20) : null,
+          borderRadius: showLabel ? BorderRadius.circular(isTablet ? 24 : 20) : null,
           border: Border.all(color: borderColor, width: 1.2),
           boxShadow: [
             BoxShadow(
@@ -582,26 +607,26 @@ class AlterniaAvatarTopBarButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 22,
-              height: 22,
+              width: isTablet ? 26 : 22,
+              height: isTablet ? 26 : 22,
               decoration: const BoxDecoration(
                 gradient: AppColors.cyanGradient,
                 shape: BoxShape.circle,
               ),
-              child: const Center(
+              child: Center(
                 child: Icon(
                   Icons.psychology_rounded,
                   color: Colors.white,
-                  size: 14,
+                  size: isTablet ? 16 : 14,
                 ),
               ),
             ),
             if (showLabel) ...[
-              const SizedBox(width: 6),
+              SizedBox(width: isTablet ? 8 : 6),
               Text(
                 'Mon Prof',
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
+                  fontSize: isTablet ? 13 : 11,
                   fontWeight: FontWeight.w700,
                   color: textColor,
                   letterSpacing: 0.2,

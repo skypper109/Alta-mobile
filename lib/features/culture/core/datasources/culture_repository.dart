@@ -45,6 +45,7 @@ class CultureRepository {
   static const String _cachedPlacesPrefKey = 'culture_cached_places_json';
   static const String _cachedStoriesPrefKey = 'culture_cached_stories_json';
   static const String _cachedProverbsPrefKey = 'culture_cached_proverbs_json';
+  static const String _localContributionsPrefKey = 'culture_local_contributions_json';
 
   /// Liste d'autorité des 8 monuments historiques réels du Mali
   static const Set<String> _validMonumentIds = {
@@ -785,21 +786,161 @@ class CultureRepository {
   }
 
   /// Soumet une nouvelle contribution culturelle (tous types de contenu)
+  /// Envoie la contribution au Super Admin en statut EN_ATTENTE et la met en cache localement.
   Future<Map<String, dynamic>?> submitContribution(Map<String, dynamic> payload) async {
-    return _apiClient.submitContribution(payload);
+    final remoteResult = await _apiClient.submitContribution(payload);
+
+    final entryToCache = remoteResult ??
+        <String, dynamic>{
+          'id': 'local_${DateTime.now().millisecondsSinceEpoch}',
+          'typeContenu': payload['type_contenu'] ?? 'proverbe',
+          'titre': payload['titre'],
+          'texte': payload['texte'] ?? '',
+          'texteOriginal': payload['texte_original'],
+          'signification': payload['signification'] ?? '',
+          'morale': payload['morale'],
+          'origine': payload['origine'] ?? 'Tradition Orale',
+          'theme': payload['theme'] ?? 'Patrimoine & Culture Vivante',
+          'regionId': payload['region_id'] ?? 'bamako',
+          'regionNom': payload['region_nom'] ?? 'Bamako',
+          'sourceTemoin': payload['source_temoin'],
+          'photoUrl': payload['photo_url'],
+          'donneesSupplementaires': payload['donnees_supplementaires'] ?? {},
+          'auteurId': payload['auteur_id'],
+          'auteurNom': payload['auteur_nom'] ?? 'Gardien AlterniA',
+          'auteurRole': payload['auteur_role'] ?? 'Apprenant',
+          'statut': 'EN_ATTENTE',
+          'xpAttribues': payload['xp_attribues'] ?? 50,
+          'piecesAttribuees': payload['pieces_attribuees'] ?? 25,
+          'dateSoumission': DateTime.now().toUtc().toIso8601String(),
+          'pendingSync': remoteResult == null,
+        };
+
+    await _saveContributionToLocalCache(entryToCache);
+    return remoteResult;
   }
 
-  /// Récupère les contributions pour la modération ou l'historique utilisateur
+  Future<void> _saveContributionToLocalCache(Map<String, dynamic> contrib) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_localContributionsPrefKey);
+      final List<Map<String, dynamic>> current = [];
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = jsonDecode(raw);
+        if (decoded is List) {
+          current.addAll(decoded.whereType<Map<String, dynamic>>());
+        }
+      }
+      final id = contrib['id']?.toString() ?? '';
+      current.removeWhere((c) => c['id']?.toString() == id);
+      current.insert(0, contrib);
+      await prefs.setString(_localContributionsPrefKey, jsonEncode(current));
+    } catch (e) {
+      _logger.w('Impossible de sauvegarder la contribution en cache local: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _loadLocalContributions() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_localContributionsPrefKey);
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = jsonDecode(raw);
+        if (decoded is List) {
+          return decoded.whereType<Map<String, dynamic>>().toList();
+        }
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  /// Récupère les contributions pour la modération ou l'historique utilisateur.
+  /// Synchronise automatiquement les contributions en attente et fusionne avec le serveur Super Admin.
   Future<List<Map<String, dynamic>>> getContributions({
     String? statut,
     String? typeContenu,
     String? auteurId,
   }) async {
-    return _apiClient.fetchContributions(
+    final localItems = await _loadLocalContributions();
+
+    // Synchroniser les contributions créées hors-ligne dès que le backend répond
+    bool localUpdated = false;
+    final updatedLocal = <Map<String, dynamic>>[];
+    for (final item in localItems) {
+      if (item['pendingSync'] == true) {
+        final synced = await _apiClient.submitContribution({
+          'type_contenu': item['typeContenu'] ?? item['type_contenu'] ?? 'proverbe',
+          'titre': item['titre'],
+          'texte': item['texte'] ?? '',
+          'texte_original': item['texteOriginal'] ?? item['texte_original'],
+          'signification': item['signification'] ?? '',
+          'morale': item['morale'],
+          'origine': item['origine'] ?? 'Tradition Orale',
+          'theme': item['theme'] ?? 'Patrimoine & Culture Vivante',
+          'region_id': item['regionId'] ?? item['region_id'] ?? 'bamako',
+          'region_nom': item['regionNom'] ?? item['region_nom'] ?? 'Bamako',
+          'source_temoin': item['sourceTemoin'] ?? item['source_temoin'],
+          'photo_url': item['photoUrl'] ?? item['photo_url'],
+          'donnees_supplementaires': item['donneesSupplementaires'] ?? item['donnees_supplementaires'] ?? {},
+          'auteur_id': item['auteurId'] ?? item['auteur_id'],
+          'auteur_nom': item['auteurNom'] ?? item['auteur_nom'] ?? 'Gardien AlterniA',
+          'auteur_role': item['auteurRole'] ?? item['auteur_role'] ?? 'Apprenant',
+          'xp_attribues': item['xpAttribues'] ?? 50,
+          'pieces_attribuees': item['piecesAttribuees'] ?? 25,
+        });
+        if (synced != null) {
+          updatedLocal.add(synced);
+          localUpdated = true;
+          continue;
+        }
+      }
+      updatedLocal.add(item);
+    }
+
+    final remoteItems = await _apiClient.fetchContributions(
       statut: statut,
       typeContenu: typeContenu,
       auteurId: auteurId,
     );
+
+    if (remoteItems.isNotEmpty) {
+      final remoteById = {
+        for (final r in remoteItems)
+          if (r['id'] != null) r['id'].toString(): r,
+      };
+
+      // Mettre à jour le statut local (ex: EN_ATTENTE -> APPROUVE / REJETE par le Super Admin)
+      for (var i = 0; i < updatedLocal.length; i++) {
+        final localId = updatedLocal[i]['id']?.toString();
+        if (localId != null && remoteById.containsKey(localId)) {
+          updatedLocal[i] = remoteById[localId]!;
+          localUpdated = true;
+        }
+      }
+
+      if (localUpdated) {
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_localContributionsPrefKey, jsonEncode(updatedLocal));
+        } catch (_) {}
+      }
+
+      final merged = <Map<String, dynamic>>[...remoteItems];
+      for (final loc in updatedLocal) {
+        final locId = loc['id']?.toString() ?? '';
+        final locTexte = (loc['texte'] ?? '').toString().trim().toLowerCase();
+        final alreadyInRemote = remoteItems.any((r) =>
+            r['id']?.toString() == locId ||
+            ((r['texte'] ?? '').toString().trim().toLowerCase() == locTexte &&
+                locTexte.isNotEmpty));
+        if (!alreadyInRemote) {
+          merged.insert(0, loc);
+        }
+      }
+      return merged;
+    }
+
+    return updatedLocal;
   }
 
   /// Récupère la liste des contes interactifs (priorité backend API, repli hors ligne)

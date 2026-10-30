@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/culture_challenge_models.dart';
 import '../theme/culture_theme.dart';
+import 'culture_database_seed.dart';
+import 'mock_culture_details_data.dart';
+import 'mock_culture_stories_data.dart';
+import '../../scanner/data/monument_scan_knowledge.dart';
 
 /// Banques de données authentiques des Devinettes (« Kôkô ! » — « N'sira ! »), Quiz et Missions
 abstract final class MockCultureChallengesData {
@@ -731,13 +735,412 @@ abstract final class MockCultureChallengesData {
     photoUrl: 'assets/images/culture/personnages/soundiata.jpg',
   );
 
-  /// Récupère un pack de quiz par son ID
+  /// Récupère un pack de quiz par son ID ou génère dynamiquement le Défi Quiz lié à un contenu culturel
   static CultureQuizPack getQuizPackById(String? id) {
     if (id == null || id.isEmpty) return quizPacks.first;
-    return quizPacks.firstWhere(
-      (pack) => pack.id == id,
-      orElse: () => quizPacks.first,
-    );
+
+    // 1. Pack de quiz thématique existant
+    for (final pack in quizPacks) {
+      if (pack.id == id) return pack;
+    }
+
+    // 2. Défi Quiz lié à un Grand Personnage Historique
+    // ignore: deprecated_member_use_from_same_package
+    final figMatch = MockCultureDetailsData.figures.where((f) => f.id == id).firstOrNull ??
+        CultureDatabaseSeed.getInitialFigureDetail(id);
+    if (figMatch != null) {
+      final firstFact = figMatch.keyFacts.isNotEmpty ? figMatch.keyFacts.first : null;
+      final firstChap = figMatch.chapters.isNotEmpty ? figMatch.chapters.first : null;
+      return CultureQuizPack(
+        id: 'quiz_${figMatch.id}',
+        title: 'Défi : ${figMatch.name}',
+        subtitle: figMatch.titleHonorifique,
+        description: "Validez votre maîtrise de l'histoire de ${figMatch.name} (${figMatch.period}) pour graver son sceau et gagner vos récompenses.",
+        category: 'Grande Figure',
+        regionId: figMatch.regionId,
+        regionName: figMatch.regionName,
+        xpReward: 60,
+        coinsReward: 20,
+        timeMinutes: 3,
+        icon: Icons.person_rounded,
+        themeColor: CultureTheme.accentOrange,
+        photoUrl: figMatch.photoUrl,
+        stampBadgeTitle: 'Sceau de ${figMatch.name}',
+        linkedContentId: figMatch.id,
+        linkedContentType: 'personnage',
+        linkedContentTitle: figMatch.name,
+        linkedContentSubtitle: figMatch.titleHonorifique,
+        linkedContentQuote: figMatch.citationHistorique,
+        linkedTargetRoute: '/culture/personnage/${figMatch.id}',
+        questions: [
+          CultureQuizQuestion(
+            id: '${figMatch.id}_q1',
+            question: "Quel titre honorifique et rôle historique caractérisent ${figMatch.name} ?",
+            options: [
+              figMatch.titleHonorifique,
+              'Gouverneur colonial du Soudan',
+              'Navigateur portugais des côtes atlantiques',
+              'Marchand vénitien du Moyen Âge',
+            ],
+            correctIndex: 0,
+            explanation: figMatch.resume,
+            category: 'Grande Figure',
+            regionId: figMatch.regionId,
+            regionName: figMatch.regionName,
+            xp: 20,
+          ),
+          CultureQuizQuestion(
+            id: '${figMatch.id}_q2',
+            question: "À quelle région et époque historique est rattachée l'épopée de ${figMatch.name} ?",
+            options: [
+              '${figMatch.regionName} (${figMatch.period})',
+              'Europe du Nord (XIXe siècle)',
+              'Asie Mineure (Antiquité)',
+              'Amérique du Sud (XVIIIe siècle)',
+            ],
+            correctIndex: 0,
+            explanation: "${figMatch.name} a marqué l'histoire de la région de ${figMatch.regionName} durant la période ${figMatch.period}.",
+            category: 'Grande Figure',
+            regionId: figMatch.regionId,
+            regionName: figMatch.regionName,
+            xp: 20,
+          ),
+          CultureQuizQuestion(
+            id: '${figMatch.id}_q3',
+            question: firstFact != null
+                ? 'Quel repère clé caractérise « ${firstFact.label} » pour ${figMatch.name} ?'
+                : 'Quel enseignement majeur retient-on du parcours de ${figMatch.name} ?',
+            options: [
+              firstFact != null
+                  ? firstFact.value
+                  : (firstChap != null ? firstChap.title : figMatch.tag),
+              'La reddition sans condition face aux envahisseurs',
+              "L'abandon des traditions orales du terroir",
+              'La destruction des bibliothèques de manuscrits',
+            ],
+            correctIndex: 0,
+            explanation: firstChap != null ? firstChap.content : figMatch.resume,
+            category: 'Grande Figure',
+            regionId: figMatch.regionId,
+            regionName: figMatch.regionName,
+            xp: 20,
+          ),
+        ],
+      );
+    }
+
+    // 3. Défi Quiz lié à un Monument Historique
+    // ignore: deprecated_member_use_from_same_package
+    final monMatch = MockCultureDetailsData.monuments.where((m) => m.id == id).firstOrNull;
+    if (monMatch != null) {
+      return CultureQuizPack(
+        id: 'quiz_${monMatch.id}',
+        title: 'Défi : ${monMatch.name}',
+        subtitle: monMatch.subtitle,
+        description: 'Prouvez votre connaissance de « ${monMatch.name} » pour débloquer son sceau officiel, vos XP et vos pièces culturelles.',
+        category: 'Monument Historique',
+        regionId: monMatch.regionId,
+        regionName: monMatch.regionName,
+        xpReward: 60,
+        coinsReward: 20,
+        timeMinutes: 3,
+        icon: Icons.account_balance_rounded,
+        themeColor: CultureTheme.primaryBlue,
+        photoUrl: monMatch.photoUrl,
+        stampBadgeTitle: 'Sceau : ${monMatch.name}',
+        linkedContentId: monMatch.id,
+        linkedContentType: 'monument',
+        linkedContentTitle: monMatch.name,
+        linkedContentSubtitle: monMatch.subtitle,
+        linkedContentQuote: monMatch.whyItMatters,
+        linkedTargetRoute: '/culture/monument/${monMatch.id}',
+        questions: [
+          CultureQuizQuestion(
+            id: '${monMatch.id}_q1',
+            question: "Dans quelle région du Mali s'élève « ${monMatch.name} » ?",
+            options: [
+              '${monMatch.regionName} (${monMatch.locationDetails})',
+              'Sur les côtes méditerranéennes',
+              'Dans la forêt équatoriale du bassin du Congo',
+              "Sur les hauts plateaux d'Abyssinie",
+            ],
+            correctIndex: 0,
+            explanation: monMatch.presentation,
+            category: 'Monument Historique',
+            regionId: monMatch.regionId,
+            regionName: monMatch.regionName,
+            xp: 20,
+          ),
+          CultureQuizQuestion(
+            id: '${monMatch.id}_q2',
+            question: "Quelle caractéristique distingue l'identité de « ${monMatch.name} » ?",
+            options: [
+              monMatch.subtitle,
+              'Un gratte-ciel de verre du XXIe siècle',
+              'Une forteresse maritime en granit',
+              'Un amphithéâtre romain antique',
+            ],
+            correctIndex: 0,
+            explanation: monMatch.architectureAndMaterials,
+            category: 'Monument Historique',
+            regionId: monMatch.regionId,
+            regionName: monMatch.regionName,
+            xp: 20,
+          ),
+          CultureQuizQuestion(
+            id: '${monMatch.id}_q3',
+            question: 'À quelle époque ou repère historique est associé « ${monMatch.name} » ?',
+            options: [
+              monMatch.era,
+              'Préhistoire néolithique (-5000 av. J.-C.)',
+              'Antiquité gréco-romaine',
+              'Époque féodale japonaise',
+            ],
+            correctIndex: 0,
+            explanation: monMatch.whyItMatters,
+            category: 'Monument Historique',
+            regionId: monMatch.regionId,
+            regionName: monMatch.regionName,
+            xp: 20,
+          ),
+        ],
+      );
+    }
+
+    // Fallback sur MonumentScanKnowledge si c'est un monument de Bamako / CultureLens
+    final scanMon = MonumentScanKnowledge.findById(id);
+    if (scanMon != null) {
+      return CultureQuizPack(
+        id: 'quiz_${scanMon.id}',
+        title: 'Défi : ${scanMon.name}',
+        subtitle: scanMon.subtitle,
+        description: 'Validez votre découverte de « ${scanMon.name} » à ${scanMon.regionName} pour gagner vos XP et pièces culturelles.',
+        category: 'Monument Historique',
+        regionId: scanMon.regionId,
+        regionName: scanMon.regionName,
+        xpReward: 60,
+        coinsReward: 20,
+        timeMinutes: 3,
+        icon: Icons.account_balance_rounded,
+        themeColor: CultureTheme.primaryBlue,
+        photoUrl: scanMon.photoUrl,
+        stampBadgeTitle: 'Sceau : ${scanMon.name}',
+        linkedContentId: scanMon.id,
+        linkedContentType: 'monument',
+        linkedContentTitle: scanMon.name,
+        linkedContentSubtitle: scanMon.subtitle,
+        linkedContentQuote: scanMon.whyItMatters,
+        linkedTargetRoute: '/culture/monument/${scanMon.id}',
+        questions: [
+          CultureQuizQuestion(
+            id: '${scanMon.id}_q1',
+            question: 'Que symbolise principalement « ${scanMon.name} » à ${scanMon.regionName} ?',
+            options: [
+              scanMon.subtitle,
+              'Un ancien comptoir commercial maritime',
+              'Une gare ferroviaire coloniale désaffectée',
+              'Un barrage hydroélectrique souterrain',
+            ],
+            correctIndex: 0,
+            explanation: scanMon.historicalStory,
+            category: 'Monument Historique',
+            regionId: scanMon.regionId,
+            regionName: scanMon.regionName,
+            xp: 20,
+          ),
+          CultureQuizQuestion(
+            id: '${scanMon.id}_q2',
+            question: 'À quelle période ou date clé est rattaché « ${scanMon.name} » ?',
+            options: [
+              scanMon.era,
+              'Ve siècle avant notre ère',
+              'XIIe siècle européen',
+              'XVIIe siècle ottoman',
+            ],
+            correctIndex: 0,
+            explanation: scanMon.architectureStyle,
+            category: 'Monument Historique',
+            regionId: scanMon.regionId,
+            regionName: scanMon.regionName,
+            xp: 20,
+          ),
+          CultureQuizQuestion(
+            id: '${scanMon.id}_q3',
+            question: 'Où se situe « ${scanMon.name} » ?',
+            options: [
+              '${scanMon.regionName} (${scanMon.locationDetails})',
+              'Dakar (Plateau)',
+              'Conakry (Kaloum)',
+              'Niamey (Rive Droite)',
+            ],
+            correctIndex: 0,
+            explanation: scanMon.whyItMatters,
+            category: 'Monument Historique',
+            regionId: scanMon.regionId,
+            regionName: scanMon.regionName,
+            xp: 20,
+          ),
+        ],
+      );
+    }
+
+    // 4. Défi Quiz lié à une Ville ou Terroir
+    // ignore: deprecated_member_use_from_same_package
+    final placeMatch = MockCultureDetailsData.places.where((p) => p.id == id).firstOrNull ??
+        CultureDatabaseSeed.getInitialPlaceDetail(id);
+    if (placeMatch != null) {
+      return CultureQuizPack(
+        id: 'quiz_${placeMatch.id}',
+        title: 'Défi : ${placeMatch.name}',
+        subtitle: placeMatch.subtitle,
+        description: 'Testez vos connaissances sur la cité historique de ${placeMatch.name} pour débloquer son sceau, vos XP et vos pièces.',
+        category: 'Cité & Terroir',
+        regionId: placeMatch.regionId,
+        regionName: placeMatch.regionName,
+        xpReward: 60,
+        coinsReward: 20,
+        timeMinutes: 3,
+        icon: Icons.location_city_rounded,
+        themeColor: CultureTheme.cyanTurquoise,
+        photoUrl: placeMatch.photoUrl,
+        stampBadgeTitle: 'Sceau de ${placeMatch.name}',
+        linkedContentId: placeMatch.id,
+        linkedContentType: 'ville',
+        linkedContentTitle: placeMatch.name,
+        linkedContentSubtitle: placeMatch.subtitle,
+        linkedContentQuote: placeMatch.identiteCulturelle,
+        linkedTargetRoute: '/culture/ville/${placeMatch.id}',
+        questions: [
+          CultureQuizQuestion(
+            id: '${placeMatch.id}_q1',
+            question: 'Quel surnom ou titre patrimonial illustre la cité de ${placeMatch.name} ?',
+            options: [
+              placeMatch.subtitle,
+              'La Cité de Glace et des Fjords',
+              'La Métropole Industrielle du Pacifique',
+              "Le Port Franc de l'Atlantique Sud",
+            ],
+            correctIndex: 0,
+            explanation: placeMatch.resume,
+            category: 'Cité & Terroir',
+            regionId: placeMatch.regionId,
+            regionName: placeMatch.regionName,
+            xp: 20,
+          ),
+          CultureQuizQuestion(
+            id: '${placeMatch.id}_q2',
+            question: "Quelle est l'origine ou l'époque de fondation de ${placeMatch.name} ?",
+            options: [
+              placeMatch.fondation,
+              "Fondée en 1995 lors d'un sommet industriel",
+              'Créée au XXe siècle comme base minière',
+              'Établie par des colons hollandais au XVIIe siècle',
+            ],
+            correctIndex: 0,
+            explanation: placeMatch.identiteCulturelle,
+            category: 'Cité & Terroir',
+            regionId: placeMatch.regionId,
+            regionName: placeMatch.regionName,
+            xp: 20,
+          ),
+          CultureQuizQuestion(
+            id: '${placeMatch.id}_q3',
+            question: 'Dans quelle région culturelle du Mali rayonne ${placeMatch.name} ?',
+            options: [
+              placeMatch.regionName,
+              'Littoral Atlantique',
+              'Bassin du Nil Blanc',
+              'Hauts Plateaux des Grands Lacs',
+            ],
+            correctIndex: 0,
+            explanation: placeMatch.traditionsAndPatrimoine,
+            category: 'Cité & Terroir',
+            regionId: placeMatch.regionId,
+            regionName: placeMatch.regionName,
+            xp: 20,
+          ),
+        ],
+      );
+    }
+
+    // 5. Défi Quiz lié à un Conte ou Récit Interactif
+    final storyMatch = MockCultureStoriesData.stories.where((s) => s.id == id).firstOrNull;
+    if (storyMatch != null) {
+      return CultureQuizPack(
+        id: 'quiz_${storyMatch.id}',
+        title: 'Défi : ${storyMatch.title}',
+        subtitle: storyMatch.subtitle,
+        description: 'Vérifiez que vous avez bien intégré les enseignements du conte « ${storyMatch.title} » pour gagner vos XP et pièces.',
+        category: 'Conte & Sagesse',
+        regionId: storyMatch.regionId,
+        regionName: storyMatch.regionName,
+        xpReward: 60,
+        coinsReward: 20,
+        timeMinutes: 3,
+        icon: Icons.auto_stories_rounded,
+        themeColor: CultureTheme.accentOrange,
+        photoUrl: storyMatch.photoUrl,
+        stampBadgeTitle: 'Sceau : ${storyMatch.title}',
+        linkedContentId: storyMatch.id,
+        linkedContentType: 'conte',
+        linkedContentTitle: storyMatch.title,
+        linkedContentSubtitle: storyMatch.subtitle,
+        linkedContentQuote: storyMatch.moral,
+        linkedTargetRoute: '/culture/conte/${storyMatch.id}',
+        questions: [
+          CultureQuizQuestion(
+            id: '${storyMatch.id}_q1',
+            question: 'Quel est le thème central du conte « ${storyMatch.title} » ?',
+            options: [
+              storyMatch.subtitle,
+              'La conquête maritime des océans lointains',
+              'La fabrication industrielle des métaux modernes',
+              "Le commerce des épices avec l'Orient",
+            ],
+            correctIndex: 0,
+            explanation: storyMatch.summary,
+            category: 'Conte & Sagesse',
+            regionId: storyMatch.regionId,
+            regionName: storyMatch.regionName,
+            xp: 20,
+          ),
+          CultureQuizQuestion(
+            id: '${storyMatch.id}_q2',
+            question: 'De quelle tradition orale et région nous vient « ${storyMatch.title} » ?',
+            options: [
+              '${storyMatch.origin} (${storyMatch.regionName})',
+              'Mythologie nordique scandinave',
+              "Folklore celtique d'Irlande",
+              'Chroniques impériales de Chine',
+            ],
+            correctIndex: 0,
+            explanation: 'Ce récit est transmis par ${storyMatch.narrator} dans la tradition ${storyMatch.origin}.',
+            category: 'Conte & Sagesse',
+            regionId: storyMatch.regionId,
+            regionName: storyMatch.regionName,
+            xp: 20,
+          ),
+          CultureQuizQuestion(
+            id: '${storyMatch.id}_q3',
+            question: 'Quelle est la leçon morale transmise par les anciens dans « ${storyMatch.title} » ?',
+            options: [
+              storyMatch.moral,
+              "« La force brute l'emporte toujours sur la justice et la parole donnée. »",
+              "« Il vaut mieux voyager seul que d'écouter les conseils du village. »",
+              "« L'or et l'avidité valent mieux que la paix du cœur. »",
+            ],
+            correctIndex: 0,
+            explanation: storyMatch.moral,
+            category: 'Conte & Sagesse',
+            regionId: storyMatch.regionId,
+            regionName: storyMatch.regionName,
+            xp: 20,
+          ),
+        ],
+      );
+    }
+
+    return quizPacks.first;
   }
 
   /// Récupère un pack de quiz adapté à la région spécifiée (ou le premier par défaut)

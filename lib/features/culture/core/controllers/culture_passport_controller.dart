@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../profile/gamification_notifier.dart';
+import 'package:dio/dio.dart';
+import '../../../../core/constants.dart';
 import '../../../profile/user_prefs_notifier.dart';
 import '../datasources/culture_api_client.dart';
 import '../models/culture_passport_models.dart';
@@ -17,8 +18,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
   final Ref _ref;
   final CultureApiClient _apiClient;
 
-  static const String _prefEntriesKey = 'culture_passport_entries_v3';
-  static const String _prefIssuedAtKey = 'culture_passport_issued_at_v3';
+  static const String _prefEntriesKey = 'culture_passport_entries_v4';
+  static const String _prefIssuedAtKey = 'culture_passport_issued_at_v4';
 
   CulturePassportNotifier(this._ref, {CultureApiClient? apiClient})
       : _apiClient = apiClient ?? CultureApiClient(),
@@ -82,6 +83,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
           entries: state.entries,
           exploredRegionIds: state.exploredRegionIds,
           featuredDiscoveryOfTheDay: state.featuredDiscoveryOfTheDay,
+          bonusCultureXp: state.bonusCultureXp,
+          bonusCultureCoins: state.bonusCultureCoins,
         );
       }
     });
@@ -121,6 +124,8 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
                   e.type == PassportItemType.monument,
               orElse: () => _defaultFeaturedDiscovery,
             ),
+            bonusCultureXp: state.bonusCultureXp,
+            bonusCultureCoins: state.bonusCultureCoins,
           );
         }
       }
@@ -136,55 +141,45 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
     } catch (_) {}
   }
 
-  /// Synchronise les découvertes enregistrées sur le backend (alta_db)
+  /// Synchronise les récompenses culturelles validées sur le backend (contributions citoyennes)
   Future<void> syncWithBackend() async {
     try {
       final userPrefs = _ref.read(userPrefsProvider);
-      final studentId = userPrefs.name.isNotEmpty ? userPrefs.name : null;
+      if (userPrefs.name.trim().isEmpty) return;
 
-      final remoteDiscoveries = await _apiClient.fetchDiscoveries(studentId: studentId);
-      if (remoteDiscoveries.isNotEmpty) {
-        final currentEntries = List<PassportEntry>.from(state.entries);
-        bool hasChanges = false;
-
-        for (final item in remoteDiscoveries) {
-          final monumentId = item['monumentId'] as String? ?? item['id'] as String? ?? '';
-          if (monumentId.isEmpty) continue;
-
-          final alreadyExists = currentEntries.any((e) => e.id == monumentId);
-          if (!alreadyExists) {
-            final entry = PassportEntry(
-              id: monumentId,
-              type: PassportItemType.monument,
-              title: item['monumentName'] as String? ?? 'Monument Historique',
-              subtitle: 'Découvert et authentifié via CultureLens',
-              regionId: (item['ville'] as String?)?.toLowerCase(),
-              regionName: item['ville'] as String? ?? 'Mali',
-              photoUrl: item['photoUrl'] as String? ??
-                  'assets/images/culture/monuments/mosquee_djingareyber.jpg',
-              tag: 'Authentifié IA',
-              discoveredAt: item['discoveredAt'] != null
-                  ? DateTime.tryParse(item['discoveredAt'] as String) ?? DateTime.now()
-                  : DateTime.now(),
-              targetRoute: '/culture/monument/$monumentId',
-              xpEarned: 50,
-            );
-            currentEntries.add(entry);
-            hasChanges = true;
-          }
-        }
-
-        if (hasChanges) {
-          state = PassportState(
-            travelerName: _currentTravelerName,
-            passportNumber: _currentPassportNumber,
-            issuedAt: state.issuedAt,
-            entries: currentEntries,
-            exploredRegionIds: _computeExploredRegions(currentEntries),
-            featuredDiscoveryOfTheDay: state.featuredDiscoveryOfTheDay,
+      final dio = Dio();
+      for (final url in AltaApiConfig.candidateBaseUrls) {
+        try {
+          final res = await dio.get(
+            '$url/api/apprenants/gamification/stats',
+            queryParameters: {
+              'eleve_nom': userPrefs.name.trim(),
+              'classe': userPrefs.studentClassId.trim(),
+            },
+            options: Options(connectTimeout: const Duration(seconds: 3)),
           );
-          await _saveToLocal(currentEntries);
-        }
+          if (res.statusCode == 200 && res.data is Map) {
+            final data = Map<String, dynamic>.from(res.data as Map);
+            if (data['culture'] is Map) {
+              final cultureMap = Map<String, dynamic>.from(data['culture'] as Map);
+              final remoteCultureXp = (cultureMap['xp'] as num?)?.toInt() ?? 0;
+              final remoteCultureCoins = (cultureMap['coins'] as num?)?.toInt() ?? 0;
+              if (mounted) {
+                state = PassportState(
+                  travelerName: _currentTravelerName,
+                  passportNumber: _currentPassportNumber,
+                  issuedAt: state.issuedAt,
+                  entries: state.entries,
+                  exploredRegionIds: state.exploredRegionIds,
+                  featuredDiscoveryOfTheDay: state.featuredDiscoveryOfTheDay,
+                  bonusCultureXp: remoteCultureXp,
+                  bonusCultureCoins: remoteCultureCoins,
+                );
+              }
+            }
+            break;
+          }
+        } catch (_) {}
       }
     } catch (_) {}
   }
@@ -223,6 +218,7 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
     bool isMilestone = false,
     String? milestoneLabel,
     int xpEarned = 50,
+    int coinsEarned = 15,
   }) {
     final existingIndex =
         state.entries.indexWhere((e) => e.type == type && e.id == id);
@@ -233,7 +229,7 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
     final bool firstOfType = !state.entries.any((e) => e.type == type);
     final String? resolvedMilestone = milestoneLabel ??
         (firstOfType
-            ? 'Premier(ère) ${type.label.toLowerCase()} découvert(e)'
+            ? 'Premier(ère) ${type.label.toLowerCase()} maîtrisé(e)'
             : null);
 
     final newEntry = PassportEntry(
@@ -251,6 +247,7 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
       milestoneLabel: resolvedMilestone,
       targetRoute: targetRoute,
       xpEarned: xpEarned,
+      coinsEarned: coinsEarned,
     );
 
     final updatedEntries = [newEntry, ...state.entries];
@@ -267,9 +264,11 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
               newEntry.type != PassportItemType.defi)
           ? newEntry
           : (state.featuredDiscoveryOfTheDay ?? _defaultFeaturedDiscovery),
+      bonusCultureXp: state.bonusCultureXp,
+      bonusCultureCoins: state.bonusCultureCoins,
     );
 
-    // 1. Sauvegarde locale persistante
+    // 1. Sauvegarde locale persistante (strictement dans l'espace Culture)
     unawaited(_saveToLocal(updatedEntries));
 
     // 2. Synchronisation backend CultureLens
@@ -279,14 +278,9 @@ class CulturePassportNotifier extends StateNotifier<PassportState> {
         monumentId: id,
         studentId: userPrefs.name.isNotEmpty ? userPrefs.name : null,
         confidence: 0.98,
-        notes: 'Inscrit au Passeport Culturel ($title)',
+        notes: 'Maîtrisé par Défi Quiz et inscrit au Passeport Culturel ($title)',
       ));
     }
-
-    // 3. Attribution d'XP dans la gamification globale
-    try {
-      _ref.read(gamificationProvider.notifier).addXp(xpEarned);
-    } catch (_) {}
 
     return true;
   }

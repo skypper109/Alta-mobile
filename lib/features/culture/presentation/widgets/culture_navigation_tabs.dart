@@ -54,56 +54,65 @@ class CultureNavigationTabs extends StatelessWidget {
         isDark ? const Color(0xFF23314D) : const Color(0xFFE2E8F0);
 
     final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
+    final isLargeTablet = screenWidth >= 900;
     final isSmall = screenWidth < 360;
     final isCompact = screenWidth < 390;
 
-    final outerHPad = isSmall ? 10.0 : (isCompact ? 12.0 : 16.0);
-    final outerBPad = isSmall ? 18.0 : 22.0;
-    final buttonHPad = isSmall ? 10.0 : 12.0;
-    final gap = isSmall ? 6.0 : 8.0;
+    final navBarHeight = isTablet ? 74.0 : 64.0;
+    final outerHPad = isLargeTablet ? 32.0 : (isTablet ? 24.0 : (isSmall ? 10.0 : (isCompact ? 12.0 : 16.0)));
+    final outerBPad = isTablet ? 24.0 : (isSmall ? 18.0 : 22.0);
+    final buttonHPad = isTablet ? 16.0 : (isSmall ? 10.0 : 12.0);
+    final gap = isTablet ? 12.0 : (isSmall ? 6.0 : 8.0);
 
-    final iconSize = isSmall ? 19.5 : 21.0;
-    final fontSize = isSmall ? 11.0 : (isCompact ? 11.5 : 12.0);
-    final selectedHPad = isSmall ? 9.0 : (isCompact ? 11.0 : 13.0);
-    final unselectedHPad = isSmall ? 6.5 : (isCompact ? 8.0 : 9.5);
-    final maxLabelWidth = isSmall ? 85.0 : (isCompact ? 100.0 : 125.0);
+    final iconSize = isTablet ? 24.0 : (isSmall ? 19.5 : 21.0);
+    final fontSize = isTablet ? 13.0 : (isSmall ? 11.0 : (isCompact ? 11.5 : 12.0));
+    final selectedHPad = isTablet ? 14.0 : (isSmall ? 9.0 : (isCompact ? 11.0 : 13.0));
+    final unselectedHPad = isTablet ? 10.0 : (isSmall ? 6.5 : (isCompact ? 8.0 : 9.5));
+    final maxLabelWidth = isTablet ? 140.0 : (isSmall ? 85.0 : (isCompact ? 100.0 : 125.0));
+    final maxMenuWidth = isLargeTablet ? 600.0 : (isTablet ? 560.0 : double.infinity);
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: ConstrainedBox(
-        constraints:
-            const BoxConstraints(maxWidth: CultureResponsive.kMaxNavTabsWidth),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(outerHPad, 0, outerHPad, outerBPad),
-          child: Row(
-        children: [
-          // ── Bouton retour éducation Solide Opaque ─────────────────────────
-          _BackToEducationButton(
-            isDark: isDark,
-            horizontalPadding: buttonHPad,
-          ),
-
-          SizedBox(width: gap),
-
-          // ── Barre de navigation Culture Solide Opaque ─────────────────────
-          Expanded(
-            child: Container(
-              height: 64,
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-              decoration: BoxDecoration(
-                color: navBg,
-                borderRadius: BorderRadius.circular(32),
-                border: Border.all(color: borderColor, width: 1.2),
-                boxShadow: [
-                  BoxShadow(
-                    color: (isDark ? Colors.black : CultureTheme.accentOrange)
-                        .withValues(alpha: isDark ? 0.45 : 0.12),
-                    blurRadius: 22,
-                    spreadRadius: 2,
-                    offset: const Offset(0, 5),
+    return SafeArea(
+      top: false,
+      child: SizedBox(
+        height: navBarHeight + outerBPad,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxMenuWidth),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(outerHPad, 0, outerHPad, outerBPad),
+              child: Row(
+                children: [
+                  // ── Bouton retour éducation Solide Opaque ─────────────────────────
+                  _BackToEducationButton(
+                    isDark: isDark,
+                    horizontalPadding: buttonHPad,
                   ),
-                ],
-              ),
+
+                  SizedBox(width: gap),
+
+                  // ── Barre de navigation Culture Solide Opaque ─────────────────────
+                  Expanded(
+                    child: Container(
+                      height: navBarHeight,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 8 : 6,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: navBg,
+                        borderRadius: BorderRadius.circular(isTablet ? 36 : 30),
+                        border: Border.all(color: borderColor, width: 1.2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: (isDark ? Colors.black : CultureTheme.accentOrange)
+                                .withValues(alpha: isDark ? 0.45 : 0.12),
+                            blurRadius: 22,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: List.generate(_tabs.length, (index) {
@@ -123,13 +132,13 @@ class CultureNavigationTabs extends StatelessWidget {
                       curve: Curves.easeInOut,
                       padding: EdgeInsets.symmetric(
                         horizontal: isSelected ? selectedHPad : unselectedHPad,
-                        vertical: 8,
+                        vertical: isTablet ? 10 : 8,
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? CultureTheme.accentOrange
                             : Colors.transparent,
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(isTablet ? 28 : 24),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
@@ -189,6 +198,8 @@ class CultureNavigationTabs extends StatelessWidget {
       ),
     ),
   ),
+),
+),
 );
   }
 }
@@ -205,6 +216,13 @@ class _BackToEducationButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
+    final btnHeight = isTablet ? 74.0 : 64.0;
+    final iconSize = isTablet ? 24.0 : 21.0;
+    final fontSize = isTablet ? 11.0 : 9.5;
+    final hPad = isTablet ? 16.0 : horizontalPadding;
+
     final bgColor = isDark ? const Color(0xFF121B2D) : Colors.white;
     final borderColor =
         isDark ? const Color(0xFF23314D) : const Color(0xFFE2E8F0);
@@ -228,11 +246,11 @@ class _BackToEducationButton extends ConsumerWidget {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        height: 64,
-        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+        height: btnHeight,
+        padding: EdgeInsets.symmetric(horizontal: hPad),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(isTablet ? 36 : 30),
           border: Border.all(color: borderColor, width: 1.2),
           boxShadow: [
             BoxShadow(
@@ -248,17 +266,16 @@ class _BackToEducationButton extends ConsumerWidget {
           children: [
             Icon(
               Icons.school_rounded,
-              size: 22,
-              color: isDark ? const Color(0xFF64748B) : const Color(0xFF64748B),
+              size: iconSize,
+              color: const Color(0xFF64748B),
             ),
             const SizedBox(height: 3),
             Text(
               'Éduc.',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 9.5,
+                fontSize: fontSize,
                 fontWeight: FontWeight.w600,
-                color:
-                    isDark ? const Color(0xFF64748B) : const Color(0xFF64748B),
+                color: const Color(0xFF64748B),
               ),
             ),
           ],

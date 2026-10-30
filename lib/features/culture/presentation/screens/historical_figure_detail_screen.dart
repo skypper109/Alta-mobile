@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/controllers/culture_data_providers.dart';
 import '../../core/controllers/culture_filter_controller.dart';
-import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_detail_models.dart';
 import '../../core/models/culture_passport_models.dart';
@@ -17,10 +16,10 @@ import '../../../../core/services/vivienne_tts_service.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/character_motion_hero.dart';
 import '../widgets/connected_contents_section.dart';
+import '../widgets/content_mastery_quiz_card.dart';
 import '../widgets/cultural_content_share_sheet.dart';
 import '../widgets/documentary_scene_player.dart';
 import '../widgets/historical_sacred_parchment_card.dart';
-import '../widgets/passport_stamp_toast.dart';
 
 /// Fiche de consultation immersive d'un Grand Personnage Historique
 /// Sublimée avec du Motion Design 2D de classe mondiale (Soundiata Keïta, Mansa Moussa, etc.)
@@ -171,28 +170,7 @@ class _HistoricalFigureDetailScreenState
 
     final activeRegion = ref.watch(activeCultureRegionProvider).activeRegion;
 
-    // Enregistrement automatique de la découverte dans le Passeport Culturel
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
-            id: item.id,
-            type: PassportItemType.personnage,
-            title: item.name,
-            subtitle: item.titleHonorifique,
-            regionId: item.regionId,
-            regionName: item.regionName,
-            photoUrl: item.photoUrl,
-            tag: item.tag,
-            culturalQuote: item.citationHistorique,
-            targetRoute: '/culture/personnage/${item.id}',
-          );
-      if (added && context.mounted) {
-        PassportStampToast.show(
-          context,
-          title: item.name,
-          type: PassportItemType.personnage,
-        );
-      }
-    });
+    // Pas d'enregistrement automatique : validation requise via le Défi Quiz lié au personnage
 
     final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final borderCol =
@@ -423,6 +401,15 @@ class _HistoricalFigureDetailScreenState
                       ),
 
                       const SizedBox(height: 28),
+
+                      // ── DÉFI DE MAÎTRISE LIÉ AU PERSONNAGE ──────────────────
+                      ContentMasteryQuizCard(
+                        contentId: item.id,
+                        contentType: PassportItemType.personnage,
+                        contentTitle: item.name,
+                      ),
+
+                      const SizedBox(height: 24),
 
                       // ── CONTENUS ASSOCIÉS & MAILLAGE CULTUREL ───────────────
                       ConnectedContentsSection(

@@ -134,7 +134,7 @@ class _PassportItemCardState extends State<PassportItemCard>
             children: [
               // ── 1. PHOTOGRAPHIE RÉELLE & TAMPON D'AUTHENTICITÉ (HERO) ──────
               SizedBox(
-                height: isFeatured ? 170 : 135,
+                height: isFeatured ? 170 : 124,
                 width: double.infinity,
                 child: Stack(
                   fit: StackFit.expand,
@@ -283,7 +283,7 @@ class _PassportItemCardState extends State<PassportItemCard>
 
               // ── 2. INFORMATIONS & CITATION PATRIMONIALE ───────────────────
               Padding(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

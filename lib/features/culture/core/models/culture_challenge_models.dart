@@ -96,12 +96,19 @@ class CultureQuizPack {
   final String? regionId;
   final String regionName;
   final int xpReward;
+  final int coinsReward;
   final int timeMinutes;
   final IconData icon;
   final Color themeColor;
   final String photoUrl;
   final String stampBadgeTitle;
   final List<CultureQuizQuestion> questions;
+  final String? linkedContentId;
+  final String? linkedContentType;
+  final String? linkedContentTitle;
+  final String? linkedContentSubtitle;
+  final String? linkedContentQuote;
+  final String? linkedTargetRoute;
 
   const CultureQuizPack({
     required this.id,
@@ -112,12 +119,19 @@ class CultureQuizPack {
     this.regionId,
     required this.regionName,
     required this.xpReward,
+    this.coinsReward = 20,
     this.timeMinutes = 5,
     required this.icon,
     required this.themeColor,
     required this.photoUrl,
     required this.stampBadgeTitle,
     required this.questions,
+    this.linkedContentId,
+    this.linkedContentType,
+    this.linkedContentTitle,
+    this.linkedContentSubtitle,
+    this.linkedContentQuote,
+    this.linkedTargetRoute,
   });
 
   int get questionsCount => questions.length;

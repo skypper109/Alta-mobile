@@ -314,7 +314,7 @@ class _CharacterMotionHeroState extends State<CharacterMotionHero>
                           top: topPadding + 28,
                           bottom: heroHeight * 0.14,
                         ),
-                        width: size.width * 0.72,
+                        width: (size.width * 0.72).clamp(260.0, 400.0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(32),
                           boxShadow: [

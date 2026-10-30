@@ -104,7 +104,7 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
-          padding: EdgeInsets.fromLTRB(hPad, 10, hPad, 36),
+          padding: EdgeInsets.fromLTRB(hPad, 10, hPad, isTablet ? 70 : 100),
           child: CultureResponsive.constrainedCentered(
             maxWidth: CultureResponsive.kMaxContentWidth,
             child: Column(
@@ -376,22 +376,58 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
                 ),
               ),
               const SizedBox(width: 8),
-              // Badge de niveau épuré (uniquement le niveau)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: CultureTheme.primaryBlue,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  'NIVEAU ${passport.rankLevel}',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: 0.6,
+              // Badge Pièces Culturelles + Badge Niveau
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: CultureTheme.accentOrange.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: CultureTheme.accentOrange.withValues(alpha: 0.35),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.monetization_on_rounded,
+                          size: 13,
+                          color: CultureTheme.accentOrange,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${passport.totalCoins} Pièces',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: CultureTheme.accentOrange,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: CultureTheme.primaryBlue,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      'NIVEAU ${passport.rankLevel}',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -924,15 +960,17 @@ class _CulturePassportViewState extends ConsumerState<CulturePassportView> {
     }
 
     if (isTablet) {
+      final screenWidth = MediaQuery.sizeOf(context).width;
+      final columns = screenWidth >= 900 ? 3 : 2;
       return GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: entries.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: columns,
           crossAxisSpacing: 14,
-          mainAxisSpacing: 12,
-          childAspectRatio: 3.3,
+          mainAxisSpacing: 14,
+          mainAxisExtent: 265,
         ),
         itemBuilder: (context, index) {
           return AnimatedCulturalReveal(

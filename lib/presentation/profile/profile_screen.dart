@@ -649,17 +649,25 @@ class ProfileScreen extends ConsumerWidget {
     final isConnected = deviceState.isConnected;
     final level = (gamification.xpInt ~/ 250) + 1;
 
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
+    final isLargeTablet = screenWidth >= 900;
+    final hPad = isLargeTablet ? 40.0 : (isTablet ? 28.0 : 20.0);
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 125),
-        children: [
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 880),
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(hPad, 8, hPad, 125),
+            children: [
           // ── 1. CARTE PROFIL PRINCIPALE (SOLIDE, SANS DÉGRADÉ) ─────────────
           Container(
-            padding: const EdgeInsets.all(18),
+            padding: EdgeInsets.all(isTablet ? 24 : 18),
             decoration: BoxDecoration(
               color: cardBg,
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(isTablet ? 26 : 22),
               border: Border.all(color: borderCol, width: 1.2),
               boxShadow: [
                 BoxShadow(
@@ -676,14 +684,14 @@ class ProfileScreen extends ConsumerWidget {
                   children: [
                     // Avatar Cercle Solide Officiel
                     Container(
-                      width: 62,
-                      height: 62,
+                      width: isTablet ? 76 : 62,
+                      height: isTablet ? 76 : 62,
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: AppColors.secondary,
-                          width: 2.4,
+                          width: isTablet ? 2.8 : 2.4,
                         ),
                         boxShadow: [
                           BoxShadow(
@@ -697,7 +705,7 @@ class ProfileScreen extends ConsumerWidget {
                         child: Text(
                           name[0].toUpperCase(),
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 26,
+                            fontSize: isTablet ? 32 : 26,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -1092,46 +1100,52 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: 18),
 
           // ── 3. GRILLE DE STATISTIQUES RÉELLES ────────────────────────────
-          GridView.count(
-            crossAxisCount: 2,
+          GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.35,
-            children: [
-              _ProfileStatCard(
-                title: 'SÉRIE DE RÉVISION',
-                value: gamification.streak,
-                subtitle: 'Jours consécutifs',
-                icon: Icons.local_fire_department_rounded,
-                color: AppColors.accent,
-              ),
-              _ProfileStatCard(
-                title: 'FLASHCARDS LEITNER',
-                value: 'Mémoriser',
-                subtitle: 'Répétition J+1/J+7',
-                icon: Icons.style_rounded,
-                color: AppColors.primary,
-                onTap: () => context.push('/education/flashcards'),
-              ),
-              _ProfileStatCard(
-                title: 'DUEL SCOLAIRE',
-                value: 'Arène & Quiz',
-                subtitle: 'Défier des élèves',
-                icon: Icons.sports_esports_rounded,
-                color: AppColors.secondary,
-                onTap: () => context.push('/education/duel'),
-              ),
-              _ProfileStatCard(
-                title: 'MODE GRIN LOCAL',
-                value: 'Réseau Boîtier',
-                subtitle: 'Défis sans Internet',
-                icon: Icons.groups_rounded,
-                color: const Color(0xFFE0823D),
-                onTap: () => context.push('/education/grin'),
-              ),
-            ],
+            itemCount: 4,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: isTablet ? 4 : 2,
+              crossAxisSpacing: isTablet ? 14 : 12,
+              mainAxisSpacing: isTablet ? 14 : 12,
+              mainAxisExtent: isLargeTablet ? 140.0 : (isTablet ? 134.0 : 112.0),
+            ),
+            itemBuilder: (context, index) {
+              final cards = [
+                _ProfileStatCard(
+                  title: 'SÉRIE DE RÉVISION',
+                  value: gamification.streak,
+                  subtitle: 'Jours consécutifs',
+                  icon: Icons.local_fire_department_rounded,
+                  color: AppColors.accent,
+                ),
+                _ProfileStatCard(
+                  title: 'FLASHCARDS LEITNER',
+                  value: 'Mémoriser',
+                  subtitle: 'Répétition J+1/J+7',
+                  icon: Icons.style_rounded,
+                  color: AppColors.primary,
+                  onTap: () => context.push('/education/flashcards'),
+                ),
+                _ProfileStatCard(
+                  title: 'DUEL SCOLAIRE',
+                  value: 'Arène & Quiz',
+                  subtitle: 'Défier des élèves',
+                  icon: Icons.sports_esports_rounded,
+                  color: AppColors.secondary,
+                  onTap: () => context.push('/education/duel'),
+                ),
+                _ProfileStatCard(
+                  title: 'MODE GRIN LOCAL',
+                  value: 'Réseau Boîtier',
+                  subtitle: 'Défis sans Internet',
+                  icon: Icons.groups_rounded,
+                  color: const Color(0xFFE0823D),
+                  onTap: () => context.push('/education/grin'),
+                ),
+              ];
+              return cards[index];
+            },
           ),
 
           const SizedBox(height: 18),
@@ -1478,7 +1492,9 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 }
 
@@ -1565,12 +1581,14 @@ class _ProfileStatCard extends StatelessWidget {
     final textMuted = isDark ? AppColors.textMuted : const Color(0xFF64748B);
     final borderCol = isDark ? AppColors.border : const Color(0xFFE2E8F0);
     final cardBg = isDark ? AppColors.surface : Colors.white;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
 
     final child = Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(isTablet ? 16 : 12),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(isTablet ? 22 : 18),
         border: Border.all(color: borderCol, width: 1.1),
       ),
       child: Column(
@@ -1584,7 +1602,7 @@ class _ProfileStatCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 9.5,
+                    fontSize: isTablet ? 11.5 : 9.5,
                     fontWeight: FontWeight.bold,
                     color: textMuted,
                     letterSpacing: 0.4,
@@ -1594,12 +1612,12 @@ class _ProfileStatCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.all(5),
+                padding: EdgeInsets.all(isTablet ? 7 : 5),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 14, color: color),
+                child: Icon(icon, size: isTablet ? 18 : 14, color: color),
               ),
             ],
           ),
@@ -1609,7 +1627,7 @@ class _ProfileStatCard extends StatelessWidget {
               Text(
                 value,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
+                  fontSize: isTablet ? 18.0 : 14.0,
                   fontWeight: FontWeight.bold,
                   color: textPri,
                 ),
@@ -1620,7 +1638,7 @@ class _ProfileStatCard extends StatelessWidget {
               Text(
                 subtitle,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 10,
+                  fontSize: isTablet ? 12.0 : 10.0,
                   color: textMuted,
                 ),
                 maxLines: 1,

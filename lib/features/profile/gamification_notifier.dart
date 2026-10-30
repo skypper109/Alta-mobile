@@ -82,13 +82,13 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
           seances: '0',
           subjectsProgress: {},
         )) {
-    _loadFromLocalCache();
-    fetchStatsFromBackend();
+    _initStats();
   }
 
   final Ref _ref;
+  int _requestToken = 0;
 
-  static const _prefsKey = 'alternia_gamification_stats_v3';
+  static const _prefsKey = 'alternia_gamification_stats_v5';
 
   static String _formatNumber(int number) {
     return number.toString().replaceAllMapped(
@@ -97,9 +97,18 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
         );
   }
 
+  Future<void> _initStats() async {
+    await _loadFromLocalCache();
+    await fetchStatsFromBackend();
+  }
+
   Future<void> _loadFromLocalCache() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      // Nettoyage de l'ancien cache v3 potentiellement pollué par les données de démo
+      if (prefs.containsKey('alternia_gamification_stats_v3')) {
+        await prefs.remove('alternia_gamification_stats_v3');
+      }
       final cachedJson = prefs.getString(_prefsKey);
       if (cachedJson != null && cachedJson.isNotEmpty) {
         final data = jsonDecode(cachedJson) as Map<String, dynamic>;
@@ -109,8 +118,13 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
   }
 
   Future<void> fetchStatsFromBackend() async {
-    state = state.copyWith(isLoading: true);
     final userPrefs = _ref.read(userPrefsProvider);
+    if (userPrefs.name.trim().isEmpty || !userPrefs.hasSelectedClass) {
+      return;
+    }
+
+    final currentToken = ++_requestToken;
+    state = state.copyWith(isLoading: true);
     final dio = Dio();
 
     for (final url in AltaApiConfig.candidateBaseUrls) {
@@ -118,14 +132,40 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
         final res = await dio.get(
           '$url/api/apprenants/gamification/stats',
           queryParameters: {
-            'eleve_nom': userPrefs.name,
-            'classe': userPrefs.studentClassId,
+            'eleve_nom': userPrefs.name.trim(),
+            'classe': userPrefs.studentClassId.trim(),
           },
           options: Options(connectTimeout: const Duration(seconds: 3)),
         );
 
+        // Si resetStats() ou une autre requête a été lancée entre-temps, on ignore cette réponse
+        if (!mounted || currentToken != _requestToken) return;
+
         if (res.statusCode == 200 && res.data is Map) {
-          final data = res.data as Map<String, dynamic>;
+          final data = Map<String, dynamic>.from(res.data as Map);
+
+          // Protection contre l'ancienne API distante (api.alterniamali.com) non mise à jour
+          // qui renvoie les stats de démo (12j, 21 900 XP, 240 pièces, 24 séances) pour tout nouvel inscrit.
+          final remoteXp = int.tryParse(data['xp']?.toString() ?? '0') ?? 0;
+          final remoteStreak = int.tryParse(data['streak']?.toString() ?? '1') ?? 1;
+          final remoteSeances = int.tryParse(data['seances']?.toString() ?? '0') ?? 0;
+          final remoteCoins = int.tryParse(data['coins']?.toString() ?? '0') ?? 0;
+
+          final isLegacyDemoFallback = !data.containsKey('valeur_fcfa') ||
+              (state.xpInt == 0 &&
+                  state.seances == '0' &&
+                  (remoteXp >= 3450 || remoteStreak >= 12 || remoteSeances >= 24));
+
+          if (isLegacyDemoFallback) {
+            break;
+          }
+
+          // Si le compte est neuf (0 XP, 0 séance) mais que le serveur renvoie l'ancien bonus de 240 pièces par défaut
+          if (remoteXp == 0 && remoteSeances == 0 && remoteCoins == 240 && state.coinsInt == 0) {
+            data['coins'] = 0;
+            data['coins_label'] = '0';
+          }
+
           _applyJsonData(data);
 
           // Sauvegarder dans le cache local
@@ -136,23 +176,28 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
       } catch (_) {}
     }
 
-    if (mounted) {
+    if (mounted && currentToken == _requestToken) {
       state = state.copyWith(isLoading: false);
     }
   }
 
   void _applyJsonData(Map<String, dynamic> data) {
-    final streak = data['streak_label'] as String? ??
-        (data['streak'] != null ? '${data['streak']}j' : state.streak);
+    // Séparation stricte : l'état GamificationNotifier ne lit que les métriques Éducation
+    final eduSource = data['education'] is Map
+        ? Map<String, dynamic>.from(data['education'] as Map)
+        : data;
 
-    final xp = data['xp_label'] as String? ??
-        (data['xp'] != null ? _formatNumber(int.tryParse(data['xp'].toString()) ?? 0) : state.xp);
+    final streak = eduSource['streak_label'] as String? ??
+        (eduSource['streak'] != null ? '${eduSource['streak']}j' : state.streak);
 
-    final coins = data['coins_label'] as String? ??
-        (data['coins'] != null ? data['coins'].toString() : state.coins);
+    final xp = eduSource['xp_label'] as String? ??
+        (eduSource['xp'] != null ? _formatNumber(int.tryParse(eduSource['xp'].toString()) ?? 0) : state.xp);
 
-    final seances = data['seances_label'] as String? ??
-        (data['seances'] != null ? '${data['seances']}' : state.seances);
+    final coins = eduSource['coins_label'] as String? ??
+        (eduSource['coins'] != null ? eduSource['coins'].toString() : state.coins);
+
+    final seances = eduSource['seances_label'] as String? ??
+        (eduSource['seances'] != null ? '${eduSource['seances']}' : state.seances);
 
     final rawSubProgress = data['subjects_progress'] as Map<String, dynamic>?;
     final Map<String, double> progressMap = Map.from(state.subjectsProgress);
@@ -307,16 +352,19 @@ class GamificationNotifier extends StateNotifier<GamificationState> {
 
   /// Réinitialise l'ensemble des métriques de jeu à zéro (utilisé lors de la réinitialisation du profil)
   Future<void> resetStats() async {
+    _requestToken++;
     state = const GamificationState(
       streak: '1j',
       xp: '0',
       coins: '0',
       seances: '0',
       subjectsProgress: {},
+      isLoading: false,
     );
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_prefsKey);
+      await prefs.remove('alternia_gamification_stats_v3');
     } catch (_) {}
   }
 }

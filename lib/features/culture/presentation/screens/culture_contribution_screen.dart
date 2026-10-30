@@ -4,9 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/controllers/culture_data_providers.dart';
 import '../../core/datasources/culture_repository.dart';
+import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/theme/culture_theme.dart';
 import '../../exploration/data/datasources/mock_mali_regions.dart';
 import '../../immersive/immersive.dart';
+import '../../../profile/gamification_notifier.dart';
+import '../../../profile/user_prefs_notifier.dart';
 
 /// Définition des 6 piliers culturels pour la contribution
 enum CulturalCategory {
@@ -135,6 +138,14 @@ class _CultureContributionScreenState
       (c) => c.id == widget.initialCategory,
       orElse: () => CulturalCategory.proverbe,
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final userName = ref.read(userPrefsProvider).name.trim();
+      if (userName.isNotEmpty && _auteurNomCtrl.text.trim().isEmpty) {
+        _auteurNomCtrl.text = userName;
+      }
+    });
   }
 
   @override
@@ -197,6 +208,12 @@ class _CultureContributionScreenState
       if (_epoqueCtrl.text.isNotEmpty) donneesExtra['fondation'] = _epoqueCtrl.text.trim();
     }
 
+    final userPrefs = ref.read(userPrefsProvider);
+    final profileName = userPrefs.name.trim();
+    final authorName = _auteurNomCtrl.text.trim().isNotEmpty
+        ? _auteurNomCtrl.text.trim()
+        : (profileName.isNotEmpty ? profileName : 'Gardien AlterniA');
+
     final payload = <String, dynamic>{
       'type_contenu': _selectedCategory.id,
       'titre': _titreCtrl.text.trim().isNotEmpty ? _titreCtrl.text.trim() : null,
@@ -220,15 +237,17 @@ class _CultureContributionScreenState
           : null,
       'donnees_supplementaires': donneesExtra,
       'donneesSupplementaires': donneesExtra,
-      'auteur_nom': _auteurNomCtrl.text.trim().isNotEmpty
-          ? _auteurNomCtrl.text.trim()
-          : 'Gardien AlterniA',
+      'auteur_id': profileName.isNotEmpty ? profileName : authorName,
+      'auteur_nom': authorName,
       'auteur_role': _selectedAuteurRole,
       'xp_attribues': 50,
       'pieces_attribuees': 25,
     };
 
     final result = await repo.submitContribution(payload);
+
+    // Rafraîchir immédiatement la liste des contributions pour que l'onglet Historique soit à jour
+    ref.invalidate(culturalContributionsProvider);
 
     if (!mounted) return;
     setState(() => _isSubmitting = false);
@@ -238,18 +257,11 @@ class _CultureContributionScreenState
       _showSuccessDialog();
     } else {
       CulturalHaptics.warning();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Enregistré en attente de synchronisation réseau avec l\'ALTA Box.',
-          ),
-          backgroundColor: Color(0xFFF59E0B),
-        ),
-      );
+      _showSuccessDialog(isOfflineQueued: true);
     }
   }
 
-  void _showSuccessDialog() {
+  void _showSuccessDialog({bool isOfflineQueued = false}) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -260,16 +272,28 @@ class _CultureContributionScreenState
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                color: (isOfflineQueued
+                        ? const Color(0xFFF59E0B)
+                        : const Color(0xFF10B981))
+                    .withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check_circle_rounded,
-                  color: Color(0xFF10B981), size: 28),
+              child: Icon(
+                isOfflineQueued
+                    ? Icons.cloud_upload_rounded
+                    : Icons.check_circle_rounded,
+                color: isOfflineQueued
+                    ? const Color(0xFFF59E0B)
+                    : const Color(0xFF10B981),
+                size: 28,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Contribution reçue !',
+                isOfflineQueued
+                    ? 'Enregistrée pour le Super Admin !'
+                    : 'Envoyée au Super Admin !',
                 style: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -283,7 +307,9 @@ class _CultureContributionScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Merci pour votre transmission précieuse. Votre savoir a été soumis au Conseil des Modérateurs et Enseignants.',
+              isOfflineQueued
+                  ? 'Votre contribution est enregistrée avec le statut « En attente » et sera transmise automatiquement au Super Admin dès la connexion au serveur pour vérification (acceptation ou rejet).'
+                  : 'Merci pour votre transmission précieuse. Votre contribution a été envoyée au Super Admin pour vérification (acceptation ou rejet). Vous pouvez suivre son statut dans l\'onglet « Historique ».',
               style: GoogleFonts.inter(fontSize: 14, height: 1.4),
             ),
             const SizedBox(height: 16),
@@ -1628,17 +1654,27 @@ class _CultureContributionScreenState
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.redAccent.withValues(alpha: 0.08),
+                        color: (statut == 'APPROUVE'
+                                ? const Color(0xFF10B981)
+                                : Colors.redAccent)
+                            .withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: Colors.redAccent.withValues(alpha: 0.2),
+                          color: (statut == 'APPROUVE'
+                                  ? const Color(0xFF10B981)
+                                  : Colors.redAccent)
+                              .withValues(alpha: 0.25),
                         ),
                       ),
                       child: Text(
-                        'Remarque du modérateur : $motif',
+                        statut == 'APPROUVE'
+                            ? 'Message du Super Admin : $motif'
+                            : 'Motif du refus (Super Admin) : $motif',
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: Colors.redAccent,
+                          color: statut == 'APPROUVE'
+                              ? const Color(0xFF10B981)
+                              : Colors.redAccent,
                         ),
                       ),
                     ),
@@ -1668,34 +1704,59 @@ class _CultureContributionScreenState
             );
         }
 
+        Future<void> refreshHistory() async {
+          ref.invalidate(culturalContributionsProvider);
+          await ref.read(
+            culturalContributionsProvider(const ContributionFilter()).future,
+          );
+          await ref
+              .read(culturePassportProvider.notifier)
+              .syncWithBackend();
+          await ref
+              .read(gamificationProvider.notifier)
+              .fetchStatsFromBackend();
+        }
+
         if (isTablet) {
-          return CultureResponsive.constrainedCentered(
-            maxWidth: CultureResponsive.kMaxContentWidth,
-            child: GridView.builder(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 20),
-              itemCount: items.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-                childAspectRatio: 2.1,
+          return RefreshIndicator(
+            color: CultureTheme.accentOrange,
+            onRefresh: refreshHistory,
+            child: CultureResponsive.constrainedCentered(
+              maxWidth: CultureResponsive.kMaxContentWidth,
+              child: GridView.builder(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 20),
+                itemCount: items.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
+                  childAspectRatio: 2.1,
+                ),
+                itemBuilder: (context, idx) =>
+                    buildContributionCard(items[idx]),
               ),
-              itemBuilder: (context, idx) =>
-                  buildContributionCard(items[idx]),
             ),
           );
         }
 
-        return CultureResponsive.constrainedCentered(
-          maxWidth: CultureResponsive.kMaxFormWidth,
-          child: ListView.separated(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 20),
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 14),
-            itemBuilder: (context, idx) =>
-                buildContributionCard(items[idx]),
+        return RefreshIndicator(
+          color: CultureTheme.accentOrange,
+          onRefresh: refreshHistory,
+          child: CultureResponsive.constrainedCentered(
+            maxWidth: CultureResponsive.kMaxFormWidth,
+            child: ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 20),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 14),
+              itemBuilder: (context, idx) =>
+                  buildContributionCard(items[idx]),
+            ),
           ),
         );
       },

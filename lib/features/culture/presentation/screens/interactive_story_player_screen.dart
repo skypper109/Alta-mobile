@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/controllers/culture_passport_controller.dart';
 import '../../core/datasources/mock_culture_stories_data.dart';
 import '../../core/models/cultural_guide_models.dart';
 import '../../core/models/culture_passport_models.dart';
@@ -13,6 +12,7 @@ import '../../../../core/services/vivienne_tts_service.dart';
 import '../../immersive/immersive.dart';
 import '../widgets/ask_cultural_guide_button.dart';
 import '../widgets/connected_contents_section.dart';
+import '../widgets/content_mastery_quiz_card.dart';
 import 'culture_main_screen.dart';
 
 /// Moteur immersif de Narration Interactive Scène par Scène
@@ -39,7 +39,6 @@ class _InteractiveStoryPlayerScreenState
   late StoryScene _currentScene;
   final List<String> _visitedSceneIds = [];
   String? _selectedChoiceId;
-  bool _hasTriggeredCelebrationForScene = false;
 
   @override
   void initState() {
@@ -70,7 +69,6 @@ class _InteractiveStoryPlayerScreenState
         setState(() {
           _currentScene = nextScene;
           _selectedChoiceId = null;
-          _hasTriggeredCelebrationForScene = false;
           if (!_visitedSceneIds.contains(nextScene.id)) {
             _visitedSceneIds.add(nextScene.id);
           }
@@ -85,35 +83,7 @@ class _InteractiveStoryPlayerScreenState
   }
 
   void _handleEpilogueReached() {
-    final added = ref.read(culturePassportProvider.notifier).recordDiscovery(
-          id: _story.id,
-          type: PassportItemType.conte,
-          title: _story.title,
-          subtitle: _story.subtitle,
-          regionId: _story.regionId,
-          regionName: _story.regionName,
-          photoUrl: _story.photoUrl,
-          tag: _story.tag,
-          culturalQuote: _story.moral,
-          targetRoute: '/culture/conte/${_story.id}',
-        );
-
-    if (added && !_hasTriggeredCelebrationForScene && mounted) {
-      _hasTriggeredCelebrationForScene = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        CulturalBadgeCelebration.show(
-          context: context,
-          title: 'Nouveau Tampon Culturel',
-          subtitle:
-              'Votre voyage dans « ${_story.title} » enrichit votre Passeport Culturel.',
-          category: 'Passeport Culturel',
-          xpGained: 50,
-          badgeIcon: Icons.auto_awesome_rounded,
-          photoUrl: _story.photoUrl,
-        );
-      });
-    }
+    // La récompense XP & Pièces et le tampon ne sont attribués qu'après réussite du Défi Quiz lié au conte
   }
 
   void _restartStory() {
@@ -124,7 +94,6 @@ class _InteractiveStoryPlayerScreenState
       _visitedSceneIds.clear();
       _visitedSceneIds.add(_currentScene.id);
       _selectedChoiceId = null;
-      _hasTriggeredCelebrationForScene = false;
     });
   }
 
@@ -762,6 +731,15 @@ class _InteractiveStoryPlayerScreenState
             contentTitle: _story.title,
             subtitle: 'Morale et sagesse de ce conte',
           ),
+        ),
+
+        const SizedBox(height: 24),
+
+        // Défi de maîtrise lié au conte
+        ContentMasteryQuizCard(
+          contentId: _story.id,
+          contentType: PassportItemType.conte,
+          contentTitle: _story.title,
         ),
 
         const SizedBox(height: 24),

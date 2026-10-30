@@ -98,38 +98,45 @@ class _CultureAudioListenBadgeState extends ConsumerState<CultureAudioListenBadg
           curve: Curves.easeOutCubic,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(
               color: isPlayingThis
                   ? accent
-                  : (isDark
-                      ? CultureTheme.darkSurfaceAlt
-                      : const Color(0xFFF8FAFC)),
-              borderRadius: BorderRadius.circular(8),
+                  : accent.withValues(alpha: isDark ? 0.20 : 0.12),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isPlayingThis
                     ? accent
-                    : (isDark ? CultureTheme.darkBorder : CultureTheme.lightBorder),
-                width: 1.0,
+                    : accent.withValues(alpha: isDark ? 0.60 : 0.45),
+                width: 1.4,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: (isPlayingThis ? accent : Colors.black)
+                      .withValues(alpha: isPlayingThis ? 0.35 : (isDark ? 0.25 : 0.06)),
+                  blurRadius: isPlayingThis ? 8 : 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (isPlayingThis)
-                  _buildAnimatedWaves(color: Colors.white, height: 12)
+                  _buildAnimatedWaves(color: Colors.white, height: 13)
                 else
                   Icon(
                     Icons.volume_up_rounded,
-                    size: 13,
+                    size: 15,
                     color: accent,
                   ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 6),
                 Text(
                   isPlayingThis ? 'Pause' : widget.label,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.2,
                     color: isPlayingThis
                         ? Colors.white
                         : (isDark ? Colors.white : const Color(0xFF0F172A)),
@@ -153,43 +160,53 @@ class _CultureAudioListenBadgeState extends ConsumerState<CultureAudioListenBadg
         curve: Curves.easeOutCubic,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
             color: isPlayingThis
                 ? accent
-                : (isDark ? CultureTheme.darkSurface : Colors.white),
-            borderRadius: BorderRadius.circular(12),
+                : accent.withValues(alpha: isDark ? 0.22 : 0.14),
+            borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: isPlayingThis ? accent : accent.withValues(alpha: 0.5),
-              width: 1.2,
+              color: isPlayingThis
+                  ? accent
+                  : accent.withValues(alpha: isDark ? 0.65 : 0.50),
+              width: 1.6,
             ),
-            boxShadow: isPlayingThis
-                ? [
-                    BoxShadow(
-                      color: accent.withValues(alpha: 0.35),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
+            boxShadow: [
+              BoxShadow(
+                color: (isPlayingThis ? accent : Colors.black)
+                    .withValues(alpha: isPlayingThis ? 0.40 : (isDark ? 0.30 : 0.08)),
+                blurRadius: isPlayingThis ? 10 : 6,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (isPlayingThis)
-                _buildAnimatedWaves(color: Colors.white, height: 15)
-              else
-                Icon(
-                  Icons.headphones_rounded,
-                  size: 15,
-                  color: accent,
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: isPlayingThis
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : accent.withValues(alpha: 0.18),
+                  shape: BoxShape.circle,
                 ),
-              const SizedBox(width: 7),
+                child: isPlayingThis
+                    ? _buildAnimatedWaves(color: Colors.white, height: 16)
+                    : Icon(
+                        Icons.headphones_rounded,
+                        size: 17,
+                        color: accent,
+                      ),
+              ),
+              const SizedBox(width: 8),
               Text(
                 isPlayingThis ? 'Arrêter l\'écoute' : widget.label,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: FontWeight.w800,
+                  letterSpacing: 0.3,
                   color: isPlayingThis
                       ? Colors.white
                       : (isDark ? Colors.white : const Color(0xFF0F172A)),
